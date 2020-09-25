@@ -1,4 +1,4 @@
-<?php /*a:2:{s:63:"E:\mi\company\SaaS\code\back-end\app\saas\view\index\index.html";i:1601021642;s:56:"E:\mi\company\SaaS\code\back-end\app\saas\view\base.html";i:1601005714;}*/ ?>
+<?php /*a:2:{s:63:"E:\mi\company\SaaS\code\back-end\app\saas\view\index\index.html";i:1601029250;s:56:"E:\mi\company\SaaS\code\back-end\app\saas\view\base.html";i:1601029239;}*/ ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -25,9 +25,9 @@
 	<style>
 		.ns-calendar{background: url("http://saas.com/public/static/img/ns_calendar.png") no-repeat center / 16px 16px;}
 	</style>
-	
+	-->
 
-
+<!--
 	<script type="text/javascript">
 	</script>
 </head>
@@ -137,9 +137,9 @@
 				</div>
 				<?php endif; ?>
 				
-				
-欢迎登录SaaS后台！
-
+				-->
+<!--欢迎登录SaaS后台！-->
+<!--
 			</div>
 			
 			<!-- 版权信息 -->
@@ -322,10 +322,10 @@
 	});
 </script>
 
+-->
+<!--<script>-->
 
-<script>
-
-</script>
-
+<!--</script>-->
+<!--
 </body>
 </html>
