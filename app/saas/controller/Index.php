@@ -8,19 +8,21 @@
  * ----------------------------------------------
  * =========================================================
  */
+
 namespace app\saas\controller;
+use app\model\system\User as UserModel;
+use app\model\web\Config as ConfigModel;
+use think\captcha\facade\Captcha as ThinkCaptcha;
+use think\facade\Cache;
+
 /**
  * 首页 控制器
  */
-class Index 
+class Index extends BaseSaas
 {
-	
-	/**
-	 * 首页
-	 */
-	public function index()
-	{
-		 echo"hello demo";
-	}
+
+    public function index(){
+        return view();
+    }
 
 }

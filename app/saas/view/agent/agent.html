@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta name="renderer" content="webkit" />
+
+    <meta http-equiv="X-UA-COMPATIBLE" content="IE=edge,chrome=1" />
+
+    <title>{$menu_info['title']|default=""} - {$website['title']|default="Niushop开源商城"}</title>
+
+    <meta name="keywords" content="{$website['keywords']|default='Niushop开源商城'}">
+
+    <meta name="description" content="{$website['desc']|default='描述'}}">
+
+    <link rel="icon" type="image/x-icon" href="__STATIC__/img/bitbug_favicon.ico" />
+
+    <link rel="stylesheet" type="text/css" href="STATIC_CSS/iconfont.css" />
+
+    <link rel="stylesheet" type="text/css" href="__STATIC__/ext/layui/css/layui.css" />
+
+    <link rel="stylesheet" type="text/css" href="__STATIC__/loading/msgbox.css"/>
+
+    <link rel="stylesheet" type="text/css" href="ADMIN_CSS/common.css" />
+
+    <script src="__STATIC__/js/jquery-3.1.1.js"></script>
+
+    <script src="__STATIC__/ext/layui/layui.js"></script>
+
+    <script>
+
+        layui.use(['layer', 'upload', 'element'], function() {});
+
+        window.ns_url = {
+
+            baseUrl: "ROOT_URL/",
+
+            route: ['{:request()->module()}', '{:request()->controller()}', '{:request()->action()}'],
+
+        };
+
+    </script>
+
+    <script src="__STATIC__/js/common.js"></script>
+
+    <style>
+
+        .ns-calendar{background: url("__STATIC__/img/ns_calendar.png") no-repeat center / 16px 16px;}
+
+    </style>
+
+
+    <script type="text/javascript">
+
+    </script>
+
+</head>
+
+<body>
+<table id="agent_list" lay-filter="agent_list"></table>
+
+<script>
+
+    layui.use(['form', 'laydate'], function() {
+
+        var tableAccountList= layui.table,
+
+            laydate = layui.laydate,
+
+            form = layui.form;
+
+        form.render();
+
+        /**
+
+         * 搜索功能
+
+         */
+
+        form.on('submit(search)', function(data) {
+
+            tableAccountList.reload({
+
+                page: {
+
+                    curr: 1
+
+                },
+
+                where: data.field
+
+            });
+
+            return false;
+
+        });
+
+
+
+        //账户流水
+
+        tableAccountList = new Table({
+
+            elem: '#agent_list',
+
+            url: ns.url("saas/agent/agent_list"),
+
+            cols: [[
+                    {field: 'agent_id', title: 'ID'},
+                    {field: 'number', title: '账号'},
+                    {field: 'name', title: '姓名'},
+                    {field: 'level', title: '代理等级'},
+                    {field: 'region', title: '所在区域'},
+                    {field: 'address', title: '客户地址'},
+                    {field: 'manager', title: '客户经理'},
+                    {field: 'contacts', title: '联系人'},
+                    {field: 'telephone', title: '电话'},
+                    {field: 'phone', title: '手机'},
+                    {field: 'email', title: '邮箱'},
+                    {field: 'qq', title: 'QQ'}
+                ]]
+
+        });
+
+    })
+
+</script>

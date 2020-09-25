@@ -1526,3 +1526,16 @@ function timediff( $begin_time, $end_time )
     }
     return $diff_str;
 }
+
+/**
+ * @return mixed
+ * 获取站点信息
+ */
+if (!function_exists('site_name')) {
+
+    function site_name()
+    {
+        return Db::name('config')->where('code', 'site_name')
+            ->value('value');
+    }
+}
