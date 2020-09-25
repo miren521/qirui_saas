@@ -1,0 +1,101 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+    .ns-discount { display: flex; justify-content: space-between; height: 34px; line-height: 34px; padding: 5px 15px; background-color: #F6FBFD; border: 1px dashed #BCE8F1; }
+    .layui-table-view {
+        margin-top: 0;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label">优惠券名称：</label>
+        <div class="layui-input-inline">{$platformcoupon_type_info.platformcoupon_name}</div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">优惠券面额：</label>
+        <div class="layui-input-inline">￥ {$platformcoupon_type_info.money} </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">使用场景：</label>
+        <div class="layui-input-inline">{if $platformcoupon_type_info.use_scenario == 1} 全场通用 {else/} 指定店铺 {/if} </div>
+    </div>
+
+    {if $platformcoupon_type_info.use_scenario == 2}
+    <div class="layui-form-item">
+        <label class="layui-form-label">适用店铺套餐：</label>
+        <div class="layui-input-inline">
+            {foreach $group_list as $k=>$v}
+                {if in_array($v['group_id'],explode(",", $platformcoupon_type_info['group_ids']))}
+                    {$v['group_name']}&nbsp;&nbsp;&nbsp;&nbsp;
+                {/if}
+            {/foreach}
+        </div>
+    </div>
+    {/if}
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">平台分担比例：</label>
+        <div class="layui-input-inline">{$platformcoupon_type_info.platform_split_rare} %</div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">店铺分担比例：</label>
+        <div class="layui-input-inline">{$platformcoupon_type_info.shop_split_rare} %</div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">发放数量：</label>
+        <div class="layui-input-inline">{$platformcoupon_type_info.count} 张</div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">最大领取数量：</label>
+        <div class="layui-input-inline">{$platformcoupon_type_info.max_fetch} 张</div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">满多少元可以使用：</label>
+        <div class="layui-input-inline">{$platformcoupon_type_info.at_least} 元</div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label img-upload-lable">优惠券图片：</label>
+        <div class="layui-input-inline img-upload">
+            <input type="hidden" class="layui-input" name="image" value="{$platformcoupon_type_info.image}" />
+            <div class="upload-img-block icon">
+                <div class="upload-img-box" id="platformcouponImg">
+                    {if condition="$platformcoupon_type_info.image"}
+                    <img src="{:img($platformcoupon_type_info.image)}" />
+                    {/if}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">有效期：</label>
+        <div class="layui-input-inline">
+            {if $platformcoupon_type_info.validity_type == 0}
+            {:date('Y-m-d H:i:s',$platformcoupon_type_info.end_time)}
+            {else /}
+            领取之日起 {$platformcoupon_type_info.fixed_term} 天有效
+            {/if}
+        </div>
+    </div>
+
+    <div class="ns-form-row">
+        <button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+    </div>
+
+</div>
+{/block}
+{block name="script"}
+<script>
+    function back() {
+        location.href = ns.url("platformcoupon://admin/platformcoupon/lists");
+    }
+</script>
+{/block}

@@ -1,0 +1,252 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	.select-goods{margin-top: 20px;margin-right: 20px;}
+	.select-goods .layui-table-body{height: 425px;}
+</style>
+{/block}
+{block name="body"}
+<div class="select-goods">
+
+	<!-- 筛选面板 -->
+	<div class="ns-single-filter-box">
+		<div class="layui-form">
+			<div class="layui-input-inline">
+				<input type="text" name="brand_name" placeholder="请输入品牌名称" autocomplete="off" class="layui-input">
+				<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+					<i class="layui-icon">&#xe615;</i>
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- 列表 -->
+	<table id="brand_list" lay-filter="brand_list"></table>
+</div>
+{/block}
+{block name="script"}
+<script type="text/html" id="checkbox">
+	{{# if($.inArray(d.brand_id.toString(), selected_id_arr) != -1){ }}
+		{{# if(disabled == 1){ }}
+			<input type="checkbox" data-brand-id="{{d.brand_id}}" name="brand_checkbox" lay-skin="primary" lay-filter="brand_checkbox" checked disabled>
+		{{# }else{ }}
+		<input type="checkbox" data-brand-id="{{d.brand_id}}" name="brand_checkbox" lay-skin="primary" lay-filter="brand_checkbox" checked>
+		{{# } }}
+	{{# }else{ }}
+		<input type="checkbox" data-brand-id="{{d.brand_id}}" name="brand_checkbox" lay-skin="primary" lay-filter="brand_checkbox">
+	{{# } }}
+	<input type="hidden" data-brand-id="{{d.brand_id}}" name="brand_json" value='{{ JSON.stringify(d) }}' />
+</script>
+
+<script type="text/html" id="image_url">
+	{{# if(d.image_url){ }}
+	<div class="ns-img-box">
+		<img layer-src src={{ns.img(d.image_url)}} >
+	</div>
+	{{# } }}
+</script>
+
+<script>
+	var table, form,laytpl,element,
+		select_id = "{$select_id}", //选中品牌id
+		selected_id_arr = select_id.length ? select_id.split(',') : [],
+		select_list = [], //选中品牌所有数据
+		max_num = "{$max_num}", //最大品牌数量
+		min_num = "{$min_num}", //最小品牌数量
+		disabled = "{$disabled}", //不可选中
+		brandCols = [], //数据源
+		brandIdArr = [],
+		filterData = {brand_name:''}; //筛选数据
+
+	brandIdArr = selected_id_arr;
+
+	brandCols = [
+		[{
+			width: "15%",
+			unresize: 'false',
+			templet: '#checkbox'
+		}, {
+			field: 'brand_name',
+			title: '品牌名称',
+			width: '40%',
+			unresize: 'false'
+		}, {
+			title: '品牌LOGO',
+			width: '20%',
+			unresize: 'false',
+			templet: "#image_url"
+		},{
+			field: 'site_name',
+			title: '商家',
+			width: '25%',
+			unresize: 'false'
+		}]
+	];
+
+	$(function () {
+		layui.use(['form','laytpl','element'], function () {
+			form = layui.form;
+			laytpl = layui.laytpl;
+			element = layui.element;
+
+			table = new Table({
+				elem: '#brand_list',
+				url: '{:addon_url("admin/pc/brandselect")}',
+				where: {},
+				cols: brandCols,
+				callback : function (res) {
+					// 更新品牌复选框状态
+					for (var i=0;i<brandIdArr.length;i++) {
+						var selected_brand = $("input[name='brand_checkbox'][data-brand-id='" + brandIdArr[i] + "']");
+						if (selected_brand.length) {
+							$("input[name='brand_checkbox'][data-brand-id='" + brandIdArr[i] + "']").prop("checked", true);
+							if (disabled == 1) {
+								$("input[name='brand_checkbox'][data-brand-id='" + brandIdArr[i] + "']").attr("disabled", "disabled");
+							}
+						}
+					}
+					form.render();
+					initData();
+				}
+
+			});
+
+			/**
+			 * 监听搜索
+			 */
+			form.on('submit(search)', function (data) {
+				filterData.brand_name = data.field.brand_name;
+				table.reload({
+					page: {
+						curr: 1
+					},
+					where: filterData
+				});
+				return false;
+			});
+
+			// 勾选品牌
+			form.on('checkbox(brand_checkbox)', function(data) {
+				var brand_id = $(data.elem).attr("data-brand-id"),
+					json = {};
+				form.render();
+
+				var len = $("input[name='brand_checkbox'][data-brand-id="+ brand_id +"]:checked").length;
+				if (len){
+					json = JSON.parse($("input[name='brand_json'][data-brand-id="+ brand_id +"]").val());
+
+					select_list.push({
+						brand_id: json.brand_id,
+						brand_name: json.brand_name,
+						brand_initial: json.brand_initial,
+						image_url: json.image_url
+					});
+
+					brandIdArr.push(brand_id);
+				} else{
+					for (var i=0;i<select_list.length;i++){
+						if(select_list[i].brand_id == brand_id){
+							select_list.splice(i,1);
+						}
+					}
+
+					brandIdArr.remove(brand_id);
+				}
+
+			});
+
+			//初始化数据
+			function initData(){
+				var brandLen = $("input[name='brand_checkbox'][data-brand-id]:checked").length;
+				for (var i = 0; i < brandLen; i++){
+					var brandId = $("input[name='brand_checkbox'][data-brand-id]:checked").eq(i).attr("data-brand-id");
+					var ident = false,
+						json = {};
+					for (var k = 0; k < select_list.length; k++){
+						if(select_list[k].brand_id == brandId){
+							ident = true;
+							break;
+						}
+					}
+
+					if (ident) return;
+
+					json = JSON.parse($("input[name='brand_json'][data-brand-id="+ brandId +"]").val());
+					select_list.push({
+						brand_id: json.brand_id,
+						brand_initial: json.brand_initial,
+						brand_name: json.brand_name,
+						image_url: json.image_url
+					});
+				}
+
+				// 查询其他页的品牌
+				var brand_ids = [];
+				for (var i=0;i<brandIdArr.length;i++){
+					var is_not = true;
+					for (var j=0;j<select_list.length;j++){
+						if(brandIdArr[i] ==select_list[j].brand_id) {
+							is_not = false;
+						}
+					}
+					if(is_not) brand_ids.push([brandIdArr[i]]);
+
+				}
+
+				if (brand_ids.length > 0) {
+					$.ajax({
+						url: ns.url("admin/pc/brandselect"),
+						data: {brand_ids: brand_ids.toString()},
+						dataType: 'JSON',
+						type: 'POST',
+						success: function (res) {
+							var list = res.data.list;
+							for (var i = 0; i < list.length; i++) select_list.push(list[i]);
+						}
+					});
+				}
+			}
+		});
+
+	});
+
+	function selectBrands(callback) {
+		var res = select_list;
+		var num = brandIdArr.length;
+
+		if (max_num && max_num > 0 && num > max_num) {
+			layer.msg("所选品牌数量不能超过" + max_num + '件');
+			return;
+		}
+
+		if (min_num && min_num > 0 && num < min_num) {
+			layer.msg("所选品牌数量最少不能少于" + min_num + '件');
+			return;
+		}
+		callback(res);
+
+	}
+
+	Array.prototype.indexOf = function(val) {
+
+		for (var i = 0; i < this.length; i++) {
+			if (this[i].brand_id && !this[i].sku_id){
+				if (this[i].brand_id == parseInt(val)) return i;
+			}else{
+				if (this[i] == val) return i;
+			}
+
+		}
+		return -1;
+	};
+
+	Array.prototype.remove = function(val) {
+		var index = this.indexOf(val);
+		if (index > -1) {
+			this.splice(index, 1);
+		}
+	};
+
+	select_list.__proto__ = Array.prototype;
+</script>
+{/block}

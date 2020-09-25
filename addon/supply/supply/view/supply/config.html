@@ -1,0 +1,122 @@
+{extend name="addon/supply/supply/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div  class="layui-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label">主营行业：</label>
+		<div class="layui-input-inline">
+			<p class="ns-input-text ns-len-mid">{$data.category_name}</p>
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">供货商名称：</label>
+		<div class="layui-input-inline">
+			<p class="ns-input-text ns-len-mid">{$data.title}</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">供货商logo：</label>
+		<div class="layui-input-block img-upload">
+			<div class="upload-img-block">
+				<div class="upload-img-box" id="logoUpload">
+					{if condition="$data.logo"}
+						<img src="{:img($data.logo)}" />
+					{else/}
+						<div class="ns-upload-default">
+							<img src="SUPPLY_IMG/upload_img.png" />
+							<p>点击上传</p>
+						</div>
+					{/if}
+				</div>
+			</div>
+			<input type="hidden" name="logo"  value="{$data.logo}"/>
+		</div>
+
+		<div class="ns-word-aux">
+			<p>建议图片尺寸：200*60像素；图片格式：jpg、png、jpeg。</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">供货商简介：</label>
+		<div class="layui-input-block">
+			<textarea name="desc" class="layui-textarea ns-len-long">{$data.desc}</textarea>
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'upload'], function(){
+		var form = layui.form,
+			upload = layui.upload,
+			repeat_flag = false; //防重复标识
+			
+		form.render();
+			
+		form.on('submit(save)', function(data){
+			if (repeat_flag) return;
+			repeat_flag = true;
+			$.ajax({
+				type: 'POST',
+				url: ns.url("supply://supply/supply/config"),
+				data: data.field,
+				dataType: 'JSON',
+				success: function(res) {
+					layer.msg(res.message);
+					repeat_flag = false;
+					if (res.code == 0) {
+						location.reload();
+					}
+				}
+			});
+		});
+		//供货商LOGO
+		var uploadInst = upload.render({
+			elem: '#logoUpload',
+			url: ns.url("supply://supply/upload/image"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='logo']").val(res.data.pic_path);
+					$("#logoUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+
+
+		//供货商头像
+		var uploadInst = upload.render({
+			elem: '#avatarUpload',
+			url: ns.url("supply://supply/upload/image"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='avatar']").val(res.data.pic_path);
+					$("#avatarUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+
+
+		//供货商大图
+		var uploadInst = upload.render({
+			elem: '#bannerUpload',
+			url: ns.url("supply://supply/upload/image"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='banner']").val(res.data.pic_path);
+					$("#bannerUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+	});
+</script>
+{/block}

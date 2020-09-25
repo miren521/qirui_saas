@@ -1,0 +1,180 @@
+{extend name="base"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div  class="layui-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label">开店套餐：</label>
+		<div class="layui-input-inline">
+			<p class="ns-input-text ns-len-mid">{$shop_info.group_name}</p>
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">主营行业：</label>
+		<div class="layui-input-inline">
+			<p class="ns-input-text ns-len-mid">{$shop_info.category_name}</p>
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">店铺名称：</label>
+		<div class="layui-input-inline">
+			<p class="ns-input-text ns-len-mid">{$shop_info.site_name}</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">店铺logo：</label>
+		<div class="layui-input-block img-upload">
+			<div class="upload-img-block">
+				<div class="upload-img-box" id="logoUpload">
+					{if condition="$shop_info.logo"}
+						<img src="{:img($shop_info.logo)}" />
+					{else/}
+						<div class="ns-upload-default">
+							<img src="SHOP_IMG/upload_img.png" />
+							<p>点击上传</p>
+						</div>
+					{/if}
+				</div>
+			</div>
+			<input type="hidden" name="logo"  value="{$shop_info.logo}"/>
+		</div>
+
+		<div class="ns-word-aux">
+			<p>建议图片尺寸：200*60像素；图片格式：jpg、png、jpeg。</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">店铺头像：</label>
+		<div class="layui-input-block img-upload">
+			<div class="upload-img-block square">
+				<div class="upload-img-box" id="avatarUpload">
+					{if condition="$shop_info.avatar"}
+						<img src="{:img($shop_info.avatar)}" />
+					{else/}
+						<div class="ns-upload-default">
+							<img src="SHOP_IMG/upload_img.png" />
+							<p>点击上传</p>
+						</div>
+					{/if}
+				</div>
+			</div>
+			<input type="hidden" name="avatar" value="{$shop_info.avatar}"/>
+		</div>
+
+		<div class="ns-word-aux">
+			<p>建议图片尺寸：800*800像素；图片格式：jpg、png、jpeg。</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">店铺大图：</label>
+		<div class="layui-input-block img-upload">
+			<div class="upload-img-block">
+				<div class="upload-img-box" id="bannerUpload">
+					{if condition="$shop_info.banner"}
+						<img src="{:img($shop_info.banner)}" />
+					{else/}
+						<div class="ns-upload-default">
+							<img src="SHOP_IMG/upload_img.png" />
+							<p>点击上传</p>
+						</div>
+					{/if}
+				</div>
+			</div>
+			<input type="hidden" name="banner" value="{$shop_info.banner}"/>
+		</div>
+		<div class="ns-word-aux">
+			<p>建议图片高度：150像素；图片格式：jpg、png、jpeg。</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">店铺简介：</label>
+		<div class="layui-input-block">
+			<textarea name="seo_description" class="layui-textarea ns-len-long">{$shop_info.seo_description}</textarea>
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">店铺关键字：</label>
+		<div class="layui-input-block">
+			<input type="text" name="seo_keywords" autocomplete="off" value="{$shop_info.seo_keywords}" class="layui-input ns-len-long">
+			<span class="layui-word-aux">多个关键字之间用英文“,”隔开</span>
+		</div>
+	</div>
+	
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'upload'], function(){
+		var form = layui.form,
+			upload = layui.upload,
+			repeat_flag = false; //防重复标识
+			
+		form.render();
+			
+		form.on('submit(save)', function(data){
+			if (repeat_flag) return;
+			repeat_flag = true;
+			$.ajax({
+				type: 'POST',
+				url: ns.url("shop/shop/config"),
+				data: data.field,
+				dataType: 'JSON',
+				success: function(res) {
+					layer.msg(res.message);
+					repeat_flag = false;
+					if (res.code == 0) {
+						setTimeout(function(){ location.reload(); }, 1000);
+					}
+				}
+			});
+		});
+		//店铺LOGO
+		var uploadInst = upload.render({
+			elem: '#logoUpload',
+			url: ns.url("shop/upload/image"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='logo']").val(res.data.pic_path);
+					$("#logoUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+
+
+		//店铺头像
+		var uploadInst = upload.render({
+			elem: '#avatarUpload',
+			url: ns.url("shop/upload/image"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='avatar']").val(res.data.pic_path);
+					$("#avatarUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+
+
+		//店铺大图
+		var uploadInst = upload.render({
+			elem: '#bannerUpload',
+			url: ns.url("shop/upload/image"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='banner']").val(res.data.pic_path);
+					$("#bannerUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+	});
+</script>
+{/block}

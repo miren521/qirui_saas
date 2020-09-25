@@ -1,0 +1,328 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<style>
+	.layui-table-view td:last-child>div{overflow: inherit;}
+	.operation-wrap{position: relative;}
+	.layui-table-box{overflow: inherit;}
+	.layui-table-body{overflow: inherit;}
+	.popup-qrcode-wrap{text-align: center;background: #fff;border-radius: 2px;box-shadow: 0 2px 8px 0 rgba(200,201,204,.5);padding: 10px;position: absolute;z-index: 1;top: -70px;left: -190px;display: none;width: 170px;height: 230px;}
+	.popup-qrcode-wrap:before, .popup-qrcode-wrap:after {left: 100%;top: 50%;border: solid transparent;content: " ";height: 0;width: 0;position: absolute;pointer-events: none;}
+	.popup-qrcode-wrap:before {border-color: transparent;border-left-color: #e5e5e5;border-width: 8px;margin-top: -29px;}
+	.popup-qrcode-wrap:after {border-color: transparent;border-left-color: #ffffff;border-width: 7px;margin-top: -31px;}
+	.popup-qrcode-wrap img{width: 150px;height: 150px;max-width: 100%;}
+	.popup-qrcode-wrap p{font-size: 12px;margin: 5px 0;line-height: 1.8!important;}
+	.popup-qrcode-wrap a{font-size: 12px;}
+	.popup-qrcode-wrap input{opacity: 0;position: absolute;}
+	.popup-qrcode-wrap .popup-qrcode-loadimg {width: 16px!important; height: 16px!important; margin-top: 107px;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>幸运抽奖活动列表展示幸运抽奖相关信息</li>
+		</ul>
+	</div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<button class="layui-btn ns-bg-color" onclick="add()">添加幸运抽奖</button>
+	
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<input type="text" name="game_name" placeholder="请输入活动名称" class="layui-input" autocomplete="off">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+			  <i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="cards_tab">
+	<ul class="layui-tab-title">
+		<li class="layui-this" data-status="">全部</li>
+		<li data-status="0">未开始</li>
+		<li data-status="1">进行中</li>
+		<li data-status="2">已结束</li>
+		<li data-status="3">已关闭</li>
+	</ul>
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="cards_list" lay-filter="cards_list"></table>
+	</div>
+</div>
+
+<!-- 时间 -->
+<script id="time" type="text/html">
+	<div class="layui-elip">开始：{{ns.time_to_date(d.start_time)}}</div>
+	<div class="layui-elip">结束：{{ns.time_to_date(d.end_time)}}</div>
+</script>
+
+<!-- 状态 -->
+<script type="text/html" id="status">
+	{{#  if(d.status == 0){  }}
+	未开始
+	{{#  }else if(d.status == 1){  }}
+	进行中
+	{{#  }else if(d.status == 2){  }}
+	已结束
+	{{#  }else if(d.status == 3){  }}
+	已关闭
+	{{#  }  }}
+</script>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="operation-wrap" data-game-id="{{d.game_id}}">
+		<div class="popup-qrcode-wrap"><img class="popup-qrcode-loadimg" src="__STATIC__/loading/loading.gif" /></div>
+		<div class="ns-table-btn">
+			<a class="layui-btn" lay-event="detail">查看</a>
+			<a class="layui-btn" lay-event="select">推广</a>
+			{{# if(d.status == 0){ }}
+			<a class="layui-btn" lay-event="edit">编辑</a>
+			<a class="layui-btn" lay-event="del">删除</a>
+			{{# }else if(d.status == 1){ }}
+			<a class="layui-btn" lay-event="close">关闭</a>
+			<a class="layui-btn" lay-event="record">抽奖记录</a>
+			{{# }else if(d.status == 2){ }}
+			<a class="layui-btn" lay-event="del">删除</a>
+			<a class="layui-btn" lay-event="record">抽奖记录</a>
+			{{# }else if(d.status == 3){ }}
+			<a class="layui-btn" lay-event="del">删除</a>
+			<a class="layui-btn" lay-event="record">抽奖记录</a>
+			{{# } }}
+		</div>
+	</div>
+</script>
+{/block}
+
+{block name="script"}
+<!-- 游戏推广 -->
+<script type="text/html" id="game_url">
+	{{# if(d.path.h5.status == 1){ }}
+	<img src="{{ ns.img(d.path.h5.img) }}" alt="推广二维码">
+	<p class="qrcode-item-description">扫码后直接访问</p>
+	<a class="ns-text-color" href="javascript:ns.copy('h5_url_{{ d.game_id }}');">复制链接</a>
+	<a class="ns-text-color" href="{{ ns.img(d.path.h5.img) }}" download>下载二维码</a>
+	<input class="layui-input nc-len-mid" type="text" value="{{ d.path.h5.url }}" id="h5_url_{{ d.game_id }}" readonly>
+	{{# } }}
+</script>
+<script>
+	layui.use(['form', 'element','laytpl'], function() {
+		var table,
+			form = layui.form,
+			laytpl = layui.laytpl,
+			element = layui.element,
+			repeat_flag = false; //防重复标识
+		form.render();
+
+		//监听Tab切换，以改变地址hash值
+		element.on('tab(cards_tab)', function() {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: {
+					'status': this.getAttribute('data-status')
+				}
+			});
+		});
+
+		table = new Table({
+			elem: '#cards_list',
+			url: ns.url("turntable://shop/turntable/lists"),
+			cols: [
+				[{
+			    	field:'game_name',
+					title: '活动名称',
+					unresize: 'false',
+					width:'15%'
+				},{
+					title: '中奖概率',
+					unresize: 'false',
+					templet: function(data) {
+						return data.winning_rate + '%';
+					}
+				}, {
+					title: '参与次数',
+					unresize: 'false',
+                    templet: function(data) {
+                        if(data.join_type == 1){
+							return '每天' + data.join_frequency + '次';
+						}else{
+                            return data.join_frequency + '次';
+						}
+                    }
+				}, {
+			    	field:'join_num',
+					title: '抽奖人数',
+					unresize: 'false'
+				}, {
+                    field:'winning_num',
+                    title: '中奖人数',
+                    unresize: 'false'
+                }, {
+					title: '状态',
+					unresize: 'false',
+					templet: '#status'
+				}, {
+                    title: '活动时间',
+                    unresize: 'false',
+                    width: '12%',
+                    templet: '#time'
+                }, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width:'12%'
+				}]
+			]
+
+		});
+		
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+
+		//监听Tab切换
+		element.on('tab(status)', function(data) {
+			var status = $(this).attr("data-status");
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: {
+					'status': status
+				}
+			});
+		});
+
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+                case 'detail': //详情
+                    location.href = ns.url("turntable://shop/turntable/detail", {"game_id": data.game_id});
+                    break;
+				case 'edit': //编辑
+					location.href = ns.url("turntable://shop/turntable/edit", {"game_id": data.game_id});
+					break;
+				case 'del': //删除
+					deleteCards(data.game_id);
+					break;
+				case 'close': //使结束
+					closeCards(data.game_id);
+					break;
+                case 'record': //抽奖记录
+                    location.href = ns.url("turntable://shop/record/lists", {"game_id": data.game_id});
+                    break;
+				case 'select'://推广
+					gameUrl(data);
+					break;
+			}
+		});
+		
+		/**
+		 * 删除
+		 */
+		function deleteCards(game_id) {
+			layer.confirm('确定要删除该幸运抽奖活动吗?', function() {
+				if (repeat_flag) return;
+				repeat_flag = true;
+
+				$.ajax({
+					url: ns.url("turntable://shop/turntable/delete"),
+					data: {
+                        game_id: game_id
+					},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						layer.msg(res.message);
+						repeat_flag = false;
+						if (res.code == 0) {
+							table.reload();
+						}
+					}
+				});
+			}, function() {
+				layer.close();
+				repeat_flag = false;
+			});
+		}
+
+		//使结束
+		function closeCards(game_id) {
+
+			layer.confirm('确定要结束该幸运抽奖活动吗?', function() {
+				if (repeat_flag) return;
+				repeat_flag = true;
+
+				$.ajax({
+					url: ns.url("turntable://shop/turntable/finish"),
+					data: {
+                        game_id: game_id
+					},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						layer.msg(res.message);
+						repeat_flag = false;
+						if (res.code == 0) {
+							table.reload();
+						}
+					}
+				});
+			}, function() {
+				layer.close();
+				repeat_flag = false;
+			});
+		}
+		// 游戏推广
+		function gameUrl(data) {
+			$(".operation-wrap[data-game-id='" + data.game_id + "'] .popup-qrcode-wrap").css("display", "block");
+			$.ajax({
+				type: "POST",
+				url: ns.url("turntable://shop/turntable/gameUrl"),
+				data: {
+					'game_id': data.game_id
+				},
+				dataType: 'JSON',
+				success: function (res) {
+					if (res.data.path.h5.status == 1) {
+						res.data.game_id = data.game_id;
+						laytpl($("#game_url").html()).render(res.data, function (html) {
+							$(".operation-wrap[data-game-id='" + data.game_id + "'] .popup-qrcode-wrap").html(html).show();
+
+							$("body").click(function (e) {
+								if (!$(e.target).closest(".popup-qrcode-wrap").length) {
+									$(".operation-wrap[data-game-id='" + data.game_id + "'] .popup-qrcode-wrap").hide();
+								}
+							});
+						});
+					} else {
+						layer.msg(res.data.path.h5.message);
+					}
+				}
+			});
+
+		}
+	});
+
+	function add() {
+		location.href = ns.url("turntable://shop/turntable/add");
+	}
+</script>
+{/block}

@@ -1,0 +1,11 @@
+@CHARSET "UTF-8";
+.draggable-element .shop-store .preview-draggable{overflow: hidden;}
+.shop-store .img-wrap{width: 80px;height: 80px;float: left;}
+.shop-store .img-wrap img{max-width: 100%;max-height: 100%;}
+.shop-store .info-wrap{margin-left: 90px;}
+.shop-store .info-wrap h4{margin-bottom: 10px;}
+.shop-store .info-wrap p{font-size: 12px;margin-bottom: 10px;}
+.shop-store .info-wrap p img{width: 15px; height: 15px;vertical-align: middle;margin-right: 5px;}
+.shop-store .info-wrap p span{vertical-align: middle;}
+.shop-store .info-wrap .open-time{font-size: 12px;}
+.shop-store .info-wrap .phone{float: right;margin-right: 10px;width: 15px; height: 15px;}

@@ -1,0 +1,199 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	.ns-form {
+		margin-top: 0;
+	}
+	
+	.ns-input-text {
+		cursor: pointer;
+	}
+	
+	.layui-layer-content {
+		word-break: break-all;
+		line-height: 24px;
+        overflow-y: scroll!important;
+	}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label">当前版本号：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text ns-len-mid">V{$current_verison['SYS_VERSION_NO']}</p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">升级版本号：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text ns-len-mid">V{$version_info['sys_version_no']}</p>
+        </div>
+    </div>
+	
+    <div class="layui-form-item">
+        <label class="layui-form-label">升级版本序列号：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text ns-len-mid">{$version_info['sys_release']}</p>
+        </div>
+    </div>
+	
+    <div class="layui-form-item">
+        <label class="layui-form-label">需更新版本数：</label>
+        <div class="layui-input-inline">
+            <p class="ns-input-text">{:count($version_info['scripts'])}</p>
+        </div>
+        <span class="ns-input-text ns-text-color" onclick="showScripts()">点击查看</span>
+    </div>
+	
+    <div class="layui-form-item">
+        <label class="layui-form-label">需更新文件数：</label>
+        <div class="layui-input-inline">
+            <p class="ns-input-text">{:count($version_info['files'])}</p>
+        </div>
+        <span class="ns-input-text ns-text-color" onclick="showFiles()">点击查看</span>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">二次开发文件数：</label>
+        <div class="layui-input-inline">
+            <p class="ns-input-text">{$version_info['tow_dev_file_count']}</p>
+        </div>
+        <span class="ns-input-text ns-text-color" onclick="showTowDevFiles()">点击查看</span>
+    </div>
+
+    <div class="ns-form-row">
+        <button class="layui-btn ns-bg-color" lay-submit lay-filter="version_download">下载文件</button>
+        <button class="layui-btn ns-bg-color" lay-submit lay-filter="version_upgrade">一键升级</button>
+        <button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+    </div>
+</div>
+{/block}
+{block name="script"}
+<script>
+    var version_info = {:json_encode($version_info)};
+	
+	var laytpl, showScripts, showFiles;
+    layui.use(['form', 'laydate','upload', 'laytpl'], function() {
+        var form = layui.form,
+            laydate = layui.laydate,
+            upload = layui.upload,
+			laytpl = layui.laytpl,
+            repeat_flag = false; //防重复标识
+        form.render();
+
+        laydate.render({
+            elem: '#laydate'
+        });
+
+        /**
+         * 监听提交
+         */
+        form.on('submit(version_download)', function(data) {
+            location.href = ns.url("admin/system/versionDownload");
+        });
+
+        form.on('submit(version_upgrade)', function(data) {
+            location.href = ns.url("admin/system/versionUpgrade");
+        });
+		
+		
+		showScripts = function() {
+			console.log(version_info);
+			var uploadHtml = $("#update_data").html();
+			laytpl(uploadHtml).render(version_info, function(html) {
+				layer.open({
+					type: 1,
+					title: '更新版本详情',
+					area: ['500px', '500px'],
+					content: html
+				});
+			})
+		}
+		
+		showFiles = function() {
+			var uploadHtml = $("#update_file").html();
+			laytpl(uploadHtml).render(version_info, function(html) {
+				layer.open({
+					type: 1,
+					title: '更新版本详情',
+					area: ['500px', '500px'],
+					content: html
+				});
+			})
+		}
+
+        showTowDevFiles = function() {
+            var uploadHtml = $("#tow_dev_file").html();
+            laytpl(uploadHtml).render(version_info, function(html) {
+                layer.open({
+                    type: 1,
+                    title: '二次开发文件详情',
+                    area: ['500px', '500px'],
+                    content: html
+                });
+            })
+        }
+    });
+
+    function back() {
+        location.href = ns.url("admin/system/upgrade");
+    }
+</script>
+
+<script type="text/html" id="update_data">
+	<div><span>需更新版本数：{{d.script_count}}</span></div>
+	
+	<table class="layui-table" lay-skin="lg">
+		<colgroup>
+			<col width="50%">
+			<col width="50%">
+		</colgroup>
+		<tbody>
+			<!-- <tr>
+				<td>需更新版本数：{{d.script_count}}</td>
+				<td>111</td>
+			</tr> -->
+			{{#  layui.each(d.scripts, function(index, item){  }}
+			<tr>
+				<td colspan="2">{{item}}</td>
+			</tr>
+			{{#  })  }}
+		</tbody>
+	</table>
+</script>
+
+<script type="text/html" id="update_file">
+	<div><p>需更新文件数：{{d.file_count}}</p><p class="ns-text-color-red">说明：如果对以下文件进行过二次开发，文件更新过程中，将会对其进行覆盖，请自行甄选。</p></div>
+	<table class="layui-table">
+		<colgroup>
+			<col width="50%">
+			<col width="50%">
+		</colgroup>
+		<tbody>
+			{{#  layui.each(d.files, function(index, item){  }}
+			<tr>
+				<td>{{item}}</td>
+			</tr>
+			{{#  })  }}
+		</tbody>
+	</table>
+</script>
+<script type="text/html" id="tow_dev_file">
+    <div><p>需更新文件数：{{d.tow_dev_file_count}}</p><p class="ns-text-color-red">说明：以下文件为当前升级版本要覆盖并且在本地进行过二次开发的文件。</p></div>
+    <table class="layui-table">
+        <colgroup>
+            <col width="50%">
+            <col width="50%">
+        </colgroup>
+        <tbody>
+        {{#  layui.each(d.two_dev_files, function(index, item){  }}
+        <tr>
+            <td>{{item}}</td>
+        </tr>
+        {{#  })  }}
+        </tbody>
+    </table>
+</script>
+{/block}

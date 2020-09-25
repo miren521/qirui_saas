@@ -1,0 +1,165 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">操作提示</h2>
+        <ul class="layui-colla-content layui-show">
+            <li>供应商列表，可在此展示所有供应商</li>
+			<li>可添加供应商以及对供应商进行编辑和删除操作</li>
+			<li>供应商管理中心：<a href="{:url('supply/supply/index/index')}" target="_blank" style="color: orangered">
+                {:url('supply/supply/index/index')}</a></li>
+			<li>供应市场：<a href="{:url('supply/shop/market/index')}" target="_blank" style="color: orangered">
+                {:url('supply/shop/market/index')}</a></li>
+        </ul>
+    </div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+    <button class="layui-btn ns-bg-color" onclick="addSupplier()">添加供应商</button>
+    <div class="layui-form">
+        <div class="layui-input-inline">
+            <input type="text" name="search_keys" placeholder="请输入关键词" autocomplete="off" class="layui-input">
+            <button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+                <i class="layui-icon">&#xe615;</i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 列表 -->
+<table id="brand_list" lay-filter="brand_list"></table>
+
+<script type="text/html" id="image_url">
+    {{# if(d.logo){ }}
+    <div class="ns-img-box">
+        <img layer-src src={{ns.img(d.logo)}} >
+    </div>
+    {{# } }}
+</script>
+
+<!-- 状态 -->
+<script type="text/html" id="status">
+    {{ d.status == 1 ? '正常' : '关闭' }}
+</script>
+
+<!-- 操作 -->
+<script type="text/html" id="operation">
+    <div class="ns-table-btn">
+        {{#  if(d.site_id == 0){ }}
+        {{#  }else{ }}
+        <a class="layui-btn" lay-event="edit">详情</a>
+        <a class="layui-btn" lay-event="delete">删除</a>
+        {{# } }}
+    </div>
+</script>
+
+<!-- 编辑排序 -->
+{/block}
+{block name="script"}
+<script>
+    var form, table;
+    layui.use(['table', 'form'], function() {
+        form = layui.form;
+        form.render();
+
+        table = new Table({
+            elem: '#brand_list',
+            url: ns.url("supply://admin/supplier/index"),
+            cols: [
+                [
+                    {
+                        field: 'title',
+                        title: '供应商名称',
+                        width: '15%',
+                        unresize: 'false'
+                    }, {
+                        field: 'username',
+                        title: '供应商账号',
+                        width: '12%',
+                        unresize: 'false',
+                    }, {
+                        field: 'category_name',
+                        title: '主营行业',
+                        width: '12%',
+                        unresize: 'false',
+                    }, {
+                        field: 'supplier_phone',
+                        title: '联系方式',
+                        width: '12%',
+                        unresize: 'false'
+                    },{
+                        field: 'supplier_address',
+                        title: '供应商地址',
+                        width: '25%',
+                        unresize: 'false'
+                    }, {
+                        field: 'status',
+                        title: '供应商状态',
+                        width: '8%',
+                        templet: '#status',
+                        unresize: 'false'
+                    },{
+                        title: '操作',
+                        width: '15%',
+                        toolbar: '#operation',
+                        unresize: 'false'
+                    }
+                ]
+            ]
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'edit':
+                    location.href = ns.url("supply://admin/supplier/edit", {supplier_id: data.supplier_id});
+                    break;
+                case 'delete':
+                    deleteSupplier(data.supplier_id);
+                    break;
+            }
+        });
+
+        /**
+         * 删除
+         */
+        function deleteSupplier(supplier_id) {
+            layer.confirm('确定要删除该供应商吗？', function() {
+                $.ajax({
+                    url: ns.url("supply://admin/supplier/delete"),
+                    data: {supplier_id: supplier_id},
+                    dataType: 'JSON',
+                    type: 'POST',
+                    success: function (res) {
+                        layer.msg(res.message);
+                        if (res.code == 0) {
+                            table.reload();
+                        }
+                    }
+                });
+            });
+        }
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function(data){
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+        });
+    });
+
+    function addSupplier() {
+        location.href = ns.url("supply://admin/supplier/add");
+    }
+</script>
+{/block}

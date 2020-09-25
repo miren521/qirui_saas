@@ -1,0 +1,322 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.layui-layer-page .layui-layer-content {
+	    padding: 20px 30px;
+	}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>展示了优惠券的相关信息列表</li>
+			<li>通过优惠券名称搜索出具体优惠券信息</li>
+		</ul>
+	</div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<input type="text" name="coupon_name" placeholder="请输入优惠券名称" autocomplete="off" class="layui-input">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+				<i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+<!-- 筛选面板 -->
+<!-- <div class="ns-screen layui-collapse">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">筛选</h2>
+		<form class="layui-colla-content layui-form layui-show">
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">优惠券名称：</label>
+					<div class="layui-input-inline">
+						<input type="text" name="coupon_name" placeholder="请输入优惠券名称" autocomplete="off" class="layui-input">
+					</div>
+				</div>
+				
+				<div class="layui-inline">
+					<label class="layui-form-label">店铺名称：</label>
+					<div class="layui-input-inline">
+						<input type="text" name="coupon_name" placeholder="请输入店铺名称" autocomplete="off" class="layui-input">
+					</div>
+				</div>
+			</div>
+			
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="search">筛选</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</form>
+	</div>
+</div> -->
+
+<div class="layui-tab ns-table-tab" lay-filter="coupon_tab">
+	<ul class="layui-tab-title">
+		<li class="layui-this" lay-id="">全部</li>
+		<li lay-id="1">进行中</li>
+		<li lay-id="2">已结束</li>
+		<li lay-id="-1">已关闭</li>
+	</ul>
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="coupon_list" lay-filter="coupon_list"></table>
+	</div>
+</div>
+
+<script type="text/html" id="validity">
+	{{#  if(d.validity_type == 0){  }}
+	失效期{{ ns.time_to_date(d.end_time) }}
+	{{#  }else{  }}
+	领取后，{{ d.fixed_term }}天有效
+	{{#  }  }}
+</script>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="receive">领取记录</a>
+		<a class="layui-btn" lay-event="detail">详情</a>
+		{{#  if(!(d.status == 1)){ }}
+		<a class="layui-btn" lay-event="del">删除</a>
+		{{#  } }}
+		{{#  if((d.status == 1)){ }}
+		<a class="layui-btn" lay-event="close">强制关闭</a>
+		{{#  } }}
+	</div>
+</script>
+
+<script type="text/html" id="couponDetail">
+	<table class="layui-table">
+		<colgroup>
+			<col width="150">
+			<col width="200">
+			<col>
+		</colgroup>
+		<tbody>
+		<tr>
+			<td>类型名</td>
+			<td>{{d.coupon_name}}</td>
+		</tr>
+		<tr>
+			<td>优惠券面额</td>
+			<td>{{d.money}}元</td>
+		</tr>
+		<tr>
+			<td>发放数量</td>
+			<td>{{d.count}}张</td>
+		</tr>
+		<tr>
+			<td>最大领取数量</td>
+			<td>{{d.max_fetch}}张</td>
+		</tr>
+		<tr>
+			<td>满多少元可以使用</td>
+			<td>{{d.at_least}}元</td>
+		</tr>
+		<tr>
+			{{#  if(d.validity_type == 0){  }}
+			<td>有效时间至</td>
+			<td>{{ ns.time_to_date(d.end_time) }}</td>
+			{{#  }else{  }}
+			<td>有效时间</td>
+			<td>{{ d.fixed_term }}天</td>
+			{{#  }  }}
+		</tr>
+		</tbody>
+	</table>
+</script>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'laytpl', 'element'], function() {
+		var table,
+			form = layui.form,
+			laytpl = layui.laytpl,
+			element = layui.element,
+			repeat_flag = false; //防重复标识
+
+		form.render();
+
+		
+		//监听Tab切换，以改变地址hash值
+		element.on('tab(coupon_tab)', function(){
+			table.reload({
+		        page: {curr: 1},
+		        where: {'status': this.getAttribute('lay-id')},
+		    })
+		});
+
+
+		table = new Table({
+			elem: '#coupon_list',
+			url: ns.url("coupon://admin/coupon/lists"),
+			cols: [
+				[{
+					field: 'coupon_name',
+					title: '优惠券名称',
+					unresize: 'false',
+					width: '15%'
+				}, 
+				{
+					field: 'site_name',
+					title: '店铺名称',
+					unresize: 'false',
+					width: '12%',
+				},
+				{
+					field: 'money',
+					title: '<span style="padding-right: 15px;">发放面额</span>',
+					unresize: 'false',
+					width: '13%',
+					align: 'right',
+					templet: function(data) {
+						if(Number(data.money)>0){
+							return '<span style="padding-right: 15px;">￥'+ data.money +'</span>';
+						}else{
+							return '<span style="padding-right: 15px;">'+ data.discount +'折</span>';
+						}
+					}
+				}, {
+					field: 'count',
+					title: '发放数量',
+					unresize: 'false',
+					width: '10%'
+				}, {
+					field: 'max_fetch',
+					title: '领取上限',
+					unresize: 'false',
+					width: '10%',
+					templet: function(data){
+						return data.max_fetch + '张/人';
+					}
+				}, {
+					title: '有效期限',
+					unresize: 'false',
+					width: '18%',
+					templet: '#validity'
+				}, {
+					field: 'status_name',
+					title: '状态',
+					unresize: 'false',
+					width: '8%'
+				}, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width: '13%'
+				}]
+			]
+		});
+
+
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'edit': //编辑
+					location.href = ns.url("coupon://admin/coupon/edit?site_id=" + data.site_id + "&coupon_type_id=" + data.coupon_type_id);
+					break;
+
+				case 'del': //删除
+					layer.confirm('确定要删除吗?', function() {
+						if (repeat_flag) return false;
+						repeat_flag = true;
+
+						$.ajax({
+							url: ns.url("coupon://admin/coupon/delete"),
+							data: {
+								'coupon_type_id': data.coupon_type_id,
+								'site_id': data.site_id
+							},
+							dataType: 'JSON',
+							type: 'POST',
+							success: function(res) {
+								layer.msg(res.message);
+								repeat_flag = false;
+
+								if (res.code == 0) {
+									table.reload();
+								}
+							}
+						});
+					}, function() {
+						layer.close();
+						repeat_flag = false;
+					});
+					break;
+
+				case 'close': ////强制关闭
+					layer.confirm('确定要强制关闭吗?', function() {
+						if (repeat_flag) return;
+						repeat_flag = true;
+						$.ajax({
+							url: ns.url("coupon://admin/coupon/close"),
+							data: {
+								'coupon_type_id': data.coupon_type_id,
+								'site_id': data.site_id
+							},
+							dataType: 'JSON',
+							type: 'POST',
+							success: function(res) {
+								layer.msg(res.message);
+								repeat_flag = false;
+
+								if (res.code == 0) {
+									table.reload();
+								}
+							}
+						});
+					}, function() {
+						layer.close();
+						repeat_flag = false;
+					});
+					break;
+
+				case 'detail': //详情
+                    location.href = ns.url("coupon://admin/coupon/detail?site_id=" + data.site_id + "&coupon_type_id=" + data.coupon_type_id);
+                    break;
+
+				case 'receive': //领取记录
+					location.href = ns.url("coupon://admin/coupon/receive?site_id=" + data.site_id + "&coupon_type_id=" + data.coupon_type_id);
+					break;
+				
+			}
+		});
+
+
+		//详情
+		function couponDetail(data) {
+			var detailHtml = $("#couponDetail").html();
+			laytpl(detailHtml).render(data, function(html) {
+				layer.open({
+					type: 1,
+					title: '优惠券详情',
+					area: ['500px'],
+					content: html
+				});
+			})
+		}
+
+
+		// 搜索
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+
+	});
+</script>
+{/block}

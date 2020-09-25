@@ -1,0 +1,119 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/order.css">
+{/block}
+{block name="body"}
+<!-- 顶部html文件-->
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-order">
+			<div class="order-menu">
+				<ul class="layui-nav layui-nav-tree" lay-filter="test">
+					<li class="layui-nav-item layui-nav-itemed">
+						<a href="javascript:;">交易中心</a>
+						<dl class="layui-nav-child">
+							<dd class="layui-this"><a href="{:addon_url('supply://shop/order/lists')}">我的订单</a></dd>
+							<dd><a href="{:addon_url('supply://shop/orderrefund/lists')}">退款/售后</a></dd>
+							<dd><a href="{:addon_url('supply://shop/purchase/purchase')}">我的求购单</a></dd>
+						</dl>
+					</li>
+				</ul>
+			</div>
+			<div class="order-list">
+				<div class="order-list-title">我的订单</div>
+
+				<div class="order-list-wrap">
+					<div class="layui-tab ns-table-tab" lay-filter="order_tab">
+						<ul class="layui-tab-title">
+							<li class="layui-this" data-status="all">全部</li>
+							{foreach $status_list as $status_k=>$status_v}
+							<li data-status="{$status_k}">{$status_v}</li>
+							{/foreach}
+						</ul>
+						<div class="layui-tab-content">
+							<!-- 列表 -->
+							<div id="order_list"></div>
+						</div>
+					</div>
+				</div>
+
+				<div id="order_page"></div>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script src="SHOP_SUPPLY_LOCAL_JS/order_list.js"></script>
+<script>
+	var form, laypage, element, count = 0, curr = 1;
+	//监听“刷新”按钮
+	$("#refresh").on('click', function () {
+		curr = 1
+		window.location.hash.replace('#!page=', '') = ns.url("supply://shop/order/lists");
+	});
+	layui.use(['form', 'laypage', 'element'], function () {
+		form = layui.form;
+		laypage = layui.laypage;
+		element = layui.element;
+
+		curr = location.hash.replace('#!page=', '') ? location.hash.replace('#!page=', '') : curr;
+		getOrderList(curr, "");
+		getOrderPage(count);
+
+		//监听Tab切换，以改变地址hash值
+		element.on('tab(order_tab)', function() {
+			getOrderList(1, this.getAttribute('data-status'))
+			window.location.hash = "!page=1";
+			getOrderPage(count);
+		});
+	})
+
+	var order = new Order();
+	function getOrderList(curr, order_status) {
+		$.ajax({
+			type: 'GET',
+			dataType: 'JSON',
+			async: false,
+			data: {
+				"page": curr,
+				"order_status": order_status
+			},
+			url: ns.url("supply://shop/order/lists"),
+			success: function (res) {
+				if(checkLogin(res)) {
+					if (res.code == 0) {
+						order.setData(res.data);
+						$("#order_list").html(order.fetch());
+
+						count = res.data.count;
+					} else {
+						layer.msg(res.message);
+					}
+				}
+			}
+		});
+	}
+
+	function getOrderPage(count) {
+		if (!count) {
+			$("#order_page").css("display", "none");
+		} else {
+			$("#order_page").css("display", "block");
+		}
+
+		page = new Page({
+			elem: 'order_page',
+			count: count,
+			curr: 1,
+			callback: function (obj) {
+				console.log(obj);
+				getOrderList(obj.curr);
+			}
+		});
+	}
+</script>
+{/block}

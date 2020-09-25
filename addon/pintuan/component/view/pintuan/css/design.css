@@ -1,0 +1,11 @@
+@CHARSET "UTF-8";
+.component-pintuan .pintuan-head {width: 100%;display: -webkit-box;display: -webkit-flex;display: flex;-webkit-box-pack: justify;-webkit-justify-content: space-between;justify-content: space-between;-webkit-box-align: center;-webkit-align-items: center;align-items: center;margin-bottom: 10px;}
+.component-pintuan .pintuan-head .title-wrap {display: -webkit-box;display: -webkit-flex;display: flex;-webkit-box-align: center;-webkit-align-items: center;align-items: center;}
+.component-pintuan .pintuan-head .title-wrap .name {font-weight: bold;margin-right: 8px;}
+.component-pintuan .pintuan-head .more {font-size: 12px;}
+.component-pintuan .list-wrap{overflow: hidden;}
+.component-pintuan .list-wrap .item {width: 50%;height: 100%;background: #ffffff;float: left;margin-bottom: 10px;text-align: center;}
+.component-pintuan .list-wrap .item .img-wrap {margin-bottom: 5px;}
+.component-pintuan .list-wrap .item .img-wrap img {width: 100px;height: 100px;padding: 0;margin: 0;}
+.component-pintuan .list-wrap .item .new-price {font-size: 14px;text-align: center;display: block;}
+.component-pintuan .list-wrap .item .old-price {font-size: 12px;text-align: center;color: #898989;text-decoration: line-through;}

@@ -1,0 +1,100 @@
+{extend name="base"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>填写平台收款账户的信息，相关信息会出现在需要向平台汇款的页面</li>
+		</ul>
+	</div>
+</div>
+
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>银行开户名：</label>
+		<div class="layui-input-inline">
+			<input type="text" name="bank_account_name" lay-verify="name" value="{$receivable_config.data.value.bank_account_name}" placeholder="请输入银行开户名" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>银行账户：</label>
+		<div class="layui-input-block">
+			<input type="text" name="bank_account_no" lay-verify="no" value="{$receivable_config.data.value.bank_account_no}" placeholder="请输入银行账户"  autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>开户行名称：</label>
+		<div class="layui-input-block">
+			<input type="text" name="bank_name" lay-verify="bank_name" value="{$receivable_config.data.value.bank_name}" placeholder="请输入开户名称" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>开户行所在地：</label>
+		<div class="layui-input-block">
+			<input type="text" name="bank_address" lay-verify="bank_address" value="{$receivable_config.data.value.bank_address}" placeholder="请输入开户所在地" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'upload'], function() {
+		var form = layui.form,
+			upload = layui.upload,
+			repeat_flag = false; //防重复标识
+		form.render();
+
+		form.on('submit(save)', function(data) {
+
+			if (repeat_flag) return;
+			repeat_flag = true;
+
+			$.ajax({
+				type: 'POST',
+				dataType: 'JSON',
+				url: ns.url("admin/config/receivable"),
+				data: data.field,
+				success: function(res) {
+					layer.msg(res.message);
+					if (res.code == 0) {
+						location.reload();
+					}else{
+						repeat_flag = false;
+					}
+				}
+			});
+		});
+		/**
+		 * 表单验证
+		 */
+		form.verify({
+			name: function (value) {
+				if (value == '') {
+					return'银行开户名不能为空';
+				}
+			},
+			no: function (value) {
+				if (value == '') {
+					return'银行账户不能为空';
+				}
+			},
+			bank_name: function (value) {
+				if (value == '') {
+					return'开户名称不能为空';
+				}
+			},
+			bank_address: function (value) {
+				if (value == '') {
+					return'开户地址不能为空';
+				}
+			}
+		});
+	});
+</script>
+{/block}

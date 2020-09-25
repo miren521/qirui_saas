@@ -1,0 +1,94 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.layui-form-switch{margin-top: 0;}
+	.layui-card-body{display: flex;justify-content: space-between;align-items: center;}
+	.layui-card-body p{color: #666666;}
+	.ns-btn-box{flex-shrink: 0;margin-left: 20px;}
+	.ns-btn-box a{cursor: pointer;}
+	.ns-card-common:first-child{margin-top: 0;}
+	.ns-card-common{border: 1px solid #f1f1f1;}
+
+	.ns-wechat-circle {width: 100%;}
+	.ns-wechat-wrap {width: 100%;}
+	.ns-wechat-circle-wrap {width: 1000px; margin: 50px auto; display: flex; justify-content: center; align-items: center;}
+	.ns-wechat-circle-wrap>div:first-child {margin-right: 50px;}
+	.ns-wechat-circle-intro {width: 360px;}
+	.ns-wechat-circle-intro h1 {font-size: 26px; font-weight: 600; color: #333333; line-height: 40px;}
+	.ns-wechat-circle-intro p {font-size: 16px; color: #858585; line-height: 28px; margin-top: 20px;}
+	.ns-wechat-circle-img {width: 360px;}
+	.ns-wechat-circle-img img {width: 100%;}
+</style>
+{/block}
+{block name="main"}
+
+<div class="layui-form">
+	<div class="layui-card ns-card-common">
+		<div class="layui-card-header">
+			<span class="ns-card-title">微信圈子</span>
+			<input type="checkbox" name="isUse" lay-skin="switch" {if $config.is_use == 1} checked {/if}  lay-filter="isUse"/>
+		</div>
+		<div class="layui-card-body">
+			<p>启用后，可以将商品分享到微信圈子。</p>
+			<!-- <p>好物圈是微信提供的服务信息管理和物品推荐工具。用户可以在这里浏览朋友推荐的物品，与朋友交流心得，还可以为朋友进行推荐。</p> -->
+		</div>
+	</div>
+</div>
+
+<div class="ns-wechat-circle">
+	<div class="ns-wechat-wrap">
+		<!-- <div class="ns-wechat-circle-wrap">
+			<div class="ns-wechat-circle-intro">
+				<h1>扫一扫识物</h1>
+				<h1>直接曝光好物圈商品</h1>
+				<p>商家开启好物圈后，用户同步至好物圈的商品，可以通过“微信扫一扫”-识物功能直接曝光展示。</p>
+			</div>
+			<div class="ns-wechat-circle-img">
+				<img src="CIRCLE_IMG/1.png" />
+			</div>
+		</div> -->
+		
+		<div class="ns-wechat-circle-wrap">
+			<div class="ns-wechat-circle-intro">
+				<h1>好物分享</h1>
+				<p>商家开启好物圈之后，用户可以将商品分享到好物圈。</p>
+			</div>
+			<div class="ns-wechat-circle-img">
+				<img src="CIRCLE_IMG/1.png" />
+			</div>
+		</div>
+		
+		<div class="ns-wechat-circle-wrap">
+			<div class="ns-wechat-circle-img">
+				<img src="CIRCLE_IMG/2.png" />
+			</div>
+			<div class="ns-wechat-circle-intro">
+				<h1>搜索商品</h1>
+				<p>开启好物圈，可搜索到商家发布在好物圈的商品，点击进入详情即可通过商品链接进入小程序</p>
+			</div>
+		</div>
+	</div>
+</div>
+
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form'], function() {
+		var form = layui.form;
+
+		form.on('switch(isUse)', function(data){
+		  	$.ajax({
+				type: 'POST',
+				url: ns.url("goodscircle://admin/config/index"),
+				data: {
+					is_use: $('[name="isUse"]').is(':checked') ? 1 : 0
+				},
+				dataType: 'JSON',
+				success: function (res) {
+					layer.msg(res.message);
+				}
+			});
+		});  		
+	});
+</script>
+{/block}

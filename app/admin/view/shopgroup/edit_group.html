@@ -1,0 +1,271 @@
+{extend name="base"/}
+{block name="resources"}
+<style type="text/css">
+	.tree-line{padding:10px 0;background:#ededed;margin-bottom:2px;line-height: 1.8;}
+	.tree-line .layui-form{padding-left: 10px !important;}
+	.tree-line .layui-form-checkbox{margin:0 10px !important;vertical-align:middle;}
+	.ns-form {margin-top: 0;}
+	.ns-item-block-hover-a {cursor: pointer;}
+	.ns-input-box {position: absolute; right: 0; top: 50%; transform: translateY(-50%);}
+	.layui-form-item .layui-form-checkbox[lay-skin=primary] {margin-top: 0;}
+	.ns-item-content-desc{display:inline-block;white-space:nowrap;width:100%;overflow:hidden;text-overflow:ellipsis}
+
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>套餐名称：</label>
+		<div class="layui-input-block">
+			<input name="group_name" type="text" lay-verify="required" class="layui-input ns-len-long" value="{$group_info.data.group_name}" autocomplete="off">
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否自营：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="is_own" value="1" lay-skin="switch" {if condition="$group_info.data.is_own == 1"}checked{/if} >
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">年费：</label>
+		<div class="layui-input-block">
+			<div class="layui-input-inline">
+				<input type="number" name="fee" value="{$group_info.data.fee}" lay-verify="flo" autocomplete="off" class="layui-input ns-len-short" autocomplete="off">
+			</div>
+			<span class="layui-form-mid">元</span>
+		</div>
+		<div class="ns-word-aux">
+			<p>年费不能小于0，可保留两位小数</p>
+		</div>
+	</div>
+	
+	<div class="layui-form-item layui-form-text">
+		<label class="layui-form-label">描述：</label>
+		<div class="layui-input-block">
+			<textarea name="remark" class="layui-textarea ns-len-long">{$group_info.data.remark}</textarea>
+		</div>
+	</div>
+	
+	<div class="layui-form-item layui-form-text" id="promotion_list">
+		<div id="promotion">
+			<label class="layui-form-label">店铺营销：</label>
+			<div class="layui-input-block">
+				<div class="site_list ns-item-block-parent ns-item-five">
+					{foreach $promotions as $promotion}
+					{if  condition="$promotion['show_type'] eq 'shop'"}
+					<a class="ns-item-block ns-item-block-hover-a">
+						<div class="ns-item-block-wrap">
+							<div class="ns-item-pic">
+								<img src="{:img($promotion['icon'])}" />
+							</div>
+							<div class="ns-item-con">
+								<div class="ns-item-content-title">{$promotion['title']}</div>
+								<p class="ns-item-content-desc">{$promotion['description']}</p>
+							</div>
+						</div>
+
+						<div class="ns-input-box">
+							<input type="checkbox" {if condition="$promotion['is_checked']"} checked {/if} value="{$promotion['name']}" class="ns-input-checkbox" lay-filter="is_checked" lay-skin="primary">
+						</div>
+					</a>
+					{/if}
+					{/foreach}
+				</div>
+			</div>
+		</div>
+		
+		<div id = "admin">
+			<label class="layui-form-label">平台推广：</label>
+			<div class="layui-input-block">
+				<div class="site_list ns-item-block-parent ns-item-five">
+					{foreach $promotions as $promotion}
+					{if  condition="$promotion['show_type'] eq 'admin'"}
+					<a class="ns-item-block ns-item-block-hover-a">
+						<div class="ns-item-block-wrap">
+							<div class="ns-item-pic">
+								<img src="{:img($promotion['icon'])}" />
+							</div>
+							<div class="ns-item-con">
+								<div class="ns-item-content-title">{$promotion['title']}</div>
+								<p class="ns-item-content-desc">{$promotion['description']}</p>
+							</div>
+						</div>
+
+						<div class="ns-input-box">
+							<input type="checkbox" {if condition="$promotion['is_checked']"} checked {/if} value="{$promotion['name']}" class="ns-input-checkbox" lay-filter="is_checked" lay-skin="primary">
+						</div>
+					</a>
+					{/if}
+					{/foreach}
+				</div>
+			</div>
+		</div>
+		
+		<div id="member">
+			<label class="layui-form-label">会员互动：</label>
+			<div class="layui-input-block">
+				<div class="site_list ns-item-block-parent ns-item-five">
+					{foreach $promotions as $promotion}
+					{if  condition="$promotion['show_type'] eq 'member'"}
+					<a class="ns-item-block ns-item-block-hover-a">
+						<div class="ns-item-block-wrap">
+							<div class="ns-item-pic">
+								<img src="{:img($promotion['icon'])}" />
+							</div>
+							<div class="ns-item-con">
+								<div class="ns-item-content-title">{$promotion['title']}</div>
+								<p class="ns-item-content-desc">{$promotion['description']}</p>
+							</div>
+						</div>
+
+						<div class="ns-input-box">
+							<input type="checkbox" {if condition="$promotion['is_checked']"} checked {/if} value="{$promotion['name']}" class="ns-input-checkbox" lay-filter="is_checked" lay-skin="primary">
+						</div>
+					</a>
+					{/if}
+					{/foreach}
+				</div>
+			</div>
+		</div>
+		
+		<div id="tool">
+			<label class="layui-form-label">应用工具：</label>
+			<div class="layui-input-block">
+				<div class="site_list ns-item-block-parent ns-item-five">
+					{foreach $promotions as $promotion}
+					{if  condition="$promotion['show_type'] eq 'tool'"}
+					<a class="ns-item-block ns-item-block-hover-a">
+						<div class="ns-item-block-wrap">
+							<div class="ns-item-pic">
+								<img src="{:img($promotion['icon'])}" />
+							</div>
+							<div class="ns-item-con">
+								<div class="ns-item-content-title">{$promotion['title']}</div>
+								<p class="ns-item-content-desc">{$promotion['description']}</p>
+							</div>
+						</div>
+
+						<div class="ns-input-box">
+							<input type="checkbox" {if condition="$promotion['is_checked']"} checked {/if} value="{$promotion['name']}" class="ns-input-checkbox" lay-filter="is_checked" lay-skin="primary">
+						</div>
+					</a>
+					{/if}
+					{/foreach}
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="ns-form-row">
+		<button class="layui-btn  ns-bg-color " lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+
+	<input name="group_id" type="text"  class="layui-input layui-hide" value="{$group_info.data.group_id}">
+</div>
+{/block}
+{block name="script"}
+<script>
+	var promotion_items = $("#promotion a").length,
+			extend_items = $("#admin a").length,
+			tool_item = $('#tool a').length,
+			interaction_items = $("#member a").length;
+	if (promotion_items == 0) {
+		$("#promotion").hide();
+	}
+	if (extend_items == 0) {
+		$("#admin").hide();
+	}
+	if (interaction_items == 0) {
+		$("#member").hide();
+	}
+	if (tool_item == 0) {
+		$("#tool").hide();
+	}
+    layui.use('form', function() {
+        var form = layui.form,
+			repeat_flag = false;//防重复标识
+		form.render();
+
+		$(".ns-item-block").each(function() {
+			var checkCon = $(this).find(".ns-input-checkbox");
+			
+			$(this).click(function() {
+				if ($(checkCon).is(':checked')) {
+					$(this).find(".layui-form-checkbox").removeClass("layui-form-checked");
+					$(checkCon).prop("checked", false);
+				} else {
+					$(this).find(".layui-form-checkbox").addClass("layui-form-checked");
+					$(checkCon).prop("checked", true);
+				}
+			})
+			
+			form.on("checkbox(is_checked)", function(data) {
+				$(data.elem).parents(".ns-item-block").click();
+			})
+		})
+		
+        form.on('submit(save)', function (data) {
+			if (repeat_flag) return;
+            repeat_flag = true;
+
+			var obj = $("#promotion_list input:checked");
+			var addon_array = [];
+			for (var i = 0; i < obj.length; i++) {
+				addon_array.push(obj.eq(i).val());
+			}
+			data.field.addon_array = addon_array.toString();
+	        
+            $.ajax({
+                url: ns.url("admin/shopgroup/editgroup"),
+                data: data.field,
+                type: "POST",
+                dataType: "JSON",
+                success: function (res) {
+					repeat_flag = false;
+
+					if (res.code == 0) {
+						layer.confirm('编辑成功', {
+							title:'操作提示',
+							btn: ['返回列表', '继续操作'],
+							yes: function(){
+								location.href = ns.url("admin/shopgroup/lists")
+							},
+							btn2: function() {
+								location.reload();
+							}
+						})
+					}else{
+						layer.msg(res.message);
+					}
+                }
+            });
+        });
+
+		//表单验证
+        form.verify({
+			flo: function (value) {
+				if (value == '') {
+					return;
+				}
+				if (value < 0) {
+					return '年费不能小于0！';
+				}
+				var arrMen = value.split(".");
+				var val = 0;
+				if (arrMen.length == 2) {
+					val = arrMen[1];
+				}
+				if (val.length > 2) {
+					return '年费最多可保留两位小数！'
+				}
+			}
+        });
+    });
+
+	function back(){
+		location.href = ns.url('admin/shopgroup/lists');
+	}
+</script>
+{/block}

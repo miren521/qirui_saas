@@ -1,0 +1,445 @@
+@CHARSET "UTF-8";
+
+.layui-tab-content {
+    padding: 10px 0 30px;
+}
+
+/*商品分类弹出框*/
+.category-list {
+    overflow: hidden;
+}
+
+.category-list .item {
+    position: relative;
+    float: left;
+    border: 1px solid #cccccc;
+    background: #fff;
+    width: 32.2%;
+    height: 345px;
+    margin: 0 0.5%;
+    overflow-y: auto;
+}
+
+.category-list .item:last-child {
+    margin-right: 0;
+}
+
+.category-list .item li {
+    padding: 10px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.category-list .item li .category-name {
+    display: inline-block;
+    margin-left: 4px;
+    white-space: nowrap;
+    width: 210px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.category-list .item li .right-arrow {
+    float: right;
+}
+
+.selected-category-wrap {
+    padding: 10px;
+    border-bottom: 1px solid #cccccc;
+}
+
+/*底部按钮*/
+.fixed-btn {
+    width: 100%;
+    text-align: center;
+    /* position: fixed;
+    bottom: 0;
+    margin: 0 0 0 -15px !important;
+    background: #F9F9F9;
+    line-height: 60px;
+    z-index: 1000;
+    border-top: 1px solid #e5e5e5; */
+}
+
+.fixed-btn > button {
+    vertical-align: middle;
+}
+
+.fixed-btn > button:first-child, .fixed-btn > button:nth-child(2) {
+    display: none;
+}
+
+input[disabled] {
+    cursor: not-allowed;
+}
+
+.spec-edit-list {
+    margin-bottom: 10px;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -moz-user-select: none
+}
+
+.spec-edit-list .spec-item {
+    border: 1px dotted transparent;
+    padding: 10px;
+    position: relative;
+}
+
+.spec-edit-list .spec-item .layui-form-item:last-child {
+    margin-bottom: 0;
+}
+
+.spec-edit-list .spec-item:hover {
+    border-color: #9E9E9E;
+    cursor: move;
+}
+
+.spec-edit-list .spec-item .spec-value ul {
+    margin-bottom: 10px;
+}
+
+.spec-edit-list .spec-item .spec-value ul li {
+    display: inline-block;
+    line-height: 30px;
+    height: 30px;
+    padding: 0 15px;
+    border-radius: 2px;
+    border: 1px solid #e9e9e9;
+    background: #f7f7f7;
+    font-size: 12px;
+    /*transition: all 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86);*/
+    vertical-align: middle;
+    opacity: 1;
+    margin: 4px 8px 4px 0;
+    cursor: pointer;
+    position: relative;
+}
+
+.spec-edit-list .spec-item .spec-value ul li .img-wrap {
+    display: inline-block;
+    margin-right: 5px;
+    vertical-align: middle;
+    width: 25px;
+    overflow: hidden;
+    height: 25px;
+    line-height: 25px;
+}
+
+.spec-edit-list .spec-item .spec-value ul li .img-wrap img {
+    max-width: 100%;
+}
+
+.spec-edit-list .spec-item .spec-value ul li span {
+    vertical-align: middle;
+}
+
+.spec-edit-list .spec-item .spec-value ul li i {
+    font-size: 12px;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    text-align: center;
+    color: #fff;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    display: none;
+}
+
+.spec-edit-list .spec-item .spec-value ul li:hover i {
+    display: block;
+}
+
+.spec-edit-list .spec-item .spec-value > a {
+    /*font-size: 12px;*/
+}
+
+.spec-edit-list .spec-item .layui-icon-close {
+    font-size: 12px;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    text-align: center;
+    color: #fff;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+
+.spec-edit-list .spec-item .add-spec-value-popup {
+    position: absolute;
+    z-index: 10;
+    cursor: auto;
+    left: -15px;
+    top: 35px;
+    background-color: #fff;
+    border-radius: 2px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    display: none;
+}
+
+.spec-edit-list .layui-unselect.layui-form-select {
+    display: none;
+}
+
+/*批量操作*/
+.batch-operation-sku {
+    display: none;
+}
+
+.batch-operation-sku span {
+    margin-right: 10px;
+    display: inline-block;
+    height: 34px;
+    line-height: 34px;
+    cursor: pointer;
+}
+
+.batch-operation-sku input {
+    display: inline-block;
+}
+
+.batch-operation-sku input, .batch-operation-sku button {
+    display: none;
+}
+
+.sku-table {
+    display: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -moz-user-select: none
+}
+
+.sku-table .layui-input-block .img-wrap {
+    display: inline-block;
+    position: relative;
+    margin: 8px;
+    border: 1px solid #e5e5e5;
+}
+
+.sku-table .layui-input-block .img-wrap a {
+    display: block;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.sku-table .layui-input-block .img-wrap a img {
+    width: 100%;
+}
+
+.sku-table .layui-input-block .img-wrap .operation {
+    position: absolute;
+    top: 0;
+    z-index: 10;
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    cursor: pointer;
+    line-height: 50px;
+    text-align: center;
+    display: none;
+}
+
+.sku-table .layui-input-block .img-wrap:hover .operation {
+    display: block;
+}
+
+.sku-table .layui-input-block .img-wrap .operation i {
+    font-size: 20px;
+}
+
+.sku-table .layui-input-block .upload-sku-img {
+    border: 1px dashed #d9d9d9;
+    width: 50px;
+    height: 50px;
+    border-radius: 2px;
+    background-color: #fbfbfb;
+    text-align: center;
+    cursor: pointer;
+    margin: 8px;
+    display: inline-block;
+    padding: 15px 0;
+    box-sizing: border-box;
+}
+
+.js-shipping-template {
+    display: none;
+}
+
+.js-goods-image {
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.goods-image-wrap .item {
+    overflow: hidden;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    display: inline-block;
+}
+
+.goods-image-wrap .item, .goods-image-wrap .item.empty {
+    display: block;
+    float: left;
+    width: 148px;
+    height: 148px;
+    position: relative;
+    border: 1px solid #e5e5e5;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.goods-image-wrap .item.empty {
+    background: url("../img/goods_empty.gif");
+    background-size: 100%;
+}
+
+.goods-image-wrap .item .img-wrap {
+    width: 150px;
+    line-height: 150px;
+}
+
+.goods-image-wrap .item .img-wrap img {
+    width: 100%;
+    height: 100%;
+}
+
+.goods-image-wrap .item .operation {
+    position: absolute;
+    top: 0;
+    z-index: 10;
+    width: 150px;
+    height: 150px;
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    cursor: pointer;
+    line-height: 150px;
+    text-align: center;
+    display: none;
+}
+
+.goods-image-wrap .item:hover .operation {
+    display: block;
+}
+
+.goods-image-wrap .item .operation i {
+    font-size: 30px;
+    margin-right: 15px;
+}
+
+.goods-image-wrap .item .operation i:last-child {
+    margin-right: 0;
+}
+
+.layui-word-aux {
+    font-size: 12px;
+}
+
+.video-thumb {
+    display: block;
+    float: left;
+    width: 290px;
+    height: 170px;
+    position: relative;
+}
+
+.video-thumb > #my-video {
+    width: 100%;
+    height: 171px;
+    background: #ffffff;
+}
+
+.file-title {
+    font-size: 12px;
+}
+
+.file-title > div {
+    margin-top: 10px;
+}
+
+.file-title ul {
+    color: #FF6600;
+}
+
+.js-attr-list {
+    display: none;
+}
+
+/* 展示视频 */
+.video-thumb {
+    display: block !important;
+    float: left;
+    width: 290px !important;
+    height: 170px !important;
+    position: relative;
+}
+
+.video-thumb span {
+    width: 10px;
+    height: 10px;
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background-image: url('../img/video_thumb_close.png');
+    background-size: 100%;
+    z-index: 100;
+}
+
+.video-thumb span.hide {
+    display: none;
+}
+
+.video-thumb > #goods_video {
+    width: 100% !important;
+    height: 171px;
+    background: #ffffff;
+}
+
+.js-more-spec {
+    display: none;
+}
+
+.js-goods-shop-category .layui-form-select {
+    margin-bottom: 10px;
+}
+
+.js-goods-shop-category .layui-form-select:last-child {
+    margin-bottom: 0;
+}
+
+.js-goods-shop-category .item {
+    position: relative;
+}
+
+.js-goods-shop-category .item .layui-icon-close {
+    font-size: 12px;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    text-align: center;
+    color: #fff;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}

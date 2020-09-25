@@ -1,0 +1,191 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<style>
+.progress-layer {width:400px;background:#fff;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:1px 1px 50px rgba(0,0,0,.3);padding:20px 20px;z-index:100;display:none;}
+.progress-layer h3 {line-height:1;margin-bottom:15px;text-align:center;font-size:14px;}
+.progress-layer .layui-progress-big,.progress-layer .layui-progress-big .layui-progress-bar {height:14px;line-height:14px;}
+.progress-layer .layui-progress-text {line-height:14px;}
+.room-info {padding: 5px 0;align-items: center;flex-wrap:unset!important;}
+.room-info .room-name {padding-left: 5px;line-height: 1}
+.room-info img {width:50px;height: 50px;}
+.ns-single-filter-box{justify-content: end}
+.push-layer{text-align: center;padding: 30px 0;}
+.push-layer .qrcode{width:100px;height:100px;margin:10px auto;display:block}
+</style>
+{/block}
+
+{block name="main"}
+<div class="ns-single-filter-box">
+	<a href="{:addon_url('live://shop/room/add')}" class="layui-btn layui-btn-primary">添加直播间</a>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="room_list_tab">
+	<ul class="layui-tab-title">
+		<li class="layui-this" lay-id="">全部</li>
+		{foreach $status_list as $status_key => $status_v}
+			<li data-status="{$status_key}" data-type="live_status">{$status_v}</li>
+		{/foreach}
+	</ul>
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="room_list" lay-filter="room_list"></table>
+	</div>
+</div>
+
+
+
+<!-- 直播间信息 -->
+<script type="text/html" id="roominfo">
+	<div class="ns-table-btn room-info">
+		<img src="{{ ns.img(d.share_img) }}">
+		<span class="room-name" title="{{ d.name }}">{{ d.name }}</span>
+	</div>
+</script>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+
+		{{#  if( d.audit_status == '1' ){ }}
+			<a class="layui-btn" lay-event="operate">运营</a>
+			{{#  if( d.live_status == '102' ){ }}
+				<a class="layui-btn" lay-event="push">推流入口</a>
+			{{#  } }}
+		{{#  } }}
+		{{#  if( d.audit_status == '-1' || d.audit_status == '0' ){ }}
+			<a class="layui-btn" lay-event="edit">编辑</a>
+		{{#  } }}
+	</div>
+</script>
+
+
+<script type="text/html" id="push">
+	<div class="push-layer">
+		<img src="LIVE_IMG/weapp_push.png" class="qrcode">
+		<p>主播可通过微信扫该小程序码或搜一搜“小程序直播”进入主播小程序进行推流</p>
+	</div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+		var form,table,element = false;
+	layui.use(['form', 'element'], function() {
+		form = layui.form;
+		element = layui.element;
+		
+		table = new Table({
+			elem: '#room_list',
+			url: ns.url("live://shop/room/index"),
+			cols: [
+				[{
+					title: '直播间信息',
+					unresize: 'false',
+					width: '20%',
+					templet: "#roominfo"
+				}, {
+					field: 'roomid',
+					title: '直播间ID',
+					unresize: 'false',
+					width: '8%'
+				}, {
+					field: 'anchor_name',
+					title: '主播昵称',
+					unresize: 'false',
+					width: '8%'
+				}, {
+					field: 'start_time',
+					title: '开播时间',
+					unresize: 'false',
+					width: '12%',
+					templet: function(data) {
+						return ns.time_to_date(data.start_time);
+					}
+				}, {
+					field: 'end_time',
+					title: '结束时间',
+					unresize: 'false',
+					width: '12%',
+					templet: function(data) {
+						return ns.time_to_date(data.end_time);
+					}
+				}, {
+					title: '商品数量',
+					unresize: 'false',
+					width: '10%',
+					templet: function(data) {
+						return data.goods.length;
+					}
+				}, {
+					field: 'status_name',
+					title: '状态',
+					unresize: 'false',
+					width: '10%',
+				}, {
+					field: 'audit_status_name',
+					title: '审核状态',
+					unresize: 'false',
+					width: '10%',
+					templet: function(data) {
+						switch (data.audit_status) {
+							case 0:
+								return '审核中';
+								break;
+							case 1:
+								return '已审核';
+								break;
+							case -1:
+								return '已拒绝';
+								break;
+						}
+
+					}
+				}, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width: '10%'
+				}]
+			]
+		});
+
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'operate': // 运营
+					location.href = ns.url("live://shop/room/operate", {"id": data.id});
+					break;
+				case 'edit': // 运营
+					location.href = ns.url("live://shop/room/edit", {"id": data.id});
+					break;
+				case 'push':
+					layer.open({
+					  	type: 1,
+					  	title: false,
+					  	skin: 'weapp-preview',
+					  	closeBtn: 1, //不显示关闭按钮
+					  	anim: 0,
+					  	shadeClose: false,
+					  	content: $('#push').html()
+					});
+					break;
+			}
+		})
+
+
+		element.on('tab(room_list_tab)', function () {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: {
+					'status': this.getAttribute('data-status')
+				}
+			});
+
+		});
+	});
+
+
+</script>
+{/block}

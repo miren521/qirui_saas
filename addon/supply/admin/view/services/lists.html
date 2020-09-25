@@ -1,0 +1,298 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>列表为站点服务申请加入各项服务记录</li>
+			<li>当站点提出的申请记录状态为“待审核”的时候，可以编辑申请；否则只能查看详情。</li>
+		</ul>
+	</div>
+</div>
+
+<div class="ns-screen layui-collapse" lay-filter="selection_panel">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">筛选</h2>
+		<form class="layui-colla-content layui-form layui-show">
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">服务类型：</label>
+					<div class="layui-input-inline">
+						<select name="service_type" lay-filter="service_type">
+							<option value="">全部</option>
+							{foreach $service_name_arr as $value}
+							<option value="{$value.key}">{$value.name}</option>
+							{/foreach}
+						</select>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">申请状态：</label>
+					<div class="layui-input-inline">
+						<select name="status" lay-filter="status">
+							<option value="">全部</option>
+							{foreach $service_status_arr as $list_k => $list_v}
+							<option value="{$list_k}">{$list_v}</option>
+							{/foreach}
+						</select>
+					</div>
+				</div>
+				
+				<div class="layui-inline">
+					<label class="layui-form-label">服务/站点名称：</label>
+					<div class="layui-input-inline ns-len-mid">
+						<input type="text" id="search_text" name="search_text" placeholder="服务名称/站点名称" autocomplete="off" class="layui-input">
+					</div>
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">申请时间：</label>
+					<div class="layui-input-inline">
+					    <input type="text" class="layui-input" name="start_time"  id="start_time" autocomplete="off" placeholder="开始时间" readonly>
+						<i class="ns-calendar"></i>
+					</div>
+					<div class="layui-form-mid">-</div>
+					<div class="layui-input-inline">
+					    <input type="text" class="layui-input" name="end_time" id="end_time" autocomplete="off" placeholder="结束时间" readonly>
+						<i class="ns-calendar"></i>
+					</div>
+				</div>
+			</div>
+			
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="search">筛选</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- 列表 -->
+<div class="layui-tab ns-table-tab" lay-filter="reopen_list_tab">
+	<ul class="layui-tab-title">
+		<li class="layui-this" data-status="">全部</li>
+		<li data-status="2" data-type="apply_state">待审核</li>
+		<li data-status="1" data-type="apply_state">审核通过</li>
+		<li data-status="-1" data-type="apply_state">审核拒绝</li>
+
+	</ul>
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="service_list" lay-filter="service_list"></table>
+	</div>
+</div>
+
+
+<!-- 工具栏操作 -->
+<script type="text/html" id="operation">
+	<div class="ns-table-btn">
+		{{#  if(d.status == 0){ }}
+		<a class="layui-btn" lay-event="detail">查看详情</a>
+		<a class="layui-btn" lay-event="pass">同意申请</a>
+		<a class="layui-btn" id="message" lay-event="refuse">拒绝申请</a>
+		{{#  } }}
+		{{#  if(d.status == -1){ }}
+		<a class="layui-btn" lay-event="detail">查看详情</a>
+		{{#  } }}
+		{{#  if(d.status == 1){ }}
+		<a class="layui-btn" lay-event="detail">查看详情</a>
+		{{#  } }}
+	</div>
+</script>
+
+<!-- 申请状态 -->
+<script type="text/html" id="service_status_name">
+	{{#  if(d.status == -1){ }}
+	<span style="color: gray">审核失败</span>
+	{{#  } }} 
+	{{#  if(d.status == 0){ }}
+	<span style="color: red">待审核</span>
+	{{#  } }} 
+	{{#  if(d.status == 1){ }}
+	<span style="color: green">审核通过</span>
+	{{#  } }} 
+</script>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'layer', 'laydate', 'element'], function() {
+		var form = layui.form,
+			layer = layui.layer,
+            element = layui.element,
+			laydate = layui.laydate;
+		form.render();
+
+		//渲染时间
+		laydate.render({
+			elem: '#start_time',
+			type: 'datetime'
+		});
+		
+		laydate.render({
+			elem: '#end_time',
+			type: 'datetime'
+		});
+
+        //监听Tab切换，以改变地址hash值
+        element.on('tab(reopen_list_tab)', function () {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: {
+                    'status': this.getAttribute('data-status')
+                }
+            });
+        });
+
+		/**
+		 * 表格加载
+		 */
+		table = new Table({
+			elem: '#service_list',
+			url: ns.url("supply://admin/services/lists"),
+			parseData: function(res) { //res 即为原始返回的数据
+				return {
+					"code": res.code, //解析接口状态
+					"msg": res.message, //解析提示文本
+					"count": res.data.count, //解析数据长度
+					"data": res.data.list //解析数据列表
+				};
+			},
+			cols: [
+				[ //表头
+					{
+						width: '1%',
+						unresize: 'false',
+					}, {
+						width: '13%',
+						field: 'service_type_name',
+						title: '服务名称',
+						unresize: 'false',
+					}, {
+						width: '15%',
+						field: 'site_name',
+						title: '供应商名称',
+						unresize: 'false',
+					}, {
+						width: '15%',
+						field: 'create_time',
+						title: '申请时间',
+						unresize: 'false',
+						templet: function(data) {
+							return ns.time_to_date(data.create_time);
+						},
+					}, {
+						width: '15%',
+						field: 'audit_time',
+						title: '通过时间',
+						unresize: 'false',
+						templet: function(data) {
+							if(data.audit_time == null){
+								return '';
+							}
+							return ns.time_to_date(data.audit_time);
+						},
+					}, {
+						width: '13%',
+						field: 'status',
+						title: '申请状态',
+						unresize: 'false',
+						templet: '#service_status_name',
+					}, {
+						width: '22%',
+						title: '操作',
+						toolbar: '#operation',
+						unresize: 'false'
+					}
+				]
+			]
+		});
+		
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+			return false;
+		});
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data,
+				event = obj.event;
+			switch (event){  
+				case 'pass':  //审核通过
+				layer.confirm('确定要通过申请吗?', function() {
+				$.ajax({
+						url: ns.url("supply://admin/services/pass"),
+						data: {
+							"apply_id":data.apply_id,
+						},
+						dataType: 'JSON', //服务器返回json格式数据
+						type: 'POST', //HTTP请求类型
+						success: function(res) {
+							layer.msg(res.message);
+							if (res.code == 0) {
+								table.reload();
+							}
+						}
+					});
+				});
+				break;
+				
+				case 'refuse':  //拒绝
+					/**
+					 * 拒绝理由弹窗
+					 */
+					layer.prompt({
+						formType: 2,
+						value: '',
+						title: '请输入拒绝理由',
+						area: ['300px', '100px'], //自定义文本域宽高
+						yes: function(index, layero){
+							var value = layero.find(".layui-layer-input").val();
+							if (value) {
+								$.ajax({
+									url: ns.url("supply://admin/services/reject"),
+									data: {
+										"apply_id":data.apply_id,
+										"reason":value
+									},
+									dataType: 'JSON', //服务器返回json格式数据
+									type: 'POST', //HTTP请求类型
+									success: function(res) {
+										layer.msg(res.message);
+										if (res.code == 0) {
+											table.reload();
+										}
+									}
+								});
+								layer.close(index);
+							} else {
+								layer.msg('请输入拒绝原因!', {icon: 5, anim: 6});
+								return;
+							}
+						}
+					});
+				
+				break;
+				case 'detail':  //查看详情
+				location.href = ns.url("supply://admin/services/detail?apply_id=" +data.apply_id)
+				
+			}
+		});
+		
+	});
+</script>
+{/block}

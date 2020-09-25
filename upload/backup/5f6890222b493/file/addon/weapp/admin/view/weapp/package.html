@@ -1,0 +1,140 @@
+{extend name="app/admin/view/base.html" /}
+
+{block name="resources"}
+{/block}
+
+{block name="main"}
+<table id="package_list" lay-filter="package_list"></table>
+
+<!-- 工具栏操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="download_com">下载完整包</a>
+		<a class="layui-btn" lay-event="download_up">下载更新包</a>
+	</div>
+</script>
+
+<script type="text/html" id="explain">
+	<div class="ns-table-btn" style="justify-content: center;">
+		{{# if(d.version_desc != ''){ }}
+		<a class="layui-btn" lay-event="explain">更新说明</a>
+		{{# } }}
+	</div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+var tabel;
+layui.use(['form'], function(){
+
+	table = new Table({
+		elem: '#package_list',
+		url: ns.url("weapp://admin/weapp/package"),
+		where: {
+			mark: '{$mark}'
+		},
+		parseData: function(res){ //res 即为原始返回的数据
+		    return {
+		      	"code": res.code, //解析接口状态
+		      	"msg": res.message, //解析提示文本
+		      	"count": res.data.length, //解析数据长度
+		      	"data": res.data //解析数据列表
+		    };
+	  	},
+		cols: [
+			[
+				{
+					field: 'version_name',
+					title: '小程序版本',
+					align: 'left'
+				},
+				{
+					field: 'version_release',
+					title: '版本号',
+					align: 'center'
+				},
+				{
+					title: '发布时间',
+					templet: function(d){
+				        return ns.time_to_date(d.create_time)
+			      	},
+					align: 'center'
+				},
+				{
+					field: 'template_no',
+					title: '更新说明',
+					align: 'center',
+					templet: '#explain',
+				},
+				{
+					title: '操作',
+					unresize: 'false',
+					toolbar: '#action'
+				}
+			]
+		]
+	});
+
+	table.tool(function(obj) {
+		var data = obj.data;
+		switch (obj.event) {
+			case 'download_com':
+				download('os', data.version_release);
+				break;
+			case 'download_up':
+				download('up', data.version_release);
+				break;
+			case 'explain':
+				layer.open({
+					area: ['350px', '500px'],
+	  				type: 1,
+				  	shade: false,
+				  	title: '更新说明',
+				  	content: '<pre class="explain">' + data.version_desc + '</pre>'
+				});		
+			break;
+		}
+	});
+})
+
+function download(type, release){
+	$.ajax({
+		url: "{:addon_url('weapp://admin/weapp/download')}",
+		type: 'POST',
+		dataType: 'JSON',
+		data: {
+			mark: '{$mark}', 
+			type: type, 
+			release: release
+		},
+		success: function(res){
+			if(res.code >= 0){
+				window.open(ns.url('weapp://admin/weapp/toDownload?token=' + res.data.token), '_blank')
+			}else if(res.code == "-1"){
+				layer.confirm(
+					res.message+", 是否去官网重新下载证书?", 
+					{
+				  		btn: ['确定','取消'] //按钮
+					}, 
+					function(){
+				  		location.href = 'https://www.niushop.com.cn';
+					}
+				);
+			}else if (res.code == "-1000"){
+				layer.confirm(
+					res.message+", 是否去官网升级小程序授权?", 
+					{
+				  		btn: ['确定','取消'] //按钮
+					}, 
+					function(){
+				  		location.href = 'https://www.niushop.com.cn';
+					}
+				);
+			}
+		}
+	})
+}
+</script>
+{/block}
+

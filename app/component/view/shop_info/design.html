@@ -1,0 +1,33 @@
+<nc-component v-bind:data="data[index]" class="shop-info">
+
+	<!-- 预览 -->
+	<template slot="preview">
+		
+		<div class="img-wrap">
+			<img src="STATIC_EXT/diyview/img/crack_figure.png"/>
+		</div>
+		<div class="info-wrap">
+			<h4 class="name" v-bind:style="{ color : nc.color }">店铺名称</h4>
+			<p class="score">综合评分：5&nbsp;&nbsp;粉丝数：998</p>
+		</div>
+		
+		<div class="operation ns-bg-color">关注</div>
+			
+	</template>
+
+	<!-- 编辑 -->
+	<template slot="edit">
+		<div @click.stop="">
+		<color v-bind:data="{ field : 'color' }"></color>
+		</div>
+	</template>
+	
+	<!-- 资源 -->
+	<template slot="resource">
+
+		<css src="{$resource_path}/shop_info/css/design.css"></css>
+		<js src="{$resource_path}/shop_info/js/design.js"></js>
+		
+	</template>
+	
+</nc-component>

@@ -1,0 +1,328 @@
+{extend name="addon/supply/supply/view/base.html"/}
+{block name="resources"}
+<style>
+    .ns-card-common:first-of-type{margin-top:0}
+    .layui-card-body{display:flex;padding-bottom:0!important;padding-right:50px!important;padding-left:50px!important;flex-wrap:wrap}
+    .layui-card-body .content{width:33.3%;display:flex;flex-direction:column;margin-bottom:30px;justify-content:center}
+    .layui-card-body .money{font-size:20px;color:#666;font-weight:700;margin-top:10px;max-width:250px}
+    .layui-card-body .subhead{font-size:12px;margin-left:3px;cursor:pointer}
+    .ns-single-filter-box{background-color:transparent}
+</style>
+
+{/block}
+{block name='main'}
+
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <div>
+            <span class="ns-card-title">提现金额</span>
+        </div>
+    </div>
+    <div class="layui-card-body">
+
+        <div class="content">
+            <p class="title">已提现(元)</p>
+            <p class="money">{$account_withdraw}</p>
+        </div>
+        <div class="content">
+            <p class="title">提现中(元)</p>
+            <p class="money">{$account_withdraw_apply}</p>
+        </div>
+    </div>
+</div>
+
+<!-- 筛选面板 -->
+<div class="ns-single-filter-box">
+    <div class="layui-form">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <input type="text" name="start_time" id="start_time" placeholder="开始时间" class="layui-input"
+                       autocomplete="off" readonly>
+                <i class="ns-calendar"></i>
+            </div>
+            <div class="layui-input-inline end-time">
+                <input type="text" name="end_time" id="end_time" placeholder="结束时间" class="layui-input"
+                       autocomplete="off" readonly>
+                <i class="ns-calendar"></i>
+            </div>
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="search">搜索</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="layui-tab ns-table-tab" lay-filter="goods_list_tab">
+
+    <div class="layui-tab-content">
+        <!-- 列表 -->
+        <table id="account_list" lay-filter="account_list"></table>
+    </div>
+</div>
+
+{/block}
+{block name="script"}
+
+<!--操作-->
+<script type="text/html" id="operation">
+    <div class="ns-table-btn">
+        <a class="layui-btn" lay-event="detail">查看</a>
+    </div>
+</script>
+<!--操作-->
+<script type="text/html" id="money">
+    <span style="color: red; padding-right: 30px;">￥{{ d.money }}</span>
+</script>
+
+<script>
+    var start_time, end_time;
+    layui.use(['element', 'laytpl', 'laydate', 'form'], function () {
+        var table,
+            form = layui.form,
+            laydate = layui.laydate,
+            element = layui.element,
+            laytpl = layui.laytpl;
+        form.render();
+
+        //监听Tab切换，以改变地址hash值
+        element.on('tab(goods_list_tab)', function () {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: {
+                    'status': this.getAttribute('data-status')
+                }
+            });
+        });
+
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time' //指定元素
+            , done: function (value, date, endDate) {
+                start_time = ns.date_to_time(value);
+
+            }
+        });
+        //结束时间
+        laydate.render({
+            elem: '#end_time' //指定元素
+            , done: function (value, date, endDate) {
+                end_time = ns.date_to_time(value);
+            }
+        });
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function (data) {
+            data.field.start_time = start_time;
+            data.field.end_time = end_time;
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+            return false;
+        });
+
+        var table = new Table({
+            elem: '#account_list',
+            url: ns.url("supply://supply/supplywithdraw/lists"),
+            cols: [
+                [{
+                    field: 'withdraw_no',
+                    title: '账单编号',
+                    unresize: 'false',
+                    width: '15%',
+                }, {
+                    field: 'money',
+                    title: '<span style="padding-right: 30px;">提现金额（元）</span>',
+                    unresize: 'false',
+                    width: '17%',
+                    align: 'right',
+                    templet: '#money'
+                }, {
+                    field: 'name',
+                    title: '姓名',
+                    unresize: 'false',
+                    width: '12%',
+                }, {
+                    field: 'mobile',
+                    title: '电话',
+                    unresize: 'false',
+                    width: '12%',
+
+                }, {
+                    title: '账户类型',
+                    unresize: 'false',
+                    width: '10%',
+                    templet: function (res) {
+                        return res.bank_type == 1 ? "银行" : "支付宝";
+                    }
+                }, {
+                    title: '状态',
+                    unresize: 'false',
+                    width: '10%',
+                    templet: function (res) {
+                        var str = '';
+                        if (res.status == 2) {
+                            str = '<span style="color:green;">已提现</span>';
+                        } else {
+                            str = '<span style="color:red;">提现中</span>';
+                        }
+                        return str;
+                    }
+                }, {
+                    field: 'apply_time',
+                    title: '时间',
+                    unresize: 'false',
+                    width: '16%',
+                    templet: function (res) {
+                        if (res.apply_time == 0) {
+                            return '--';
+                        } else {
+                            return ns.time_to_date(res.apply_time)
+                        }
+                    }
+                }, {
+                    title: '操作',
+                    unresize: 'false',
+                    width: '8%',
+                    templet: '#operation'
+                }]
+            ]
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function (obj) {
+            var data = obj.data,
+                event = obj.event;
+
+            switch (event) {
+                case 'detail': //查看
+                    withdrawDetail(data);
+                    break;
+            }
+        });
+
+        //详情
+        function withdrawDetail(data) {
+            console.log(data);
+            var detailHtml = $("#withdrawDetail").html();
+            laytpl(detailHtml).render(data, function (html) {
+                layer.open({
+                    type: 1,
+                    title: '提现详情',
+                    area: ['600px'],
+                    content: html
+
+                });
+            })
+        }
+
+    });
+
+
+    $(".withdrawal-record").click(function () {
+        location.href = ns.url("supply://supply/supplywithdraw/lists");
+    });
+
+</script>
+
+<script type="text/html" id="withdrawDetail">
+    <table class="layui-table">
+        <colgroup>
+            <col width="150">
+            <col width="200">
+        </colgroup>
+        <tbody>
+        <tr>
+            <td>供应商名称</td>
+            <td>{{d.site_name}}</td>
+        </tr>
+        <tr>
+            <td>联系人</td>
+            <td>{{d.name}}</td>
+        </tr>
+        <tr>
+            <td>联系电话</td>
+            <td>{{d.mobile}}</td>
+        </tr>
+        <tr>
+            <td>账户类型</td>
+            {{# if(d.bank_type == 1){ }}
+            <td>银行卡</td>
+            {{# }else{ }}
+            <td>支付宝</td>
+            {{# } }}
+        </tr>
+        {{# if(d.bank_type == 1){ }}
+        <tr>
+            <td>账户名称</td>
+            <td>{{d.settlement_bank_name}}</td>
+        </tr>
+        <tr>
+            <td>提现账号</td>
+            <td>{{d.settlement_bank_account_number}}</td>
+        </tr>
+        <tr>
+            <td>开户名</td>
+            <td>{{d.settlement_bank_account_name}}</td>
+        </tr>
+        {{# }else{ }}
+        <tr>
+            <td>支付宝用户名</td>
+            <td>{{d.settlement_bank_account_name}}</td>
+        </tr>
+        <tr>
+            <td>支付宝账号</td>
+            <td>{{d.settlement_bank_account_number}}</td>
+        </tr>
+        {{# } }}
+        <tr>
+            <td>提现金额</td>
+            <td>{{d.money}}元</td>
+        </tr>
+        <tr>
+            <td>状态</td>
+            {{# if(d.status == 0){ }}
+            <td>待审核</td>
+            {{# }else if(d.status == 1){ }}
+            <td>待转账</td>
+            {{# }else if(d.status == 2){ }}
+            <td>已转账</td>
+            {{# }else if(d.status == -1){ }}
+            <td>已拒绝</td>
+            {{# } }}
+        </tr>
+        <tr>
+            <td>申请时间</td>
+            <td>{{ ns.time_to_date(d.apply_time) }}</td>
+        </tr>
+        {{# if(d.status == 2){ }}
+        <tr>
+            <td>转账时间</td>
+            <td>{{ ns.time_to_date(d.payment_time) }}</td>
+        </tr>
+        <tr>
+            <td>转账凭证</td>
+            <td><img src="{{ ns.img(d.paying_money_certificate) }}" alt=""></td>
+        </tr>
+        <tr>
+            <td>转账凭证说明</td>
+            <td>{{ d.paying_money_certificate_explain }}</td>
+        </tr>
+        {{# } }}
+        <tr>
+            <td>备注</td>
+            <td>{{d.memo}}</td>
+        </tr>
+        </tbody>
+    </table>
+</script>
+
+{/block}

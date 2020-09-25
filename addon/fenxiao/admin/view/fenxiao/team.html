@@ -1,0 +1,129 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+
+</style>
+{/block}
+
+{block name="main"}
+
+
+<div class="layui-tab ns-table-tab" lay-filter="team_list_tab">
+    <ul class="layui-tab-title">
+        <li  class="layui-this" data-status="0" data-type="live_status">推荐会员</li>
+        <li data-status="1" data-type="live_status">一级分销</li>
+        <li data-status="2" data-type="live_status">二级分销</li>
+    </ul>
+    <div class="layui-tab-content">
+        <!-- 列表 -->
+        <table id="team_list" lay-filter="team_list"></table>
+    </div>
+</div>
+
+
+<!-- 用户信息 -->
+<script type="text/html" id="userdetail">
+    <div class='ns-table-tuwen-box'>
+        <div class='ns-img-box'>
+            <img layer-src src="{{ns.img(d.headimg)}}" onerror="this.src = 'ADMIN_IMG/default_headimg.png' ">
+        </div>
+        <div class='ns-font-box'>
+            <p class="layui-elip">{{d.nickname}}</p>
+        </div>
+    </div>
+</script>
+
+<!-- 工具栏操作 -->
+<script type="text/html" id="action">
+    <div class="ns-table-btn">
+        <a class="layui-btn" lay-event="detail">查看</a>
+    </div>
+</script>
+
+
+{/block}
+
+{block name="script"}
+<script>
+    var form,table,element = false;
+    layui.use(['form', 'element'], function() {
+        form = layui.form;
+        element = layui.element;
+        form.render();
+        table = new Table({
+            elem: '#team_list',
+            url: ns.url("fenxiao://admin/fenxiao/team"),
+            where:{fenxiao_id:"{$fenxiao_id}"},
+            cols: [
+                [ {
+                    field: 'userdetail',
+                    title: '账户信息',
+                    width: '18%',
+                    unresize: 'false',
+                    templet: '#userdetail'
+                },  {
+                    field: 'order_money',
+                    title: '消费额',
+                    width: '8%',
+                    unresize: 'false',
+                },  {
+                    field: 'order_num',
+                    title: '消费量',
+                    width: '8%',
+                    unresize: 'false',
+                },  {
+                    field: 'order_complete_money',
+                    title: '消费额(已完成)',
+                    width: '8%',
+                    unresize: 'false',
+                },  {
+                    field: 'order_complete_num',
+                    title: '消费量(已完成)',
+                    width: '8%',
+                    unresize: 'false',
+                }, {
+                    field: 'reg-login',
+                    title: '成为会员时间',
+                    width: '18%',
+                    unresize: 'false',
+                    templet: function (data) {
+                        return ns.time_to_date(data.reg_time);
+                    }
+                }, {
+                    title: '操作',
+                    width: '15%',
+                    unresize: 'false',
+                    toolbar: '#action'
+                }
+                ]
+            ]
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'detail': //编辑
+                    location.href = ns.url("admin/member/editmember?member_id=" + data.member_id);
+                    break;
+            }
+        });
+        element.on('tab(team_list_tab)', function () {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: {
+                    'level': this.getAttribute('data-status')
+                }
+            });
+
+        });
+
+    });
+
+
+</script>
+{/block}

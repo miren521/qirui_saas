@@ -1,0 +1,128 @@
+<!-- 调整价格模态 -->
+<script type="text/html" id="adjust_price_html">
+    <div style="padding:10px;">
+        <div class="layui-form adjust-price-html" id='adjust_price'lay-filter="adjust_price">
+            <div style="color: #666;">注意 : 只有订单未付款时才支持改价,改价后请联系买家刷新订单核实订单金额后再支付。</div>
+            <table class="layui-table">
+				<colgroup>
+					<col width="30%">
+					<col width="10%">
+					<col width="10%">
+					<col width="10%">
+					<col width="15%">
+					<col width="15%">
+					<col width="10%">
+				</colgroup>
+                <thead>
+                <tr>
+                    <th>商品信息</th>
+                    <th>单价</th>
+                    <th>数量</th>
+                    <th>小计</th>
+                    <th>调整金额</th>
+                    <th>运费</th>
+                    <th>总计</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {{#  layui.each(d.order_goods, function(index, item){ }}
+                        <tr>
+                            <td>{{ item.sku_name }}</td>
+                            <td>{{ item.price }}</td>
+                            <td>{{ item.num }}</td>
+                            <td>{{ item.goods_money }}</td>
+                            {{#  if(index == 0){ }}
+                                <td rowspan="{{ d.order_goods.length }}"><input type="number" name="adjust_money"  class="layui-input ns-len-small"value="{{ d.adjust_money }}"/></td>
+                                <td rowspan="{{ d.order_goods.length }}"><input type="number"  name="delivery_money"class="layui-input ns-len-small"value="{{ d.delivery_money }}"/></td>
+                                <td rowspan="{{ d.order_goods.length }}">{{ d.pay_money }}</td>
+                            {{#  } }}
+                        </tr>
+                    {{#  }); }}
+                </tbody>
+            </table>
+            <div style="color: #666;">实付金额 = 订单总额 + 调价 + 运费</div>
+
+            <input type="hidden" name="order_id" value="{{ d.order_id }}"/>
+            <button class="layui-btn"  lay-submit id="submit_price" lay-filter="submit_price" style="display:none;">保存</button>
+        </div>
+    </div>
+</script>
+<script>
+    var form;
+    /**
+     * 订单调价
+     */
+    function orderAdjustMoney(order_id) {
+        $.ajax({
+            type: "post",
+            url: ns.url("store://store/order/getOrderDetail"),
+            async: true,
+            dataType: 'json',
+            data: {
+                "order_id": order_id
+            },
+            success: function (res) {
+                if(res.code == 0){
+                    //获取模板
+                    var getTpl = $("#adjust_price_html").html();
+                    var data = res.data;
+                    //渲染模板
+                    laytpl(getTpl).render(data, function(html) {
+                        layer.open({
+                            type: 1,
+                            shadeClose: true,
+                            shade: 0.3,
+                            offset: 'auto',
+                            scrollbar: true,
+                            fixed: false,
+                            title: "调整价格",
+                            area: ['800px', 'auto'],
+                            btn: ['确定', '取消'],
+                            yes: function(index, layero){
+                                $("#submit_price").click();
+                            },
+                            btn2: function(index, layero){
+                                layer.close(index);
+                            },
+                            content:  html,
+                            cancel: function(){
+                                //右上角关闭回调
+                                //return false 开启该代码可禁止点击该按钮关闭
+                            },
+                            success: function(layero, index){
+                                var repeat_flag = false;//防重复标识
+                                form.render();
+
+                                form.on('submit(submit_price)', function(data){
+                                    if(repeat_flag)return;
+                                    repeat_flag = true;
+
+                                    $.ajax({
+                                        url: ns.url("store://store/order/adjustPrice"),
+                                        type: "POST",
+                                        dataType: "JSON",
+                                        async: false,
+                                        data: data.field,
+                                        success: function (res) {
+                                            layer.msg(res.message);
+                                            if(res.code == 0){
+                                                layer.closeAll();
+                                                location.reload();
+                                            }else{
+                                                repeat_flag = false;
+                                            }
+
+                                        }
+                                    })
+                                    return false;
+                                });
+                            }
+                        });
+                        form.render();
+                    });
+                }
+            }
+        })
+
+    }
+</script>

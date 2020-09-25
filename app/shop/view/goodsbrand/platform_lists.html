@@ -1,0 +1,103 @@
+{extend name="base"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>平台端品牌列表</li>
+			<li>商品类型可以关联平台的品牌用在前台搜索商品</li>
+		</ul>
+	</div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-function-search">
+	<div class="layui-form">
+		<div class="layui-input-inline  ns-len-mid">
+			<input type="text" name="search_keys" placeholder="请输入品牌名称" autocomplete="off" class="layui-input">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+				<i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- 列表 -->
+<table id="brand_list" lay-filter="brand_list"></table>
+
+<script type="text/html" id="image_url">
+	{{# if(d.image_url){ }}
+	<div class="ns-img-box">
+		<img layer-src src={{ns.img(d.image_url)}} >
+	</div>
+	{{# } }}
+</script>
+
+<!-- 编辑排序 -->
+<script type="text/html" id="editSort">
+	<input name="sort" type="number" value="{{d.sort}}" placeholder="请输入排序" class="layui-input edit-sort ns-sort-len">
+</script>
+{/block}
+{block name="script"}
+<script>
+	var form, table;
+	layui.use(['table', 'form'], function() {
+		form = layui.form;
+		form.render();
+		
+		table = new Table({
+			elem: '#brand_list',
+			url: ns.url("shop/goodsbrand/platformLists"),
+			cols: [
+				[
+					{
+						width: "3%",
+						type: 'checkbox',
+						unresize: 'false'
+					},
+					{
+						field: 'brand_name',
+						title: '品牌名称',
+						width: '48%',
+						unresize: 'false'
+					},
+					{
+						field: 'group_name',
+						title: '图片',
+						width: '17%',
+						unresize: 'false',
+						templet: "#image_url"
+					},
+					{
+						field: 'brand_initial',
+						title: '品牌首字母',
+						width: '20%',
+						unresize: 'false'
+					},
+					{
+						field: 'sort',
+						unresize: 'false',
+						title: '排序',
+						width: '12%',
+						align: 'center',
+					}
+				]
+			]
+		});
+		
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data){
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+	});
+</script>
+{/block}

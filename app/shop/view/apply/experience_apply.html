@@ -1,0 +1,191 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+    .apply-header{height: 80px;line-height: 80px;border-bottom: 1px solid #EFEFEF; position: fixed; top: 0; background: #fff; width: 100%; z-index: 999;}
+    .apply-header .apply-header-box{position: relative;display: flex;justify-content: space-between;align-items: center;width: 1200px;margin: auto;}
+    .apply-header .apply-header-title{color: #5D5D5D;}
+    .layui-nav .layui-nav-item a{max-width: 100px;}
+    .layui-nav .layui-nav-item a, .layui-nav .layui-nav-item a:hover{color: #5D5D5D;}
+    .apply-header .layui-nav{padding-left: 0;position:relative !important;height: 80px;background-color: transparent;}
+    .layui-nav .layui-nav-more{border-top-color: #5D5D5D;}
+    .layui-nav .layui-nav-mored{border-color: transparent transparent #5D5D5D;}
+    .phone{margin-left: auto;}
+    .apply-header .layui-nav .layui-nav-bar{width: 0 !important;}
+    .apply-body{margin: 120px 0;display: flex;justify-content: center;}
+    /* 入驻协议*/
+    .settlement-agreement{width: 960px;margin-bottom: 50px;}
+    .settlement-agreement h2:first-of-type{margin-bottom: 80px;height:34px;font-size:34px;font-weight:400;color:rgba(93,93,93,1);text-align: center;}
+    .settlement-agreement h2:nth-child(2){margin-bottom: 30px;height:20px;font-size:20px;font-weight:400;color:rgba(0,0,0,1);}
+    .settlement-agreement .apply-btn-box{margin-top: 30px;}
+    .settlement-agreement .agreement-foot{text-align: center;margin-top: 30px;}
+    .apply-btn-box{margin-top: 44px;text-align: center;}
+    h2.apply-h2-title{margin-bottom: 80px;height:34px;font-size:34px;font-weight:400;color:rgba(93,93,93,1);text-align: center;}
+    /* 开店成功*/
+    .shop-succeey{position: relative;width: 1200px;top: 0;bottom: 0;left: 0;right: 0;margin: auto;padding: 68px 0 0;text-align: center;}
+    .shop-succeey p{font-size: 16px;margin-top: 20px;}
+</style>
+{/block}
+{block name="body"}
+<div class="layui-layout layui-layout-admin">
+    <div class="apply-header">
+        <div class="apply-header-box">
+            <span class="apply-header-title">欢迎您，您可以申请入驻了！</span>
+            <span class="phone">联系电话：{$website_info['web_phone']} </span>
+            <ul class="layui-nav layui-layout-right">
+                <li class="layui-nav-item">
+                    <a href="javascript:;">{$userInfo.username}</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="{:url('shop/login/login')}">退出登录</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="apply-body">
+        <!-- 入驻协议 -->
+        <div class="settlement-agreement layui-form {if $status.data.site_id != 0}layui-hide{/if}">
+            <h2>签订入驻协议</h2>
+            <h2>{$shop_apply_agreement["data"]["title"]}</h2>
+            <div class="agreement-content">
+                {:html_entity_decode($shop_apply_agreement["data"]["content"])}
+            </div>
+            <div class="agreement-foot">
+                <input type="checkbox" title="我已阅读并同意以上协议" lay-skin="primary" lay-filter="apply_info">
+                <div class="apply-btn-box">
+                    <button class="ns-bg-color layui-btn apply-info">下一步，填写申请信息</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快速入驻 -->
+        <div class="layui-hide layui-form quickly-open-shop">
+            <h2 class="apply-h2-title">填写开店信息</h2>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>店铺名称：</label>
+                <div class="layui-input-inline">
+                    <input name="site_name" type="text" placeholder="请输入店铺名称" maxlength="10" lay-verify="required" class="layui-input ns-len-long">
+                </div>
+                <div class="ns-word-aux" style="color: #ff0000">注意：店铺名称注册后不可修改。</div>
+
+            </div>
+
+            {if $is_city == 1}
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>城市分站：</label>
+                <div class="layui-input-block ns-len-mid">
+                    <select name="website_id" lay-verify="required" lay-search="">
+                        <option value="" >请选择城市分站</option>
+                        {foreach $web_city as $key => $val}
+                        <option value="{$val.site_id}">{$val.site_area_name}</option>
+                        {/foreach}
+                    </select>
+                </div>
+                <div class="ns-word-aux" style="color: #ff0000">注意：城市分站注册后不可修改。</div>
+            </div>
+
+            {/if}
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>主营行业：</label>
+                <div class="layui-input-inline ns-len-mid">
+                    <select name="category_id" lay-verify="required" lay-search="" lay-filter="payment_category_id">
+                        <option value="" >请选择主营行业</option>
+                        {foreach $shop_category['data'] as $shop_category_key => $shop_category_val}
+                        <option value="{$shop_category_val['category_id']}">{$shop_category_val['category_name']}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <div class="apply-btn-box">
+                <button class="ns-bg-color layui-btn" lay-submit lay-filter="quickly_open_shop">快速入驻</button>
+            </div>
+        </div>
+        <!-- 入驻成功 -->
+        <div class="shop-succeey {if $status.data.site_id == 0}layui-hide{/if}">
+            <h2 class="apply-h2-title">开店成功</h2>
+            <img src="SHOP_IMG/apply/apply_succeed.png" alt="">
+            <p>恭喜您开店成功，快点击进入店铺，进行体验吧！</p>
+            <div class="apply-btn-box">
+                <button class="ns-bg-color layui-btn" onclick="shopSuccess()">进入店铺</button>
+            </div>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="script"}
+<script type="text/javascript">
+    var form,
+        agreementConsent = false;
+
+    layui.use("form",function () {
+        form = layui.form;
+
+		form.render();
+        /**
+         * 签订入驻协议
+         * */
+
+        //监听是否同意协议
+        form.on('checkbox(apply_info)', function(data){
+            agreementConsent = data.elem.checked;
+        });
+
+        $("body").on("click",".apply-info",function () {
+            if(agreementConsent){
+                //申请协议隐藏
+                $(".settlement-agreement").addClass("layui-hide");
+                $(".quickly-open-shop").removeClass("layui-hide");
+
+                //主流程
+                $(".apply-process ul li:nth-child(1) span.point").addClass("ns-bg-color");
+                $(".apply-process ul li:nth-child(2) span.content").addClass("ns-bg-color");
+                $(".apply-process ul li:nth-child(2) span.title").addClass("ns-text-color");
+            }else{
+                layer.msg("请先同意协议");
+            }
+        });
+
+        form.on('submit(quickly_open_shop)', function(data){
+            data.field.category_name = $("select[name=category_id] option:selected").text();
+
+            $.ajax({
+                url: ns.url("shop/apply/experienceApply"),
+                dataType: 'JSON',
+                type: 'POST',
+                data: data.field,
+                success : function(data) {
+                    console.log(data);
+                    layer.msg(data.message)
+                    if(data.code == 0){
+                        $(".apply-process ul li:nth-child(2) span.point").addClass("ns-bg-color");
+                        $(".apply-process ul li:nth-child(3) span.content").addClass("ns-bg-color");
+                        $(".apply-process ul li:nth-child(3) span.title").addClass("ns-text-color");
+                        $(".quickly-open-shop").addClass("layui-hide");
+                        $(".shop-succeey").removeClass("layui-hide");
+                    }
+                }
+            })
+        });
+    });
+
+    function shopSuccess (){
+        var userInfo = "{$userInfo.username}";
+        if (!userInfo){
+            location.href = ns.url("shop/login/login");
+            return false;
+        }
+        $.ajax({
+            url: ns.url("shop/apply/simulatedLogin"),
+            data: {"username": "{$userInfo.username}"},
+            dataType: 'JSON',
+            type: 'POST',
+            success : function(data) {
+
+                !data.code ? location.href = ns.url("shop/index/index") : layer.msg(data.message) ;
+            }
+        })
+    }
+
+
+</script>
+{/block}

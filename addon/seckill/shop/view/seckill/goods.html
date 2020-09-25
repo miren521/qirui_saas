@@ -1,0 +1,247 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>管理员可以在此页添加/删除参加限时秒杀活动的商品</li>
+			<li>秒杀价格为参与秒杀活动时的价格，可在列表页进行编辑</li>
+		</ul>
+	</div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<button class="layui-btn ns-bg-color" onclick="goods()" data-num="{$seckill_info.seckill_id}">添加商品</button>
+
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<input type="text" name="sku_name" placeholder="请输入商品名称" class="layui-input" autocomplete="off">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+			  <i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- 每个秒杀活动的ID -->
+<input type="hidden" value="{$seckill_info.seckill_id}" name="seckill_id" id="seckill_id" />
+
+<!-- 列表 -->
+<table id="good_list" lay-filter="good_list"></table>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="delete">删除商品</a>
+	</div>
+</script>
+
+<!-- 商品 -->
+<script type="text/html" id="goodIntro">
+	<div class="ns-table-title">
+		<div class="ns-title-pic">
+			{{#  if(d.sku_image){  }}
+			<img layer-src src="{{ns.img(d.sku_image.split(',')[0])}}"/>
+			{{#  }  }}
+		</div>
+		<div class="ns-title-content">
+			<a href="javascript:;" class="ns-multi-line-hiding ns-text-color">{{d.sku_name}}</a>
+		</div>
+	</div>
+</script>
+
+<!-- 编辑价格 -->
+<script type="text/html" id="editSort">
+	<input name="sort" type="number" onchange="editSort({{d.sku_id}}, this)" value="{{d.seckill_price}}" placeholder="请输入价格" class="layui-input edit-sort ns-len-short" autocomplete="off">
+</script>
+{/block}
+{block name="script"}
+<script>
+	var  form, table, laytpl,
+		repeat_flag = false, //防重复标识
+		selectedGoodsSkuId = [],
+		seckill_id =  $("#seckill_id").val();
+
+	layui.use(['form', 'laytpl'], function() {
+		form = layui.form;
+		laytpl = layui.laytpl;
+		form.render();
+
+		table = new Table({
+			elem: '#good_list',
+			url: '{:addon_url("seckill://shop/seckill/goods")}',
+			async : false,
+			where: {'seckill_id': seckill_id},
+			parseData: function(res) {
+				selectedGoodsSkuId = [];
+				for (var i in res.data.list) {
+					selectedGoodsSkuId.push(res.data.list[i].sku_id);
+				}
+				return {
+					"code": res.code,
+					"msg": res.message,
+					"count": res.data.count,
+					"data": res.data.list,
+				};
+			},
+			cols: [
+				[{
+					type: 'checkbox',
+					unresize: 'false',
+					width: '3%'
+				}, {
+					title: '商品',
+					unresize: 'false',
+					width: '35%',
+					templet: '#goodIntro'
+				}, {
+					field: 'price',
+					title: '商品价格',
+					unresize: 'false',
+					width: '14%',
+					align: 'right',
+					templet: function(data) {
+						return '￥<span class="goods-price">'+ data.price +'</span>'
+					}
+				}, {
+					unresize: 'false',
+					width: '3%'
+				}, {
+					field: 'seckill_price',
+					title: '秒杀价格(可编辑)',
+					unresize: 'false',
+					width: '14%',
+					templet: '#editSort'
+				}, {
+					field: 'discount_rate',
+					title: '折扣率(%)',
+					unresize: 'false',
+					width: '14%'
+				}, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width: '17%'
+				}]
+			]
+		});
+		
+		/**
+		 * 添加商品
+		 */
+		goods = function (){
+			goodsSelect(function (res) {
+				var sku_ids = [];
+				for(var i=0;i<res.length;i++) {
+					for (var k = 0; k < res[i].selected_sku_list.length; k++) {
+						sku_ids.push(res[i].selected_sku_list[k].sku_id);
+					}
+				}
+				$.ajax({
+					type: 'POST',
+					async: false,
+					url: '{:addon_url("seckill://shop/seckill/addGoods")}',
+					data: {
+						'sku_ids': sku_ids.toString(),
+						'seckill_id': seckill_id
+					},
+					dataType: 'JSON',
+					success: function(res) {
+						layer.msg(res.message);
+						table.reload();
+					}
+				});
+			},selectedGoodsSkuId, {mode: "sku",disabled:1});
+		};
+		
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+		
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'delete': //删除
+					delGoods(data.sku_id);
+					break;
+			}
+		});
+		
+		/**
+		 * 删除
+		 */
+		function delGoods(sku_id) {
+
+			if (repeat_flag) return false;
+			repeat_flag = true;
+
+			layer.confirm('确定要删除该商品吗?', function() {
+				$.ajax({
+					url: '{:addon_url("seckill://shop/seckill/deleteGoods")}',
+					data: {
+						"sku_id": sku_id,
+						"seckill_id": seckill_id
+					},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						layer.msg(res.message);
+						repeat_flag = false;
+
+						if (res.code == 0) {
+							table.reload();
+						}
+					}
+				});
+			}, function() {
+				layer.close();
+				repeat_flag = false;
+			});
+		}
+	});
+
+	// 监听单元格编辑
+	function editSort(id, event){
+		var data = $(event).val();
+		var goods_price = $(event).parents("tr").find(".goods-price").text();
+		if(data < 0){
+			layer.msg("折扣价格不能小于0");
+			return;
+		}
+		if (data > Number(goods_price)) {
+			layer.msg("折扣价格不能大于商品价格");
+			return;
+		}
+		$.ajax({
+			type: 'POST',
+			url: ns.url("seckill://shop/seckill/updateGoods"),
+			data: {
+				"sku_id": id,
+				"seckill_id": seckill_id,
+				"price": data
+			},
+			dataType: 'JSON',
+			success: function(res) {
+				layer.msg(res.message);
+				if(res.code==0){
+					table.reload();
+				}
+			}
+		});
+	}
+</script>
+{/block}

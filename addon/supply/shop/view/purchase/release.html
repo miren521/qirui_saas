@@ -1,0 +1,459 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/release.css">
+{/block}
+{block name="body"}
+<!-- 顶部html文件-->
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-order">
+			<div class="order-menu">
+				<ul class="layui-nav layui-nav-tree" lay-filter="test">
+					<li class="layui-nav-item layui-nav-itemed">
+						<a href="javascript:;">交易中心</a>
+						<dl class="layui-nav-child">
+							<dd><a href="{:addon_url('supply://shop/order/lists')}">我的订单</a></dd>
+                            <dd><a href="{:addon_url('supply://shop/orderrefund/lists')}">退款/售后</a></dd>
+                            <dd class="layui-this"><a href="{:addon_url('supply://shop/purchase/purchase')}">我的求购单</a></dd>
+						</dl>
+					</li>
+				</ul>
+			</div>
+			<div class="order-list">
+				<div class="order-list-title">发布求购单</div>
+
+                <div class="purchase-form-wrap layui-form">
+					<div class="layui-card ns-card-common ns-card-brief">
+                        <div class="layui-card-header">
+                            <span class="ns-card-title">求购产品</span>
+                        </div>
+                        <div class="layui-card-body">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label"><span class="required">*</span>求购单标题：</label>
+								<div class="layui-input-block">
+									<input type="text" name="title" lay-verify="required" autocomplete="off" class="layui-input ns-len-mid">
+								</div>
+							</div>
+							
+							<div class="layui-form-item">
+								<label class="layui-form-label"><span class="required">*</span>求购产品：</label>
+								<div class="layui-input-block">
+									<div class="layui-input-inline">
+										<input type="radio" name="type" value="1" lay-filter="goods_type" title="现货商品" checked />
+										<input type="radio" name="type" value="2" lay-filter="goods_type" title="定制商品" />
+									</div>
+								</div>
+							</div>
+							
+							<div class="layui-input-block ns-table-box">
+								<table class="layui-table" id="goods" lay-skin="line" lay-size="lg">
+									<colgroup>
+										<col width="40%">
+										<col width="20%">
+										<col width="15%">
+										<col width="15%">
+										<col width="10%">
+									</colgroup>
+									<thead>
+										<tr>
+											<th><span class="required">*</span>商品名称</th>
+											<th><span class="required">*</span>商品分类</th>
+											<th><span class="required">*</span>数量</th>
+											<th><span class="required">*</span>目标单价</th>
+											<th class="operation">操作</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr data-num="1">
+											<td>
+												<input type="text" name="" lay-verify="req" placeholder="名称" autocomplete="off" class="layui-input goods-name">
+											</td>
+											<td>
+												<select name="" class="category" lay-verify="req" placeholder="分类">
+													<option value="">请选择</option>
+													{foreach $category_list as $cate_k => $cate_v}
+													<option value="{$cate_v.category_id}">{$cate_v.category_name}</option>
+													{/foreach}
+												</select>
+											</td>
+											<td>
+												<input type="number" name="" lay-verify="req|num" placeholder="数量" autocomplete="off" class="layui-input goods-num">
+											</td>
+											<td>
+												<input type="number" name="" lay-verify="req|flo" placeholder="价格" autocomplete="off" class="layui-input goods-price">
+											</td>
+											<td rowspan="2">
+												<a class="layui-btn" onclick="delRow(1)">删除</a>
+											</td>
+										</tr>
+										<tr data-num="1">
+											<td>
+												<input type="text" name="" autocomplete="off" placeholder="请输入备注" class="layui-input remark">
+											</td>
+											<td colspan="3">
+												<div class="upload-imgs-box">
+													<div class="ns-upload-default test" id="test_1" data-num="1">
+														<p>上传图片</p>
+													</div>
+													<div class="ns-img-wrap">
+														<input value="" type="hidden" lay-verify="imgReq" class="img-input" />
+													</div>
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								<div class="add-goods">
+									<span class="ns-red-color" onclick="addGoods()"><i class="iconfont iconjia2"></i></span>
+									<span onclick="addGoods()">添加商品</span>
+								</div>
+							</div>
+                        </div>
+					</div>
+					
+					<div class="layui-card ns-card-common ns-card-brief">
+                        <div class="layui-card-header">
+                            <span class="ns-card-title">采购商联系方式</span>
+                        </div>
+                        <div class="layui-card-body">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label"><span class="required">*</span>姓名：</label>
+								<div class="layui-input-block">
+									<input type="text" name="nickname" lay-verify="required" autocomplete="off" class="layui-input ns-len-mid">
+								</div>
+							</div>
+							
+							<div class="layui-form-item">
+								<label class="layui-form-label"><span class="required">*</span>性别：</label>
+								<div class="layui-input-block">
+									<div class="layui-input-inline">
+										<input type="radio" name="sex" value="1" lay-filter="" title="男" checked />
+										<input type="radio" name="sex" value="2" lay-filter="" title="女" />
+									</div>
+								</div>
+							</div>
+							
+							<div class="layui-form-item">
+                                <label class="layui-form-label"><span class="required">*</span>联系电话：</label>
+								<div class="layui-input-block">
+									<input type="text" name="mobile" lay-verify="required|phone" autocomplete="off" class="layui-input ns-len-mid">
+								</div>
+							</div>
+
+							<div class="layui-form-item">
+                                <label class="layui-form-label">电子邮箱：</label>
+								<div class="layui-input-block">
+									<input type="text" name="email" lay-verify="email" autocomplete="off" class="layui-input ns-len-mid">
+								</div>
+							</div>
+                        </div>
+					</div>
+					
+					<div class="layui-card ns-card-common ns-card-brief">
+                        <div class="layui-card-header">
+                            <span class="ns-card-title">采购需求</span>
+                        </div>
+                        <div class="layui-card-body">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label"><span class="required">*</span>求购截止日期：</label>
+								<div class="layui-input-block">
+									<input type="text" name="end_time" id="end_time" lay-verify="required|current" class="layui-input ns-len-mid" placeholder="请选择求购截止时间" autocomplete="off" readonly>
+								</div>
+							</div>
+							
+							<div class="layui-form-item">
+                                <label class="layui-form-label"><span class="required">*</span>收货地址：</label>
+								<div class="layui-input-inline area-select">
+									<select name="province_id" lay-filter="province_id" lay-verify="province_id">
+										<option value="">请选择省份</option>
+										{foreach $province_list as $k => $v}
+										<option value="{$v.id}">{$v.name}</option>
+										{/foreach}
+									</select>
+								</div>
+								
+								<div class="layui-input-inline area-select">
+									<select name="city_id" lay-filter="city_id" lay-verify="city_id">
+										<option value="">请选择城市</option>
+									</select>
+								</div>
+								
+								<div class="layui-input-inline area-select">
+									<select name="district_id" lay-filter="district_id" lay-verify="district_id">
+										<option value="">请选择区/县</option>
+									</select>
+								</div>
+							</div>
+
+							<div class="layui-form-item">
+                                <label class="layui-form-label"><span class="required">*</span>详细地址：</label>
+								<div class="layui-input-block">
+									<input type="text" name="address" lay-verify="required" autocomplete="off" class="layui-input ns-len-mid">
+								</div>
+							</div>
+
+							<div class="layui-form-item layui-form-text">
+								<label class="layui-form-label">补充说明：</label>
+								<div class="layui-input-block ns-len-mid">
+									<textarea name="remark" class="layui-textarea"></textarea>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="ns-form-row">
+						<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">发布求购单</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script type="text/javascript" src="{:get_http_type()}://webapi.amap.com/maps?v=1.4.6&amp;key=2df5711d4e2fd9ecd1622b5a53fc6b1d"></script>
+<script type="text/javascript" src="SHOP_JS/address.js"></script>
+<script type="text/javascript" src="STATIC_JS/map_address.js"></script>
+<script>
+	var form, laydate, laytpl, goodsImage = [], repeat_flag = false;
+	layui.use(['form', 'laydate', 'laytpl', 'upload'], function() {
+		form = layui.form;
+		laydate = layui.laydate;
+		laytpl = layui.laytpl;
+		upload = layui.upload;
+
+		form.render();
+
+		laydate.render({
+		    elem: '#end_time', //指定元素
+		    type: 'datetime'
+		});
+
+		//初始化联系地址
+		var initdata = { province_id: '', city_id: '', district_id: '' };
+		initAddress(initdata, "storeform");
+		
+		upload.render({
+			elem: '#test_1',
+			url: ns.url("shop/upload/upload"),
+			multiple: true,
+			done: function(res, index, upload){
+				var html = '<div class="img-box"><img layer-src src="'+ ns.img(res.data.pic_path) +'" /><input type="hidden" value="'+ res.data.pic_path +'" /><i class="iconfont iconcuo"></i></div>';
+				$("#test_1").siblings(".ns-img-wrap").append(html);
+				$("#test_1").siblings(".ns-img-wrap").find(".img-input").val(res.data.pic_path);
+				
+				$(".img-box i").click(function() {
+					$(this).parents(".img-box").remove();
+				})
+				loadImgMagnify();
+			}
+		})
+		
+		
+		form.on('submit(save)', function(data) {
+			var province_name = $("select[name=province_id] option:selected").text();
+			var city_name = $("select[name=city_id] option:selected").text();
+			var district_name = $("select[name=district_id] option:selected").text();
+			
+			//地址id
+			data.field.province = data.field.province_id;
+			data.field.city = data.field.city_id;
+			data.field.district = data.field.district_id;
+			data.field.community = data.field.community_id;
+			
+			//地址name
+			data.field.province_name = province_name;
+			data.field.city_name = city_name;
+			data.field.district_name = district_name;
+			data.field.full_address = province_name + city_name + district_name;
+			
+			var goods_arr = [];
+			var len = $("tbody tr").length / 2;
+			for (var i=1; i<=len; i++) {
+				var goods = {};
+				$("tbody tr").each(function(index, item) {
+					var num = $(item).attr("data-num");
+					if (num == i) {
+						if (index % 2 == 0) {
+							goods.goods_name = $(item).find(".goods-name").val();
+							goods.num = $(item).find(".goods-num").val();
+							goods.price = $(item).find(".goods-price").val();
+							goods.category_id_1 = $(item).find(".category option:selected").attr("value");
+							goods.category_name_1 = $(item).find(".category option:selected").text();
+						} else { 
+							var goods_images = [];
+							$(item).find(".ns-img-wrap div").each(function(key, imgDiv) {
+								goods_images.push($(imgDiv).find("input").val());
+							})
+							goods.goods_images = goods_images;
+							goods.remark = $(item).find(".remark").val();
+						}
+					}
+				})
+				
+				goods_arr.push(goods);
+			}
+			data.field.purchase_goods_item_json = JSON.stringify(goods_arr);
+			if (repeat_flag) return;
+			repeat_flag = true;
+			
+			$.ajax({
+				url: ns.url("supply://shop/purchase/release"),
+				data: data.field,
+				dataType: 'JSON',
+				type: 'POST',
+				success: function(res) {
+					repeat_flag = false;
+					if(checkLogin(res)) {
+						layer.msg(res.message);
+						if (res.code == 0) {
+							location.href = ns.url("supply://shop/purchase/purchase");
+						}
+					}
+				}
+			})
+		})
+
+		//表单验证
+		form.verify({
+			province_id : function(value, item){
+			    if(value == ''){
+			        return '请选择省份';
+			    }
+			},
+			city_id : function(value, item){
+			    if(value == ''){
+			        return '请选择城市';
+			    }
+			},
+			district_id : function(value, item){
+			    if(value == ''){
+			        return '请选择区/县';
+			    }
+			},
+			address: function(value) {
+				if (value == '') {
+					return '请输入详细地址';
+				}
+			},
+			req: function(value, item) {
+				var str = $(item).attr("placeholder");
+				if (value == '') {
+					return "请输入采购商品" + str;
+				}
+			},
+			num: function(value, item) {
+				if (value % 1 != 0 || value < 0) {
+					return '采购数量必须是大于0的整数';
+				}
+			},
+			flo: function(value, item) {
+				if (value != '' && value <= 0) {
+					return '目标单价必须大于0';
+				}
+
+				if (value != '' && value * 100 % 1 != 0) {
+					return '目标单价最多可有两位小数'
+				}
+			},
+			current: function(value, item) {
+				var now_time = (new Date()).getTime();
+				var end_time = (new Date(value)).getTime();
+				if (now_time > end_time) {
+				    return '截止时间不能小于当前时间!'
+				}
+			},
+			email: function(value, item) {
+				var reg = /^([a-zA-Z\d])(\w|\-)+@[a-zA-Z\d]+\.[a-zA-Z]{2,4}$/;
+				if (value != '' && !reg.test(value)) {
+					return '邮箱格式不正确!'
+				}
+			},
+			imgReq: function(value, item) {
+				if (!value) {
+					return '请至少上传一张图片!'
+				}
+			}
+		});
+
+	})
+
+	var num = 1;
+	function addGoods() {
+		num++;
+		var data = {};
+		data.num = num;
+		laytpl($("#tableTr").html()).render(data, function(html) {
+			$(".ns-table-box tbody").append(html);
+			form.render();
+			
+			upload.render({
+				elem: '#test_'+num,
+				url: ns.url("shop/upload/upload"),
+				multiple: true,
+				done: function(res, index, upload){
+					var html = '<div class="img-box"><img layer-src src="'+ ns.img(res.data.pic_path) +'" /><input type="hidden" value="'+ res.data.pic_path +'" /><i class="iconfont iconcuo"></i></div>';
+					$("#test_"+num).siblings(".ns-img-wrap").append(html);
+					$("#test_"+num).siblings(".ns-img-wrap").find(".img-input").val(res.data.pic_path);
+					
+					$(".img-box i").click(function() {
+						$(this).parents(".img-box").remove();
+					})
+					loadImgMagnify();
+				}
+			})
+		});	
+	}
+	
+	function delRow(i) {
+		$("tbody tr").each(function() {
+			if ($(this).attr("data-num") == i) {
+				$(this).remove();
+			}
+		})
+	}
+</script>
+
+<script type="text/html" id="tableTr">
+	<tr data-num="{{d.num}}">
+		<td>
+			<input type="text" name="" lay-verify="req" placeholder="名称" autocomplete="off" class="layui-input goods-name">
+		</td>
+		<td>
+			<select name="" class="category" lay-verify="req" placeholder="分类">
+				<option value="">请选择</option>
+				{foreach $category_list as $cate_k => $cate_v}
+				<option value="{$cate_v.category_id}">{$cate_v.category_name}</option>
+				{/foreach}
+			</select>
+		</td>
+		<td>
+			<input type="number" name="" lay-verify="req|num" placeholder="数量" autocomplete="off" class="layui-input goods-num">
+		</td>
+		<td>
+			<input type="number" name="" lay-verify="req|flo" placeholder="价格" autocomplete="off" class="layui-input goods-price">
+		</td>
+		<td rowspan="2">
+			<a class="layui-btn" onclick="delRow({{d.num}})">删除</a>
+		</td>
+	</tr>
+	<tr data-num="{{d.num}}">
+		<td>
+			<input type="text" name="" autocomplete="off" placeholder="请输入备注" class="layui-input remark">
+		</td>
+		<td colspan="3">
+			<div class="upload-imgs-box">
+				<div class="ns-upload-default test" id="test_{{d.num}}" data-num="{{d.num}}">
+					<p>上传图片</p>
+				</div>
+				<div class="ns-img-wrap">
+					<input value="" type="hidden" lay-verify="imgReq" class="img-input" />
+				</div>
+			</div>
+		</td>
+	</tr>
+</script>
+{/block}

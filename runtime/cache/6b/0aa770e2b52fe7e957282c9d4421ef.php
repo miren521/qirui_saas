@@ -1,0 +1,4 @@
+<?php
+//000000000000
+ exit();?>
+a:7:{s:7:"site_id";i:0;s:10:"app_module";s:5:"admin";s:12:"document_key";s:17:"SHOP_JOIN_GUIDE_1";s:5:"title";s:12:"商家入驻";s:7:"content";s:969:"<p style="line-height: 2em;"><span style="font-family: 微软雅黑; font-size: 14px;">入驻Niushop商城的商家可以是在中国大陆注册的企业，包括法人（公司）和合伙（合伙企业），持有相应的企业营业执照。也可以是个人。</span></p><p style="line-height: 2em;"><span style="font-family: 微软雅黑; font-size: 14px; color: rgb(89, 89, 89);">注：</span></p><p style="line-height: 2em;"><span style="font-family: 微软雅黑; font-size: 14px;">1. 大陆境外商标（包括香港、台湾、澳门）授权境内实体经营的，需持有品牌授权书；</span></p><p style="line-height: 2em;"><span style="font-family: 微软雅黑; font-size: 14px;">2. 纯图形商标暂不接受入驻；</span></p><p style="line-height: 2em;"><span style="font-family: 微软雅黑; font-size: 14px;">3.&nbsp;</span><span style="font-size: 14px; font-family: 微软雅黑;">个体工商户接受入驻。</span></p><p><br/></p>";s:11:"create_time";i:1600942316;s:11:"modify_time";i:0;}

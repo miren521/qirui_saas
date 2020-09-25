@@ -1,0 +1,393 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	.required { margin-right: 3px; }
+	/* 关联会员 */
+	.ns-check-member { position: relative; }
+	.ns-check-member .layui-btn { position: absolute; top: 0; right: 1px; border-color: #e5e5e5; padding: 0 10px; border-right: 0; }
+	.ns-search-result { border: 1px solid; padding: 15px 30px 15px 15px; display: flex; align-items: center; position: relative; }
+	.ns-search-res-img { width: 50px; height: 50px; margin-right: 5px; text-align: center; line-height: 50px; }
+	.ns-search-res-img img { max-width: 100%; max-height: 100%; }
+	.ns-search-res-intro p { line-height: 24px; }
+	.ns-search-res-close { position: absolute; top: 5px; right: 5px; }
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>店铺名称：</label>
+		<div class="layui-input-block">
+			<input name="site_name" type="text" value="{$shop_info.site_name}" disabled lay-verify="required" class="layui-input ns-len-long" autocomplete="off">
+		</div>
+		<p class="ns-word-aux">店铺名称不可编辑</p>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">到期时间：</label>
+		<div class="layui-input-block ns-input-text">
+			{if condition='$shop_info.expire_time'}{:date('Y-m-d', $shop_info.expire_time)}{/if}
+		</div>
+		<div class="ns-word-aux">
+			<p>店铺关闭时间，与入驻时长相关联</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">卖家账号：</label>
+		<div class="layui-input-block ns-input-text">
+			{$shop_info.username}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否自营：</label>
+		<div class="layui-input-block ns-input-text">
+			{if condition="$shop_info.is_own == 1"} 是 {else /} 否 {/if}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>主营行业：</label>
+		<div class="layui-input-block ns-input-text">
+			{$shop_info.category_name}
+		</div>
+	</div>
+
+	<!-- 非自营 -->
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>开店套餐：</label>
+		<div class="layui-input-block ns-input-text">
+			{$shop_info.group_name}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">店铺经营状态：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="shop_status" value="1" lay-skin="switch" {if condition="$shop_info.shop_status == 1"} checked {/if} />
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">排序号：</label>
+		<div class="layui-input-block">
+			<input name="sort" type="number" class="layui-input ns-len-short" lay-verify="int" value="{$shop_info.sort}">
+		</div>
+		<div class="ns-word-aux">
+			<p>排序值必须是整数</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">店铺logo：</label>
+		<div class="layui-input-block">
+			<div class="upload-img-block">
+				<div class="upload-img-box" id="logoImg">
+					{if condition="$shop_info.logo"}
+						<img src="{:img($shop_info.logo)}" />
+					{else/}
+						<div class="ns-upload-default">
+							<img src="__STATIC__/img/upload_img.png" />
+							<p>点击上传</p>
+						</div>
+					{/if}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">店铺头像（大图）：</label>
+		<div class="layui-input-block">
+			<div class="upload-img-block">
+				<div class="upload-img-box" id="avatarImg">
+					{if condition="$shop_info.avatar"}
+						<img src="{:img($shop_info.avatar)}" />
+					{else/}
+						<div class="ns-upload-default">
+							<img src="__STATIC__/img/upload_img.png" />
+							<p>点击上传</p>
+						</div>
+					{/if}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">店铺条幅：</label>
+		<div class="layui-input-block">
+			<div class="upload-img-block">
+				<div class="upload-img-box" id="bannerImg">
+					{if condition="$shop_info.banner"}
+						<img src="{:img($shop_info.banner)}" />
+					{else/}
+						<div class="ns-upload-default">
+							<img src="__STATIC__/img/upload_img.png" />
+							<p>点击上传</p>
+						</div>
+					{/if}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">店铺关键字：</label>
+		<div class="layui-input-block">
+			<input name="seo_keywords" type="text" value="{$shop_info.seo_keywords}" class="layui-input ns-len-long" autocomplete="off">
+		</div>
+		<div class="ns-word-aux">
+			<p>关键字之间请用英文逗号分隔</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">店铺简介：</label>
+		<div class="layui-input-inline ns-len-long">
+			<textarea name="seo_description" class="layui-textarea">{$shop_info.seo_description}</textarea>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">联系电话：</label>
+		<div class="layui-input-block">
+			<input name="telephone" type="text" value="{$shop_info.telephone}" lay-verify="mobile" class="layui-input ns-len-mid" autocomplete="off">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否推荐：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="is_recommend" value="1" lay-skin="switch" {if condition="$shop_info.is_recommend == 1"} checked {/if} >
+		</div>
+		<p class="ns-word-aux">开启后，会在客户端店铺列表优先展示</p>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">服务保障：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="shop_qtian" title="7天退换" lay-skin="primary" value="1" lay-filter="service" {if condition="$shop_info.shop_qtian == 1"} checked {/if}>
+			<input type="checkbox" name="shop_zhping" title="正品保障" lay-skin="primary" value="1" lay-filter="service" {if condition="$shop_info.shop_zhping == 1"} checked {/if}>
+			<input type="checkbox" name="shop_erxiaoshi" title="两小时发货" lay-skin="primary" value="1" lay-filter="service" {if condition="$shop_info.shop_erxiaoshi == 1"} checked {/if}>
+			<input type="checkbox" name="shop_tuihuo" title="退货承诺" lay-skin="primary" value="1" lay-filter="service" {if condition="$shop_info.shop_tuihuo == 1"} checked {/if}>
+			<input type="checkbox" name="shop_shiyong" title="试用中心" lay-skin="primary" value="1" lay-filter="service" {if condition="$shop_info.shop_shiyong == 1"} checked {/if}>
+			<input type="checkbox" name="shop_shiti" title="实体验证" lay-skin="primary" value="1" lay-filter="service" {if condition="$shop_info.shop_shiti == 1"} checked {/if}>
+			<input type="checkbox" name="shop_xiaoxie" title="消协保证" lay-skin="primary" value="1" lay-filter="service" {if condition="$shop_info.shop_xiaoxie == 1"} checked {/if}>
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+	
+	<!-- 隐藏域 -->
+	<input type="hidden" value="{$shop_info.site_id}" name="site_id" />
+	<input type="hidden" value="{$shop_info.logo}" name="logo" />
+	<input type="hidden" value="{$shop_info.avatar}" name="avatar" />
+	<input type="hidden" value="{$shop_info.banner}" name="banner" />
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'laydate', 'upload'], function() {
+		var form = layui.form,
+			laydate = layui.laydate,
+			upload = layui.upload,
+			autotrphyChecked = parseInt("{$shop_info.is_own}"),
+			repeat_flag = false; //防重复标识
+		form.render();
+
+		laydate.render({
+			elem: '#laydate'
+		});
+
+		form.render();
+		
+		//图片上传
+		var uploadLogo = upload.render({
+			elem: '#logoImg',
+			url: ns.url("city://city/upload/upload"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='logo']").val(res.data.pic_path);
+					$("#logoImg").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+
+		var uploadAvatar = upload.render({
+			elem: '#avatarImg',
+			url: ns.url("city://city/upload/upload"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='avatar']").val(res.data.pic_path);
+					$("#avatarImg").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+
+		var uploadBanner = upload.render({
+			elem: '#bannerImg',
+			url: ns.url("city://city/upload/upload"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='banner']").val(res.data.pic_path);
+					$("#bannerImg").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+		
+		/**
+		 * 表单验证
+		 */
+		form.verify({
+			int: function(value) {
+				if (value == "") {
+					return false;
+				}
+				if (value < 0 || value > 100 || !(value % 1 === 0)) {
+					return '请输入0-100之间的整数'
+				}
+			},
+			mobile: function(value) {
+				var reg = /^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[0135678]|9[89])\d{8}$/;
+				if (value == '') {
+					return;
+				}
+				if (!reg.test(value)) {
+					return '请输入正确的手机号码!';
+				}
+			}
+		});
+
+
+		// 是否自营
+		form.on('switch(whether_autotrophy)', function(data){
+			autotrphyChecked = data.elem.checked ? 1 : 0;
+			autotrophy();
+		});
+
+		autotrophy();
+		function autotrophy(){
+			if(autotrphyChecked == 1){
+				$('select[name="own_group_id"]').attr("lay-verify",'required').parents('.layui-form-item').removeClass("layui-hide");
+				$('select[name="group_id"]').attr("lay-verify",'').parents('.layui-form-item').addClass("layui-hide");
+			}else{
+				$('select[name="group_id"]').attr("lay-verify",'required').parents('.layui-form-item').removeClass("layui-hide");
+				$('select[name="own_group_id"]').attr("lay-verify",'').parents('.layui-form-item').addClass("layui-hide");
+			}
+		}
+		
+		/**
+		 * 监听保存
+		 */
+		form.on('submit(save)', function(data) {
+			var group_id = data.field.group_id,
+				group_name = $(".ns-group").find("option[value=" + group_id + "]").text(),
+				category_id = data.field.category_id,
+				category_name = $(".ns-category").find("option[value=" + category_id + "]").text();
+
+			data.field.group_name = group_name;
+			data.field.category_name = category_name;
+
+			if(autotrphyChecked == 1){
+				data.field.group_id = data.field.own_group_id;
+			}
+			
+			if (repeat_flag) return false;
+			repeat_flag = true;
+			
+			$.ajax({
+				url: ns.url("city://city/shop/basicInfo"),
+				data: data.field,
+				type: "POST",
+				dataType: "JSON",
+				success: function(res) {
+					repeat_flag = false;
+					if (res.code == 0) {
+						layer.confirm('编辑成功', {
+							title:'操作提示',
+							btn: ['返回列表', '继续操作'],
+							yes: function(){
+								location.href = ns.url("city://city/shop/lists")
+							},
+							btn2: function() {
+								location.reload();
+							}
+						});
+					} else {
+						layer.msg(res.message);
+					}
+				}
+			});
+		});
+	});
+	
+	/**
+	 * 点击搜索
+	 */
+	var repeat_flag = false;
+	var html, val;
+	function checkMember() {
+		var parent = $(".ns-check-member");
+		var con = parent.find(".ns-member-name").val();
+		$(".layui-word-aux").remove();
+		$(".ns-search-result").remove();
+		
+		if(repeat_flag) return false;
+		repeat_flag = true;
+		
+		if (con == "" || con == null || con.trim() == "") {
+			repeat_flag = false;
+		} else {
+			$.ajax({
+				type: 'POST',
+				url: ns.url("city://city/member/searchMember"),
+				data: {
+					'search_text': con
+				},
+				dataType: 'JSON',
+				success: function (res) {
+					layer.msg(res.message);
+					repeat_flag = false;
+					
+					if (res.data == null) {
+						html = '<span class="layui-word-aux">未找到该用户</span>';
+						val = res.data;
+					} else {
+						html = '<div class="ns-search-result layui-input-inline ns-border-color-gray">' +
+									'<div class="ns-search-res-img">' +
+										'<img src="' + ns.img(res.data.headimg) + '" />' +
+									'</div>' +
+									'<div class="ns-search-res-intro">' +
+										'<p>用户名：'+ res.data.username +'</p>' +
+										'<p>电话：'+ res.data.mobile +'</p>' +
+									'</div>' +
+									'<div class="ns-search-res-close" onclick="closeMember()">' +
+										'<i class="iconfont iconclose_light"></i>' +
+									'</div>' +
+								'</div>';
+						val = res.data.member_id;
+					}
+					
+					$(".ns-member-id").attr("value", val);
+					$(".ns-check-member-box").append(html);
+				}
+			});
+		}
+	}
+	
+	function closeMember() {
+		$(".ns-search-result").hide();
+	}
+	
+	function back() {
+		location.href = ns.url("city://city/shop/lists");
+	}
+</script>
+{/block}

@@ -1,0 +1,501 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+    .layui-card-body{
+        display: flex;
+        justify-content: space-around;
+    }
+    .layui-card-body .money{
+        font-size: 20px;
+        color: #000;
+        font-weight: bold;
+        margin-top: 10px;
+        text-align: center;
+        max-width: 250px;
+    }
+    .layui-card-body .subhead{
+        font-size: 12px;
+        margin-left: 3px;
+        cursor: pointer;
+    }
+    .layui-table-box {
+        overflow: inherit;
+    }
+    .layui-table-header {
+        overflow: inherit;
+    }
+    .layui-table-header .layui-table-cell{overflow: inherit;}
+    .ns-prompt .iconfont{font-size: 16px;color: rgba(0,0,0,0.7);cursor: pointer;font-weight: 500;margin-left: 3px;}
+    .ns-prompt-con{font-weight: 500;text-align: left}
+</style>
+
+{/block}
+{block name='main'}
+<!-- 筛选面板 -->
+<div class="ns-screen layui-collapse" lay-filter="selection_panel">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">筛选</h2>
+        <form class="layui-colla-content layui-form layui-show">
+            <div class="layui-form-item">
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">分站城市：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="site_area_name" placeholder="请输入分站城市名称" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">分站联系方式：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="web_phone" placeholder="请输入分站联系方式" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">分站状态：</label>
+                    <div class="layui-input-inline">
+                        <select name="status">
+                            <option value="">全部</option>
+                            <option value="1">正常</option>
+                            <option value="-1">关闭</option>
+                        </select>
+                    </div>
+                </div>
+			</div>
+			
+			<div class="layui-form-item">
+			    <div class="layui-inline">
+			        <label class="layui-form-label">添加时间：</label>
+			        <div class="layui-input-inline">
+			            <input type="text" class="layui-input" name="start_time" readonly id="start_time" autocomplete="off" placeholder="开始时间" >
+			            <i class="ns-calendar"></i>
+			        </div>
+			        <div class="layui-form-mid">-</div>
+			        <div class="layui-input-inline">
+			            <input type="text" class="layui-input" name="end_time" readonly id="end_time" autocomplete="off" placeholder="结束时间" >
+			            <i class="ns-calendar"></i>
+			        </div>
+			    </div>
+			</div>
+
+            <div class="ns-form-row">
+                <button class="layui-btn ns-bg-color" lay-submit lay-filter="search">筛选</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="ns-single-filter-box">
+    <button class="layui-btn ns-bg-color" onclick="clickAdd()">添加城市分站</button>
+</div>
+
+<!-- 列表 -->
+<table id="account_list" lay-filter="account_list"></table>
+{/block}
+{block name="script"}
+<script type="text/html" id="action">
+    <div class="ns-table-btn">
+        <a class="layui-btn" lay-event="edit">编辑</a>
+        <a class="layui-btn" lay-event="detail">详情</a>
+        <a class="layui-btn" lay-event="apply_pay">转账</a>
+        {{#  if(d.status == 1){  }}
+        <a class="layui-btn" lay-event="frozen">关闭</a>
+        {{#  }  }}
+        {{#  if(d.status == -1){  }}
+        <a class="layui-btn" lay-event="unfrozen">开启</a>
+        {{#  }  }}
+        <a class="layui-btn" lay-event="delete">删除</a>
+    </div>
+</script>
+
+<script type="text/html" id="website_info">
+    <div class="ns-table-tuwen-box">
+        <div class="ns-img-box">
+            {{#  if(d.logo){  }}
+            <img layer-src src="{{ns.img(d.logo.split(',')[0])}}" />
+			{{#  }else{  }}
+			<img layer-src src="__STATIC__/img/default_shop.png" />
+            {{#  }  }}
+        </div>
+        <div class="ns-font-box">
+            <a href="javascript:;" class="ns-multi-line-hiding ns-text-color" title="{{d.title}}">{{d.title}}</a>
+        </div>
+    </div>
+</script>
+
+
+<script>
+    function clickAdd()
+    {
+        location.href = ns.url('city://admin/website/add');
+    }
+
+    var start_time,end_time;
+    layui.use(['element','laydate','form', 'laytpl','upload'], function () {
+        var element = layui.element,
+            laydate = layui.laydate,
+            laytpl = layui.laytpl,
+            upload = layui.upload,
+            form = layui.form,
+			repeat_flag = false;
+			
+		form.render();
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time', //指定元素
+			type: 'datetime'
+            /* done: function(value, date, endDate){
+                start_time = ns.date_to_time(value);
+            } */
+        });
+        //结束时间
+        laydate.render({
+            elem: '#end_time', //指定元素
+			type: 'datetime'
+            /* done: function(value, date, endDate){
+                end_time = ns.date_to_time(value);
+            } */
+        });
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function (data) {
+            // data.field.start_time = start_time;
+            // data.field.end_time = end_time;
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+            return false;
+        });
+
+        var table = new Table({
+            elem: '#account_list',
+            url: ns.url("city://admin/Website/lists"),
+            cols: [
+                [{
+                    field:'title',
+                    title: '站点信息',
+                    unresize: 'false',
+					width: '15%',
+                    templet:'#website_info',
+                },{
+                    field:'site_area_name',
+                    title: '分站城市',
+                    unresize: 'false',
+					width: '8%'
+                },{
+                    field:'username',
+                    title: '管理员',
+                    unresize: 'false',
+					width: '7%'
+                },{
+                    field:'account',
+                    title: '<div class="ns-prompt-block" style="justify-content: flex-end">' +
+                            '账户金额' +
+                            '<div class="ns-prompt">' +
+                            '<i class="iconfont iconwenhao1 required ns-point"></i>'+
+                            '<div class="ns-point-box ns-reason-box ns-prompt-box" >' +
+                            '<div class="ns-prompt-con">' +
+                            '<p>1、帐户金额的来源：城市分站结算的店铺入驻续签费用的佣金、订单结算的佣金。</p>' +
+                            '<p>2、平台根据城市分站的帐户金额进行实际打款结算。</p>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>',
+                    unresize: 'false',
+					width: '8%',
+                    align: 'right',
+					templet: function(data) {
+						return '<p style="text-align: right">￥' + data.account + '</p>';
+					}
+                },{
+                    field:'shop_rate',
+                    title: '<p style="text-align: right">开店分佣比率</p>',
+                    unresize: 'false',
+					width: '10%',
+					templet: function(data) {
+						return '<p style="text-align: right">' + data.shop_rate + '%</p>';
+					}
+                },{
+                    field:'order_rate',
+                    title: '<p style="text-align: right">订单分佣比率</p>',
+                    unresize: 'false',
+					width: '10%',
+					templet: function(data) {
+						return '<p style="text-align: right">' + data.order_rate + '%</p>';
+					}
+                }, {
+                    field:'web_phone',
+                    title: '联系方式',
+                    unresize: 'false',
+					width: '8%'
+                }, {
+                    title: '状态',
+                    unresize: 'false',
+                    width: '5%',
+                    templet:function(data){
+                        return data.status == 1 ? '正常' : '关闭';
+                    }
+                }, {
+                    title: '创建时间',
+                    unresize: 'false',
+                    width: '12%',
+                    templet: function (res){
+                        if(res.create_time == 0){
+                            return '--';
+                        }else{
+                            return ns.time_to_date(res.create_time)
+                        }
+                    }
+                },{
+                    title: '操作',
+                    toolbar: '#action',
+                    unresize: 'false',
+					width: '17%'
+                }]
+            ]
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'detail': //详情
+                    location.href = ns.url("city://admin/website/detail", {"website_id": data.site_id});
+                    break;
+                case 'edit': //编辑
+                    location.href = ns.url("city://admin/website/edit", {"website_id": data.site_id});
+                    break;
+                case 'apply_pay': //转账
+                    applyPay(data);
+                    break;
+                case 'delete'://删除
+
+                    layer.confirm('确定要删除该分站吗?', function () {
+                        if (repeat_flag) return;
+                        repeat_flag = true;
+
+                        $.ajax({
+                            url: ns.url("city://admin/website/delete"),
+                            data: {website_id:data.site_id},
+                            dataType: 'JSON',
+                            type: 'POST',
+                            success: function(res) {
+                                layer.msg(res.message);
+                                repeat_flag = false;
+
+                                if (res.code == 0) {
+                                    table.reload();
+                                }
+                            }
+                        });
+                    });
+
+                    break;
+
+                case 'frozen'://冻结
+
+                    layer.confirm('确定要关闭该分站吗?', function () {
+                        if (repeat_flag) return;
+                        repeat_flag = true;
+
+                        $.ajax({
+                            url: ns.url("city://admin/website/frozen"),
+                            data: {website_id:data.site_id},
+                            dataType: 'JSON',
+                            type: 'POST',
+                            success: function(res) {
+                                layer.msg(res.message);
+                                repeat_flag = false;
+
+                                if (res.code == 0) {
+                                    table.reload();
+                                }
+                            }
+                        });
+                    });
+
+                    break;
+                case 'unfrozen'://解冻
+
+                    layer.confirm('确定要开启该分站吗?', function () {
+                        if (repeat_flag) return;
+                        repeat_flag = true;
+
+                        $.ajax({
+                            url: ns.url("city://admin/website/unfrozen"),
+                            data: {website_id:data.site_id},
+                            dataType: 'JSON',
+                            type: 'POST',
+                            success: function(res) {
+                                layer.msg(res.message);
+                                repeat_flag = false;
+
+                                if (res.code == 0) {
+                                    table.reload();
+                                }
+                            }
+                        });
+                    });
+
+                    break;
+            }
+
+            /**
+             * 转账
+             */
+            function applyPay(data) {
+                laytpl($("#applyPay").html()).render(data, function(html) {
+                    layer_pass = layer.open({
+                        title: '商家转账',
+                        skin: 'layer-tips-class',
+                        type: 1,
+                        area: ['800px'],
+                        content: html,
+                    });
+                });
+
+                //转账凭证
+                var uploadInst = upload.render({
+                    elem: '#paying_money_certificate',
+                    url: ns.url("admin/upload/upload"),
+                    done: function(res) {
+                        if (res.code >= 0) {
+                            $("input[name='paying_money_certificate']").val(res.data.pic_path);
+                            $("#paying_money_certificate").html("<img src=" + ns.img(res.data.pic_path) + " >");
+                        }
+                        return layer.msg(res.message);
+                    }
+                });
+            }
+
+            //提交
+            form.on('submit(repass)', function(data) {
+				field = data.field;
+				
+                if(parseFloat(field.account) < parseFloat(field.money)){
+                    layer.msg('转账金额不能大于分站城市可用余额', {icon: 5, anim: 6});
+                    return;
+                }
+				
+				if (repeat_flag) return;
+				repeat_flag = true;
+				
+                $.ajax({
+                    url: ns.url("city://admin/withdraw/withdraw"),
+                    data: data.field,
+                    dataType: 'JSON',
+                    type: 'POST',
+                    success: function(res) {
+                        layer.msg(res.message);
+                        repeat_flag = false;
+
+                        if (res.code == 0) {
+                            layer.closeAll("page");
+                            table.reload();
+                        }
+                    }
+                });
+
+            });
+			
+			//表单验证
+			form.verify({
+				money: function(value, item) {
+					var str = $(item).parents(".layui-form-item").find("label").text().split("*").join("");
+					str = str.substring(0, str.length - 1);
+					
+					if (value <= 0) {
+						return str + "必须大于0";
+					}
+					
+					var arrMen = value.split(".");
+					var val = 0;
+					if (arrMen.length == 2) {
+						val = arrMen[1];
+					}
+					if (val.length > 2) {
+						return str + "最多可保留两位小数";
+					}
+				}
+			});
+        });
+    });
+
+
+
+
+    $(".withdrawal-record").click(function () {
+        location.href = ns.url("shop/shopwithdraw/lists");
+    });
+
+	function closePass() {
+		layer.close(layer_pass);
+	}
+</script>
+
+<!-- 重置密码弹框html -->
+<script type="text/html" id="applyPay">
+    <div class="layui-form" lay-filter="form">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">分站城市：</label>
+            <div class="layui-input-block">
+                <p class="ns-input-text ">{{ d.site_area_name }}</p>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">可用余额：</label>
+            <div class="layui-input-block">
+                <p class="ns-input-text ">￥ {{d.account}}</p>
+            </div>
+        </div>
+		
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="required">*</span>转账金额：</label>
+            <div class="layui-input-block ns-len-long">
+                <input type="number" min="0" name="money" lay-verify="required|money" class="layui-input ns-len-short">
+            </div>
+        </div>
+		
+        <div class="layui-form-item">
+            <label class="layui-form-label img-upload-lable">支付凭证：</label>
+            <div class="layui-input-block img-upload">
+                <div class="upload-img-block">
+                    <input type="hidden" name="paying_money_certificate" >
+                    <div class="upload-img-box" id="paying_money_certificate">
+                        <div class="ns-upload-default">
+                            <img src="__STATIC__/img/upload_img.png" />
+                            <p>点击上传</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">付款凭证说明：</label>
+            <div class="layui-input-block ns-len-long">
+                <textarea name="paying_money_certificate_explain" class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+        <input type="hidden" name="account" value="{{ d.account }}">
+        <input type="hidden" name="website_id" value="{{ d.site_id }}">
+        <div class="ns-form-row">
+            <button class="layui-btn ns-bg-color" lay-submit lay-filter="repass">确定</button>
+            <button class="layui-btn layui-btn-primary" onclick="closePass()">返回</button>
+        </div>
+    </div>
+</script>
+{/block}

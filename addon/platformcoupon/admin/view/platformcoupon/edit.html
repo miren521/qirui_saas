@@ -1,0 +1,328 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>标识“<span class="required">*</span>”的选项为必填项，其余为选填项</li>
+			<li>有效期类型可选固定时间和自领取之日起<br />1、固定时间：选择结束日期，所有领取的优惠券有效期都截止在结束日期当天<br />2、自领取之日起：填写一个数字，表示从领取之日起有效期持续多少天</li>
+		</ul>
+	</div>
+</div>
+
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>优惠券名称：</label>
+		<div class="layui-input-block">
+			<input type="text" name="platformcoupon_name" value="{$platformcoupon_type_info.platformcoupon_name}" lay-verify="required" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>优惠券面额：</label>
+		<div class="layui-input-block">
+			<div class="layui-input-inline">
+				<input type="number" name="money" value="{$platformcoupon_type_info.money}" lay-verify="required|number|money|gtzero" autocomplete="off" class="layui-input ns-len-short">
+			</div>
+			<span class="layui-form-mid">元</span>
+		</div>
+		<div class="ns-word-aux">
+			<p>价格不能小于0，可保留两位小数</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>使用场景：</label>
+		<div class="layui-input-block">
+			<input type="radio" name="use_scenario" lay-filter="use_scenario" value="1" title="全场通用" {if $platformcoupon_type_info.use_scenario == 1} checked {/if}>
+			<input type="radio" name="use_scenario" lay-filter="use_scenario" value="2" title="指定店铺" {if $platformcoupon_type_info.use_scenario == 2} checked {/if}>
+		</div>
+	</div>
+
+	<div class="layui-form-item group_list" {if $platformcoupon_type_info.use_scenario == 1} style="display: none" {/if}>
+		<label class="layui-form-label"></label>
+		<div class="layui-input-block ns-len-long">
+			{foreach $group_list as $k=>$v}
+			<input type="checkbox" name="group_ids[{$k}]" value="{$v['group_id']}"  lay-skin="primary" title="{$v['group_name']}" {if in_array($v['group_id'],explode(",", $platformcoupon_type_info['group_ids']))} checked="" {/if}>
+			{/foreach}
+		</div>
+	</div>
+
+
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>店铺分担比率：</label>
+		<div class="layui-input-block">
+			<div class="layui-input-inline">
+				<input type="number" name="shop_split_rare" value="{$platformcoupon_type_info.shop_split_rare}" min="0" lay-verify="required|number|money|rate" autocomplete="off" class="layui-input ns-len-short">
+			</div>
+			<span class="layui-form-mid">%</span>
+		</div>
+		<div class="ns-word-aux">
+			<p>订单使用时的平台优惠券优惠店铺承担部分</p>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>发放数量：</label>
+		<div class="layui-input-block">
+			<div class="layui-input-inline">
+				<input type="number" name="count" min=0 value="{$platformcoupon_type_info.count}" lay-verify="required|number|int|gtzero" autocomplete="off" class="layui-input ns-len-short">
+			</div>
+			<span class="layui-form-mid">张</span>
+		</div>
+		<div class="ns-word-aux">
+			<p>数量不能小于0，且必须为整数</p>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>最大领取数量：</label>
+		<div class="layui-input-block">
+			<div class="layui-input-inline">
+				<input type="number" name="max_fetch" min=0 value="{$platformcoupon_type_info.max_fetch}" lay-verify="required|number|int|max" autocomplete="off" class="layui-input ns-len-short">
+			</div>
+			<span class="layui-form-mid">张</span>
+		</div>
+		<div class="ns-word-aux">
+			<p>数量不能小于0，且必须为整数；设置为0时，可无限领取</p>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>满多少元可以使用：</label>
+		<div class="layui-input-block">
+			<div class="layui-input-inline">
+				<input type="number" name="at_least" value="{$platformcoupon_type_info.at_least}" lay-verify="required|number|money" autocomplete="off" class="layui-input ns-len-short">
+			</div>
+			<span class="layui-form-mid">元</span>
+		</div>
+		<div class="ns-word-aux">
+			<p>价格不能小于0，可保留两位小数</p>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">优惠券图片：</label>
+		<div class="layui-input-inline img-upload">
+			<input type="hidden" class="layui-input" name="image" value="{$platformcoupon_type_info.image}" />
+			<div class="upload-img-block icon">
+				<div class="upload-img-box" id="platformcouponImg">
+					{if condition="$platformcoupon_type_info.image"}
+					<img src="{:img($platformcoupon_type_info.image)}" />
+					{else/}
+					<div class="ns-upload-default">
+						<img src="SHOP_IMG/upload_img.png" />
+						<p>点击上传</p>
+					</div>
+					{/if}
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否允许直接领取：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="is_show" min=0 lay-filter="" value="1" lay-skin="switch" {if condition="$platformcoupon_type_info.is_show == 1"}checked{/if} />
+		</div>
+	</div> 
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">有效期类型：</label>
+		<div class="layui-input-block">
+			<input type="radio" name="validity_type" value="0" lay-filter="filter" title="固定时间" {if condition="$platformcoupon_type_info.validity_type == 0"}checked{/if}>
+			<input type="radio" name="validity_type" value="1" lay-filter="filter" title="领取之日起" {if condition="$platformcoupon_type_info.validity_type == 1"}checked{/if}>
+		</div> 
+	</div> 
+	
+	<div class="layui-form-item ns-end-time">
+		<label class="layui-form-label ">活动结束时间：</label>
+		<div class="layui-input-block">
+			<input type="text" name="end_time" value="{:date('Y-m-d H:i:s', $platformcoupon_type_info.end_time)}" lay-verify="time" id="end_time" class="layui-input ns-len-mid" readonly>
+		</div>
+	</div>
+	
+	<div class="layui-form-item ns-fixed-term">
+		<label class="layui-form-label">领取后几天有效：</label>
+		<div class="layui-input-block">
+			<div class="layui-input-inline">
+				<input type="number" name="fixed_term" value="{$platformcoupon_type_info.fixed_term}" lay-verify="days" autocomplete="off"
+				 class="layui-input ns-len-short">
+			</div>
+			<span class="layui-form-mid">天</span>
+		</div>
+		<div class="ns-word-aux">
+			<p>不能小于0，且必须为整数</p>
+		</div>
+	</div>
+	
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+
+	<input type="hidden" name="platformcoupon_type_id" value="{$platformcoupon_type_info.platformcoupon_type_id}" />
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['laydate', 'form', 'upload'], function() {
+		var validity_type = $("input[name='validity_type']:checked").val();
+		if (validity_type == 0) {
+			$('.ns-end-time').removeClass('layui-hide');
+			$('.ns-fixed-term').addClass('layui-hide');
+		} else {
+			$('.ns-fixed-term').removeClass('layui-hide');
+			$('.ns-end-time').addClass('layui-hide');
+		}
+		
+		var form = layui.form,
+			upload = layui.upload,
+			laydate = layui.laydate,
+			repeat_flag = false; //防重复标识
+		form.render();
+
+		// 时间模块
+		laydate.render({
+			elem: '#end_time', //指定元素
+			type: 'datetime'
+		});
+
+        //监听活动商品类型
+        form.on('radio(use_scenario)', function(data){
+            var value = data.value;
+            if(value == 1){
+                $(".group_list").hide();
+            }
+            if(value == 2){
+                $(".group_list").show();
+            }
+        });
+
+		/**
+		 * 监听表单提交
+		 */
+		form.on('submit(save)', function(data) {
+			if (repeat_flag) return false;
+			var field = data.field;
+
+
+			repeat_flag = true;
+			
+			$.ajax({
+				url: ns.url("platformcoupon://admin/platformcoupon/edit"),
+				data: data.field,
+				dataType: 'JSON',
+				type: 'POST',
+				success: function(res) {
+					repeat_flag = false;
+					
+					if (res.code == 0) {
+						layer.confirm('编辑成功', {
+							title:'操作提示',
+							btn: ['返回列表', '继续操作'],
+							yes: function(){
+								location.href = ns.url("platformcoupon://admin/platformcoupon/lists")
+							},
+							btn2: function() {
+								location.reload();
+							}
+						});
+					}else{
+						layer.msg(res.message);
+					}
+				}
+			});
+		});
+		
+		// 监听单选按钮
+		form.on('radio(filter)', function(data) {
+			if (data.value == 0) {
+				$('.ns-end-time').removeClass('layui-hide');
+				$('.ns-fixed-term').addClass('layui-hide');
+			} else {
+				$('.ns-fixed-term').removeClass('layui-hide');
+				$('.ns-end-time').addClass('layui-hide');
+			}
+		});
+		
+		// 图片上传
+		var uploadInst = upload.render({
+			elem: '#platformcouponImg',
+			url: ns.url("admin/upload/upload"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='image']").val(res.data.pic_path);
+					$("#platformcouponImg").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+		
+		form.verify({
+			days: function(value) {
+				if (value == '') {
+					return;
+				}
+				if (value%1 != 0) {
+					return '请输入整数';
+				}
+			},
+			rate: function(value){
+				if (value > 100) {
+					return '分担比率不能大于100';
+				}
+			},
+			number: function (value) {
+				if (value < 0) {
+					return '请输入不小于0的数!'
+				}
+			},
+			int: function (value) {
+				if (value%1 != 0) {
+					return '请输入整数!'
+				}
+				if (value <= 0) {
+					return '请输入大于0的数!'
+				}
+			},
+			money: function (value) {
+				var arrMen = value.split(".");
+				var val = 0;
+				if (arrMen.length == 2) {
+					val = arrMen[1];
+				}
+				if (val.length > 2) {
+					return '保留小数点后两位'
+				}
+			},
+			time: function(value) {
+				var now_time = (new Date()).getTime();
+				var end_time = (new Date(value)).getTime();
+				if (now_time > end_time) {
+					return '结束时间不能小于当前时间!'
+				}
+			},
+			gtzero: function(value) {
+				if (parseFloat(value) <= 0) {
+					return '请输入大于0的数!'
+				}
+			},
+			max: function(value) {
+				var _count = $("input[name=count]").val();
+
+				if (parseInt(value) > parseInt(_count)) {
+					return '最大领取数量不能超过发放数量!';
+				}
+			}
+		});
+	});
+
+	function back() {
+		location.href = ns.url("platformcoupon://admin/platformcoupon/lists");
+	}
+</script>
+{/block}

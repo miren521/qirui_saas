@@ -1,0 +1,217 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+    .ns-card-common:first-of-type{margin-top: 0;}
+    .layui-card-body{display: flex;padding-bottom: 0 !important;padding-right: 50px !important;padding-left: 50px !important;flex-wrap: wrap;}
+    .layui-card-body .content{width: 33.3%;display: flex;flex-direction: column;margin-bottom: 30px;justify-content: center;}
+    .layui-card-body .money{font-size: 20px;color: #666;font-weight: bold;margin-top: 10px;max-width: 250px;}
+    .layui-card-body .subhead{font-size: 12px;margin-left: 3px;cursor: pointer;}
+	.ns-single-filter-box {background-color: transparent;}
+</style>
+
+{/block}
+{block name='main'}
+
+
+<!-- 筛选面板 -->
+<div class="ns-single-filter-box">
+    <div class="layui-form">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <input type="text" name="start_time" id="start_time" placeholder="开始时间" class="layui-input" autocomplete="off" readonly>
+                <i class="ns-calendar"></i>
+            </div>
+            <div class="layui-input-inline end-time">
+                <input type="text" name="end_time" id="end_time" placeholder="结束时间" class="layui-input" autocomplete="off" readonly>
+                <i class="ns-calendar"></i>
+            </div>
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="search">搜索</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- 列表 -->
+<table id="account_list" lay-filter="account_list"></table>
+{/block}
+{block name="script"}
+
+<!--操作-->
+<script type="text/html" id="action">
+    <div class="ns-table-btn">
+        <a class="layui-btn" lay-event="detail">查看</a>
+    </div>
+</script>
+<!--操作-->
+<script type="text/html" id="money">
+	<span style="color: red; padding-right: 30px;">￥{{ d.money }}</span>
+</script>
+
+<script type="text/html" id="certificate">
+    <div class="ns-table-tuwen-box">
+        <div class="ns-img-box">
+            <img layer-src src="{{ns.img(d.paying_money_certificate.split(',')[0])}}"/>
+        </div>
+    </div>
+</script>
+
+<script>
+    var start_time,end_time;
+    layui.use(['element', 'laytpl','laydate','form'], function () {
+        var table,
+            form = layui.form,
+            laydate = layui.laydate,
+            element = layui.element,
+            laytpl = layui.laytpl;
+		form.render();
+
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time' //指定元素
+            ,done: function(value, date, endDate){
+                start_time = ns.date_to_time(value);
+
+            }
+        });
+        //结束时间
+        laydate.render({
+            elem: '#end_time' //指定元素
+            ,done: function(value, date, endDate){
+                end_time = ns.date_to_time(value);
+            }
+        });
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function (data) {
+            data.field.start_time = start_time;
+            data.field.end_time = end_time;
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+            return false;
+        });
+
+        var table = new Table({
+            elem: '#account_list',
+            url: ns.url("city://city/withdraw/lists"),
+            cols: [
+                [{
+                    field: 'withdraw_no',
+                    title: '账单编号',
+                    unresize: 'false',
+					width: '20%'
+                }, {
+                    field:'money',
+                    title: '转账金额（元）',
+                    unresize: 'false',
+					align: 'right',
+					width: '10%',
+                    templet: '#money'
+                }, {
+                    title: '付款凭证',
+                    unresize: 'false',
+                    templet: '#certificate',
+					width: '15%'
+                }, {
+                    field:'paying_money_certificate_explain',
+                    title: '付款凭证说明',
+                    unresize: 'false',
+					width: '25%'
+                }, {
+                    field: 'apply_time',
+                    title: '时间',
+                    unresize: 'false',
+                    width:'20%',
+                    templet: function (res){
+                        if(res.payment_time == 0){
+                            return '--';
+                        }else{
+                            return ns.time_to_date(res.payment_time)
+                        }
+                    }
+                },{
+                    title: '操作',
+                    unresize: 'false',
+                    templet: '#action',
+					width: '10%'
+                }]
+            ]
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data,
+                event = obj.event;
+
+            switch (event){
+                case 'detail': //查看
+                    withdrawDetail(data);
+                    break;
+            }
+        });
+
+        //详情
+        function withdrawDetail(data) {
+            var detailHtml = $("#withdrawDetail").html();
+            laytpl(detailHtml).render(data, function(html) {
+                layer.open({
+                    type: 1,
+                    title: '提现详情',
+                    area: ['500px'],
+                    content: html
+
+                });
+            })
+        }
+
+    });
+
+
+
+    $(".withdrawal-record").click(function () {
+        location.href = ns.url("city://city/withdraw/lists");
+    });
+
+</script>
+
+<script type="text/html" id="withdrawDetail">
+    <table class="layui-table">
+        <colgroup>
+            <col width="150">
+            <col width="200">
+        </colgroup>
+        <tbody>
+        <tr>
+            <td>账单编号</td>
+            <td>{{d.withdraw_no}}</td>
+        </tr>
+        <tr>
+            <td>转账金额</td>
+            <td>￥ {{d.money}}</td>
+        </tr>
+        <tr>
+            <td>转账凭证</td>
+            <td><img src="{{ ns.img(d.paying_money_certificate) }}" alt=""></td>
+        </tr>
+        <tr>
+            <td>转账凭证说明</td>
+            <td>{{ d.paying_money_certificate_explain }}</td>
+        </tr>
+        <tr>
+            <td>转账时间</td>
+            <td>{{ ns.time_to_date(d.payment_time) }}</td>
+        </tr>
+
+        </tbody>
+    </table>
+</script>
+
+{/block}

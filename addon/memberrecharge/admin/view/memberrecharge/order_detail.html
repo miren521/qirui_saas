@@ -1,0 +1,122 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.layui-colla-content li { line-height: 30px; }
+</style>
+{/block}
+{block name="main"}
+
+<div class="layui-card ns-card-common ns-card-brief">
+	<div class="layui-card-header">
+		<span class="ns-card-title">订单详情</span>
+	</div>
+
+	<div class="layui-card-body">
+		<div class="layui-form-item">
+			<label class="layui-form-label">订单号：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{$order.data.order_no}</p>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">客户头像：</label>
+			<div class="layui-input-inline img-upload">
+				<div class="upload-img-block icon square">
+					<div class="upload-img-box">
+						<img class="member_img" layer-src src="" />
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">客户昵称：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{$order.data.nickname}</p>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">套餐名称：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{$order.data.recharge_name}</p>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">封面：</label>
+			<div class="layui-input-inline img-upload">
+				<div class="upload-img-block icon square">
+					<div class="upload-img-box">
+						<img class="cover_img" layer-src src="" />
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">面值：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{$order.data.face_value}</p>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">金额：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{$order.data.buy_price}</p>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">积分：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{$order.data.point}</p>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">成长值：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{$order.data.growth}</p>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">支付方式：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{$order.data.pay_type_name}</p>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">支付时间：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{:date('Y-m-d H:i:s', $order.data.pay_time)}</p>
+			</div>
+		</div>
+		
+		<div class="ns-form-row">
+			<button type="reset" class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+		</div>
+	</div>
+</div>
+
+{/block}
+{block name="script"}
+<script>
+
+    var member_img = "{$order.data.member_img}";
+    member_img = ns.img(member_img);
+    $(".member_img").attr("src",member_img);
+    
+    var cover_img = "{$order.data.cover_img}";
+    cover_img = ns.img(cover_img);
+    $(".cover_img").attr("src",cover_img);
+	
+	function back() {
+		location.href = ns.url("memberrecharge://admin/memberrecharge/card_lists")
+	}
+</script>
+{/block}

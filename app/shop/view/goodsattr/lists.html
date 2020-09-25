@@ -1,0 +1,88 @@
+{extend name="base"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>平台已经维护好对应的商品类型和属性，如果满足不了您的需求，可以编辑属性</li>
+			<li>前台用户可以根据分类关联的类型在搜索分类商品之后根据属性进行进一步的搜索</li>
+		</ul>
+	</div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<input type="text" name="search_keys" placeholder="请输入商品类型名称" autocomplete="off" class="layui-input">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+				<i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- 列表 -->
+<table id="attr_class_list" lay-filter="attr_class_list"></table>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="edit">属性管理</a>
+	</div>
+</script>
+{/block}
+{block name="script"}
+<script>
+	var laytpl, add_attr_index = -1, form, table;
+	layui.use(['form','laytpl'], function() {
+		laytpl = layui.laytpl;
+		form = layui.form;
+		form.render();
+		
+		table = new Table({
+			elem: '#attr_class_list',
+			url: ns.url("shop/goodsattr/lists"),
+			cols: [
+				[{
+					field: 'class_name',
+					title: '类型名称',
+					width: '80%',
+					unresize: 'false'
+				}, {
+					title: '操作',
+					width: '20%',
+					toolbar: '#action',
+					unresize: 'false'
+				}]
+			]
+		});
+		
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'edit':
+					location.href = ns.url("shop/goodsattr/editattr",{"class_id":data.class_id});
+					break;
+			}
+		});
+		
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data){
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+	});
+</script>
+{/block}

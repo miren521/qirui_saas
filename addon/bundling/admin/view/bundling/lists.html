@@ -1,0 +1,204 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>优惠套餐显示在商品详情，是一种捆绑购买的优惠活动</li>
+			<li>商家可以选择发布组合套餐，同时可以设置套餐价格</li>
+		</ul>
+	</div>
+</div>
+<div class="ns-screen layui-collapse" lay-filter="selection_panel">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">筛选</h2>
+		<form class="layui-colla-content layui-form layui-show">
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">活动名称：</label>
+					<div class="layui-input-inline">
+						<input type="text" id="bl_name" name="bl_name" placeholder="请输入活动名称" class="layui-input" autocomplete="off">
+					</div>
+				</div>
+				
+				<div class="layui-inline">
+					<label class="layui-form-label">店铺名称：</label>
+					<div class="layui-input-inline">
+						<input type="text" id="search_text" name="search_text" placeholder="请输入店铺名称" class="layui-input" autocomplete="off">
+					</div>
+				</div>
+				
+				<!--<div class="layui-inline">-->
+					<!--<label class="layui-form-label">状态：</label>-->
+					<!--<div class="layui-input-inline">-->
+						<!--<select name="status" lay-filter="status">-->
+							<!--<option value=""></option>-->
+							<!--<option value="1">开启</option>-->
+							<!--<option value="0">关闭</option>-->
+						<!--</select>-->
+					<!--</div>-->
+				<!--</div>-->
+			</div>
+			
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="search">筛选</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="bundling_tab">
+	<ul class="layui-tab-title">
+		<li class="layui-this" lay-id="_all">全部</li>
+		<li lay-id="1_open">已开启</li>
+		<li lay-id="0_close">已关闭</li>
+	</ul>
+	<div class="layui-tab-content">
+		
+		<div class="layui-tab-item layui-show">
+			<!-- 列表 -->
+			<table id="activity_list" lay-filter="activity_list"></table>
+		</div>
+		
+	</div>
+</div>
+
+<!-- 状态 -->
+<script type="text/html" id="status">
+	{{ d.status == 0 ? '<span style="color: red">关闭</span>' : '<span style="color: green">开启</span>' }}
+</script>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="detail">详情</a>
+		<a class="layui-btn" lay-event="delete">删除</a>
+	</div>
+</script>
+{/block}
+{block name="script"}
+<script>
+    layui.use(['form','element'], function() {
+        var table,
+			element = layui.element,
+            form = layui.form;
+
+		form.render();
+	
+		//监听Tab切换，以改变地址hash值
+		element.on('tab(bundling_tab)', function(){
+			var id = this.getAttribute('lay-id');
+			location.hash = 'bundling_tab='+ id;
+			var status = id.split("_")[0];
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: { status : status }
+			});
+		});
+		
+        table = new Table({
+			elem: '#activity_list',
+			url: ns.url("bundling://admin/bundling/lists"),
+            cols: [
+                [{
+                	field: 'bl_name',
+                	title: '名称',
+                	unresize: 'false',
+                	width: '20%'
+                },{
+					field: 'site_name',
+					title: '店铺名称',
+					unresize: 'false',
+					width: '10%'
+				}, {
+                	field: 'bl_price',
+                	title: '商品优惠价格',
+                	unresize: 'false',
+                	width: '15%',
+					align: 'right',
+					templet: function(data) {
+						return '<span>￥'+ data.bl_price +'</span>';
+					}
+                }, {
+                	field: 'goods_money',
+                	title: '<span style="padding-right: 15px;">商品总价</span>',
+                	unresize: 'false',
+                	width: '15%',
+					align: 'right',
+					templet: function(data) {
+						return '<span style="padding-right: 15px;">￥'+ data.goods_money +'</span>';
+					}
+                }, {
+                	title: '状态',
+                	unresize: 'false',
+                	width: '10%',
+                	templet: '#status'
+                }, {
+                	field: 'update_time',
+                	title: '创建时间',
+                	unresize: 'false',
+                	width: '15%',
+                	templet: function(data) {
+                		return ns.time_to_date(data.update_time);
+                	}
+                }, {
+                	title: '操作',
+                	toolbar: '#action',
+                	unresize: 'false',
+                	width: '15%'
+                }]
+            ]
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'detail': //详情
+                    location.href = ns.url("bundling://admin/bundling/detail?bl_id=" + data.bl_id + "&site_id=" +data.site_id);
+                    break;
+
+				case 'delete': //删除
+					deleteBunding(data.bl_id, data.site_id);
+            }
+        });
+
+        //删除组合套餐
+        function deleteBunding(bl_id, site_id){
+			$.ajax({
+				url: ns.url("bundling://admin/bundling/delete"),
+				data: {bl_id, site_id},
+				dataType: 'JSON',
+				type: 'POST',
+				async: false,
+				success: function(res) {
+					layer.msg(res.message);
+					if(res.code == 0){
+						table.reload();
+					}
+				}
+			});
+		}
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function(data) {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+			return false;
+        });
+    });
+</script>
+{/block}

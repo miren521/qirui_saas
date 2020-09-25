@@ -1,0 +1,323 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	.ns-table-tuwen-box .ns-font-box {
+		overflow: inherit;
+	}
+	
+    .ns-card-head-right {
+        display: flex;
+        align-items: center;
+    }
+
+    .ns-card-head-right .layui-form-item {
+        margin-bottom: 0;
+    }
+	
+	.current-time, .ns-flow-time-today {
+		margin-left: 10px;
+		line-height: 34px;
+	}
+
+	/* 基本信息 */
+	.ns-basic {
+		display: flex;
+	}
+	
+	.ns-basic .ns-table-tuwen-box {
+		width: 25%;
+		border-right: 1px solid #EEEEEE;
+		padding: 10px 20px;
+	}
+	
+	.ns-basic-count {
+		font-size: 20px;
+		font-weight: 600;
+	}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-card ns-card-common ns-card-brief">
+	<div class="layui-card-header">
+		<span class="ns-card-title">实时概况</span>
+		
+		<div class="ns-card-head-right layui-form">
+			<div class="layui-form-item">
+				<div class="layui-input-block ns-len-mid">
+					<select name="date" lay-filter="date">
+						<option value="0">今日实时</option>
+						<option value="1">近7天</option>
+						<option value="2">近30天</option>
+					</select>
+				</div>
+			</div>
+			<div class="ns-flow-time">
+				<div class="ns-flow-time-today"></div>
+			</div>
+		</div>
+    </div>
+	
+	<div class="layui-card-body ns-basic">
+		<div class="ns-table-tuwen-box">
+			<div class="ns-img-box">
+				<img src="ADMIN_IMG/stat/goods_browse.png">
+			</div>
+			<div class="ns-font-box">
+				<p class="ns-text-color-dark-gray">商品浏览数</p>
+				<p class="ns-basic-count" id="visitCount">0</p>
+			</div>
+		</div>
+		<div class="ns-table-tuwen-box">
+			<div class="ns-img-box">
+				<img src="ADMIN_IMG/stat/goods_collect.png">
+			</div>
+			<div class="ns-font-box">
+				<div class="ns-text-color-dark-gray ns-prompt-block">
+					商品收藏数&nbsp;&nbsp;
+					<div class="ns-prompt">
+						<i class="iconfont iconwenhao1"></i>
+						<div class="ns-prompt-box">
+							<div class="ns-prompt-con">
+								用户收藏的商品总数
+							</div>
+						</div>
+					</div>
+				</div>
+				<p class="ns-basic-count" id="collectGoods">0</p>
+			</div>
+		</div>
+		<div class="ns-table-tuwen-box">
+			<div class="ns-img-box">
+				<img src="ADMIN_IMG/stat/goods_order.png">
+			</div>
+			<div class="ns-font-box">
+				<p class="ns-text-color-dark-gray">订单商品数</p>
+				<p class="ns-basic-count" id="goodsPayCount">0</p>
+			</div>
+		</div>
+        <div class="ns-table-tuwen-box">
+            <div class="ns-img-box">
+                <img src="ADMIN_IMG/stat/shop_collect.png">
+            </div>
+            <div class="ns-font-box">
+                <p class="ns-text-color-dark-gray">店铺收藏数</p>
+                <p class="ns-basic-count" id="collectShop">0</p>
+            </div>
+        </div>
+	</div>
+    <div class="layui-card-body ns-basic">
+        <div class="ns-table-tuwen-box">
+            <div class="ns-img-box">
+                <img src="ADMIN_IMG/stat/order_money.png">
+            </div>
+            <div class="ns-font-box">
+				<div class="ns-text-color-dark-gray ns-prompt-block">
+					订单金额&nbsp;&nbsp;
+					<div class="ns-prompt">
+						<i class="iconfont iconwenhao1"></i>
+						<div class="ns-prompt-box">
+							<div class="ns-prompt-con">
+								商城已付款的订单总金额
+							</div>
+						</div>
+					</div>
+				</div>
+                <p class="ns-basic-count" id="orderTotal">0</p>
+            </div>
+        </div>
+        <div class="ns-table-tuwen-box">
+            <div class="ns-img-box">
+                <img src="ADMIN_IMG/stat/order_num.png">
+            </div>
+            <div class="ns-font-box">
+                <p class="ns-text-color-dark-gray">订单数</p>
+                <p class="ns-basic-count" id="orderPayCount">0</p>
+            </div>
+        </div>
+        <div class="ns-table-tuwen-box">
+            <div class="ns-img-box">
+                <img src="ADMIN_IMG/stat/member_num.png">
+            </div>
+            <div class="ns-font-box">
+				<div class="ns-text-color-dark-gray ns-prompt-block">
+					会员人数&nbsp;&nbsp;
+					<div class="ns-prompt">
+						<i class="iconfont iconwenhao1"></i>
+						<div class="ns-prompt-box">
+							<div class="ns-prompt-con">
+								商城中存在的会员人数
+							</div>
+						</div>
+					</div>
+				</div>
+                <p class="ns-basic-count" id="memberCount">0</p>
+            </div>
+        </div>
+        <div class="ns-table-tuwen-box">
+        </div>
+    </div>
+</div>
+
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+		<span class="ns-card-title">趋势分析</span>
+		
+		<div class="ns-card-head-right layui-form">
+			<div class="layui-form-item">
+				<div class="layui-input-block ns-len-mid">
+					<select name="date" lay-filter="date_chart">
+						<option value="1">近7天</option>
+						<option value="2">近30天</option>
+					</select>
+				</div>
+			</div>
+			<span class="current-time"></span>
+		</div>
+    </div>
+	<div class="layui-card-body ns-basic">
+		<div id="main" style="width: 100%; height: 400px;"></div>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script src="SHOP_JS/echarts.min.js"></script>
+<script>
+    $(function() {
+        getStat(0);
+        getStatChart(1);
+    });
+
+    layui.use(['form'], function() {
+        var form = layui.form;
+
+        /**
+         * 监听下拉框
+         */
+        form.on('select(date)', function(data) {
+            getStat(data.value);
+        });
+
+        /**
+         * 图表监听下拉框
+         */
+        form.on('select(date_chart)', function(data) {
+            getStatChart(data.value);
+        });
+    });
+
+    //获取店铺统计
+    function getStat(date_type){
+        $.ajax({
+            dataType: 'JSON',
+            type: 'POST',
+            url: ns.url("admin/stat/index"),
+            data: {
+                date_type: date_type
+            },
+            success: function(res){
+                console.log(res);
+                if (res.code == 0) {
+                    $("#collectShop").html(res.data.collect_shop);
+                    $("#collectGoods").html(res.data.collect_goods);
+                    $("#visitCount").html(res.data.visit_count);
+                    $("#orderTotal").html(res.data.order_total);
+                    $("#orderPayCount").html(res.data.order_pay_count);
+                    $("#goodsPayCount").html(res.data.goods_pay_count);
+                    $("#memberCount").html(res.data.member_count);
+                    $(".ns-flow-time-today").html(res.data.time_range);
+                }else{
+                    layer.msg(res.message);
+                }
+            }
+        });
+    }
+
+    //获取店铺统计图表
+    function getStatChart(date_type){
+        $.ajax({
+            dataType: 'JSON',
+            type: 'POST',
+            url: ns.url("admin/stat/getstatlist"),
+            data: {
+                date_type: date_type
+            },
+            success: function(res){
+                console.log(res);
+                option.xAxis.data = res.time;
+                option.series[0].data = res.visit_count;
+                option.series[1].data = res.collect_goods;
+                option.series[2].data = res.goods_pay_count;
+                option.series[3].data = res.collect_shop;
+                option.series[4].data = res.order_total;
+                option.series[5].data = res.order_pay_count;
+                option.series[6].data = res.member_count;
+                $(".current-time").html(res.time_range);
+                myChart.setOption(option);
+            }
+        });
+    }
+
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
+
+    // 指定图表的配置项和数据
+    option = {
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data: ['商品浏览数', '商品收藏数', '订单商品数', '店铺收藏数', '订单金额', '订单数', '会员人数']
+        },
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: []
+        },
+        yAxis: {
+            type: 'value',
+            axisLabel: {
+                formatter: '{value} 个'
+            }
+        },
+        series: [{
+                name: '商品浏览数',
+                type: 'line',
+                data: [],
+            },
+            {
+                name: '商品收藏数',
+                type: 'line',
+                data: [],
+            },
+            {
+                name: '订单商品数',
+                type: 'line',
+                data: [],
+            },
+            {
+                name: '店铺收藏数',
+                type: 'line',
+                data: [],
+            },
+            {
+                name: '订单金额',
+                type: 'line',
+                data: [],
+            },
+            {
+                name: '订单数',
+                type: 'line',
+                data: [],
+            },
+            {
+                name: '会员人数',
+                type: 'line',
+                data: [],
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+{/block}

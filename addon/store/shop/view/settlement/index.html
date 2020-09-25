@@ -1,0 +1,269 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<style>
+    .layui-card-body{
+        display: flex;
+        justify-content: space-around;
+    }
+    .layui-card-body .money{
+        font-size: 20px;
+        color: #000;
+        font-weight: bold;
+        margin-top: 10px;
+        text-align: center;
+        max-width: 250px;
+    }
+    .layui-card-body .subhead{
+        font-size: 12px;
+        margin-left: 3px;
+        cursor: pointer;
+    }
+</style>
+
+{/block}
+{block name='main'}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>页面展示商家所有的门店进行的结算操作</li>
+			<li>商家可在此查看结算详情以及结算操作</li>
+		</ul>
+	</div>
+</div>
+
+<!-- 筛选面板 -->
+<div class="ns-single-filter-box">
+    <div class="layui-form">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <input type="text" name="start_time" id="start_time" placeholder="开始时间" class="layui-input" autocomplete="off" readonly>
+                <i class="ns-calendar"></i>
+            </div>
+            <div class="layui-input-inline end-time">
+                <input type="text" name="end_time" id="end_time" placeholder="结束时间" class="layui-input" autocomplete="off" readonly>
+                <i class="ns-calendar"></i>
+            </div>
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="search">搜索</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="layui-tab ns-table-tab" lay-filter="goods_list_tab">
+
+    <div class="layui-tab-content">
+        <!-- 列表 -->
+        <table id="account_list" lay-filter="account_list"></table>
+    </div>
+
+</div>
+
+{/block}
+{block name="script"}
+<script type="text/html" id="action">
+    <div class="ns-table-btn">
+        {{# if(d.is_settlement == 0){ }}
+        <a class="layui-btn" lay-event="settlement">结算</a>
+        {{# } }}
+        <a class="layui-btn" lay-event="detail">详情</a>
+    </div>
+</script>
+
+<script type="text/html" id="shop_money">
+    <span style="color: red;">￥{{d.shop_money}}</span>
+</script>
+
+<script type="text/html" id="reviewReason">
+    <div class="layui-form">
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label"><span class="required">*</span>结算备注：</label>
+            <div class="layui-input-block ns-len-mid">
+                <textarea name="remark" lay-verify="required" placeholder="请输入内容" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <input name="settlement_id" value="{{d.id}}" type="hidden"/>
+        <div class="ns-form-row">
+            <button class="layui-btn ns-bg-color" lay-submit lay-filter="save">结算</button>
+            <button onclick="cancel()" class="layui-btn layui-btn-primary">取消</button>
+        </div>
+    </div>
+</script>
+
+
+<script>
+    var start_time,end_time,
+        repeat_flag = false;
+    layui.use(['element','laydate','form','laytpl'], function () {
+        var element = layui.element,
+            laydate = layui.laydate,
+            laytpl = layui.laytpl,
+            form = layui.form;
+		form.render();
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time' //指定元素
+            ,done: function(value, date, endDate){
+                start_time = ns.date_to_time(value);
+
+            }
+        });
+        //结束时间
+        laydate.render({
+            elem: '#end_time' //指定元素
+            ,done: function(value, date, endDate){
+                end_time = ns.date_to_time(value);
+            }
+        });
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function (data) {
+            data.field.start_time = start_time;
+            data.field.end_time = end_time;
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+            return false;
+        });
+
+        function settlement(data) {
+            laytpl($("#reviewReason").html()).render(data, function(html){
+                layer.open({
+                    type: 1,
+                    title:'结算',
+                    content: html,
+                    area: ['650px']
+                });
+            })
+        }
+
+        form.on('submit(save)', function (data) {
+            if (repeat_flag) return;
+            repeat_flag = true;
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("store://shop/settlement/settlement"),
+                data: data.field,
+                success: function(res) {
+                    repeat_flag = false;
+                    if (res.code == 0) {
+                        layer.msg('操作成功！');
+                        location.reload();
+                    }else{
+                        layer.msg(res.message);
+                    }
+                }
+            });
+        });
+
+
+        var table = new Table({
+            elem: '#account_list',
+            url: ns.url("store://shop/settlement/index"),
+            cols: [
+                [{
+                    field:'settlement_no',
+                    title: '账单编号',
+                    unresize: 'false',
+                    width:'16%',
+                },{
+                    field: 'store_name',
+                    title: '门店',
+                    width:'8%',
+                }, {
+                    title: '订单总额',
+                    unresize: 'false',
+                    width:'10%',
+					align: 'right',
+                    templet: function (res){
+                        return '￥' + (res.order_money*1 + res.offline_order_money*1 - res.refund_shop_money*1- res.offline_refund_money*1);
+                    }
+                }, {
+                    title: '线上结算金额',
+                    unresize: 'false',
+                    width:'10%',
+					align: 'right',
+                    templet: function (res) {
+                        return '<span style="color: red;">￥'+ (res.shop_money*1 - res.refund_shop_money*1 -res.commission*1) + '</span>';
+                    }
+                }, {
+                    title: '线下结算金额',
+                    unresize: 'false',
+                    width:'10%',
+					align: 'right',
+                    templet: function (res){
+                        return '<span style="color: red;">￥'+ (res.offline_order_money*1 - res.offline_refund_money*1) + '</span>';
+                    }
+                }, {
+                    title: '结算开始时间',
+                    unresize: 'false',
+                    width:'14%',
+                    templet: function (res){
+                        if(res.start_time == 0){
+                            return '--';
+                        }else{
+                            return ns.time_to_date(res.start_time)
+                        }
+                    }
+                }, {
+                    title: '结算结束时间',
+                    unresize: 'false',
+                    width:'14%',
+                    templet: function (res){
+                        if(res.end_time == 0){
+                            return '--';
+                        }else{
+                            return ns.time_to_date(res.end_time)
+                        }
+                    }
+                }, {
+                    title: '是否结算',
+                    unresize: 'false',
+                    width:'8%',
+                    templet: function (res){
+                        if (res.is_settlement) {
+                            return '已结算';
+                        } else {
+                            return '未结算';
+                        }
+                    }
+                }, {
+                    title: '操作',
+                    toolbar: '#action',
+                    unresize: 'false',
+                    width: '10%'
+                }]
+            ]
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'settlement': //编辑
+                    settlement(data);
+                    break;
+                case 'detail':
+                    location.href = ns.url("store://shop/settlement/detail", {'settlement_id': data.id});
+                    break;
+            }
+        });
+    });
+
+    function cancel(){
+        layer.closeAll()
+    }
+
+
+
+</script>
+{/block}

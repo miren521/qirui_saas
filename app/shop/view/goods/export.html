@@ -1,0 +1,107 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+    .layui-card-header{background-color:#f8f8f8}
+    .export-view{
+        /*width:1000px;*/
+        margin:30px 0 30px 0;
+
+    }
+    .apply-time{
+        float:left;
+    }
+    .download-button{
+        float:right;
+    }
+    .export-list-view{
+        font-size:12px;
+    }
+    .empty-content{margin:20px auto;text-align:center;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-layout layui-layout-admin">
+    <div class="export-view">
+        <div class="ns-body-content">
+            <div id="export_list"></div>
+        </div>
+    </div>
+</div>
+{/block}
+
+{block name="script"}
+<script type="text/html" id="exportHtml">
+    {{#  layui.each(d.data, function(index, item){ }}
+        <div class="layui-card export-list-view">
+            <div class="layui-card-header">
+                <div class="apply-time">
+                    导出时间：{{ ns.time_to_date(item.create_time) }}
+                </div>
+                <div class="download-button">
+                <a class="ns-text-color" href="{{ ns.img(item.path) }}">下载</a>
+                </div>
+            </div>
+            <div class="layui-card-body">
+                <div class="layui-row layui-col-space10">
+                    {{#  layui.each(JSON.parse(item.condition), function(condition_index, condition_item){ }}
+                    <div class="layui-col-md3">
+                        {{condition_item.name}}：{{condition_item.value || '-'}}
+                    </div>
+                    {{#  }); }}
+                </div>
+            </div>
+        </div>
+    {{#  }); }}
+    {{#  if(d.data.length === 0){ }}
+    <div class="layui-card export-list-view">
+        <div class="layui-card-header">
+            <div class="apply-time">
+                商品导出记录
+            </div>
+        </div>
+        <div class="layui-card-body">
+            <div class="layui-row layui-col-space10">
+                <div class="layui-col-md3">
+                    暂无导出记录
+                </div>
+            </div>
+        </div>
+    </div>
+    {{#  } }}
+
+</script>
+<script>
+
+    layui.use(['form', 'laytpl'], function() {
+        form = layui.form;
+        laytpl = layui.laytpl;
+        form.render();
+
+
+        exportList();
+
+
+
+    });
+
+    function exportList(){
+        $.ajax({
+            url: '{:addon_url("shop/goods/export")}',
+            data: {},
+            dataType: 'JSON',
+            type: 'POST',
+            success: function(res) {
+                var export_template = $("#exportHtml").html();
+
+                if(res.code >= 0){
+                    laytpl(export_template).render(res, function (html) {
+                        $("#export_list").html(html);
+                    })
+                }
+
+
+            }
+        });
+    }
+</script>
+{/block}

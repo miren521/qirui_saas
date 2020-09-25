@@ -1,0 +1,7 @@
+@CHARSET "UTF-8";
+.shop-info .img-wrap{width: 40px;display: inline-block;vertical-align: middle;}
+.shop-info .img-wrap img{width: 100%;}
+.shop-info .info-wrap{display: inline-block;vertical-align: middle;margin-left: 10px;}
+.shop-info .info-wrap .name{font-weight: bold;margin-bottom: 5px;}
+.shop-info .info-wrap .score{font-size: 12px;}
+.shop-info .operation{float: right;color:#fff;padding: 2px 10px;border-radius: 20px;}

@@ -1,0 +1,633 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/cart.css">
+{/block}
+{block name="body"}
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-cart">
+			<div class="ns-cart-list-wrap">
+				
+			</div>
+			<!-- 购物车为空 -->
+			{if $count > 0}
+			<div class="null-cart layui-hide">
+			{else/}
+			<div class="null-cart">
+			{/if}
+				<div class="null-cart-img"><img src="SHOP_SUPPLY_LOCAL_IMG/shopping_cart.png" /></div>
+				<div class="null-cart-font">
+					<p>您的供货单还是空的，赶紧行动吧！您可以：</p>
+					<p>看看 <a href="{:addon_url('supply://shop/goods/goodslist')}">商品列表</a></p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/html" id="cartList">
+	<div class="ns-cart-wrap layui-form">
+		<ul class="ns-cart-th">
+			<li><input type="checkbox" name="" lay-skin="primary" lay-filter="allSelected" checked></li>
+			<li>商品信息</li>
+			<li>价格</li>
+			<li>数量</li>
+			<li>小计</li>
+			<li>操作</li>
+		</ul>
+	
+		<div class="list">
+			{{#  layui.each(d, function(siteIndex, siteItem) {  }}
+			<div class="item">
+				<div class="head layui-form">
+					<input type="checkbox" name="" lay-skin="primary" lay-filter="siteSelected" data-site="{{siteIndex}}" checked>
+					<a href="#">{{ siteItem.site_name }}</a>
+					{{#  if (siteItem.is_own) {  }}
+					<span class="layui-badge">自营</span>
+					{{#  }  }}
+				</div>
+				
+				{{#  layui.each(siteItem.goodsList, function(goodsIndex, goodsItem) {  }}
+					<ul data-site="{{siteIndex}}" data-sku="{{goodsIndex}}" data-sku_id="{{goodsItem.sku_id}}">
+						<li>
+							<input type="checkbox" name="" lay-skin="primary" lay-filter="goodsSelected" data-site="{{siteIndex}}" data-sku="{{goodsIndex}}" data-site_id="{{siteItem.site_id}}" data-cart_id="{{goodsItem.cart_id}}" checked>
+						</li>
+						<li class="goods-info-wrap">
+							<div class="img-wrap" onclick="goodsDetail({{goodsItem.sku_id}})"><img class="img-thumbnail" src="{{ns.img(goodsItem.sku_image)}}" onerror="this.src = 'SHOP_SUPPLY_LOCAL_IMG/default_goods.png' " /></div>
+							<div class="info-wrap">
+								<h5 onclick="goodsDetail({{goodsItem.sku_id}})">{{ goodsItem.sku_name }}</h5>
+								
+								{{#  if (goodsItem.sku_spec_format) {  }}
+									{{#  var sku_spec = JSON.parse(goodsItem.sku_spec_format)  }}
+								{{#  }  }}
+								
+								{{#  layui.each(sku_spec, function(k, v) {  }}
+									<span> {{ v.spec_name }}：{{ v.spec_value_name }}{{ k < goodsItem.sku_spec_format.length - 1 ? "；" : "" }}
+									</span>
+								{{#  })  }}
+							</div>
+						</li>
+						<li>
+							<span class="price-text">￥{{ goodsItem.price }}</span>
+						</li>
+						<li class="ns-goods-buy-num">
+							<span>
+								<span class="decrease" onclick="changeNum({{siteIndex}}, {{goodsIndex}}, 'down', {{goodsItem.cart_id}})">-</span><input type="text" name="buy_num" class="layui-input" data-id="{{goodsItem.cart_id}}" data-min="{{goodsItem.min_num}}" data-max="{{goodsItem.stock}}" data-site="{{siteIndex}}" data-sku="{{goodsIndex}}" value="{{goodsItem.num}}"  data-sku_id="{{goodsItem.sku_id}}"/><span class="increase" onclick="changeNum({{siteIndex}}, {{goodsIndex}}, 'up', {{goodsItem.cart_id}})">+</span>
+							</span>
+						</li>
+						<li>
+							<strong class="subtotal ns-text-color" data-site="{{siteIndex}}" data-sku="{{goodsIndex}}">￥{{ goodsItem.total_price }}</strong>
+						</li>
+						<li>
+							<a class="layu-btn" onclick="deleteCart({{goodsItem.cart_id}}, {{siteIndex}}, {{goodsIndex}})">删除</a>
+						</li>
+					</ul>
+				{{#  })  }}
+			</div>
+			{{#  })  }}
+		</div>
+	
+		<div class="lose-list" v-if="invalidGoods.length">
+	
+		</div>
+	
+		<div class="footer">
+			<input type="checkbox" name="" title="全选" lay-skin="primary" lay-filter="allSelected" checked>
+			<ul class="operation">
+				<li>
+					<a class="" onclick="deleteCartSelected()">删除</a>
+				</li>
+				<!-- <li>
+					<a class="" onclick="clearInvalidGoods()">清除失效宝贝</a>
+				</li> -->
+			</ul>
+			<div class="sum-wrap">
+				<div class="selected-sum">
+					<span>已选商品</span>
+					<em class="total-count"></em>
+					<span>件</span>
+				</div>
+				<div class="price-wrap">
+					<span>合计（不含运费）：</span>
+					<strong class="ns-text-color">￥</strong>
+				</div>
+	
+				<button class="layui-btn ns-bg-color" onclick="settlement()">结算</button>
+			</div>
+		</div>
+	</div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+	$(document).ready(function() {
+		var count = 0;
+		$.ajax({
+			url: ns.url("supply://shop/cart/count"),
+			dataType: 'JSON',
+			type: 'POST',
+			success: function(res) {
+				if (res.code >= 0) {
+					count = res.data;
+					if (count > 0) {
+						$(".ns-cart-wrap").removeClass("layui-hide");
+						$(".null-cart").addClass("layui-hide");
+					} else {
+						$(".ns-cart-wrap").addClass("layui-hide");
+						$(".null-cart").removeClass("layui-hide");
+					}
+				}
+			}
+		})
+	})
+	
+	var temp_array = {}, invalidGoods = [], siteIndex = "", goodsIndex = "", repeat_flag = false; //防重复标识
+	layui.use(['form', 'laytpl'], function() {
+		var form = layui.form,
+			laytpl = layui.laytpl;
+
+		$.ajax({
+			url: ns.url("supply://shop/cart/lists"),
+			dataType: 'JSON',
+			type: 'POST',
+			success: function(res) {
+				if(checkLogin(res)) {
+
+					handleCartList(res.data);
+
+					if (JSON.stringify(temp_array) != "{}") {
+						laytpl($("#cartList").html()).render(temp_array, function (html) {
+							$(".ns-cart-list-wrap").html(html);
+							form.render();
+						});
+					}
+
+					totalSum();
+
+					$(".ns-goods-buy-num input").blur(function () {
+						var val = $(this).val(),
+								min_num = Number($(this).attr("data-min")),
+								max_num = Number($(this).attr("data-max")),
+								_price,
+								id = $(this).attr("data-id");
+
+						if(!verifyNum(val, min_num, max_num, this)){
+							return false;
+						}else{
+							goodsNum(id, val);
+							var that = this;
+							$.each(temp_array, function (index, item) {
+								if ($(that).attr("data-site") == index) {
+									$.each(item.goodsList, function (key, value) {
+
+										if ($(that).attr("data-sku") == key) {
+											var sku_id = $(that).attr("data-sku_id");
+											var price_json_item = price_json_data[sku_id];
+											var item_price = 0;
+											$.each(price_json_item, function(price_key, price_value) {
+												if (val >= price_value.num) {
+													item_price = price_value.price;
+												}
+											})
+											value.price = item_price;
+											$(that).parent().parent().parent().find('.price-text').text(item_price);
+
+											value.num = val;
+											value.total_price = (value.num * Number(value.price)).toFixed(2);
+											_price = value.total_price
+										}
+									})
+								}
+							})
+
+							$(".subtotal").each(function () {
+								var site_index = $(this).attr("data-site");
+								var goods_index = $(this).attr("data-sku");
+
+								if (site_index == $(that).attr("data-site") && goods_index == $(that).attr("data-sku")) {
+									$(this).text("￥" + _price);
+								}
+							})
+
+							totalSum();
+						}
+
+
+
+					})
+				}
+			}
+		});
+
+		// 监听复选框
+		form.on('checkbox(allSelected)', function(data) {
+			siteIndex = ""; goodsIndex = "";
+			if (data.elem.checked) {
+				$("input[lay-filter='allSelected']").prop("checked", true);
+				$("input[lay-filter='siteSelected']").prop("checked", true);
+				$("input[lay-filter='goodsSelected']").prop("checked", true);
+				form.render();
+			} else {
+				$("input[lay-filter='allSelected']").prop("checked", false);
+				$("input[lay-filter='siteSelected']").prop("checked", false);
+				$("input[lay-filter='goodsSelected']").prop("checked", false);
+				form.render();
+			}
+			
+			renderTemp(siteIndex, goodsIndex, data.elem.checked);
+			totalSum();
+		});
+		
+		form.on('checkbox(siteSelected)', function(data) {
+			siteIndex = $(data.elem).attr("data-site");
+			goodsIndex = ""
+
+			var siteSelectedNum = $(data.elem).parents(".list").find("input[lay-filter='siteSelected']:checked").length;  // 被选中的店铺数量
+			var siteNum = $(data.elem).parents(".list").find(".item").length; // 店铺总数量
+			if (data.elem.checked) {
+				if (siteSelectedNum == siteNum) {
+					$("input[lay-filter='allSelected']").prop("checked", true);
+				}
+				$(data.elem).parents(".item").find("input[lay-filter='goodsSelected']").prop("checked", true);
+				form.render();
+			} else {
+				$("input[lay-filter='allSelected']").prop("checked", false);
+				$(data.elem).parents(".item").find("input[lay-filter='goodsSelected']").prop("checked", false);
+				form.render();
+			}
+			
+			renderTemp(siteIndex, goodsIndex, data.elem.checked);
+			totalSum();
+		});
+		
+		form.on('checkbox(goodsSelected)', function(data) {
+			var siteIndex = $(data.elem).attr("data-site");
+			var goodsIndex = $(data.elem).attr("data-sku");
+			var selectedNum = $(data.elem).parents(".item").find("input[lay-filter='goodsSelected']:checked").length; // 当前店铺被选中的商品数量
+			var goodsNum = $(data.elem).parents(".item").find("ul").length; // 当前店铺总商品数量
+			
+			if (data.elem.checked) {
+				if (selectedNum == goodsNum) {
+					$(data.elem).parents(".item").find("input[lay-filter='siteSelected']").prop("checked", true);
+
+					var siteSelectedNum = $(data.elem).parents(".list").find("input[lay-filter='siteSelected']:checked").length;  // 被选中的店铺数量
+					var siteNum = $(data.elem).parents(".list").find(".item").length; // 店铺总数量
+					
+					if (siteSelectedNum == siteNum) {
+						$("input[lay-filter='allSelected']").prop("checked", true);
+					}
+				}
+				form.render();
+			} else {
+				$("input[lay-filter='allSelected']").prop("checked", false);
+				$(data.elem).parents(".item").find("input[lay-filter='siteSelected']").prop("checked", false);
+				form.render();
+			}
+			
+			renderTemp(siteIndex, goodsIndex, data.elem.checked);
+		});
+	})
+
+	var price_json_data = {};
+	// 改变数据结构
+	function handleCartList(data) {
+		price_json_data = {};
+		$.each(data, function(index, item) {
+			if (item.goods_state == 1 && item.verify_state == 1) {
+				var price_json = JSON.parse(item.price_json);
+				price_json_data[item.sku_id] = price_json;
+				var index = 0;
+				$.each(price_json, function(key, value) {
+					if (item.num >= value.num) {
+						index = key
+					}
+				})
+				item.price = price_json[index].price;
+				item.total_price = (Number(item.price) * Number(item.num)).toFixed(2);
+				item.checked = true;
+				if (!temp_array.hasOwnProperty(item.site_id)) {
+					temp_array[item.site_id] = {
+						site_id: item.site_id,
+						site_name: item.site_name,
+						is_own: item.is_own,
+						goodsList: []
+					}
+				}
+				temp_array[item.site_id].goodsList.push(item);
+			} else {
+				invalidGoods.push(item);
+			}
+		});
+	}
+
+	// 总数量和总价格
+	function totalSum() {
+		var total_num = 0, total_price = 0;
+		$.each(temp_array, function(index, item) {
+			$.each(item.goodsList, function(goodsIndex, goodsItem) {
+				if (goodsItem.checked) {
+					total_price += Number(goodsItem.total_price);
+					total_num++;
+				}
+			})
+		})
+
+		$(".sum-wrap .total-count").text(total_num);
+		$(".sum-wrap .price-wrap strong").text("￥" + total_price.toFixed(2));
+
+		if (total_num == 0) {
+			$(".sum-wrap>.layui-btn").addClass("layui-btn-disabled");
+			$(".sum-wrap>.layui-btn").removeClass("ns-bg-color");
+		} else {
+			$(".sum-wrap>.layui-btn").removeClass("layui-btn-disabled");
+			$(".sum-wrap>.layui-btn").addClass("ns-bg-color");
+		}
+	}
+	
+	// 重新整理数据
+	function renderTemp(siteIndex, goodsIndex, flag) {
+		$.each(temp_array, function(index, item) {
+			if (siteIndex && goodsIndex) {
+				if (index == siteIndex) {
+					$.each(item.goodsList, function(key, value) {
+						if (key == goodsIndex) {
+							value.checked = flag;
+						}
+					})
+				}
+			} else if (siteIndex && !goodsIndex) {
+				if (index == siteIndex) {
+					$.each(item.goodsList, function(key, value) {
+						value.checked = flag;
+					})
+				}
+			} else {
+				$.each(item.goodsList, function(key, value) {
+					value.checked = flag;
+				})
+			}
+		})
+		
+		totalSum();
+	}
+
+	// 商品详情
+	function goodsDetail(id) {
+		location.href = ns.url("supply://shop/goods/detail", {
+			sku_id: id
+		});
+	}
+	
+	// 删除商品
+	function deleteCart(id, siteIndex, goodsIndex) {
+		layer.confirm('是否将该商品从供货单中删除？', function(index){
+			if (repeat_flag) return;
+			repeat_flag = true;
+			
+			delCartGoods(id);
+			repeat_flag = false;
+			
+			$(".item ul").each(function() {
+				var site_index = $(this).attr("data-site"), goods_index = $(this).attr("data-sku");
+				if (site_index == siteIndex && goods_index == goodsIndex) {
+					$(this).remove();
+				}
+			})
+
+			$(".item").each(function() {
+				if ($(this).find("ul").length == 0) {
+					$(this).remove();
+				}
+			})
+			 
+			delTemp(siteIndex, goodsIndex, "", "");
+		}, function() {
+			repeat_flag = false;
+			layer.close();
+		});
+	}
+	
+	// 删除多个
+	function deleteCartSelected() {
+		var id_arr = [], input_arr = [];
+		$("input[lay-filter='goodsSelected']:checked").each(function(index, item) {
+			id_arr.push($(item).attr("data-cart_id"));
+			input_arr.push($(item));
+		})
+		
+		layer.confirm('是否将商品从供货单中删除？', function(index){
+			if (repeat_flag) return;
+			repeat_flag = true;
+			
+			delCartGoods(id_arr.toString());
+			repeat_flag = false;
+			
+			$.each(input_arr, function(index, item) {
+				var siteIndex = $(item).attr("data-site"), goodsIndex = $(item).attr("data-sku"), siteId = $(item).attr("data-site_id"), cartId = $(item).attr("data-cart_id");
+				$(".item ul").each(function(key, value) {
+					var site_index = $(value).attr("data-site"), goods_index = $(value).attr("data-sku");
+					if (site_index == siteIndex && goods_index == goodsIndex) {
+						$(value).remove();
+					}
+				})
+
+				$(".item").each(function() {
+					if ($(this).find("ul").length == 0) {
+						$(this).remove();
+					}
+				})
+				delTemp(siteIndex, goodsIndex, siteId, cartId);
+			})
+		}, function() {
+			repeat_flag = false;
+			layer.close();
+		});
+	}
+	
+	// 删除购物车商品
+	function delCartGoods(id) {
+		$.ajax({
+			url: ns.url("supply://shop/cart/delete"),
+			data: {"cart_id": id},
+			dataType: 'JSON',
+			type: 'POST',
+			async: false,
+			success: function(res) {
+				if(checkLogin(res)) {
+					layer.msg(res.message);
+					$.ajax({
+						url: ns.url("supply://shop/cart/count"),
+						dataType: 'JSON',
+						type: 'POST',
+						success: function (res) {
+							if (res.code >= 0) {
+								var count = res.data;
+								if (count == 0) {
+									$(".ns-cart-wrap").addClass("layui-hide");
+									$(".null-cart").removeClass("layui-hide");
+									location.href = ns.url("supply://shop/cart/cart", {"count": 0});
+								}
+							}
+						}
+					})
+				}
+			}
+		})
+	}
+	
+	// 删除数据
+	function delTemp(siteIndex, goodsIndex, siteId, cartId) {
+		if (!siteId && !cartId) {
+			var arr = temp_array[siteIndex].goodsList.splice(goodsIndex, 1);
+			if (temp_array[siteIndex].goodsList.length == 0) {
+				delete temp_array[siteIndex];
+			}
+		} else {
+			var temp_site = "", temp_cart = "";
+			$.each(temp_array, function(site, site_v) {
+				$.each(site_v.goodsList, function(cart, cart_v) {
+					if (cartId == cart_v.cart_id) {
+						temp_site = site_v;
+						temp_cart = cart;
+					}
+					if (site_v.goodsList.length == 0) {
+						temp_array.splice(site, 1)
+					}
+				})
+			})
+			temp_site.goodsList.splice(temp_cart, 1)
+		}
+		
+		totalSum();
+	}
+	
+	// 购买数量验证
+	function verifyNum(val, min_num, max_num, el) {
+		if (val % 1 != 0 || val < 0) {
+			layer.msg("购买数量必须为大于0的整数");
+			return false;
+		}
+		
+		if (val < min_num) {
+			layer.msg("请至少购买"+ min_num +"件商品");
+			$(el).val(min_num);
+			$(el).blur();
+			return false;
+		}
+		
+		if (val > max_num) {
+			layer.msg("库存不足");
+			$(el).val(max_num);
+			return false;
+		}
+		return true;
+	}
+	
+	function changeNum(siteIndex, goodsIndex, str, id) {
+		var el, val, min_num, max_num, site_index, goods_index, _price;
+		$("input[name='buy_num']").each(function(index, item) {
+			site_index = $(item).attr("data-site");
+			goods_index = $(item).attr("data-sku");
+
+			if (site_index == siteIndex && goods_index == goodsIndex) {
+				el = item;
+				val = Number($(item).val());
+				min_num = Number($(item).attr("data-min"));
+				max_num = Number($(item).attr("data-max"));
+			}
+		});
+		
+		if (str == 'up') {
+			val++;
+		} else {
+			val--;
+		}
+		
+
+		
+		$(el).val(val);
+		if(!verifyNum(val, min_num, max_num, el)){
+			return false;
+		}else{
+			goodsNum(id, val);
+			$.each(temp_array, function(index, item) {
+				if (siteIndex == index) {
+					$.each(item.goodsList, function(key, value) {
+						if (goodsIndex == key) {
+
+							var sku_id = $(el).attr("data-sku_id");
+							var price_json_item = price_json_data[sku_id];
+
+							var item_price = 0;
+							$.each(price_json_item, function(price_key, price_value) {
+								if (val >= price_value.num) {
+									item_price = price_value.price;
+								}
+							})
+							value.price = item_price;
+
+							$(el).parent().parent().parent().find('.price-text').text(item_price);
+
+							value.num = val;
+							value.total_price = (value.num * Number(value.price)).toFixed(2);
+							_price = value.total_price
+						}
+					})
+				}
+			})
+
+			$(".subtotal").each(function() {
+				var site_index = $(this).attr("data-site");
+				var goods_index = $(this).attr("data-sku");
+
+				if (site_index == siteIndex && goods_index == goodsIndex) {
+					$(this).text("￥" + _price);
+				}
+			})
+
+			totalSum();
+		}
+		
+
+	}
+	
+	// 改变购买数量
+	function goodsNum(id, val) {
+
+		if (repeat_flag) return;
+		repeat_flag = true;
+
+		$.ajax({
+			url: ns.url("supply://shop/cart/edit"),
+			data: {"cart_id": id, "num": val},
+			dataType: 'JSON',
+			type: 'POST',
+			success: function(res) {
+				repeat_flag = false;
+				if(checkLogin(res)) {
+					if (res.code < 0) {
+						layer.msg(res.message);
+					}
+				}
+			}
+		})
+	}
+	
+	// 结算
+	function settlement() {
+		var cart_id_arr = [], num = 0, sku_id = "";
+		$.each(temp_array, function(siteIndex, siteItem) {
+			$.each(siteItem.goodsList, function(goodsIndex, goodsItem) {
+				if (goodsItem.checked) {
+					cart_id_arr.push(goodsItem.cart_id);
+				}
+			})
+		})
+		
+		location.href = ns.url("supply://shop/ordercreate/payment", {"cart_ids": cart_id_arr.toString()})
+	}
+</script>
+{/block}

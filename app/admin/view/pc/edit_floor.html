@@ -1,0 +1,239 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="ADMIN_CSS/edit_floor.css">
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>首页楼层编辑</li>
+		</ul>
+	</div>
+</div>
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>楼层名称：</label>
+		<div class="layui-input-block">
+			<input name="title" type="text" lay-verify="title" class="layui-input ns-len-mid" {notempty name="$floor_info"}value="{$floor_info['title']}"{/notempty} />
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>楼层模板：</label>
+		<div class="layui-input-block ns-len-mid">
+			<select name="block_id" lay-filter="block_id" lay-verify="block_id">
+				<option value="">请选择</option>
+				{foreach name="$floor_block_list" item="vo"}
+				<option value="{$vo.id}" data-value='{$vo.value}' data-block-id="{$vo.id}" {if condition="!empty($floor_info) && $floor_info['block_id'] == $vo['id']" }selected{/if}>{$vo.title}</option>
+				{/foreach}
+			</select>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否显示：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="state" value="1" lay-skin="switch" {if condition="!empty($floor_info) && $floor_info['state'] == 1" }checked{elseif condition="!empty($floor_info) && $floor_info['state'] == 0"}{else/}checked{/if} />
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required"></span>排序：</label>
+		<div class="layui-input-block">
+			<input name="sort" type="text" class="layui-input ns-len-short" value="{if condition="!empty($floor_info)" }{$floor_info['sort']}{else/}0{/if}" />
+		</div>
+	</div>
+
+	<div id="app">
+		{foreach name="$floor_block_list" item="vo"}
+			{notempty name="$vo['value']"}
+				<{$vo['name']} :data='data' v-if="blockId == {$vo.id}">{$vo.title}</{$vo['name']}>
+			{/notempty}
+		{/foreach}
+	</div>
+
+	<input type="hidden" name="id" value="{$id}"/>
+	{notempty name="$floor_info"}
+	<input type="hidden" id="info" value='{$floor_info.value}' />
+	<input type="hidden" id="block_id" value='{$floor_info.block_id}' />
+	{/notempty}
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+	</div>
+
+</div>
+{/block}
+{block name="script"}
+<script type="text/html" id="setTitleHtml">
+
+	<div class="layui-form ns-form set-title">
+		<div class="layui-form-item">
+			<label class="layui-form-label sm"><span class="required">*</span>文本：</label>
+			<div class="layui-input-block">
+				<input name="text" type="text" lay-verify="required" class="layui-input ns-len-mid" value="{{ d.text ? d.text : '' }}">
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label sm">链接：</label>
+			<div class="layui-input-block ns-len-mid">
+				<select name="pc_link_text" lay-filter="pc_link_text">
+					<option value="">请选择</option>
+					{foreach $pc_link as $k => $v}
+						{{# if(d.link && d.link.title == '{$v.title}'){ }}
+							<option value="{$v.url}" selected>{$v.title}</option>
+						{{# }else{ }}
+							<option value="{$v.url}">{$v.title}</option>
+						{{# } }}
+					{/foreach}
+					{{# if(d.link && d.link.title == '自定义'){ }}
+						<option value="diy" selected>自定义</option>
+					{{# }else{ }}
+						<option value="diy">自定义</option>
+					{{# } }}
+				</select>
+			</div>
+		</div>
+
+		{{# if(d.link && d.link.title){ }}
+			<input name="text_link" type="hidden" value='{{ JSON.stringify(d.link) }}' />
+		{{# }else{ }}
+			<input name="text_link" type="hidden" />
+		{{# } }}
+
+		<div class="layui-form-item">
+			<label class="layui-form-label sm">颜色：</label>
+			<div class="layui-input-block ns-len-mid">
+				<div id="text_color"></div>
+			</div>
+			<input name="text_color" type="hidden" value="" class="layui-input ns-len-short" id="text_color_input">
+		</div>
+
+		<div class="ns-form-row sm">
+			<button class="layui-btn ns-bg-color" lay-submit lay-filter="save_text">保存</button>
+		</div>
+	</div>
+</script>
+<script type="text/html" id="uploadImg">
+
+	<div class="layui-form ns-form upload-img">
+
+		<div class="layui-form-item">
+			<label class="layui-form-label sm">图片：</label>
+			<div class="layui-input-inline img-upload">
+				<input type="hidden" class="layui-input" name="upload_image" value="{{ d.url ? d.url : '' }}" />
+				<div class="upload-img-block icon">
+					<div class="upload-img-box" id="upload_image">
+						{{# if(d.url){ }}
+							<img src="{{ ns.img(d.url) }}" />
+						{{# }else{ }}
+							<div class="ns-upload-default">
+								<img src="__STATIC__/img/upload_img.png" />
+								<p>点击上传</p>
+							</div>
+						{{# } }}
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label sm">链接：</label>
+			<div class="layui-input-block ns-len-mid">
+				<select name="pc_link_upload" lay-filter="pc_link_upload">
+					<option value="">请选择</option>
+					{foreach $pc_link as $k => $v}
+						{{# if(d.link && d.link.title == '{$v.title}'){ }}
+							<option value="{$v.url}" selected>{$v.title}</option>
+						{{# }else{ }}
+							<option value="{$v.url}">{$v.title}</option>
+						{{# } }}
+					{/foreach}
+					{{# if(d.link && d.link.title == '自定义'){ }}
+						<option value="diy" selected>自定义</option>
+					{{# }else{ }}
+						<option value="diy">自定义</option>
+					{{# } }}
+				</select>
+			</div>
+		</div>
+
+		{{# if(d.link && d.link.title){ }}
+			<input name="upload_link" type="hidden" value='{{ JSON.stringify(d.link) }}' />
+		{{# }else{ }}
+			<input name="upload_link" type="hidden" />
+		{{# } }}
+
+		<div class="ns-form-row sm">
+			<button class="layui-btn ns-bg-color" lay-submit lay-filter="save_upload">保存</button>
+		</div>
+	</div>
+</script>
+<script type="text/html" id="setCategoryHtml">
+
+	<div class="layui-form ns-form set-category">
+
+		<div class="layui-form-item">
+			<label class="layui-form-label sm">商品分类：</label>
+			<div class="layui-input-block ns-len-mid">
+				<select name="goods_category" lay-filter="goods_category">
+					<option value="">请选择</option>
+					{foreach $category_list as $k => $v}
+					<option value="{$v.category_id}" data-category-name="{$v.category_name}">{$v.category_name}</option>
+						{notempty name="$v['child_list']"}
+							{foreach $v['child_list'] as $second_k => $second_v}
+							<option value="{$second_v.category_id}" data-category-name="{$second_v.category_name}">&nbsp;&nbsp;&nbsp;&nbsp;{$second_v.category_name}</option>
+								{notempty name="$second_v['child_list']"}
+									{foreach $second_v['child_list'] as $third_k => $third_v}
+									<option value="{$third_v.category_id}" data-category-name="{$third_v.category_name}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$third_v.category_name}</option>
+									{/foreach}
+								{/notempty}
+							{/foreach}
+						{/notempty}
+					{/foreach}
+				</select>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label sm">已选：</label>
+			<div class="layui-input-block selected-wrap">
+				<ul>
+					{{# if(d.list){ }}
+						{{# for(var i=0;i<d.list.length;i++){ }}
+						<li>
+							<span>{{d.list[i].category_name}}</span>
+							<i data-id="{{d.list[i].category_id}}">x</i>
+						</li>
+						{{# } }}
+					{{# } }}
+				</ul>
+			</div>
+		</div>
+
+		{{# if(d.list){ }}
+			<input name="category_list" type="hidden" value='{{ JSON.stringify(d.list) }}' />
+			<input name="category_ids" type="hidden" value="
+			{{# for(var i=0;i<d.list.length;i++){ }}
+				{{ d.list[i].category_id }}
+				{{# if((i+1)!=d.list.length){ }}
+				,
+				{{# } }}
+			{{# } }}" />
+		{{# }else{ }}
+			<input name="category_ids" type="hidden" />
+			<input name="category_list" type="hidden" />
+		{{# } }}
+
+		<div class="ns-form-row sm">
+			<button class="layui-btn ns-bg-color" lay-submit lay-filter="save_category">保存</button>
+		</div>
+	</div>
+</script>
+<script src="STATIC_JS/vue.js"></script>
+<script src="ADMIN_JS/floor/edit.js"></script>
+<script src="ADMIN_JS/floor/floor_style_1.js"></script>
+<script src="ADMIN_JS/floor/floor_style_2.js"></script>
+<script src="ADMIN_JS/floor/floor_style_3.js"></script>
+{/block}

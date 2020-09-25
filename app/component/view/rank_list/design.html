@@ -1,0 +1,55 @@
+<nc-component v-bind:data="data[index]" class="rank-list">
+
+	<!-- 预览 -->
+	<template slot="preview">
+		
+		<div class="head">
+			<h3>排行榜</h3>
+			<!--<div class="right-tab">-->
+				<!--<span class="selected ns-border-color">销量排行</span>-->
+				<!--<span>收藏排行</span>-->
+			<!--</div>-->
+		</div>
+		<div class="list-wrap">
+			<div class="item">
+				<div class="img-wrap">
+					<img src="STATIC_EXT/diyview/img/crack_figure.png">
+				</div>
+				<span class="buy-num">2141人付款</span>
+			</div>
+			<div class="item">
+				<div class="img-wrap">
+					<img src="STATIC_EXT/diyview/img/crack_figure.png">
+				</div>
+				<span class="buy-num">2141人付款</span>
+			</div>
+			<div class="item">
+				<div class="img-wrap">
+					<img src="STATIC_EXT/diyview/img/crack_figure.png">
+				</div>
+				<span class="buy-num">2141人付款</span>
+			</div>
+		</div>
+		
+	</template>
+
+	<!-- 编辑 -->
+	<template slot="edit">
+		
+		<template v-if="nc.lazyLoad">
+			<div @click.stop="">
+				<rank-list></rank-list>
+			</div>
+		</template>
+		
+	</template>
+	
+	<!-- 资源 -->
+	<template slot="resource">
+
+		<css src="{$resource_path}/rank_list/css/design.css"></css>
+		<js src="{$resource_path}/rank_list/js/design.js"></js>
+		
+	</template>
+	
+</nc-component>

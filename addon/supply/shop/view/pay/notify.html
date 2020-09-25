@@ -1,0 +1,41 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/pay.css">
+{/block}
+{block name="body"}
+<!-- 顶部html文件-->
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-pay-result">
+			<div class="pay">
+				<div class="pay-icon">
+					{if $info.data.pay_status}
+					<i class="iconfont icon1 ns-text-color"></i>
+					{else/}
+					<i class="iconfont iconcuo ns-red-color"></i>
+					{/if}
+				</div>
+				<div class="pay-text">{$info.data.pay_status ? '支付成功' : '支付失败'}</div>
+				<div class="pay-money">支付金额：￥{$info.data.pay_money}</div>
+				<div class="pay-footer">
+					<button class="layui-btn ns-bg-color" onclick="toIndex()">回到首页</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script>
+    layui.use('form', function() {
+		
+    })
+	
+	function toIndex() {
+		location.href = ns.url("supply://shop/market/index");
+	}
+</script>
+{/block}

@@ -1,0 +1,136 @@
+@CHARSET "UTF-8";
+.goods-list .preview-draggable{padding:0;}
+.control-goods-list-small {overflow: hidden;}
+.control-goods-list-small li {float: left;width: 48%;margin: 3px 0;background: #ffffff;border: 1px solid #e5e5e5;padding-bottom: 10px;position: relative;border-radius: 5px;}
+.control-goods-list-small li:NTH-CHILD(even) {float: right;}
+.control-goods-list-small .control-thumbnail {padding: 60px 0;text-align: center;color: #ffffff;margin: 0;}
+.control-goods-list-small .control-goods-name {font-weight: normal;text-indent: 5px;overflow: hidden;width: 100%;text-overflow: ellipsis;white-space: nowrap;height: 20px;line-height: 20px; margin: 5px 0;}
+.control-goods-list-small .control-goods-subname {font-weight: normal;text-indent: 5px;overflow: hidden;width: 100%;text-overflow: ellipsis;white-space: nowrap;height: 20px;font-size: 12px;color: #999999;}
+.control-goods-list-small .control-goods-delprice {font-weight: normal;text-indent: 5px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;font-size: 12px;color: #777;text-decoration: line-through;}
+.control-goods-list-small .control-goods-sellnum {font-weight: normal;text-indent: 5px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;font-size: 12px;color: #777;}
+.control-goods-list-small .control-goods-price em {width: 100px;text-indent: 5px;font-size: 12px;}
+.control-goods-list-small .control-goods-price em {font-style: normal;color: #ff6600;font-weight: bold;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;display: inline-block;}
+.control-goods-list-small .control-goods-price {margin: 0;height: 16px;line-height: 16px;}
+.control-goods-list-small .control-goods-price.position {display: block;position: absolute;right: 5px;bottom: 15px;}
+.goods-list-edit p.hint {font-size: 12px;color: #999;margin: 10px 10px 10px 20px;}
+.blue-bg {background: #81D5FA;}
+.pink-bg {background: #FF7EC4;}
+.green-bg {background: #8BC34A;}
+.orange-bg {background: #FFBD33;}
+.goods-list h3 {font-size: 14px; font-weight: 600; padding: 5px 10px 10px 10px;}
+
+/* 商品弹框 */
+.goods-list .goods-list-layer {
+	border: 1px solid #F1F1F1;
+	width: 100%;
+	height: 400px;
+	overflow: hidden;
+}
+
+/* 购物车图标 */
+.cart-list-style {
+	display: none;
+}
+
+.cart-list-con {
+	display: flex;
+	align-items: center;
+}
+
+.cart-li {
+	width: 32%;
+	height: 220px;
+	line-height: 220px;
+	text-align: center;
+	margin-right: 2%;
+	margin-bottom: 20px;
+	border: 1px solid #ededed;
+	background: #f7f8fa;
+}
+
+.cart-li:nth-child(3n) {
+	margin-right: 0;
+}
+
+
+/* 商品列表风格 */
+.goods-list-style {
+	display: none;
+}
+
+.style-list-con-goods {
+	display: flex;
+	flex-wrap: wrap;
+}
+.style-list-con-goods .style-li-goods {
+	width: 32%;
+	height: 465px;
+	line-height: 465px;
+	margin-right: 2%;
+	margin-bottom: 15px;
+	cursor: pointer;
+	border: 1px solid #ededed;
+	background: #f7f8fa;
+	box-sizing: border-box;
+}
+
+.style-list-con-goods .style-li-goods:nth-child(3n) {
+	margin-right: 0;
+}
+
+.style-list-con-goods .style-li-goods img {
+	width: 100%;
+}
+
+.layui-layer-page .layui-layer-content {
+	overflow: auto !important;
+}
+
+.btn-box {
+	margin-top: 30px;
+	text-align: center;
+}
+
+.goods-list .goods-list-preview-img {
+	width: 100%;
+	height: 150px;
+	line-height: 150px;
+	text-align: center;
+}
+
+.goods-list .goods-list-preview-img img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+.goods-list .control-goods-list-small li {
+	position: relative;
+}
+
+.goods-list .cart-box {
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+}
+
+.goods-list .cart-icon {
+	color: #FFFFFF;
+	background-color: #FF4544;
+	width: 20px;
+	height: 20px;
+	line-height: 20px;
+	text-align: center;
+	border-radius: 50%;
+	font-size: 24px;
+}
+
+/* 显示内容 */
+.goods-show-box .layui-input-inline {
+	padding-left: 20px;
+}
+
+.control-goods-list-small .control-goods-sellnum-abs {
+	position: absolute;
+	right: 5px;
+	bottom: 10px;
+}

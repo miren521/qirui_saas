@@ -1,0 +1,269 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>团购活动列表展示商品的团购相关信息</li>
+		</ul>
+	</div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<button class="layui-btn ns-bg-color" onclick="add()">添加团购</button>
+	
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<input type="text" name="goods_name" placeholder="请输入商品名称" class="layui-input" autocomplete="off">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+			  <i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="groupbuy_tab">
+	<ul class="layui-tab-title">
+		<li class="layui-this" data-status="">全部</li>
+		<li data-status="1">未开始</li>
+		<li data-status="2">进行中</li>
+		<li data-status="3">已结束</li>
+	</ul>
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="groupbuy_list" lay-filter="groupbuy_list"></table>
+	</div>
+</div>
+
+<!-- 商品 -->
+<script type="text/html" id="goods">
+	<div class="ns-table-title">
+		<div class="ns-title-pic">
+			{{#  if(d.goods_image){  }}
+			<img layer-src src="{{ns.img(d.goods_image.split(',')[0])}}"/>
+			{{#  }  }}
+		</div>
+		<div class="ns-title-content">
+			<a href="javascript:;" class="ns-multi-line-hiding ns-text-color"
+			   title="{{d.goods_name}}">{{d.goods_name}}</a>
+		</div>
+	</div>
+</script>
+
+<!-- 时间 -->
+<script id="time" type="text/html">
+	<div class="layui-elip">开始：{{ns.time_to_date(d.start_time)}}</div>
+	<div class="layui-elip">结束：{{ns.time_to_date(d.end_time)}}</div>
+</script>
+
+<!-- 状态 -->
+<script type="text/html" id="status">
+	{{#  if(d.status == 1){  }}
+	未开始
+	{{#  }else if(d.status == 2){  }}
+	进行中
+	{{#  }else if(d.status == 3){  }}
+	已结束
+	{{#  }  }}
+</script>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		{{# if(d.status == 1){ }}
+		<a class="layui-btn" lay-event="edit">编辑</a>
+		<a class="layui-btn" lay-event="del">删除</a>
+		{{# }else if(d.status == 2){ }}
+		<a class="layui-btn" lay-event="close">结束</a>
+		{{# }else if(d.status == 3){ }}
+		<a class="layui-btn" lay-event="edit">编辑</a>
+		<a class="layui-btn" lay-event="del">删除</a>
+		{{# } }}
+	</div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+	layui.use(['form', 'element', 'laytpl'], function() {
+		var table,
+			form = layui.form,
+			element = layui.element,
+			laytpl = layui.laytpl,
+			repeat_flag = false; //防重复标识
+		form.render();
+
+		//监听Tab切换，以改变地址hash值
+		element.on('tab(groupbuy_tab)', function() {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: {
+					'status': this.getAttribute('data-status')
+				}
+			});
+		});
+
+		table = new Table({
+			elem: '#groupbuy_list',
+			url: ns.url("groupbuy://shop/groupbuy/lists"),
+			cols: [
+				[{
+					title: '团购商品',
+					unresize: 'false',
+					width: '20%',
+					templet: '#goods'
+				}, {
+					field: 'goods_price',
+					title: '商品原价',
+					unresize: 'false',
+					width: '15%',
+					align: 'right',
+					templet: function(data) {
+						return '￥'+ data.goods_price;
+					}
+				}, {
+					field: 'groupbuy_price',
+					title: '<span style="padding-right: 15px;">团购价格</span>',
+					unresize: 'false',
+					width: '15%',
+					align: 'right',
+					templet: function(data) {
+						return '<span style="padding-right: 15px;">￥'+ data.groupbuy_price +'</span>';
+					}
+				}, {
+					field: 'buy_num',
+					title: '起购量',
+					unresize: 'false',
+					width: '8%'
+				}, {
+					title: '活动时间',
+					unresize: 'false',
+					width: '20%',
+					templet: '#time'
+				}, {
+					title: '状态',
+					unresize: 'false',
+					width: '10%',
+					templet: '#status'
+				}, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width: '12%'
+				}]
+			],
+
+		});
+		
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+
+		//监听Tab切换
+		element.on('tab(status)', function(data) {
+			var status = $(this).attr("data-status");
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: {
+					'status': status
+				}
+			});
+		});
+
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			console.log(data);
+			switch (obj.event) {
+				case 'edit': //编辑
+					location.href = ns.url("groupbuy://shop/groupbuy/edit", {"groupbuy_id": data.groupbuy_id});
+					break;
+				case 'del': //删除
+					deleteGroupbuy(data.groupbuy_id);
+					break;
+				case 'close': //使结束
+					closeGroupbuy(data.groupbuy_id);
+					break;
+			}
+		});
+		
+		/**
+		 * 删除
+		 */
+		function deleteGroupbuy(groupbuy_id) {
+			layer.confirm('确定要删除该团购活动吗?', function() {
+				if (repeat_flag) return;
+				repeat_flag = true;
+
+				$.ajax({
+					url: ns.url("groupbuy://shop/groupbuy/delete"),
+					data: {
+						groupbuy_id: groupbuy_id
+					},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						layer.msg(res.message);
+						repeat_flag = false;
+						if (res.code == 0) {
+							table.reload();
+						}
+					}
+				});
+			}, function() {
+				layer.close();
+				repeat_flag = false;
+			});
+		}
+
+		//使结束
+		function closeGroupbuy(groupbuy_id) {
+
+			layer.confirm('确定要结束该团购活动吗?', function() {
+				if (repeat_flag) return;
+				repeat_flag = true;
+
+				$.ajax({
+					url: ns.url("groupbuy://shop/groupbuy/finish"),
+					data: {
+						groupbuy_id: groupbuy_id
+					},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						layer.msg(res.message);
+						repeat_flag = false;
+						if (res.code == 0) {
+							table.reload();
+						}
+					}
+				});
+			}, function() {
+				layer.close();
+				repeat_flag = false;
+			});
+		}
+	});
+
+	function add() {
+		location.href = ns.url("groupbuy://shop/groupbuy/add");
+	}
+</script>
+{/block}

@@ -1,0 +1,129 @@
+{extend name="base"/}
+
+{block name="resources"}
+<style type="text/css">
+.js-domain{
+	display: none;
+}
+.refresh-time {
+	color: #B2B2B2;
+	margin-top: 10px;
+}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>为满足不同用户的需求，方便快速搭建Web端，增加以下三种部署方式供其选择，易上手难度递增。</li>
+			<li>（难度：简单）默认部署：无需下载，一键刷新，API接口请求地址默认为当前域名，编译代码存放到web文件夹中。</li>
+			<li>（难度：中等）独立部署：下载编译代码包，参考开发文档进行配置。</li>
+			<li>（难度：较高）源码下载：下载开源代码包，参考开发文档进行配置，结合业务需求进行二次开发。</li>
+			<li>开发文档参考：<a href="https://docs.qq.com/doc/DZkpOU2h5b2NFUWtG" target="_blank" class="ns-text-color">NiuShop多商户PC端开发文档</a></li>
+		</ul>
+	</div>
+</div>
+<div class="layui-form ns-form">
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">部署方式：</label>
+		<div class="layui-input-block">
+			<input type="radio" name="deploy_way" value="cs_default" lay-filter="deploy_way" title="默认部署" data-desc="无需下载，一键刷新，API接口请求地址为当前域名，编译代码存放到web文件夹中" checked />
+			<input type="radio" name="deploy_way" value="cs_indep" lay-filter="deploy_way" title="独立部署" data-desc="下载编译代码包，参考开发文档进行配置"/>
+			<input type="radio" name="deploy_way" value="os" lay-filter="deploy_way" title="源码下载" data-desc="下载开源代码包，参考开发文档进行配置，结合业务需求进行二次开发" />
+		</div>
+		<div class="ns-word-aux js-desc"></div>
+	</div>
+
+	<div class="layui-form-item js-domain">
+		<label class="layui-form-label"><span class="required">*</span>域名地址：</label>
+		<div class="layui-input-block">
+			<input type="text" name="domain" lay-verify="domain" value="{$root_url}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+		<div class="ns-word-aux">API接口请求地址默认为当前域名</div>
+	</div>
+
+	<input type="hidden" name="refresh_time" value="{$refresh_time}">
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color js-save" lay-submit lay-filter="save">刷新</button>
+		{if $refresh_time}<p class="refresh-time">上次刷新时间：{:time_to_date($refresh_time)}</p>{/if}
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script type="text/javascript">
+	layui.use(['form'], function() {
+		var form = layui.form,
+			repeat_flag = false; //防重复标识;
+		$(".js-desc").text($("input[name='deploy_way']:checked").attr("data-desc"));
+
+		form.on('radio(deploy_way)', function(data){
+			var desc = $(data.elem).attr("data-desc");
+			$(".js-desc").text(desc);
+			var jSave = $(".js-save");
+			var jDomain = $(".js-domain");
+			var jRefreshTime = $('.refresh-time');
+			switch (data.value) {
+				case "cs_default":
+					jSave.text("刷新");
+					if(parseInt($("input[name='refresh_time']").val().toString())>0) jRefreshTime.show();
+					jDomain.hide();
+					break;
+				case "cs_indep":
+					jSave.text("下载");
+					jRefreshTime.hide();
+					jDomain.show();
+					break;
+				case "os":
+					jSave.text("下载");
+					jRefreshTime.hide();
+					jDomain.hide();
+					break;
+			}
+			repeat_flag = false;
+		});
+
+		form.verify({
+			domain : function(value, item) {
+				var reg = /^((http:\/\/)|(https:\/\/))?\S+$/; //正则表达式验证域名
+				if($("input[name='deploy_way']:checked").val() == "cs_indep") {
+					if (value === '') {
+						return "请输入域名地址";
+					} else if (!(reg.test(value))) {
+						return '请输入正确的域名地址';
+					}
+				}
+			}
+		});
+
+		form.on("submit(save)",function(data){
+
+			switch (data.field.deploy_way) {
+				case "cs_default":
+					if (repeat_flag) return false;
+					repeat_flag = true;
+					$.ajax({
+						url: ns.url("admin/pc/downloadcsdefault"),
+						dataType: 'JSON',
+						type: 'POST',
+						success: function(res){
+							repeat_flag = false;
+							layer.msg(res.message);
+						}
+					});
+					break;
+				case "cs_indep":
+					console.log("data",data.field);
+					window.open(ns.url("admin/pc/downloadcsindep",data.field));
+					break;
+				case "os":
+					window.open(ns.url("admin/pc/downloados"));
+					break;
+			}
+		})
+
+	});
+</script>
+{/block}

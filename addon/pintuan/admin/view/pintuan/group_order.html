@@ -1,0 +1,153 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.layui-collapse .layui-colla-content li {
+		height: auto;
+	}
+</style>
+{/block}
+{block name="main"}
+
+<div class="good-ids">
+{foreach $list.data.list as $k => $v}
+	<input type="hidden" data-id="{$k}" class="group_id" value="{$v.group_id}" />
+{/foreach}
+</div>
+
+<!-- 列表 -->
+<table id="order_list" lay-filter="order_list"></table>
+
+<!-- 商品 -->
+<script type="text/html" id="goods">
+	<div class="ns-table-tuwen-box">
+		<div class="ns-img-box">
+			<img layer-src src="{{ns.img(d.sku_image.split(',')[0])}}"/>
+		</div>
+		<div class="ns-font-box">
+			<a href="javascript:;" class="ns-multi-line-hiding ns-text-color">{{d.sku_name}}</a>
+		</div>
+	</div>
+</script>
+
+<!-- 收货人 -->
+<script type="text/html" id="receiver">
+	<p class="layui-elip">
+		<span>{{d.name}}</span>
+		<span>{{d.mobile}}</span>
+	</p>
+	<p class="layui-elip">{{d.address}}</p>
+</script>
+
+<!-- 信息标签 -->
+<script type="text/html" id="information">
+	<p class="layui-elip">支付方式：{{d.pay_type_name}}</p>
+	<p class="layui-elip">来源：{{d.order_from_name}}</p>
+</script>
+
+<!-- 余额标签 -->
+<script type="text/html" id="money">
+	<p class="layui-elip">应付金额：{{d.pay_money}}</p>
+</script>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="check">查看</a>
+	</div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+	var group_id = [];
+	$(".good-ids input").each(function() {
+		if(group_id.indexOf($(this).val()) == -1) {
+			group_id.push($(this).val());
+		}
+	});
+	
+	if (group_id.length > 1) {
+		group_id = [];
+	}
+	
+	layui.use(['form', 'element'], function() {
+		var table,
+			form = layui.form,
+			element = layui.element;
+		form.render();
+
+
+
+		table = new Table({
+			elem: '#order_list',
+			url: ns.url("pintuan://admin/pintuan/groupOrder"),
+			where: {
+				"group_id": group_id.toString()
+			},
+			cols: [
+				[{
+					field: 'order_no',
+					title: '订单号',
+					unresize: 'false',
+					width: '12%',
+				}, {
+					field: 'sku_name',
+					title: '商品名称',
+					unresize: 'false',
+					width: '12%',
+				}, {
+					field: 'site_name',
+					title: '商家名称',
+					unresize: 'false',
+					width: '10%',
+				}, {
+					title: '下单时间',
+					unresize: 'false',
+					width: '14%',
+					templet: function(data) {
+						return ns.time_to_date(data.pay_time);
+					}
+				}, {
+					title: '收货人',
+					unresize: 'false',
+					width: '14%',
+					templet: '#receiver'
+				}, {
+					title: '信息标签',
+					unresize: 'false',
+					width: '12%',
+					templet: '#information'
+				}, {
+					title: '余额标签',
+					unresize: 'false',
+					width: '12%',
+					templet: '#money'
+				}, {
+					field: 'order_status_name',
+					title: '订单状态',
+					unresize: 'false',
+					width: '8%'
+				}, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width: '6%'
+				}]
+			],
+
+		});
+		
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'check': //查看
+					location.href = ns.url("admin/order/detail?order_id="+ data.order_id);
+					break;
+			}
+		});
+	});
+</script>
+{/block}

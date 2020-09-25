@@ -1,0 +1,221 @@
+.clear {
+	clear: both;
+}
+.item-block {
+	padding: 0 15px 1px;
+	margin: 10px 0;
+	border-radius: 0;
+	border: none;
+	background: #ffffff;
+	.block-text {
+		border-color: #eeeeee;
+		color: $ns-text-color-black;
+		padding: 7px 0;
+		border-bottom: 1px;
+	}
+}
+
+.address-desc {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+}
+.address-item {
+	width: 23%;
+	border: 3px solid #eee;
+	box-sizing: border-box;
+	margin: 1%;
+	height: 150px;
+	cursor: pointer;
+	float: left;
+	.add-address {
+		padding: 10px;
+		text-align: center;
+		line-height: 120px;
+	}
+	.address-info {
+		padding: 10px;
+		height: 100%;
+		box-sizing: border-box;
+		position: relative;
+		.options {
+			position: absolute;
+			right: 0;
+			top: 10px;
+			width: 50%;
+			text-align: right;
+			div {
+				display: inline-block;
+				margin-right: 10px;
+				color: #999999;
+			}
+		}
+		.address-name {
+			color: $base-color;
+			padding: 0px 0 6px;
+			border-bottom: 1px solid #eee;
+			width: 100%;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			padding-right: 71px;
+			box-sizing: border-box;
+			line-height: 25px;
+		}
+		.address-mobile {
+			padding: 10px 0 4px;
+		}
+	}
+}
+.address-item.active {
+	background-color: #fffbf9;
+	border-color: $base-color;
+}
+
+//支付方式
+.pay-type-list {
+	padding: 20px 0;
+}
+.pay-type-item {
+	display: inline-block;
+	border: 2px solid #eeeeee;
+	padding: 5px 20px;
+	margin-right: 20px;
+	cursor: pointer;
+}
+.pay-type-item.active {
+	border-color: $base-color;
+}
+.mobile-wrap {
+	width: 300px;
+}
+
+.pay-password {
+	width: 80%;
+}
+
+//商品列表
+.goods-list {
+	padding: 15px 0;
+	.shop-icon {
+		font-size: 18px;
+	}
+	table {
+		width: 100%;
+	}
+	.goods-info-left {
+		width: 60px;
+		height: 60px;
+		float: left;
+		.goods-img {
+			width: 60px;
+			height: 60px;
+		}
+	}
+	.goods-info-right {
+		float: left;
+		height: 60px;
+		margin-left: 10px;
+		color: $base-color;
+		width: 80%;
+		.goods-name {
+			line-height: 20px;
+			padding-top: 10px;
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 2;
+			overflow: hidden;
+		}
+		.goods-spec {
+			color: #999;
+		}
+	}
+	.goods-footer {
+		background-color: #f3fbfe;
+		padding: 10px;
+		margin-top: 10px;
+		.goods-footer-right {
+			width: 50%;
+			float: left;
+		}
+		.goods-footer-left {
+			width: 50%;
+			float: left;
+		}
+		.order-cell {
+			cursor: pointer;
+			.tit {
+				padding: 5px 0 0 0;
+			}
+		}
+		.express-item {
+			margin-top: 5px;
+			display: inline-block;
+			border: 2px solid #eeeeee;
+			padding: 3px 10px;
+			margin-right: 20px;
+			cursor: pointer;
+		}
+		.express-item.active {
+			border-color: $base-color;
+		}
+	}
+}
+
+.promotion-show {
+	color: #999;
+}
+.align-right {
+	text-align: right;
+}
+
+//统计
+.order-statistics {
+	float: right;
+	padding: 10px;
+	// color: #999;
+}
+.order-submit {
+	float: right;
+	padding: 10px;
+}
+.order-money {
+	display: inline-block;
+	margin-right: 20px;
+	div {
+		display: inline-block;
+		font-size: $ns-font-size-lg;
+	}
+}
+
+.buyer-message.el-textarea {
+	width: 400px;
+	margin-top: 10px;
+}
+.address-open {
+	cursor: pointer;
+	font-size: 13px;
+	padding: 0 0 10px 10px;
+}
+.pay-password {
+	width: 80%;
+}
+.pay-password.hide-password {
+	position: fixed;
+	top: -9999px;
+}
+.platform-coupon {
+	cursor: pointer;
+}
+
+.forget-password {
+	text-align: right;
+	margin-right: 45px;
+	cursor: pointer;
+}
+
+.cursor-pointer {
+	cursor: pointer;
+}

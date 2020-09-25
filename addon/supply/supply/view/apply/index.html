@@ -1,0 +1,1377 @@
+{extend name="addon/supply/supply/view/base.html"/}
+{block name="resources"}
+<link rel="stylesheet" href="SUPPLY_CSS/apply_index.css">
+{/block}
+{block name="body"}
+<div class="layui-layout layui-layout-admin">
+    <div class="apply-header">
+        <div class="apply-header-box">
+            <span class="apply-header-title">欢迎您，您可以申请入驻了！</span>
+            <span class="phone">联系电话：{$website_info['web_phone']} </span>
+            <ul class="layui-nav layui-layout-right">
+                <li class="layui-nav-item">
+                    <a href="javascript:;" class="layui-elip">{$userInfo["user_info"]["username"]}</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="{:addon_url('supply://supply/login/login')}">退出登录</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="apply-body">
+
+        <!-- 入驻协议 -->
+        <div class="settlement-agreement layui-form {if $procedure != 1}layui-hide{/if}">
+            <h2>签订入驻协议</h2>
+            <h2>{$agreement["data"]["title"]}</h2>
+            <div class="agreement-content">
+                {:html_entity_decode($agreement["data"]["content"])}
+            </div>
+            <div class="agreement-foot" style="margin-top: 40px;">
+                <input type="checkbox" title="我已阅读并同意以上协议" lay-skin="primary" class="ns-text-color" lay-filter="apply_info">
+                <div class="apply-btn-box">
+                    <button class="ns-bg-color layui-btn apply-info">下一步，填写申请信息</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 类型选择 -->
+        <div class="application-type layui-hide layui-form">
+            <h2>填写公司认证信息</h2>
+            <div class="cert-type">
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><span class="required">*</span>申请类型：</label>
+                    <div class="layui-input-inline ns-len-long">
+                        <input type="radio" name="cert_type" lay-filter="application_type" value="2" title="公司"
+                                {empty name='$apply_info'}checked{else/}
+                                    {eq name='$apply_info.cert_type' value="2"}checked{/eq}
+                                {/empty}
+                        >
+                        <input type="radio" name="cert_type" lay-filter="application_type" value="1" title="个人"
+                               {notempty name='$apply_info'}
+                                       {eq name='$apply_info.cert_type' value="1"}checked{/eq}
+                                {/notempty}
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 公司认证信息 -->
+        <div class="layui-form company-authentication-info layui-hide" lay-filter="update_address">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>公司名称：</label>
+                <div class="layui-input-inline">
+                    <input name="company_name" type="text" value="{$apply_info.company_name}" placeholder="请输入公司名称" lay-verify="required" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>联系地址：</label>
+                <div class="layui-input-inline area-select ns-len-short">
+                    <select name="province_id" lay-filter="province_id" lay-verify="province_id">
+                        <option value="">请选择省份</option>
+                        {foreach $province_list as $k => $v}
+                        <option value="{$v.id}">{$v.name}</option>
+                        {/foreach}
+                    </select>
+                </div>
+
+                <div class="layui-input-inline area-select ns-len-short">
+                    <select name="city_id" lay-filter="city_id" lay-verify="city_id">
+                        <option value="">请选择城市</option>
+                    </select>
+                </div>
+
+                <div class="layui-input-inline area-select ns-len-short">
+                    <select name="district_id" lay-filter="district_id" lay-verify="district_id">
+                        <option value="">请选择区/县</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>公司地址：</label>
+                <div class="layui-input-inline">
+                    <input name="company_address" type="text" value="{$apply_info.company_address}" placeholder="请输入详细地址" maxlength="10" autocomplete="off" lay-verify="address" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>统一社会信用码：</label>
+                <div class="layui-input-inline">
+                    <input name="business_licence_number" type="text" value="{$apply_info.business_licence_number}" placeholder="请输入统一社会信用码" lay-verify="required" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label img-upload-lable"><span class="required">*</span>营业执照电子版：</label>
+                <div class="layui-input-inline img-upload">
+                    <input type="hidden" class="layui-input" lay-verify="required" name="business_licence_number_electronic" value="{$apply_info.business_licence_number_electronic}" />
+                    <div class="upload-img-block icon" data-upload data-id="businessLicense" data-name="business_licence_number_electronic">
+                        <div class="upload-img-box" id="businessLicense">
+                            {empty name="$apply_info.business_licence_number_electronic"}
+                            <div class="ns-upload-default">
+                                <img src="SUPPLY_IMG/upload_img.png" />
+                                <p>点击上传</p>
+                            </div>
+                            {else/}
+                            <img src="{:img($apply_info.business_licence_number_electronic)}" alt="">
+                            {/empty}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">法定经营范围：</label>
+                <div class="layui-input-inline">
+                    <textarea name="business_sphere" type="text" placeholder="请输入法定经营范围" class="layui-textarea ns-len-long">{$apply_info.business_sphere}</textarea>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>法人姓名：</label>
+                <div class="layui-input-inline">
+                    <input name="contacts_name" type="text" value="{$apply_info.contacts_name}" placeholder="请输入法人姓名" lay-verify="required" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>法人手机：</label>
+                <div class="layui-input-inline">
+                    <input name="contacts_mobile" type="number" value="{$apply_info.contacts_mobile}" min="0" placeholder="请输入手机号" lay-verify="required" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>法人身份证：</label>
+                <div class="layui-input-inline">
+                    <input name="contacts_card_no" type="text" value="{$apply_info.contacts_card_no}" placeholder="请输入身份证号" lay-verify="required|card" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label img-upload-lable"><span class="required">*</span>法人身份证正面：</label>
+                <div class="layui-input-inline img-upload">
+                    <input type="hidden" class="layui-input" lay-verify="required" name="contacts_card_electronic_2" value="{$apply_info.contacts_card_electronic_2}"/>
+                    <div class="upload-img-block icon" data-upload data-id="companyPositiveContactsID" data-name="contacts_card_electronic_2">
+                        <div class="upload-img-box" id="companyPositiveContactsID">
+                            {empty name="$apply_info.contacts_card_electronic_2"}
+                            <div class="ns-upload-default">
+                                <img src="SUPPLY_IMG/upload_img.png" />
+                                <p>点击上传</p>
+                            </div>
+                            {else/}
+                            <img src="{:img($apply_info.contacts_card_electronic_3)}" alt="">
+                            <img src="{:img($apply_info.contacts_card_electronic_2)}" alt="">
+                            {/empty}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label img-upload-lable"><span class="required">*</span>法人身份证反面：</label>
+                <div class="layui-input-inline img-upload">
+                    <input type="hidden" class="layui-input" lay-verify="required" name="contacts_card_electronic_3" value="{$apply_info.contacts_card_electronic_3}" />
+                    <div class="upload-img-block icon" data-upload data-id="companyBackContactsID" data-name="contacts_card_electronic_3">
+                        <div class="upload-img-box" id="companyBackContactsID">
+                            {empty name="$apply_info.contacts_card_electronic_3"}
+                            <div class="ns-upload-default">
+                                <img src="SUPPLY_IMG/upload_img.png" />
+                                <p>点击上传</p>
+                            </div>
+                            {else/}
+                            <img src="{:img($apply_info.contacts_card_electronic_3)}" alt="">
+                            {/empty}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="apply-btn-box">
+                <button class="ns-bg-color layui-btn authentication-info-step">上一步</button>
+                <button class="ns-bg-color layui-btn authentication-info-lower" lay-submit lay-filter="authentication_info">下一步</button>
+            </div>
+
+        </div>
+
+        <!-- 个人认证信息 -->
+        <div class="personal-authentication-info layui-hide layui-form">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>联系人姓名：</label>
+                <div class="layui-input-inline">
+                    <input name="contacts_name" type="text" value="{$apply_info.contacts_name}" placeholder="请输入联系人姓名" lay-verify="required" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>联系人手机：</label>
+                <div class="layui-input-inline">
+                    <input name="contacts_mobile" type="number" value="{$apply_info.contacts_mobile}" min="0" placeholder="请输入联系人手机号" lay-verify="required" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>身份证号：</label>
+                <div class="layui-input-inline">
+                    <input name="contacts_card_no" type="text" value="{$apply_info.contacts_card_no}" placeholder="请输入身份证号" lay-verify="required|card" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label img-upload-lable"><span class="required">*</span>身份证正面：</label>
+                <div class="layui-input-inline img-upload">
+                    <input type="hidden" class="layui-input" lay-verify="required" name="contacts_card_electronic_2" value="{$apply_info.contacts_card_electronic_2}"/>
+                    <div class="upload-img-block icon" data-upload data-id="positiveContactsID" data-name="contacts_card_electronic_2">
+                        <div class="upload-img-box" id="positiveContactsID">
+                            {empty name="$apply_info.contacts_card_electronic_2"}
+                            <div class="ns-upload-default">
+                                <img src="SUPPLY_IMG/upload_img.png" />
+                                <p>点击上传</p>
+                            </div>
+                            {else/}
+                            <img src="{:img($apply_info.contacts_card_electronic_2)}" alt="">
+                            {/empty}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label img-upload-lable"><span class="required">*</span>身份证反面：</label>
+                <div class="layui-input-inline img-upload" data-upload data-id="backContactsID" data-name="contacts_card_electronic_3">
+                    <input type="hidden" class="layui-input" lay-verify="required" name="contacts_card_electronic_3" value="{$apply_info.contacts_card_electronic_3}"/>
+                    <div class="upload-img-block icon">
+                        <div class="upload-img-box" id="backContactsID">
+                            {empty name="$apply_info.contacts_card_electronic_3"}
+                            <div class="ns-upload-default">
+                                <img src="SUPPLY_IMG/upload_img.png" />
+                                <p>点击上传</p>
+                            </div>
+                            {else/}
+                            <img src="{:img($apply_info.contacts_card_electronic_3)}" alt="">
+                            {/empty}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="apply-btn-box">
+                <button class="ns-bg-color layui-btn authentication-info-step">上一步</button>
+                <button class="ns-bg-color layui-btn authentication-info-lower" lay-submit lay-filter="authentication_info">下一步</button>
+            </div>
+        </div>
+
+        <!-- 银行结算信息 -->
+        <div class="application-info-bank layui-hide layui-form" >
+            <h2 class="apply-h2-title">填写银行结算信息</h2>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>银行开户名：</label>
+                <div class="layui-input-inline">
+                    <input name="bank_account_name" value="{$apply_info.bank_account_name}" type="text" placeholder="请输入银行开户名" lay-verify="required" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>开户银行账号：</label>
+                <div class="layui-input-inline">
+                    <input name="bank_account_number" value="{$apply_info.bank_account_number}" type="number" min="0" placeholder="请输入开户银行账号" lay-verify="required" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>开户银行支行名称：</label>
+                <div class="layui-input-inline">
+                    <input name="bank_name" value="{$apply_info.bank_name}" type="text" placeholder="请输入开户银行支行名称" lay-verify="required" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">开户银行所在地：</label>
+                <div class="layui-input-inline">
+                    <input name="bank_address" value="{$apply_info.bank_address}" type="text" placeholder="请输入开户银行所在地" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">支行联行号：</label>
+                <div class="layui-input-inline">
+                    <input name="bank_code" value="{$apply_info.bank_code}" type="number" min="0" placeholder="请输入支行联行号"  class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">结算类型：</label>
+                <div class="layui-input-inline">
+                    {if in_array("bank", $support_transfer_type)}
+                    <input type="radio" name="bank_type" lay-filter="bankType" value="1" title="银行卡" checked>
+                    {/if}
+                    {if in_array("alipay", $support_transfer_type)}
+                    <input type="radio" name="bank_type" lay-filter="bankType" value="2" title="支付宝">
+                    {/if}
+                </div>
+            </div>
+            <div class="ns-bank-type-1 layui-hide">
+                <div class="layui-form-item">
+                    <label class="layui-form-label type_1_settlement_bank_account_name"><span class="required">*</span>用户真实姓名：</label>
+                    <div class="layui-input-inline">
+                        <input name="zifu_settlement_bank_account_name" value="{$apply_info.settlement_bank_account_name}" type="text" placeholder="请输入用户真实姓名" class="layui-input ns-len-long">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label type_1_settlement_bank_account_number"><span class="required">*</span>支付宝账号：</label>
+                    <div class="layui-input-inline">
+                        <input name="zifu_settlement_bank_account_number" value="{$apply_info.settlement_bank_account_number}" type="text" min="0" placeholder="请输入支付宝账号" class="layui-input ns-len-long">
+                    </div>
+                </div>
+            </div>
+            <div class="ns-bank-type-2">
+                <div class="layui-form-item">
+                    <label class="layui-form-label type_2_settlement_bank_account_name"><span class="required">*</span>结算开户名：</label>
+                    <div class="layui-input-inline">
+                        <input name="settlement_bank_account_name" type="text" value="{$apply_info.settlement_bank_account_name}" placeholder="请输入结算开户名" lay-verify="required" class="layui-input ns-len-long">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label type_2_settlement_bank_account_number"><span class="required">*</span>结算银行账号：</label>
+                    <div class="layui-input-inline">
+                        <input name="settlement_bank_account_number" value="{$apply_info.settlement_bank_account_number}" type="number" min="0" placeholder="请输入结算银行账号" lay-verify="required" class="layui-input ns-len-long">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label type_2_settlement_bank_name"><span class="required">*</span>结算开户银行支行名称：</label>
+                    <div class="layui-input-inline">
+                        <input name="settlement_bank_name" type="text" value="{$apply_info.settlement_bank_name}" placeholder="请输入结算开户银行支行名称" lay-verify="required" class="layui-input ns-len-long">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label type_2_settlement_bank_address"><span class="required">*</span>结算开户银行所在地：</label>
+                    <div class="layui-input-inline">
+                        <input name="settlement_bank_address" type="text" value="{$apply_info.settlement_bank_address}" placeholder="请输入结算开户银行所在地" lay-verify="required" class="layui-input ns-len-long">
+                    </div>
+                </div>
+            </div>
+
+            <div class="ns-bank-type-3 layui-hide">
+                <div class="layui-form-item">
+                    <label class="layui-form-label type_3_settlement_bank_account_name"><span class="required">*</span>微信绑定：</label>
+                    <div class="layui-input-block shop-bind">
+                        <div class="ns-img-box">
+                            <image layer-src src="{:addon_url('supply://supply/apply/supplyBindQrcode')}"/>
+                            <div class="img-load layui-hide">点击重新加载</div>
+                        </div>
+                    </div>
+                    <div class="ns-word-aux">请扫描二维码与微信绑定</div>
+                </div>
+
+                <div class="layui-form-item layui-hide weixin-nickname">
+                    <label class="layui-form-label">微信昵称：</label>
+                    <div class="layui-input-inline">
+                        <input type="text"  disabled class="layui-input ns-dis-input ns-len-long" name="weixin_settlement_bank_address" value="">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label type_3_settlement_bank_account_name"><span class="required">*</span>用户真实姓名：</label>
+                    <div class="layui-input-inline">
+                        <input name="weixin_settlement_bank_account_name" value="" type="text" placeholder="请输入用户真实姓名" class="layui-input ns-len-long">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label type_3_settlement_bank_account_number"><span class="required">*</span>微信账号：</label>
+                    <div class="layui-input-inline">
+                        <input name="weixin_settlement_bank_name" value="" type="text" placeholder="请输入微信账号" class="layui-input ns-len-long">
+                    </div>
+                </div>
+
+                <!-- 微信openid -->
+                <input name="weixin_settlement_bank_account_number" value="" type="hidden" class="layui-input">
+            </div>
+            <div class="apply-btn-box">
+                <button class="ns-bg-color layui-btn application-info-bank-step">上一步</button>
+                <button class="ns-bg-color layui-btn application-info-bank-lower" lay-submit lay-filter="application_info_bank">下一步</button>
+            </div>
+        </div>
+
+        <!-- 供货商信息 -->
+        <div class="application-info layui-hide layui-form" >
+            <h2 class="apply-h2-title">填写供货商信息</h2>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>供货商名称：</label>
+                <div class="layui-input-block">
+                    <input name="supplier_name" value="{$apply_info.supplier_name}" type="text" placeholder="请输入供货商名称" maxlength="10" lay-verify="required" class="layui-input ns-len-long">
+                </div>
+                <div class="ns-word-aux" style="color: #ff0000">注意：供货商名称注册后不可修改。</div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>主营行业：</label>
+                <div class="layui-input-block ns-len-mid">
+                    <select name="category_id" lay-verify="required" lay-search="" lay-filter="category_id">
+                        <option value="">请选择主营行业</option>
+                        {foreach $category['data'] as $category_key => $category_val}
+                        <option value="{$category_val['category_id']}" {if $category_val['category_id'] == $apply_info['category_id']} selected {/if} data-baozheng="{$category_val['baozheng_money']}">{$category_val['category_name']} (保证金：{$category_val['baozheng_money']} )</option>
+                        {/foreach}
+                    </select>
+                </div>
+                <div class="ns-word-aux" style="color: #ff0000">注意：请根据您所经营的内容认真选择供货商主营行业吗，注册后商家不可自行修改。</div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>入驻时长：</label>
+                <div class="layui-input-inline">
+                    <select name="apply_year" lay-verify="required" lay-search="" lay-filter="apply_year">
+                        <option value="">请选择入驻时长</option>
+                        {for start="1" end="5"}
+                        <option value="{$i}" {if $i == $apply_info.apply_year} selected{/if}>{$i}</option>
+                        {/for}
+                    </select>
+                </div>
+                <div class="layui-word-aux">年</div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>服务费：</label>
+                <div class="layui-input-block">
+                    <p class="ns-input-text color-red service">{$service_fee}</p>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>费用总计：</label>
+                <div class="layui-input-block">
+                    <p class="ns-input-text color-red store-ccharges">{empty name="$apply_info.paying_amount"}0.00{else/}{$apply_info.paying_amount}{/empty} 元</p>
+                </div>
+                <div class="ns-word-aux">说明：供货商费用 = 服务费 * 入驻年限 + 保证金</div>
+            </div>
+
+            <div class="apply-btn-box">
+                <button class="ns-bg-color layui-btn application-info-step">上一步</button>
+                <button class="ns-bg-color layui-btn application-info-lower" lay-submit lay-filter="application_info">提交，审核资质信息</button>
+            </div>
+        </div>
+
+        <!-- 审核页面 -->
+        <div class="audit-status {if $procedure == 1} layui-hide {/if}">
+
+            {if condition="$procedure == 5"}
+            <h2 class="apply-h2-title">入驻成功</h2>
+            <div class="shop-succeey">
+                <img src="SUPPLY_IMG/apply/apply_succeed.png" alt="">
+                <p>恭喜您入驻成功，快进入供货商，进行体验吧！</p>
+                <div class="apply-btn-box">
+                    <button class="ns-bg-color layui-btn" onclick="supplySuccess()">进入供货商</button>
+                </div>
+            </div>
+            {else/}
+            <h2 class="apply-h2-title">提交平台审核</h2>
+            <div class="status">
+                {if condition="$procedure == 2"}
+                <div class="status-pic">
+                    <img src="SUPPLY_IMG/apply/under_review.png" alt="">
+                </div>
+                <span>信息审核中，请稍等 ~</span>
+                {elseif condition="$procedure == 6"}
+                <div class="status-pic">
+                    <img src="SUPPLY_IMG/apply/in_audit.png" alt="">
+                </div>
+                <button class="ns-bg-color layui-btn audit-success">审核通过，填写支付凭证</button>
+                {elseif condition="$procedure == 3"}
+                <div class="status-pic">
+                    <img src="SUPPLY_IMG/apply/under_review.png" alt="">
+                </div>
+                <span>支付凭证审核中，请稍等 ~</span>
+                {elseif condition="$procedure == 4"}
+                <div class="status-pic">
+                    <img src="SUPPLY_IMG/apply/audit_failure.png" alt="">
+                </div>
+                <span>审核失败，<span class="error-reason"><a href="#" class="ns-text-color">点击查看原因</a></span></span>
+                <div class="apply-btn-box">
+                    <button class="ns-bg-color layui-btn rewrite">重新填写</button>
+                </div>
+                {elseif condition="$procedure == 7"}
+                <div class="status-pic">
+                    <img src="SUPPLY_IMG/apply/audit_failure.png" alt="">
+                </div>
+                <span>财务审核失败，<span class="error-reason"><a href="#" class="ns-text-color">点击查看原因</a></span></span>
+                <div class="apply-btn-box">
+                    <button class="ns-bg-color layui-btn resubmit">重新提交</button>
+                </div>
+                {/if}
+            </div>
+
+            <!-- 供货商信息 -->
+            <table class="layui-table">
+                <colgroup>
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th colspan="4">供货商信息</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td align="right">供货商名称：</td>
+                    <td colspan="3">{$apply_info.supplier_name}</td>
+                </tr>
+                <tr>
+                    <td align="right">主营行业：</td>
+                    <td colspan="3">{$apply_info.category_name}</td>
+                </tr>
+                <tr>
+                    <td align="right">入驻时长：</td>
+                    <td colspan="3">{$apply_info.apply_year}年</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!-- 公司及联系人信息 -->
+            <table class="layui-table">
+                <colgroup>
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th colspan="4">{if $apply_info.cert_type == 2}公司信息{else/}联系人信息{/if}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {if $apply_info.cert_type == 2}
+                <tr>
+                    <td align="right">公司名称：</td>
+                    <td colspan="3">{$apply_info.company_name}</td>
+                </tr>
+                <tr>
+                    <td align="right">公司所在地：</td>
+                    <td colspan="3">{$apply_info.company_full_address}</td>
+                </tr>
+                {/if}
+                <tr>
+                    <td align="right">{if $apply_info.cert_type == 2}法人姓名{else/}联系人姓名{/if}：</td>
+                    <td colspan="3">{$apply_info.contacts_name}</td>
+                </tr>
+                <tr>
+                    <td align="right">{if $apply_info.cert_type == 2}法人手机号{else/}联系人手机号{/if}：</td>
+                    <td colspan="3">{$apply_info.contacts_mobile}</td>
+                </tr>
+                <tr>
+                    <td align="right">{if $apply_info.cert_type == 2}法人身份证号{else/}联系人身份证号{/if}：</td>
+                    <td colspan="3">{$apply_info.contacts_card_no}</td>
+                </tr>
+                <tr>
+                    <td align="right">{if $apply_info.cert_type == 2}法人身份证正面{else/}联系人身份证正面{/if}：</td>
+                    <td>
+                        <div class="ns-img-box" id="id_card_front"><img layer-src src="{:img($apply_info.contacts_card_electronic_2)}" alt=""></div>
+                    </td>
+                    <td align="right">{if $apply_info.cert_type == 2}法人身份证反面{else/}联系人身份证反面{/if}：</td>
+                    <td>
+                        <div class="ns-img-box" id="id_card_back"><img layer-src src="{:img($apply_info.contacts_card_electronic_3)}" alt=""></div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!-- 营业执照信息 -->
+            {if $apply_info.cert_type == 2}
+            <table class="layui-table">
+                <colgroup>
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th colspan="4">营业执照信息</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td align="right">统一社会信用码：</td>
+                    <td colspan="3">{$apply_info.business_licence_number}</td>
+                </tr>
+                {notempty name="$apply_info.business_sphere"}
+                <tr>
+                    <td align="right">法定经营范围：</td>
+                    <td colspan="3">{$apply_info.business_sphere}</td>
+                </tr>
+                {/notempty}
+                <tr>
+                    <td align="right">营业执照电子版：</td>
+                    <td colspan="3">
+                        <div class="ns-img-box" id="business_license"><img layer-src src="{:img($apply_info.business_licence_number_electronic)}" alt=""></div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            {/if}
+
+            <table class="layui-table">
+                <colgroup>
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th colspan="4">银行信息</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td align="right">银行开户名：</td>
+                    <td colspan="3">{$apply_info.bank_account_name}</td>
+                </tr>
+                <tr>
+                    <td align="right">开户银行账号：</td>
+                    <td colspan="3">{$apply_info.bank_account_number}</td>
+                </tr>
+                <tr>
+                    <td align="right">开户银行支行名称：</td>
+                    <td colspan="3">{$apply_info.bank_name}</td>
+                </tr>
+                {notempty name="$apply_info.bank_address"}
+                <tr>
+                    <td align="right">开户银行支行所在地：</td>
+                    <td colspan="3">{$apply_info.bank_address}</td>
+                </tr>
+                {/notempty}
+                {notempty name="$apply_info.bank_code"}
+                <tr>
+                    <td align="right">支行联行号：</td>
+                    <td colspan="3">{$apply_info.bank_code}</td>
+                </tr>
+                {/notempty}
+                </tbody>
+            </table>
+
+            <table class="layui-table">
+                <colgroup>
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th colspan="4">结算账户信息</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {if condition="$apply_info.bank_type == 2"}
+                    <tr>
+                        <td align="right">用户真实姓名：</td>
+                        <td colspan="3">{$apply_info.settlement_bank_account_name}</td>
+                    </tr>
+                    <tr>
+                        <td align="right">支付宝账号：</td>
+                        <td colspan="3">{$apply_info.settlement_bank_account_number}</td>
+                    </tr>
+                    {elseif condition="$apply_info.bank_type == 1"}
+                    <tr>
+                        <td align="right">结算银行开户名：</td>
+                        <td colspan="3">{$apply_info.settlement_bank_account_name}</td>
+                    </tr>
+                    <tr>
+                        <td align="right">结算公司银行账号：</td>
+                        <td  colspan="3">{$apply_info.settlement_bank_account_number}</td>
+                    </tr>
+                    <tr>
+                        <td align="right">结算开户银行支行名称：</td>
+                        <td colspan="3">{$apply_info.settlement_bank_name}</td>
+                    </tr>
+                    <tr>
+                        <td align="right">结算开户银行所在地：</td>
+                        <td colspan="3">{$apply_info.settlement_bank_address}</td>
+                    </tr>
+                    {elseif condition="$apply_info.bank_type == 3"}
+                    <tr>
+                        <td align="right">用户真实姓名：</td>
+                        <td colspan="3">{$apply_info.settlement_bank_account_name}</td>
+                    </tr>
+                    <tr>
+                        <td align="right">微信昵称：</td>
+                        <td colspan="3">{$apply_info.settlement_bank_address}</td>
+                    </tr>
+                    <tr>
+                        <td align="right">微信账号：</td>
+                        <td colspan="3">{$apply_info.settlement_bank_name}</td>
+                    </tr>
+                    {/if}
+
+                </tbody>
+            </table>
+            {/if}
+        </div>
+
+        <!-- 提交支付凭证 -->
+        <div class="payment-voucher layui-hide layui-form">
+            <h2 class="apply-h2-title">填写支付信息</h2>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>供货商名称：</label>
+                <div class="layui-input-inline">
+                    <input type="text" disabled class="layui-input ns-dis-input ns-len-long" value="{$apply_info.supplier_name}">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>主营行业：</label>
+                <div class="layui-input-inline">
+                    <input type="text" disabled class="layui-input ns-dis-input ns-len-long" value="{$apply_info.category_name}">
+                </div>
+            </div>
+
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>入驻时长：</label>
+                <div class="layui-input-inline">
+                    <input type="text" disabled class="layui-input ns-dis-input ns-len-long" value="{$apply_info.apply_year}">
+                </div>
+                <div class="layui-word-aux">年</div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>保证金：</label>
+                <div class="layui-input-block">
+                    <p class="ns-input-text color-red payment-cash-deposit">{$apply_info['paying_deposit']} 元</p>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>服务费：</label>
+                <div class="layui-input-block">
+                    <p class="ns-input-text color-red payment-service">{$apply_info['paying_apply']} 元</p>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>总计：</label>
+                <div class="layui-input-block">
+                    <p class="ns-input-text color-red payment-store-ccharges">{$apply_info['paying_amount']} 元</p>
+                </div>
+                <div class="ns-word-aux">
+                    说明： 供货商费用 = 服务费 * 入驻年限 + 保证金；
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label img-upload-lable"><span class="required">*</span>付款凭证：</label>
+                <div class="layui-input-inline img-upload">
+					{empty name="$apply_info.paying_money_certificate"}
+                    <input type="hidden" class="layui-input" name="paying_money_certificate" lay-verify="required" />
+					{else/}
+					<input type="hidden" class="layui-input" name="paying_money_certificate" lay-verify="required" value="{$apply_info.paying_money_certificate}" />
+					{/empty}
+                    <div class="upload-img-block icon"  data-upload data-id="voucher" data-name="paying_money_certificate">
+                        <div class="upload-img-box" id="voucher">
+                            {empty name="$apply_info.paying_money_certificate"}
+                            <div class="ns-upload-default">
+                                <img src="SUPPLY_IMG/upload_img.png" />
+                                <p>点击上传</p>
+                            </div>
+                            {else/}
+                            <img src="{:img($apply_info.paying_money_certificate)}" alt="">
+                            {/empty}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">付款凭证说明：</label>
+                <div class="layui-input-inline">
+                    <textarea name="paying_money_certificate_explain" class="layui-textarea ns-len-long" placeholder="请输入付款凭证说明">{$apply_info['paying_money_certificate_explain']}</textarea>
+                </div>
+            </div>
+            <!-- 结算信息 -->
+            <table class="layui-table">
+                <colgroup>
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th colspan="4">收款账户</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td align="right">银行开户名：</td>
+                    <td>{$receivable_config.data.value.bank_account_name}</td>
+                    <td align="right">银行账户：</td>
+                    <td>{$receivable_config.data.value.bank_account_no}</td>
+                </tr>
+                <tr>
+                    <td align="right">开户名称：</td>
+                    <td>{$receivable_config.data.value.bank_name}</td>
+                    <td align="right">开户所在地：</td>
+                    <td>{$receivable_config.data.value.bank_address}</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="apply-btn-box">
+                <button class="ns-bg-color layui-btn" lay-submit lay-filter="payment-voucher-complete">点击提交</button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{/block}
+{block name="script"}
+<script type="text/javascript" src="SUPPLY_JS/address.js"></script>
+<script type="text/javascript">
+    var form,upload,groupId,
+        agreementConsent = false,
+        cert_type = 2,
+        authentication_info = "",
+        application_info_bank = "",
+        typePayment = 1,
+        form_data = "";
+
+    $(function(){
+        layui.use("form",function () {
+            form = layui.form;
+			form.render();
+            $(".apply-process ul li:after").after("").css("background-color","#f38421 !important");
+
+            {if in_array("bank", $support_transfer_type)}
+            if (!$("input[name='bank_type']:checked").length){
+                typePayment = 1;
+                $("input[name='bank_type']").eq(0).prop("checked",true);
+            }
+            {/if}
+            {if in_array("alipay", $support_transfer_type)}
+            if (!$("input[name='bank_type']:checked").length){
+                typePayment = 2;
+                $("input[name='bank_type']").eq(0).prop("checked",true);
+            }
+            {/if}
+
+            form.render();
+            payType(typePayment);
+            /**
+             * 签订入驻协议-step1
+             * */
+            //监听是否同意协议
+            form.on('checkbox(apply_info)', function(data){
+                agreementConsent = data.elem.checked;
+            });
+
+            $("body").on("click",".apply-info",function () {
+                if(agreementConsent){
+                    //申请协议隐藏
+                    $(".settlement-agreement").addClass("layui-hide");
+                    $(".application-type").removeClass("layui-hide");
+                    if(cert_type == 2){
+                        $(".company-authentication-info").removeClass("layui-hide");
+                    }else if(cert_type == 1){
+                        $(".personal-authentication-info").removeClass("layui-hide");
+                    }
+                }else{
+                    layer.msg("请先同意协议");
+                }
+            });
+
+            /**
+             * 申请类型-step2
+             * */
+            form.on('radio(application_type)', function(data){
+                cert_type = data.value;
+
+                //公司/个人资质信息显示
+                if(cert_type == 2){
+                    $(".application-type h2").text("填写公司认证信息");
+                    $(".company-authentication-info").removeClass("layui-hide");
+                    $(".personal-authentication-info").addClass("layui-hide");
+                }else if(cert_type == 1){
+                    $(".application-type h2").text("填写个人认证信息");
+                    $(".company-authentication-info").addClass("layui-hide");
+                    $(".personal-authentication-info").removeClass("layui-hide");
+                }
+
+            });
+
+            /**
+             * 填写个人/公司资质信息-step3
+             * */
+            //上一步
+            $("body").on("click",".authentication-info-step",function () {
+
+                $(".settlement-agreement").removeClass("layui-hide");
+                //将公司/个人资质信息隐藏
+                $(".company-authentication-info").addClass("layui-hide");
+                $(".personal-authentication-info").addClass("layui-hide");
+                //申请类型隐藏
+                $(".application-type").addClass("layui-hide");
+            });
+
+            //下一步
+            form.on('submit(authentication_info)', function(data){
+                authentication_info = data.field;
+
+                //银行结算信息显示
+                $(".application-info-bank").removeClass("layui-hide");
+
+                //申请类型隐藏
+                $(".application-type").addClass("layui-hide");
+
+                //个人/公司资质信息隐藏
+                if(parseInt(cert_type) == 2){
+                    $(".company-authentication-info").addClass("layui-hide");
+                }else{
+                    $(".personal-authentication-info").addClass("layui-hide");
+                }
+            });
+
+            /**
+             * 银行结算-step4
+             * */
+            // 上一步
+            $("body").on("click",".application-info-bank-step",function () {
+                //结算信息隐藏
+                $(".application-info-bank").addClass("layui-hide");
+
+                //申请类型显示
+                $(".application-type").removeClass("layui-hide");
+                //个人/公司资质信显示
+                cert_type == 2 ? $(".company-authentication-info").removeClass("layui-hide") : $(".personal-authentication-info").removeClass("layui-hide");
+            });
+
+            //下一步
+            form.on('submit(application_info_bank)', function(data){
+                if (typePayment == 2){
+                    data.field.settlement_bank_account_name = data.field.zifu_settlement_bank_account_name;
+                    data.field.settlement_bank_account_number = data.field.zifu_settlement_bank_account_number;
+                }
+
+                if (typePayment == 3){
+                    if (!data.field.weixin_settlement_bank_account_number){
+                        layer.msg("请先与微信进行绑定");
+                        return false;
+                    }
+                    data.field.settlement_bank_account_name = data.field.weixin_settlement_bank_account_name; //用户真实姓名
+                    data.field.settlement_bank_account_number = data.field.weixin_settlement_bank_account_number; //openid
+                    data.field.settlement_bank_address = data.field.weixin_settlement_bank_address; //微信昵称
+                    data.field.settlement_bank_name = data.field.weixin_settlement_bank_name; // 微信账号
+                }
+
+                application_info_bank = data.field;
+                //银行结算信息隐藏
+                $(".application-info-bank").addClass("layui-hide");
+
+                //供货商信息显示
+                $(".application-info").removeClass("layui-hide");
+
+            });
+
+            function payType(data){
+                //银行卡
+                if(data == 1){
+                    $(".ns-bank-type-1").addClass("layui-hide");
+                    $(".ns-bank-type-3").addClass("layui-hide");
+                    $(".ns-bank-type-2").removeClass("layui-hide");
+                    $(".type_1_settlement_bank_account_name").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_1_settlement_bank_account_number").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_3_settlement_bank_account_name").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_3_settlement_bank_account_number").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_2_settlement_bank_account_name").next().find(".layui-input").attr("lay-verify","required");
+                    $(".type_2_settlement_bank_account_number").next().find(".layui-input").attr("lay-verify","required");
+                    $(".type_2_settlement_bank_name").next().find(".layui-input").attr("lay-verify","required");
+                    $(".type_2_settlement_bank_address").next().find(".layui-input").attr("lay-verify","required");
+                }
+                //支付宝
+                if(data == 2){
+                    $(".ns-bank-type-1").removeClass("layui-hide");
+                    $(".ns-bank-type-2").addClass("layui-hide");
+                    $(".ns-bank-type-3").addClass("layui-hide");
+                    $(".type_2_settlement_bank_account_name").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_2_settlement_bank_account_number").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_2_settlement_bank_name").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_2_settlement_bank_address").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_3_settlement_bank_account_name").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_3_settlement_bank_account_number").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_1_settlement_bank_account_name").next().find(".layui-input").attr("lay-verify","required");
+                    $(".type_1_settlement_bank_account_number").next().find(".layui-input").attr("lay-verify","required");
+                }
+                //微信
+                if(data == 3) {
+                    $(".ns-bank-type-1").addClass("layui-hide");
+                    $(".ns-bank-type-2").addClass("layui-hide");
+                    $(".ns-bank-type-3").removeClass("layui-hide");
+                    $(".type_2_settlement_bank_account_name").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_2_settlement_bank_account_number").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_2_settlement_bank_name").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_2_settlement_bank_address").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_1_settlement_bank_account_name").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_1_settlement_bank_account_number").next().find(".layui-input").removeAttr("lay-verify");
+                    $(".type_3_settlement_bank_account_name").next().find(".layui-input").attr("lay-verify", "required");
+                    $(".type_3_settlement_bank_account_number").next().find(".layui-input").attr("lay-verify", "required");
+
+
+                    var intervalId;
+                    supplyBind();
+
+                    function supplyBind() {
+                        intervalId = window.setInterval(
+                            function () {
+                                $.ajax({
+                                    async: 'false',
+                                    type: 'POST',
+                                    dataType: 'JSON',
+                                    url: ns.url("supply://supply/apply//checkSupplyBind"),
+                                    success: function (res) {
+
+                                        if (res.code == -10001 && res.data.is_expire == 1){
+                                            $(".ns-bank-type-3 .img-load").removeClass("layui-hide");
+                                            clearInterval(intervalId);
+                                            return false;
+                                        }
+
+                                        if (res.code >= 0){
+                                            $(".ns-bank-type-3 .img-load").removeClass("layui-hide");
+                                            $(".ns-bank-type-3 .img-load").html('恭喜您绑定成功！<p class="ns-text-color">重新绑定</p>');
+                                            $("input[name='weixin_settlement_bank_account_number']").val(res.data.openid)
+                                            $(".weixin-nickname input").val(res.data.userinfo.nickName);
+                                            $(".weixin-nickname").attr("data-state", res.code);
+                                            $(".weixin-nickname").removeClass("layui-hide");
+                                            clearInterval(intervalId);
+                                            return false;
+                                        }
+                                    }
+                                });
+                            }, 500
+                        );
+                    }
+
+                    $('body').on("click",".ns-bank-type-3 .img-load",function () {
+                        if(parseInt($(".weixin-nickname").attr("data-state")) >= 0){
+                            $(".weixin-nickname").addClass("layui-hide");
+                        }
+                        $(".ns-bank-type-3 img").attr('src',"{:addon_url('supply://supply/apply/supplyBindQrcode')}?time="+ Math.random());
+                        $(".ns-bank-type-3 .img-load").addClass("layui-hide")
+                        supplyBind();
+                    });
+                }
+            }
+
+
+            //支付类型 显示隐藏
+            form.on('radio(bankType)', function(data){
+                typePayment = data.value;
+                payType(typePayment);
+            });
+
+            /**
+             * 供货商信息-step5
+             * */
+            // 上一步
+            $("body").on("click",".application-info-step",function () {
+                //银行结算信息显示
+                $(".application-info-bank").removeClass("layui-hide");
+
+                //供货商信息隐藏
+                $(".application-info").addClass("layui-hide");
+            });
+
+            /* 计算缴费金额 */
+            function paymentAmount (){
+                var categoryId = $(".application-info select[name=category_id] option:selected").val(),
+                    applyYear = $(".application-info select[name=apply_year] option:selected").val();
+                if(categoryId && applyYear) {
+                    $.ajax({
+                        url: ns.url("supply://supply/apply/getApplyMoney"),
+                        data: {
+                            "apply_year": applyYear,
+                            "category_id": categoryId,
+                        },
+                        dataType: 'JSON',
+                        type: 'POST',
+                        success : function(data) {
+                            $(".store-ccharges").text( data.code.paying_amount + ' 元');
+                        }
+                    })
+                }
+            };
+
+            form.on('select(category_id)', function(data){
+                console.log(123);
+                $(".cash-deposit").text($(data.elem).find("option:selected").attr("data-baozheng"));
+                paymentAmount();
+            });
+            form.on('select(apply_year)', function(data){
+                console.log(1231321);
+                paymentAmount();
+            });
+
+            // 最后保存信息
+            form.on('submit(application_info)', function(data){
+                var categoryName = $(".application-info select[name=category_id] option:selected").text();
+                data.field.category_name =categoryName.substr(0, categoryName.indexOf("("));
+
+                //获取地址
+                var provinceId = $("select[name=province_id] option:selected").text(),
+                    cityId = $("select[name=city_id] option:selected").text(),
+                    districtId = $("select[name=district_id] option:selected").text(),
+                    companyAddress = $("input[name=company_address]").val();
+
+                data.field.company_full_address = provinceId + cityId + districtId + companyAddress;
+
+                data.field.cert_type = cert_type;
+                form_data = $.extend(authentication_info,application_info_bank,data.field);
+
+                $.ajax({
+                    url: ns.url("supply://supply/apply/apply"),
+                    dataType: 'JSON',
+                    type: 'POST',
+                    data: form_data,
+                    success : function(data) {
+                        if(data.code == 0){
+                            //供货商信息隐藏
+                            $(".application-info").addClass("layui-hide");
+
+                            location.reload();
+                        }
+                    }
+                })
+            });
+
+            /* 审核失败 */
+            $("body").on("click",".rewrite",function () {
+                var type = "{$apply_info.cert_type}";
+                cert_type = type;
+                if(parseInt(type) == 2){
+
+                    var province_id = "{$apply_info.company_province_id}",
+                        city_id = "{$apply_info.company_city_id}",
+                        district_id = "{$apply_info.company_district_id}",
+                        initdata = {province_id, city_id, district_id};
+                    initAddress(initdata, "update_address");
+                }
+                $(".audit-status").addClass("layui-hide");
+                $(".settlement-agreement").removeClass("layui-hide");
+                $(".apply-process ul li:nth-child(2) span.point").removeClass("ns-bg-color");
+                $(".apply-process ul li:nth-child(3) span.content").removeClass("ns-bg-color");
+                $(".apply-process ul li:nth-child(3) span.title").removeClass("ns-text-color");
+
+                //子流程
+                $(".agreement").removeClass("layui-hide");
+                $(".submit-platform").addClass("layui-hide");
+                $(".submit-platform dd:nth-child(2)").addClass("apply-side-selected ns-bg-color");
+                $(".submit-platform dd:nth-child(6)").removeClass("apply-side-selected ns-bg-color");
+            });
+
+            /* 财务审核失败 */
+            $("body").on("click",".resubmit",function () {
+                $(".audit-status").addClass("layui-hide");
+                $(".payment-voucher").removeClass("layui-hide");
+            });
+
+            /* 审核成功过 */
+            $("body").on("click",".audit-success",function () {
+                $(".audit-status").addClass("layui-hide");
+                $(".payment-voucher").removeClass("layui-hide");
+
+                //主流程
+                $(".apply-process ul li:nth-child(3) span.point").addClass("ns-bg-color");
+                $(".apply-process ul li:nth-child(4) span.content").addClass("ns-bg-color");
+                $(".apply-process ul li:nth-child(4) span.title").addClass("ns-text-color");
+
+                //子流程
+                $(".submit-platform").addClass("layui-hide");
+                $(".payFee").removeClass("layui-hide");
+            });
+
+            //解析地址
+            getAdder(1,140100);
+            function getAdder(level,pid){
+                $.ajax({
+                    type : "POST",
+                    dataType: 'JSON',
+                    url : ns.url("supply://supply/address/getAreaList"),
+                    data : {level,pid},
+                    async : false,
+                    success : function(res) {
+                        console.log(res)
+                    }
+                });
+            }
+
+            /* 支付凭证 */
+            form.on('submit(payment-voucher-complete)', function(data){
+                $.ajax({
+                    url: ns.url("supply://supply/apply/editApply"),
+                    dataType: 'JSON',
+                    type: 'POST',
+                    data: data.field,
+                    success : function(data) {
+                        if(data.code == 0){
+                            location.reload();
+                        }
+                    }
+                })
+            });
+
+            form.on('select(payment_group_id)', function(data){
+                $(".payment-service").text($(data.elem).find("option:selected").attr("data-fee"));
+                paymentVoucher();
+            });
+            form.on('select(payment_category_id)', function(data){
+                $(".payment-cash-deposit").text($(data.elem).find("option:selected").attr("data-baozheng"));
+                paymentVoucher();
+            });
+            form.on('select(payment_apply_year)', function(data){
+                paymentVoucher();
+            });
+
+            paymentVoucher();
+
+            /* 支付凭证 - 缴费金额 */
+            function paymentVoucher (){
+                var categoryId = $(".payment-voucher select[name=category_id] option:selected").val(),
+                    groupId = $(".payment-voucher select[name=group_id] option:selected").val(),
+                    applyYear = $(".payment-voucher select[name=apply_year] option:selected").val();
+
+                if(categoryId && groupId && applyYear) {
+                    $.ajax({
+                        url: ns.url("supply://supply/apply/getApplyMoney"),
+                        data: {
+                            "apply_year": applyYear,
+                            "category_id": categoryId,
+                            "group_id": groupId
+                        },
+                        dataType: 'JSON',
+                        type: 'POST',
+                        success : function(data) {
+                            $(".payment-voucher .payment-store-ccharges").text( data.code.paying_amount + " 元");
+                        }
+                    })
+                }
+            };
+
+            //表单验证
+            form.verify({
+                province_id : function(value, item){
+                    if(value == ''){
+                        return '省份不能为空';
+                    }
+                },
+                city_id : function(value, item){
+                    if(value == ''){
+                        return '城市不能为空';
+                    }
+                },
+                district_id : function(value, item){
+                    if(value == ''){
+                        return '区/县不能为空';
+                    }
+                },
+                address: function(value) {
+                    if (value == '') {
+                        return '请输入详细地址';
+                    }
+                },
+                telphone: function(value) {
+                    var mobile = /^1[3|4|5|7|8]\d{9}$/;
+                    var flag = mobile.test(value);
+                    if(!flag){
+                        return '请输入正确的手机号';
+                    }
+                },
+                card: function(value) {
+                    var reg = /(^\d{15}$)|(^\d{17}(\d|[Xx])$)/;
+                    if(!reg.test(value)) {
+                        return '请输入正确的身份证号';
+                    }
+                }
+            });
+        });
+    });
+
+    $("body").on("click", ".error-reason", function(){
+        layer.open({
+            type: 0,
+            title: '拒绝原因',
+            btn: [],
+            content: '{$apply_info["apply_message"]}'
+        });
+    });
+
+    /* 图片上传 */
+    $("[data-upload]").each(function () {
+
+        var id = $(this).attr("data-id");
+        var name = $(this).attr("data-name");
+
+        layui.use("upload", function () {
+            upload = layui.upload;
+
+            upload.render({
+                elem: "#" + id,
+                url: ns.url("supply://supply/upload/image"),
+                done: function (res) {
+
+                    if (res.code >= 0) {
+                        $("input[name=" + name + " ]").val(res.data.pic_path);
+                        $("#" + id).html("<img src=" + ns.img(res.data.pic_path) + " >");
+                    }
+                    return layer.msg(res.message);
+                }
+            });
+        });
+    });
+
+    function supplySuccess(){
+        var userInfo = "{$userInfo['user_info']['username']}";
+        if (!userInfo){
+            location.href = ns.url("supply://supply/login/login");
+            return false;
+        };
+        $.ajax({
+            url: ns.url("supply://supply/apply/simulatedLogin"),
+            data: {"username": userInfo},
+            dataType: 'JSON',
+            type: 'POST',
+            success : function(data) {
+                !data.code ? location.href = ns.url("supply://supply/index/index") : layer.msg(data.message) ;
+            }
+        });
+    }
+
+    //判断名称是否已存在
+    $('input[name=supplier_name]').on('blur',function() {
+        var supplier_name = $('input[name=supplier_name]').val();
+
+        $.ajax({
+            url: ns.url("supply://supply/apply/supplierNameExist"),
+            data: {
+                "supplier_name": supplier_name,
+            },
+            dataType: 'JSON',
+            type: 'POST',
+            success : function(data) {
+                if(data != null){
+                    layer.msg('供货商名称已存在');
+                    $('input[name=supplier_name]').focus();
+                    return false;
+                }
+            }
+        })
+    });
+</script>
+{/block}

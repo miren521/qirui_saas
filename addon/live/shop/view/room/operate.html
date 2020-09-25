@@ -1,0 +1,238 @@
+{extend name="app/shop/view/base.html"/}
+
+{block name="resources"}
+<style type="text/css">
+.goods-empty {padding: 100px 0;text-align: center;}
+.goods-info {padding: 5px 0;align-items: center;flex-wrap:unset!important;}
+.goods-info .room-name {padding-left: 5px;line-height: 1}
+.goods-info img {width:50px;height: 50px;}
+</style>
+{/block}
+
+{block name="main"}
+<div class="layui-form ns-form">
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">直播间信息</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">直播间：</label>
+				<div class="layui-input-block">
+					<p>{$room_info.name}</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">直播时间：</label>
+				<div class="layui-input-block">
+					<p>{:time_to_date($room_info.start_time)} - {:time_to_date($room_info.end_time)}</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">列表展示</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">主播头像：</label>
+				<div class="layui-input-block">
+					<input type="hidden" name="anchor_img" value="" lay-verify="shareImg"/>
+					<div class="upload-img-block icon">
+						<div class="upload-img-box" id="anchorImgUpload">
+							{if condition="$room_info.anchor_img"}
+							<img src="{:img($room_info.anchor_img)}" />
+							{else/}
+							<div class="ns-upload-default">
+								<img src="SHOP_IMG/upload_img.png" />
+								<p>点击上传</p>
+							</div>
+							{/if}
+						</div>
+					</div>
+				</div>
+				<div class="ns-word-aux">
+					<p>在直播列表中展示。建议尺寸：100像素 * 100像素，图片大小不得超过1M。</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>直播间横幅：</label>
+				<div class="layui-input-block">
+					<input type="hidden" name="banner" value="" lay-verify="shareImg"/>
+					<div class="upload-img-block icon">
+						<div class="upload-img-box" id="bannerUpload">
+							{if condition="$room_info.banner"}
+							<img src="{:img($room_info.banner)}" />
+							{else/}
+							<div class="ns-upload-default">
+								<img src="SHOP_IMG/upload_img.png" />
+								<p>点击上传</p>
+							</div>
+							{/if}
+						</div>
+					</div>
+				</div>
+				<div class="ns-word-aux">
+					<p>在直播列表中展示。建议尺寸：702像素 * 208像素，图片大小不得超过2M。</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{if $room_info['live_status'] == '102'}
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">商品货架</span>
+		</div>
+		<div class="layui-card-body">
+			{notempty name="$room_info['goods']"}	
+				<div class="ns-single-filter-box">
+					<button class="layui-btn ns-bg-color" onclick="importGoods()">从商品库导入商品</button>
+				</div>
+				<table class="layui-table" lay-skin="nob">
+				  	<colgroup>
+				    	<col width="10%">
+				    	<col width="45">
+				    	<col width="15">
+				    	<col width="30">
+				    	<col>
+				  	</colgroup>
+				  	<thead>
+			    		<tr>
+				      		<th>序号</th>
+				      		<th>商品信息</th>
+				      		<th>价格</th>
+				      		<th>商品链接</th>
+			    		</tr> 
+				  	</thead>
+				  	<tbody>
+				  		{foreach name="$room_info['goods']" item="vo" index="k"}
+				  			{php}
+				  				preg_match("/(pages\/goods\/detail\/detail\?sku_id=)(\d*)$/", $vo['url'], $matches);
+				  			{/php}
+				  			{if isset($matches[2])}
+				  			<tr data-sku="{$matches[2]}">
+				  			{else/}
+				  			<tr>
+				  			{/if}
+						      	<td>{$k}</td>
+						      	<td>
+						      		<div class="ns-table-btn goods-info">
+										<img src="{:img($vo.cover_img)}">
+										<span class="room-name" title="{$vo.name}">{$vo.name}</span>
+									</div>
+						      	</td>
+						      	<td>{:sprintf("%.2f", $vo.price)}</td>
+						      	<td>{$vo.url}</td>
+						    </tr>
+				  		{/foreach}
+				  	</tbody>
+				</table>
+			{else/}
+			<div class="goods-empty">暂无商品<a href="javascript:;" class="ns-text-color" onclick="importGoods()">从商品库中导入</a></div>
+			{/notempty} 
+		</div>
+	</div>
+	{/if}
+</div>
+
+{/block}
+
+{block name="script"}
+<script type="text/javascript">
+	layui.use(['upload'], function() {
+		upload = layui.upload;
+
+		upload.render({
+			elem: '#anchorImgUpload',
+			url: ns.url("shop/upload/image"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='anchor_img']").val(res.data.pic_path);
+					$("#anchorImgUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+					$.ajax({
+						type: 'POST',
+						url: ns.url("live://shop/room/operate"),
+						data: {
+							id: {$room_info.id},
+							anchor_img: res.data.pic_path
+						},
+						dataType: 'JSON',
+						success: function(res) {
+							
+						}
+					});
+				}
+				return layer.msg(res.message);
+			}
+		});
+
+		upload.render({
+			elem: '#bannerUpload',
+			url: ns.url("shop/upload/image"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='banner']").val(res.data.pic_path);
+					$("#bannerUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+					$.ajax({
+						type: 'POST',
+						url: ns.url("live://shop/room/operate"),
+						data: {
+							id: {$room_info.id},
+							banner: res.data.pic_path
+						},
+						dataType: 'JSON',
+						success: function(res) {
+							
+						}
+					});
+				}
+				return layer.msg(res.message);
+			}
+		});
+	})
+
+	function importGoods(){
+		var sku_id = [];
+		if ($('[data-sku]').length) {
+			$('[data-sku]').each(function(el){
+				sku_id.push($(this).attr('data-sku'));
+			})
+		}
+		layer.open({
+			type: 2,
+			title: '从商品库导入商品',
+			content: ns.url("live://shop/room/getGoodsPageList", {ids: sku_id.toString() }),
+			area: ['600px', '550px'],
+			btn: ['确定', '取消'],
+			yes: function(index, layero){
+				var iframe = $(layero).find("iframe")[0].contentWindow;
+				iframe.callback(function(data){
+			  		if (data.length == 0) {
+			  			layer.msg('请选择要添加的商品', {icon: 5, shift: 6});
+						return;
+			  		}
+			  		$.ajax({
+						type: 'POST',
+						url: ns.url("live://shop/room/addGoods"),
+						data: {
+							room_id: {$room_info.roomid},
+							data: JSON.stringify(data)
+						},
+						dataType: 'JSON',
+						success: function(res) {
+							layer.msg(res.msg);
+							if (res.code == 0) {
+								layer.closeAll();
+								location.reload();
+							}
+						}
+					});
+				})
+			}
+		})
+	}
+</script>
+{/block}

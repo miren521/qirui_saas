@@ -1,0 +1,1257 @@
+{extend name="addon/servicer/servicer/view/base.html"/}
+{block name="resources"}
+<link rel="stylesheet" type="text/css" href="ADMIN_CSS/iconfont.css" />
+{/block}
+{block name="main"}
+<style>
+	.layui-layout-admin .layui-body div.ns-body-content {
+		width: 100%;
+		height: 100%;
+		min-height: 0;
+		min-width: 0;
+		box-sizing: border-box;
+		padding: 0;
+	}
+	.servicer-chat-base{box-sizing: border-box;}
+	.chat-index-box{width: 100%;display: flex;position: relative;}
+	.chat-index-box .sunblind{width: 100%;height: 50px;background: #ffffff;position: absolute;left: 0;top: 0;padding: 0 30px;box-sizing: border-box;line-height: 50px;z-index: 99;color: #ff596d;}
+	.chat-index-box .chat-content-left{width: 200px;overflow: hidden;border: 1px solid #E5E5E5;box-sizing: border-box;}
+	.chat-content-left .left-content .content-item{width: 200px;position: relative;}
+	.chat-content-left .left-content .content-item .item-title{width: 100%;height: 53px;background: #f3f3f3;padding: 0 10px;box-sizing: border-box;line-height: 53px;border-bottom: 1px solid #e5e5e5;}
+	.chat-content-left .left-content .content-item .item-title .layui-nav-more{content: '';width: 0;height: 0;border-style: solid dashed dashed;border-color: #fff transparent transparent;overflow: hidden;cursor: pointer;transition: all .2s;-webkit-transition: all .2s;position: absolute;top: 27px;right: 20px;margin-top: -3px;border-width: 6px;border-top-color: #000000;}
+	.chat-content-left .left-content .content-item .item-title .layui-nav-more.layui-nav-mored{margin-top: -9px;border-style: dashed dashed solid;right: 20px;border-bottom-color: #000000;border-top-color: transparent;}
+	.chat-content-left .left-content .content-item .content-people{width: 100%;height: 70px;background: #ffffff;display: flex;justify-content: space-between;align-items: center;padding: 0 30px 0 15px;box-sizing: border-box;border-bottom: 1px solid #e5e5e5;cursor: pointer;}
+	.content-item .content-people img{width: 40px;height: 40px;border-radius: 50%;}
+	.content-item .content-people .people-info{width: calc(100% - 40px);height: 100%;padding-left: 10px;display: flex;flex-direction: column;justify-content: center;box-sizing: border-box;}
+	.content-item .content-people .people-info .name{width: 100%;display: flex;justify-content: space-between;align-items: center;}
+	.content-item .content-people .people-info .name .left{font-size: 14px;max-width: calc(100% - 50px);overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
+	.content-item .content-people .people-info .name .right{font-size: 12px;color: #ffffff;height: 7px;width: 7px;border-radius: 50%;background: red; text-align: center;line-height: 20px;}
+	.content-item .content-people .people-info .message{width: calc(100% - 10px);font-size: 12px;color: #838383;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;margin-top: 5px;}
+	.chat-content-center{width: calc(100% - 220px)}
+	.chat-content-center-top{width: 100%;height: 53px;background: #ffffff;border-bottom: 1px solid #E5E5E5;display: flex;align-items: flex-end;padding: 0 10px;box-sizing: border-box;overflow-x: auto;}
+	.chat-content-center-top .chat-people{display: inline-block;padding: 6px 12px;background: #F3F3F3;border: 1px solid #E5E5E5;box-sizing: border-box;position: relative;cursor: pointer;margin-right: 5px;}
+	.chat-content-center-top .chat-people .chat-people-box{width: 100%;height: 100%;display: flex;align-items: center;}
+	.chat-content-center-top .chat-people.active{background: #ffffff;border-bottom: 1px solid #ffffff;}
+	.chat-content-center-top .chat-people .name{width: 70px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
+	.chat-content-center-top .chat-people .close{background: #f5f5f5;border-radius: 50%;padding: 3px;color: red;margin-left: 6px;}
+	.chat-content-center-bottom-box{width: 100%;display: flex;}
+	.chat-content-center-bottom-left.active{flex: 1;}
+	.chat-content-center-bottom-left{width: 885px;height: 100%;overflow: hidden;border-right: 1px solid #E5E5E5;border-bottom: 1px solid #E5E5E5;box-sizing: border-box;}
+	.chat-content-center-bottom{height: calc(100% - 250px);padding: 0 30px 0 15px;box-sizing: border-box;overflow-y: scroll;}
+	.chat-content-center-bottom::-webkit-scrollbar{display: none;}
+	.chat-content-center-bottom .chat-massage-box{width: 100%;background: #ffffff;display: flex;align-items: flex-start;margin-top: 20px;}
+	.chat-content-center-bottom .chat-massage-box.active{width: 100%;background: #ffffff;display: flex;align-items: flex-start;margin-top: 20px;flex-direction: row-reverse;}
+	.chat-content-center-bottom .chat-massage-box.active .name{text-align: right;}
+	.chat-content-center-bottom .chat-massage-box:last-child{margin-bottom: 20px;}
+	.chat-content-center-bottom .chat-massage-box img{width: 40px;height: 40px;}
+	.chat-content-center-bottom .chat-massage-box .message-info{width: 80%;padding-left: 10px;box-sizing: border-box;}
+	.chat-content-center-bottom .chat-massage-box.active .message-info{padding-right: 10px;}
+	.chat-content-center-bottom .chat-massage-box .message-info .name{color: #4685FD;font-size: 14px;margin-bottom: 10px;}
+	.chat-content-center-bottom .chat-massage-box .message-info .name.active{color: #3DB272;}
+	.chat-content-center-bottom .chat-massage-box .message-info .message{font-size: 12px;}
+	.chat-content-center-bottom .chat-massage-box.active .message-info .message{font-size: 12px;text-align: right;}
+	.chat-content-center-bottom .chat-massage-box .message-info .message .stringMessage img{display: inline-block;width: 20px;height: 20px;}
+	.chat-message-box{width: 100%;height: 200px;display: flex;flex-direction: column;position: relative;}
+	.chat-message-box.active{flex-direction: column-reverse;}
+	.chat-message-box .chat-top{width: 100%;height: 50px;border: 1px solid #E5E5E5;border-left: none;border-right: none;display: flex;align-items: center;padding-left: 10px;}
+	.chat-message-box .chat-top .layui-btn{background: #ffffff;height: auto;line-height: inherit;padding: 0;}
+	.chat-message-box .chat-top .iconfont{padding: 10px;font-size: 20px;color: #A9A7A8;}
+	.chat-message-box .text-area{padding: 10px;width: 100%;height: 100px;border: none;resize: none;}
+	.chat-message-box .send-box{width: 100%;height: 50px;display: flex;flex-direction: column;align-items: flex-end;}
+	.chat-message-box .send-box .send{display: inline-block;padding: 0 10px;font-size: 14px;height: 28px;background: #ccc;border-radius: 4px;margin-right: 20px;line-height: 28px;text-align: center;color: #ffffff;margin-top: 11px;}
+	.chat-message-box .send-box .send.active{background: red;}
+
+	.chat-content-center-bottom-right.active{width: 0;}
+	.chat-content-center-bottom-right{width: 40%;height: 100%;display: flex;flex-direction: column;align-items: center;}
+	.chat-content-center-bottom-right .goods-box{}
+	.chat-content-center-bottom-right .goods-info-title{width: 100%;line-height: 50px;font-size: 14px;text-align: center;}
+	.chat-content-center-bottom-right .goods-info-box{display: flex;flex-direction: column;align-items: center;border: 1px solid #E5E5E5;box-sizing: border-box;padding: 10px 15px;border-radius: 10px;}
+	.chat-content-center-bottom-right .goods-info-box img{width: 200px;height: 200px;}
+	.chat-content-center-bottom-right .goods-info-box .goods-price{width: 200px;line-height: 35px;color: red;font-size: 16px;}
+	.chat-content-center-bottom-right .goods-info-box .goods-name{width: 200px;font-size: 14px;font-weight: 600;text-overflow: -o-ellipsis-lastline;overflow: hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 2;line-clamp: 2;-webkit-box-orient: vertical;}
+	.chat-content-center-bottom-right .goods-info-box .goods-desc{width: 200px;font-size: 12px;margin-top: 5px;color: #838383;text-overflow: -o-ellipsis-lastline;overflow: hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 3;line-clamp: 3;-webkit-box-orient: vertical;}
+	.chat-content-center-bottom-right .order-box{}
+	.chat-content-center-bottom-right .order-info-title{width: 100%;line-height: 50px;font-size: 14px;text-align: center;}
+	.chat-content-center-bottom-right .order-info-box{display: flex;align-items: center;border: 1px solid #E5E5E5;box-sizing: border-box;padding: 10px 15px;border-radius: 10px;}
+	.chat-content-center-bottom-right .order-info-box img{width: 90px;height: 90px;}
+	.chat-content-center-bottom-right .order-info-box .order-info{width: 200px;margin-left: 10px;height: 90px;display: flex;flex-direction: column;justify-content: space-between}
+	.chat-content-center-bottom-right .order-info-box .follow-color{color: red;}
+	.message .goods-info-box{width: 250px;float: left;text-align: left;}
+	/* .active .message .goods-info-box{width: 250px;float: right;text-align: left;} */
+	.active .message .goods-info-box{width: 250px;height: 320px;}
+	.message .goods-info-box img{width: 200px;height: 200px;}
+	.goods-info-box{display: flex;flex-direction: column;align-items: center;border: 1px solid #E5E5E5;box-sizing: border-box;padding: 10px 15px;border-radius: 10px;}
+	.goods-info-box img{width: 200px;height: 200px;}
+	.goods-info-box .goods-price{width: 200px;line-height: 35px;color: red;font-size: 16px;}
+	.goods-info-box .goods-name{width: 200px;font-size: 14px;font-weight: 600;text-overflow: -o-ellipsis-lastline;overflow: hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 2;line-clamp: 2;-webkit-box-orient: vertical;}
+	.goods-info-box .goods-desc{width: 200px;font-size: 12px;margin-top: 5px;color: #838383;text-overflow: -o-ellipsis-lastline;overflow: hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 3;line-clamp: 3;-webkit-box-orient: vertical;}
+	.message .order-info-box{width: 300px;display: flex;align-items: center;border: 1px solid #E5E5E5;box-sizing: border-box;padding: 10px 15px;border-radius: 10px;margin-top: 10px;}
+	.message .order-info-box img{width: 90px;height: 90px;}
+	.message .order-info-box .order-info{width: 200px;margin-left: 10px;height: 90px;display: flex;flex-direction: column;justify-content: space-between}
+	.message .order-info-box .follow-color{color: red;}
+	.content-people-box{width: 100%;position: relative;}
+	.content-people-box.scroll{position: relative;overflow-y: scroll}
+	.content-people-box:hover::-webkit-scrollbar-thumb,#scroll:hover::-webkit-scrollbar-thumb{background-color: rgba(0, 0, 0, .2);}
+	.content-people-box::-webkit-scrollbar,#scroll::-webkit-scrollbar{background-color: transparent;width: 8px;transition: all .3s;}
+	.content-people-box::-webkit-scrollbar-track,#scroll::-webkit-scrollbar-track{background-color: transparent;width: 8px;}
+	.content-people-box::-webkit-scrollbar-thumb,#scroll::-webkit-scrollbar-thumb{border-radius: 20px;background-color: transparent;}
+	.chat-content-center-bottom-content{position: relative;min-height: calc(100% + 10px);}
+	.chat-content-center-bottom-content .no-servicer {position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);width: 250px}
+	.chat-content-center-bottom-content .no-servicer img{max-width: 100%;}
+	
+	
+	.chat-message-box .emojy-box{
+		width: 301px;
+		border-top-right-radius: 10px;
+		height: 100%;
+		background: #ffffff;
+		position: absolute;
+		left: 0;  
+		top: -200px;
+		border-top: 1px solid #E5E5E5;
+		border-right: 1px solid #E5E5E5;
+		padding: 10px;
+		box-sizing: border-box;
+		overflow-y: scroll;
+		box-sizing: border-box;
+	}
+	.chat-message-box .emojy-box::-webkit-scrollbar{display: none;}
+	.chat-message-box .emojy-item{
+		width: 35px;
+		height: 35px;
+		font-size: 24px;
+		text-align: center;
+		line-height: 35px;
+		display: inline-block;
+	}
+	.chat_img{
+		display: inline-block;
+		width: 150px;
+   		max-height: 200px;
+   		min-height: 50px;
+   		text-align: left;
+   		/*line-height: 200px;*/
+   		border-radius: 5px
+	}
+	.chat_img img{
+		width:auto !important;
+		height:auto !important;
+		max-width: 150px;
+   		max-height: 200px;
+	}
+	.chat-content-center-bottom-content .active .chat_img{
+		text-align: right;
+	}
+</style>
+<div class="chat-index-box" id="chatIndexBox">
+	<div class="sunblind" v-if="text">
+		{{text}}
+	</div>
+	<div class="chat-content-left">
+		<div class="left-content">
+			<div class="content-item">
+				<div class="item-title" @click="showCurrent=!showCurrent">
+					<span class="layui-nav-more" :class="showCurrent?'':'layui-nav-mored'"></span>
+					<span>
+						正在联系
+					</span>
+					<span>
+						{{'('+onlineMembers.length+')'}}
+					</span>
+				</div>
+				<div class="content-people-box" v-if="showCurrent">
+					<div class="content-people" v-for="(item,index) in onlineMembers" :key="index" @click="openChat(item)">
+						<img :src="item.headimg" onerror=src="SERVICER_IMG/default_headimg.png">
+						<div class="people-info">
+							<div class='name'>
+								<div class="left">
+									{{item.member_name}}
+								</div>
+								<div class="right" v-if="item.nsSeeMessage>0">
+								</div>
+								<!-- <div class="right" v-if="item.nsSeeMessage>0 && item.nsSeeMessage<=99">
+									{{item.nsSeeMessage}}
+								</div>
+								<div class="right" v-if="item.nsSeeMessage>99">
+									99+
+								</div> -->
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="content-item">
+				<div class="item-title" @click="showHistory=!showHistory">
+					<span class="layui-nav-more" :class="showHistory?'':'layui-nav-mored'">
+
+					</span>
+					<span>
+						最近联系 ({{offlineMembers?offlineMembers.length:0}}/{{count}})
+					</span>
+				</div>
+				<div class="content-people-box scroll" v-if="showHistory">
+					<div class="content-people" v-for="(item,index) in offlineMembers" :key="index" @click="openChat(item)">
+						<img :src="item.headimg" onerror=src="SERVICER_IMG/default_headimg.png">
+						<div class="people-info">
+							<div class='name'>
+								<div class="left">
+									{{item.member_name}}
+								</div>
+								<div class="right" v-if="item.nsSeeMessage>0">
+									
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="chat-content-center">
+		<div class="chat-content-center-top">
+			<template v-if="selectMemberList.length>0">
+				<div class="chat-people" :class="item.select?'active':''" @click="selectTab(item)" v-for="(item,index) in selectMemberList"
+				 :key="index">
+					<div class="chat-people-box">
+						<div class='name'>
+							{{item.member_name}}
+						</div>
+						<div class="close iconfont iconclose" @click="closeChat(item,index)"></div>
+					</div>
+				</div>
+			</template>
+		</div>
+		<div class="chat-content-center-bottom-box">
+			<div class="chat-content-center-bottom-left" :class="{active : !showInfo}">
+				<div class="chat-content-center-bottom" id="scroll" @click="chatBoxState=false">
+					<div class="chat-content-center-bottom-content">
+						<div class="chat-massage-box" :class="item.type==1?'active':''" v-for="(item,index) in chatMessageList" :key="index">
+							<img :src="shopInfo.logo" v-if="item.type==1" onerror=src="SERVICER_IMG/default_shop.png">
+							<img :src="selectMember.headimg" v-else onerror=src="SERVICER_IMG/default_headimg.png">
+							<div class="message-info">
+								<div class='name'>
+									<span>
+										{{item.type==1?shopInfo.site_name:selectMember.member_name}}
+									</span>
+									<span>
+										{{item.create_day}} {{item.create_time}}
+									</span>
+								</div>
+
+								<div class="message">
+									<chat-goods v-if="item.goods_sku_id" :sku-id="item.goods_sku_id"></chat-goods>
+									<chat-order v-else-if="item.order_id" :order-id="item.order_id"> </chat-order>
+									
+									<div class="chat_img" v-else-if="item.content_type == 3" @click="piewImg(item.type==1?item.servicer_say:item.consumer_say)">
+										<img class=""  :src="item.type==1?item.servicer_say:item.consumer_say" />
+									</div>
+									
+									<div class="stringMessage" v-else v-html="item.type==1?dealmessage(item.servicer_say):dealmessage(item.consumer_say)">
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="no-servicer" v-if="!selectMemberList.length">
+							<img src="SERVICER_IMG/no_servicer.png" alt="">
+						</div>
+					</div>
+				</div>
+				<div class="chat-message-box">
+					<div class="chat-top">
+						<div @click="openChatBox" class="iconfont iconbiaoqing-xue"></div>
+						<button type="button" class="layui-btn" id="test1">
+							<div class="iconfont icontupian1"></div>
+						</button>
+					</div>
+					<textarea rows="" class="text-area" @input="inputMessage" placeholder="请输入..." v-model="message" cols="" id="text_area" @keydown.enter="textareaKeydown"></textarea>
+					<div class="send-box" v-show="!(message.trim().length)">
+						<div class="send" id="send">
+							发送[enter]
+						</div>
+					</div>
+					<div class="send-box " v-show="message.trim().length" @click="send">
+						<div class="send active" id="send">
+							发送[enter]
+						</div>
+					</div>
+					<div class="emojy-box" v-if="chatBoxState">
+						<div class="emojy-item" v-for="(item,index) in emjoyList" :key="index" @click="addEmojy(index)">
+							<img :src="item">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="chat-content-center-bottom-right" :class="{active: !showInfo}">
+				<div class="goods-box" v-if="showInfo&&showInfo.sku_id">
+					<div class="goods-info-title">
+						当前咨询的商品
+					</div>
+					<chat-goods :sku-id="showInfo.sku_id"></chat-goods>
+				</div>
+				<div class="order-box" v-if="showInfo&&showInfo.order_id">
+					<div class="order-info-title">
+						当前咨询的订单
+					</div>
+					<chat-order :order-id="showInfo.order_id"> </chat-order>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		let height = $('.ns-body-content').height();
+		$('.chat-index-box .chat-content-left').css('height', height);
+		$('.chat-index-box .chat-content-left .content-people-box.scroll').css('height', (height - 110));
+		$('.chat-index-box .chat-content-center').css('height', height);
+		$('.chat-index-box .chat-content-center-bottom-box').css('height', (height - 53));
+	})
+
+
+	var goodsTemplate = '<div class="goods-info-box">';
+	goodsTemplate += '<img :src="goodsInfo.sku_image">';
+	goodsTemplate += '<div class="goods-price">￥{{goodsInfo.price}}</div>';
+	goodsTemplate += '<div class="goods-name">{{goodsInfo.sku_name}}</div>';
+	goodsTemplate += '<div class="goods-desc">{{goodsInfo.introduction}}</div>';
+	goodsTemplate += '</div>';
+
+	Vue.component('chat-goods', {
+		props: {
+			skuId: {
+				type: [Number, String]
+			}
+		},
+		data: function() {
+			return {
+				goodsInfo: {}
+			}
+		},
+		mounted: function() {
+			let that = this;
+			$.ajax({
+				url: ns.url("servicer://servicer/chat/goodSkuDetial"),
+				data: {
+					sku_id: that.skuId
+				},
+				dataType: 'JSON',
+				type: 'POST',
+				success: function(res) {
+					that.goodsInfo = res.data
+					that.goodsInfo.sku_image = ns.img(that.goodsInfo.sku_image);
+				}
+			});
+		},
+		template: goodsTemplate
+	});
+	var orderTemplate = '<div class="order-info-box">';
+	orderTemplate += '<img :src="orderInfo.sku_image">';
+	orderTemplate += '<div class="order-info">';
+	orderTemplate += '<div class="order-No">订单号：<span>{{orderInfo.order_no}}</span></div>';
+	orderTemplate += '<div class="order-price">订单金额：<span class="follow-color">￥{{orderInfo.order_money}}</span></div>';
+	orderTemplate += '<div class="order-status">';
+	orderTemplate += '<span class="follow-color">{{orderInfo.order_status_name}}</span>';
+	orderTemplate += '</div>';
+	orderTemplate += '</div>';
+	orderTemplate += '</div>';
+
+	Vue.component('chat-order', {
+		props: {
+			orderId: {
+				type: [Number, String]
+			}
+		},
+		data: function() {
+			return {
+				orderInfo: {}
+			}
+		},
+		mounted: function() {
+			let that = this;
+			$.ajax({
+				url: ns.url("servicer://servicer/chat/orderDetail"),
+				data: {
+					order_id: that.orderId
+				},
+				dataType: 'JSON',
+				type: 'POST',
+				success: function(res) {
+					if (res.code == 0) {
+						that.orderInfo = res.data;
+						if (that.orderInfo.order_goods) {
+							that.orderInfo.sku_image = ns.img(that.orderInfo.order_goods[0].sku_image)
+						}
+					}
+
+				}
+			});
+		},
+		template: orderTemplate
+	})
+
+
+	var vue = new Vue({
+		el: "#chatIndexBox",
+		data: {
+			shopInfo: {},
+			websocket: null, //socket实例
+			maxNum: 5, //最大重连次数
+			connectTime: 10000, //重连时间间隔
+			text: "", //连接错误提示
+			message: '', //发送文本
+			message_img:'',//發送的
+			image:'',
+			count: 0,
+
+			servicer_id: 0, //绑定id
+
+			offlineMembers: [], //下线人数
+			showHistory: true,
+			showCurrent: true,
+			onlineMembers: [], //在线人数
+
+			selectMemberList: [], //正在聊天列表
+
+			otherlist: [], //用户的商品或订单信息
+
+			chatMessageList: [], //聊天信息列表
+
+			page: 1,
+			isAll: false,
+
+			userPage: {
+				currentPage: 1,
+				countPage: 1,
+				repeat_flag: false
+			},
+			selectMember: {},
+			tab_repeat_flag: false,
+
+			numberTotal: 0,
+			
+			chatBoxState: false,
+			sendState: false,
+
+			/*----------------------------心跳检测相关参数--------------------------------------------------*/
+			timeout: 20000, //20s发一次心跳
+			timeoutObj: null,
+			serverTimeoutObj: null,
+
+			emjoyList: null,
+
+			contentType:0,
+
+		},
+		watch: {
+			showHistory: function(newVal, oldVal) {
+				if (newVal) {
+					this.$nextTick(function() {
+						let height = $('.ns-body-content').height();
+						$('.chat-index-box .chat-content-left').css('height', height);
+						$('.chat-index-box .chat-content-left .content-people-box.scroll').css('height', (height - 110));
+						$('.chat-index-box .chat-content-center').css('height', height);
+						$('.chat-index-box .chat-content-center-bottom-box').css('height', (height - 53));
+					})
+				}
+			}
+		},
+		computed: {
+			//右侧要展示的商品或订单
+			showInfo: function() {
+				let obj = {};
+				let list = this.otherlist;
+				let that = this;
+				if (that.selectMember.member_id) {
+					let arr = list.filter(function(v) {
+						return v.member_id == that.selectMember.member_id
+					})
+					if (arr) {
+						obj = arr[0]
+					}
+					return obj
+				} else {
+					false
+				}
+			},
+			MessageList: function() {
+				return this.chatMessageList.length;
+			}
+		},
+		mounted: function() {
+			let list = emjoyList;
+			var keys = Object.keys(list);
+			for (var i = 0; i < keys.length; i++) {
+				emjoyList[keys[i]]=ns.img(emjoyList[keys[i]])
+			}
+			this.emjoyList = list;
+			this.userPageData();
+			this.findShopInfo();
+			this.socketConnect();
+			this.listenerFunction();
+			this.requestUserPageData()
+			this.refreshPage(); //刷新页面
+			this.addImg();
+		},
+		methods: {
+			//获取历史聊天列表
+			userPageData: function(page) {
+				let that = this;
+				$.ajax({
+					url: ns.url("servicer://servicer/index/historyMembers"),
+					data: {
+						"page": page,
+						"size": 15
+					},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						that.userPage.repeat_flag = false;
+						if (res.code == 0) {
+							var arr = res.data.offlineMembers ? res.data.offlineMembers.list : [];
+							if (arr) {
+								that.count = res.data.offlineMembers.count
+								arr.forEach(function(v) {
+									v.headimg = ns.img(v.headimg);
+									that.offlineMembers.push(v);
+								})
+							}
+						} else {
+							layer.msg(res.msg);
+						}
+					}
+				});
+			},
+			//获取当前选中用户的member_id
+			edit: function() {
+				let arr = this.selectMemberList;
+				let newArr = [];
+				if (arr.length) {
+					newArr = arr.filter(function(v) {
+						return v.select == true;
+					})
+				}
+				if (newArr.length) {
+					this.selectMember = newArr[0];
+				} else {
+					this.selectMember = {};
+				}
+				if (this.selectMember && this.selectMember.headimg) {
+					this.selectMember.headimg = ns.img(this.selectMember.headimg);
+				}
+			},
+			listenerFunction: function(e) {
+				let that = this;
+				$("#scroll").scroll(function() {
+					var scroH = $("#scroll").scrollTop(); //滚动高度
+					if (scroH == 0 && !that.isAll) {
+						that.findChatList(false);
+					}
+				})
+			},
+			//监听回车事件
+			textareaKeydown(event) {
+				if (event.keyCode === 13) {
+					this.chatBoxState=false;
+					if (this.message) {
+						this.send();
+					}
+					event.preventDefault() // 阻止浏览器默认换行操作
+					return false
+				}
+			},
+			requestUserPageData: function() {
+				var that = this;
+				$(".left-content .content-item:eq(1) .content-people-box").scroll(function(e) {
+					var currentHeight = $(this).height(),
+						subTopHeight = $(this).find(".content-people:last-of-type").position().top,
+						subOneselfHeight = $(this).find(".content-people:last-of-type").outerHeight(),
+						subHeight = subTopHeight + subOneselfHeight;
+					if (subHeight == currentHeight && !that.userPage.repeat_flag) {
+						that.userPage.repeat_flag = true;
+						that.userPage.currentPage += 1;
+						that.userPageData(that.userPage.currentPage);
+					}
+				})
+			},
+			//查询店铺信息
+			findShopInfo: function() {
+				let that = this;
+				$.ajax({
+					url: ns.url("servicer://servicer/chat/siteInfo"),
+					data: {},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						if (res.code == 0) {
+							res.data.data.logo = ns.img(res.data.data.logo);
+							that.shopInfo = res.data.data;
+						}
+					}
+				});
+			},
+			//查询聊天记录
+			findChatList: function(isAutoScroll) {
+				let that = this;
+				if (that.isAll) return;
+				if (that.selectMember) {
+					$.ajax({
+						url: ns.url("servicer://servicer/index/dialogs"),
+						data: {
+							member_id: that.selectMember.member_id,
+							page: that.page
+						},
+						dataType: 'JSON',
+						type: 'POST',
+						success: function(res) {
+							that.tab_repeat_flag = false;
+							console.log({
+								'请求完成': that.tab_repeat_flag
+							})
+							if (res.code == 0) {
+								if (res.data.list) {
+									that.page += 1;
+								}
+								if (res.data.list < 10) {
+									that.isAll = true;
+								}
+								res.data.list = res.data.list.reverse();
+								
+								that.chatMessageList = res.data.list.concat(that.chatMessageList ? that.chatMessageList : [])
+								for(var index in that.chatMessageList){
+									if(that.chatMessageList[index].content_type == 3){
+										that.chatMessageList[index].servicer_say = ns.img(that.chatMessageList[index].servicer_say)
+										that.chatMessageList[index].consumer_say = ns.img(that.chatMessageList[index].consumer_say)
+									}
+								}
+
+								if (isAutoScroll) {
+									that.$nextTick(() => {
+										let height = $(".chat-content-center-bottom-content").height();
+										$("#scroll").scrollTop(height)
+									})
+								} else {
+									that.$nextTick(() => {
+										$("#scroll").scrollTop(20)
+									})
+								}
+							}
+						},
+						fail: function() {
+							that.tab_repeat_flag = false;
+						}
+					});
+				}
+			},
+			//请求用户列表
+			userList: function() {
+				let that = this;
+				$.ajax({
+					url: ns.url("servicer://servicer/index/index"),
+					data: {},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						if (res.code == 0) {
+							that.userPage.countPage = res.data.offlineMembers.page_count;
+							that.offlineMembers = res.data.offlineMembers ? res.data.offlineMembers.list : [];
+							that.onlineMembers = res.data.onlineMembers ? res.data.onlineMembers.list : [];
+							if (that.offlineMembers) {
+								that.offlineMembers.forEach(function(v) {
+									v.headimg = ns.img(v.headimg);
+								})
+							}
+							if (that.onlineMembers) {
+								that.onlineMembers.forEach(function(v) {
+									v.headimg = ns.img(v.headimg)
+								})
+							}
+
+
+						}
+					}
+				});
+			},
+			//点击选中聊天
+			openChat: function(e) {
+				this.chatBoxState=false;
+				let that = this;
+				let obj = e;
+				obj.nsSeeMessage=0;
+				obj.select = true;
+				let arr = that.selectMemberList ? that.selectMemberList : [];
+				if (arr.length) {
+					let hasItem = false;
+					arr.forEach(function(v) {
+						if (v.member_id == obj.member_id) {
+							hasItem = true;
+							v.select = true;
+						} else {
+							v.select = false;
+						}
+					})
+					if (!hasItem) {
+						arr.push(obj);
+					}
+				} else {
+					arr.push(obj);
+				}
+				$.ajax({
+					url: ns.url("servicer://servicer/chat/bindMember"),
+					data: {
+						member_id: obj.member_id,
+					},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						console.log(res);
+					}
+				});
+				let hasmember = that.onlineMembers.filter((v) => {
+					return v.member_id == obj.member_id
+				})
+				if (!hasmember.length) {
+					that.onlineMembers.unshift(obj);
+				}
+				that.offlineMembers = that.offlineMembers.filter((v) => {
+					return v.member_id != obj.member_id
+				})
+				that.selectMemberList = arr;
+				that.edit();
+				that.chatMessageList = [];
+				that.page = 1;
+				that.isAll = false;
+				that.findChatList(true);
+			},
+			// 删除该聊天
+			closeChat: function(e, index) {
+				this.chatBoxState=false;
+				console.log(e, index)
+				if (this.tab_repeat_flag) return false;
+				this.tab_repeat_flag = true;
+				let arr = this.selectMemberList;
+				if (!e.select) {
+					this.selectMemberList = arr.filter(function(v) {
+						return v.member_id != e.member_id
+					})
+					this.tab_repeat_flag = false;
+				} else {
+					this.selectMemberList = arr.filter(function(v) {
+						return v.member_id != e.member_id
+					})
+					if (this.selectMemberList.length > 0 && index <= this.selectMemberList.length - 1) {
+						this.selectMemberList[index].select = true;
+					} else if (this.selectMemberList.length > 0 && index > this.selectMemberList.length - 1) {
+						this.selectMemberList[this.selectMemberList.length - 1].select = true;
+					}
+					this.chatMessageList = [];
+					this.page = 1;
+					this.isAll = false;
+					this.edit();
+					if (this.selectMemberList.length != 0) {
+						this.findChatList(true);
+					} else {
+						this.tab_repeat_flag = true;
+					}
+				}
+
+			},
+			//切换聊天页面
+			selectTab: function(item) {
+				this.chatBoxState=false;
+				if (this.tab_repeat_flag) return false;
+				this.tab_repeat_flag = true;
+				for (var i = 0; i < this.selectMemberList.length; i++) {
+					if (this.selectMemberList[i].id == item.id) {
+						this.selectMember = this.selectMemberList[i];
+						this.$set(this.selectMemberList[i], 'select', true)
+					} else
+						this.$set(this.selectMemberList[i], 'select', false)
+				}
+				this.$forceUpdate();
+
+				this.chatMessageList = [];
+				this.page = 1;
+				this.isAll = false;
+				this.findChatList(true);
+			},
+			socketConnect: function() {
+				let that = this;
+
+				// var wsurl = `ws://127.0.0.1:8282`;
+				var wsurl = `wss://${window.location.hostname}/wss`;
+				// var wsurl = 'wss://'+ window.location.hostname +'/wss';
+				if (that.websocket) {
+					that.websocket.close()
+				}
+
+				if (window.WebSocket) {
+					that.websocket = new WebSocket(wsurl);
+
+					that.websocket.onmessage = function(event) {
+						//onmessage事件，接收消息，显示在页面上
+						that.getMessage(event.data)
+					};
+
+					that.websocket.onclose = function(event) {
+						clearInterval(that.timeoutObj);
+						that.text = "网络连接中...";
+						if (that.maxNum > 0) {
+							setTimeout(function() {
+								that.maxNum -= 1;
+								that.socketConnect()
+							}, that.connectTime)
+						} else {
+							that.text = "连接失败，请刷新页面，重新连接";
+							clearInterval(that.timeoutObj);
+						}
+					}
+				}
+			},
+			getMessage: function(event) {
+				let that = this;
+				var msg = JSON.parse(event);
+				if (msg.type == 'init') {
+					let data = {
+						client_id: msg.data.client_id,
+					};
+					$.ajax({
+						url: ns.url("servicer://servicer/chat/bind"),
+						data: data,
+						dataType: 'JSON',
+						type: 'POST',
+						success: function(res) {
+							if (res.code >= 0) {
+								that.servicer_id = res.data.servicer_id;
+							} else {
+								layer.msg(res.message);
+							}
+						}
+					});
+				} else if (msg.type == 'connect') {
+					let arr = [];
+					msg.data.headimg = ns.img(msg.data.headimg);
+					msg.data.nsSeeMessage = 0;
+					arr.push(msg.data);
+
+					let oldArr = that.onlineMembers ? that.onlineMembers : [];
+					if (that.onlineMembers) {
+						oldArr = that.onlineMembers.filter(function(v) {
+							return v.member_id != msg.data.member_id
+						})
+					}
+					let offArr = that.offlineMembers ? that.offlineMembers : [];
+					that.offlineMembers = offArr.filter(function(v) {
+						return v.member_id != msg.data.member_id
+					})
+					that.onlineMembers = arr.concat(oldArr);
+
+					//高度处理
+					if ($(".content-item:eq(1) .content-people-box .content-people").length <= 10 && $(
+							".content-item:eq(1) .content-people-box .content-people").length)
+						$(".content-item:eq(1) .content-people-box").height($(".content-people-box .content-people").outerHeight() * $(
+							".content-item:eq(1) .content-people-box .content-people").length - 10);
+
+				} else if (msg.type == 'disconnect') {
+					let menber = that.onlineMembers.filter(function(v) {
+						return v.member_id == msg.data.member_id
+					})
+
+					let oldArr = that.onlineMembers;
+					oldArr = that.onlineMembers.filter(function(v) {
+						return v.member_id != msg.data.member_id
+					})
+					that.onlineMembers = oldArr;
+
+					that.offlineMembers = menber.concat(that.offlineMembers ? that.offlineMembers : []);
+				} else if (msg.type == 'goodssku') {
+					let obj = {};
+					obj.member_id = msg.data.member_id;
+					obj.order_id = msg.data.order_id;
+					obj.sku_id = msg.data.goods_sku_id
+					if (that.otherlist.length == 0) {
+						that.otherlist.push(obj)
+					} else {
+						let hasMember = false
+						that.otherlist.forEach(function(v) {
+							if (v.member_id == obj.member_id) {
+								v.sku_id = obj.sku_id;
+								hasMember = true;
+							}
+							if (hasMember) return;
+							that.otherlist.push(obj)
+
+						})
+					}
+					if (msg.data.member_id == that.selectMember.member_id) {
+						var date = new Date();
+						var year = date.getFullYear();
+						var month = date.getMonth() + 1;
+						var day = date.getDate();
+						var hour = date.getHours();
+						var minute = date.getMinutes();
+						var second = date.getSeconds();
+						let objdata = {
+							consumer_say: "",
+							content_type: 1,
+							create_day: '' + year + '-' + month + '-' + day,
+							create_time: '' + hour + ':' + minute + ':' + second,
+							goods_money: null,
+							goods_name: null,
+							goods_sku_id: msg.data.goods_sku_id,
+							is_platform: null,
+							order_id: 0,
+							order_money: null,
+							order_no: null,
+							order_status: null,
+							order_status_name: null,
+							price: null,
+							read: 1,
+							servicer_say: null,
+							sku_image: null,
+							sku_name: null,
+							type: 0,
+						}
+						that.chatMessageList.push(objdata)
+					} else {
+						let arr = that.onlineMembers;
+						arr.forEach(function(v) {
+							if (v.member_id == msg.data.member_id)
+								v.nsSeeMessage += 1;
+						})
+						that.onlineMembers = arr;
+						that.$forceUpdate()
+					}
+				} else if (msg.type == 'order') {
+					let obj = {};
+					obj.member_id = msg.data.member_id;
+					obj.order_id = msg.data.order_id;
+					obj.sku_id = msg.data.goods_sku_id
+					if (that.otherlist.length == 0) {
+						that.otherlist.push(obj)
+					} else {
+						let hasMember = false
+						that.otherlist.forEach(function(v) {
+							if (v.member_id == obj.member_id) {
+								v.sku_id = obj.sku_id;
+								hasMember = true;
+							}
+							if (hasMember) return;
+							that.otherlist.push(obj)
+						})
+					}
+
+					if (msg.data.member_id == that.selectMember.member_id) {
+						var date = new Date();
+						var year = date.getFullYear();
+						var month = date.getMonth() + 1;
+						var day = date.getDate();
+						var hour = date.getHours();
+						var minute = date.getMinutes();
+						var second = date.getSeconds();
+						let objdata = {
+							consumer_say: "",
+							content_type: 1,
+							create_day: '' + year + '-' + month + '-' + day,
+							create_time: '' + hour + ':' + minute + ':' + second,
+							goods_money: null,
+							goods_name: null,
+							goods_sku_id: null,
+							is_platform: null,
+							order_id: msg.data.order_id,
+							order_money: null,
+							order_no: null,
+							order_status: null,
+							order_status_name: null,
+							price: null,
+							read: 1,
+							servicer_say: null,
+							sku_image: null,
+							sku_name: null,
+							type: 0,
+						}
+						that.chatMessageList.push(objdata)
+					} else {
+						let arr = that.onlineMembers;
+						arr.forEach(function(v) {
+							if (v.member_id == msg.data.member_id)
+								v.nsSeeMessage += 1;
+						})
+						that.onlineMembers = arr;
+						that.$forceUpdate()
+					}
+				} else if (msg.type == 'string') {
+					if (that.selectMember && msg.data.member_id == that.selectMember.member_id) {
+						var date = new Date();
+						var year = date.getFullYear();
+						var month = date.getMonth() + 1;
+						var day = date.getDate();
+						var hour = date.getHours();
+						var minute = date.getMinutes();
+						var second = date.getSeconds();
+						let objdata = {
+							consumer_say: msg.data.consumer_say,
+							content_type: 1,
+							create_day: '' + year + '-' + month + '-' + day,
+							create_time: '' + hour + ':' + minute + ':' + second,
+							goods_money: null,
+							goods_name: null,
+							goods_sku_id: null,
+							is_platform: null,
+							order_id: null,
+							order_money: null,
+							order_no: null,
+							order_status: null,
+							order_status_name: null,
+							price: null,
+							read: 1,
+							servicer_say: null,
+							sku_image: null,
+							sku_name: null,
+							type: 0,
+						}
+						that.chatMessageList.push(objdata)
+					} else {
+						let arr = that.onlineMembers;
+						arr.forEach(function(v) {
+							if (v.member_id == msg.data.member_id)
+								v.nsSeeMessage += 1;
+						})
+						that.onlineMembers = arr;
+						this.$forceUpdate()
+					}
+				} else if (msg.type == 'image') {
+					if (that.selectMember && msg.data.member_id == that.selectMember.member_id) {
+						var date = new Date();
+						var year = date.getFullYear();
+						var month = date.getMonth() + 1;
+						var day = date.getDate();
+						var hour = date.getHours();
+						var minute = date.getMinutes();
+						var second = date.getSeconds();
+						let objdata = {
+							consumer_say: ns.img(msg.data.consumer_say),
+							content_type: 3,
+							create_day: '' + year + '-' + month + '-' + day,
+							create_time: '' + hour + ':' + minute + ':' + second,
+							goods_money: null,
+							goods_name: null,
+							goods_sku_id: null,
+							is_platform: null,
+							order_id: null,
+							order_money: null,
+							order_no: null,
+							order_status: null,
+							order_status_name: null,
+							price: null,
+							read: 1,
+							servicer_say: ns.img(msg.data.servicer_say),
+							sku_image: null,
+							sku_name: null,
+							type: 0,
+						}
+						that.chatMessageList.push(objdata)
+					} else {
+						let arr = that.onlineMembers;
+						arr.forEach(function(v) {
+							if (v.member_id == msg.data.member_id)
+								v.nsSeeMessage += 1;
+						})
+						that.onlineMembers = arr;
+						this.$forceUpdate()
+					}
+				} else if (msg.type == 'force_offline') {
+					layer.msg("账号在其他地方登录", {}, function() {
+						$(window).unbind("beforeunload");
+						location.href = ns.url('servicer://servicer/login/logout');
+					});
+				}
+				setTimeout(function() {
+					$("#scroll").scrollTop($(".chat-content-center-bottom-content").height())
+				}, 200)
+				that.text = "";
+				that.reset()
+			},
+			send: function() {
+				this.chatBoxState=false;
+				let that = this;
+				let onlineMember = that.onlineMembers.filter(function(v) {
+					return v.member_id == that.selectMember.member_id
+				});
+				if(that.sendState){
+					return false
+				}
+				that.sendState = true
+				if (!onlineMember) {
+					layer.msg('当前用户已离线');
+					return;
+				}
+				if (!that.selectMember || !that.selectMember.member_id) {
+					layer.msg('请选择消息发送用户');
+					return;
+				}
+				if(that.contentType == 3){
+					var servicer_say = that.image
+				}else{
+					var servicer_say = that.message
+				}
+				console.log(servicer_say)
+				$.ajax({
+					url: ns.url("servicer://servicer/chat/answer"),
+					data: {
+						member_id: that.selectMember.member_id,
+						content_type: that.contentType,
+						servicer_say: servicer_say
+					},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						if (res.code >= 0) {
+							servicer_id = res.data.servicer_id;
+
+							var date = new Date();
+							var year = date.getFullYear();
+							var month = date.getMonth() + 1;
+							var day = date.getDate();
+							var hour = date.getHours();
+							var minute = date.getMinutes();
+							var second = date.getSeconds();
+							let obj = {
+								consumer_say: "",
+								content_type: that.contentType,
+								create_day: '' + year + '-' + month + '-' + day,
+								create_time: '' + hour + ':' + minute + ':' + second,
+								goods_money: null,
+								goods_name: null,
+								goods_sku_id: 0,
+								is_platform: null,
+								order_id: 0,
+								order_money: null,
+								order_no: null,
+								order_status: null,
+								order_status_name: null,
+								price: null,
+								read: 1,
+								servicer_say: servicer_say,
+								sku_image: null,
+								sku_name: null,
+								type: 1,
+							}
+							//对图片进行处理
+							if(that.contentType == 3){
+								obj.servicer_say = ns.img(obj.servicer_say)
+							}
+							that.chatMessageList.push(obj)
+							that.contentType = 0
+							that.image = ''
+							setTimeout(function() {
+								$("#scroll").scrollTop($(".chat-content-center-bottom-content").height())
+							}, 100)
+							that.message = "";
+						} else {
+							layer.msg(res.message);
+						}
+						that.sendState = false
+					}
+				});
+				setTimeout(function() {
+					$("#scroll").scrollTop($(".chat-content-center-bottom-content").height())
+				}, 200)
+			},
+			//检测心跳
+			reset: function() {
+				clearInterval(this.timeoutObj);
+				this.start();
+			},
+			//刷新页面
+			refreshPage: function() {
+				$(window).bind('beforeunload', function() {
+					return '页面重置之后，链接将会断开。';
+				});
+			},
+			start: function() {
+				let that = this;
+				let i = 1;
+				that.timeoutObj = setInterval(function() {
+					i += 1;
+					//这里发送一个心跳，后端收到后，返回一个心跳消息，
+					//onmessage拿到返回的心跳就说明连接正常
+					that.websocket.send("ping", function(res) {});
+				}, that.timeout)
+			},
+			servicerIcon: function() {
+				layer.msg("正在开发中，敬请期待");
+			},
+			piewImg:function(v){
+				var photos_json = {
+					  "title": "", //相册标题
+					  "id": 1, //相册id
+					  "start": 0, //初始显示的图片序号，默认0
+					  "data": [   //相册包含的图片，数组格式
+					    {
+					      "alt": "图片名",
+					      "pid": 666, //图片id
+					      "src": v, //原图地址
+					      "thumb": v //缩略图地址
+					    }
+					  ]
+					}
+				layui.use(['layer'], function() {
+					var layer = layui.layer,
+						repeat_flag = false; //防重复
+						layer.photos({
+						  photos: photos_json,
+						  tab: function(pic, layero){
+						    console.log(pic) //当前图片的一些信息
+						  }
+						});
+				})
+			},
+			addImg:function(v){
+				var that = this
+				layui.use(['form', 'upload'], function() {
+					var form = layui.form,
+						upload = layui.upload,
+						repeat_flag = false; //防重复
+					var uploadInst = upload.render({
+						elem: '#test1',
+						url: ns.url("servicer://servicer/upload/upload"),
+
+						done: function(res) {
+							
+							if (res.code >= 0) {
+								that.contentType = 3
+								that.image = res.data.pic_path
+								that.send()
+							}
+							// return layer.msg(res.message);
+						},
+						error: function(e){
+					      //请求异常回调
+					      console.log()
+					    }
+					});
+				})
+			},
+			dealmessage: function(v) {
+				let html = stringToEmjoy(v)
+				return html
+			},
+			addEmojy(value){
+				this.message=this.message+value
+			},
+			openChatBox(){
+				this.chatBoxState=!this.chatBoxState;
+			},
+			inputMessage(){
+				this.chatBoxState=false;
+			}
+		}
+	});
+</script>
+{/block}
+{block name="script"}
+<script>
+</script>
+{/block}

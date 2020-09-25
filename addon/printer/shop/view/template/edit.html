@@ -1,0 +1,415 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<style>
+    .printer-box{display: flex;}
+    .printer-box > .layui-form{flex: 1;}
+    .printer-box .preview{width: 310px;margin: 0 20px;}
+    .printer-box .preview .layui-card-body{margin: 20px;padding: 0 10px;border: 1px solid #ededed;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;}
+    .printer-box .preview .layui-card-body div{font-size: 12px;color: #333;}
+    .printer-box .preview .layui-card-body div ~ div{border-top: 1px dashed #ededed ;}
+    .printer-box .preview .receipt-name{text-align: center;line-height: 40px;}
+    .printer-box .preview .shopping-name{line-height: 40px;font-size: 16px !important;text-align: center;}
+    .printer-box .preview .order-info, .printer-box .preview .goods-info, .printer-box .preview .price-info, .printer-box .preview .buyer-info, .printer-box .preview .shopping-info{padding: 8px 0;}
+    .printer-box .preview .order-info span{display: block;line-height: 2.5;}
+    .printer-box .preview .goods-info table{width: 100%;}
+    .printer-box .preview .goods-info table tr{line-height: 2.5;}
+    .printer-box .preview .goods-info table th{font-weight: normal;}
+    .printer-box .preview .price-info p{display: flex;line-height: 2.5;justify-content: space-between;}
+    .printer-box .preview .buyer-info span, .printer-box .preview .shopping-info span{display: block;line-height: 2;}
+    .printer-box .preview .buyer-message,.printer-box .preview .merchant-message{padding: 10px 0;line-height: 1.5;}
+    .preview .button-info{height: 40px;line-height: 40px;text-align: center;}
+    .preview .shopping-code{text-align: center;}
+    .preview .shopping-code img{width: 100px;height: 100px;margin: 10px 0;}
+
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>管理员可以在此页编辑打印模板</li>
+		</ul>
+	</div>
+</div>
+
+<div class="printer-box">
+    <div class="layui-form ns-form">
+
+        <div class="layui-card ns-card-common ns-card-brief">
+
+            <div class="layui-card-header">
+                <span class="ns-card-title">模板信息</span>
+            </div>
+
+            <div class="layui-card-body">
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><span class="required">*</span>模板名称：</label>
+                    <div class="layui-input-block">
+                        <input type="text"  name="template_name" value="{$info.template_name}" lay-verify="required" autocomplete="off" class="layui-input ns-len-long">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-card ns-card-common ns-card-brief">
+
+            <div class="layui-card-header">
+                <span class="ns-card-title">打印信息</span>
+            </div>
+
+            <div class="layui-card-body">
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">小票名称：</label>
+                    <div class="layui-input-block">
+                        <input type="text"  name="title" value="{$info.title}" lay-verify="required" autocomplete="off" class="layui-input ns-len-long">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">商城名称：</label>
+                    <div class="layui-input-block">
+                        <input type="radio" lay-filter="shop_name"  name="head" value="1" title="显示" {if $info.head == 1} checked {/if} autocomplete="off" class="layui-input ns-len-long">
+                        <input type="radio" lay-filter="shop_name"  name="head" value="0" title="不显示" {if $info.head == 0} checked {/if} autocomplete="off" class="layui-input ns-len-long">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">备注信息：</label>
+                    <div class="layui-input-block">
+                        <input type="checkbox" name="buy_notes" value="1"  lay-skin="primary" lay-filter="buyer_message" title="买家留言" {if $info.buy_notes == 1} checked="" {/if}>
+                        <!--<input type="checkbox" name="seller_notes" value="1"  lay-skin="primary" lay-filter="merchant_message" title="商家留言" {if $info.seller_notes == 1} checked="" {/if}>-->
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">买家信息：</label>
+                    <div class="layui-input-block">
+                        <input type="checkbox" name="buy_name" value="1"  lay-skin="primary" lay-filter="buyer_name" title="姓名" {if $info.buy_name == 1} checked="" {/if}>
+                        <input type="checkbox" name="buy_mobile" value="1"  lay-skin="primary" lay-filter="buyer_phone" title="联系方式" {if $info.buy_mobile == 1} checked="" {/if}>
+                        <input type="checkbox" name="buy_address" value="1"  lay-skin="primary" lay-filter="buyer_address" title="地址" {if $info.buy_address == 1} checked="" {/if}>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">商城信息：</label>
+                    <div class="layui-input-block">
+                        <input type="checkbox" name="shop_mobile" value="1"  lay-skin="primary" lay-filter="shopping_phone" title="联系方式" {if $info.shop_mobile == 1} checked="" {/if}>
+                        <input type="checkbox" name="shop_address" value="1"  lay-skin="primary" lay-filter="shopping_address" title="地址" {if $info.shop_address == 1} checked="" {/if}>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">商城二维码：</label>
+                    <div class="layui-input-block">
+                        <input type="checkbox" name="shop_qrcode" value="1" lay-filter="shop_qrcode" lay-skin="primary" title="商城二维码" {if $info.shop_qrcode == 1} checked="" {/if}>
+                    </div>
+                </div>
+
+                <div class="layui-form-item qrcode_url" {if $info.shop_qrcode != 1} style="display: none"{/if}>
+                    <label class="layui-form-label"><span class="required">*</span>商城二维码链接：</label>
+                    <div class="layui-input-block">
+                        <input type="text"  name="qrcode_url" value="{$info.qrcode_url}" {if $info.shop_qrcode == 1} lay-verify="required"{/if} autocomplete="off" class="layui-input ns-len-long">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">底部信息：</label>
+                    <div class="layui-input-block">
+                        <input type="text"  name="bottom" value="{$info.bottom}" lay-verify="required" placeholder="" autocomplete="off" class="layui-input ns-len-long">
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <input type="hidden" name="template_id" value="{$info.template_id}">
+        <div class="ns-form-row">
+            <button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+            <button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+        </div>
+    </div>
+
+    <div class="preview">
+        <div class="layui-card ns-card-common ns-card-brief">
+
+            <div class="layui-card-header">
+                <span class="ns-card-title">预览图</span>
+            </div>
+
+            <div class="layui-card-body">
+                <div class="receipt-name">{$info.title}</div>
+                <div class="shopping-name {if $info.head == 0}layui-hide{/if}">商城名称</div>
+                <div class="order-info">
+                    <span>订单编号：ME20180702231831547866</span>
+                    <span>支付方式：微信支付</span>
+                </div>
+                <div class="goods-info">
+                    <table>
+                        <tr>
+                            <th align="left">商品名称</th>
+                            <th>数量</th>
+                            <th align="right">金额</th>
+                        </tr>
+                        <tr>
+                            <td>男子运动外套</td>
+                            <td>2</td>
+                            <td align="right">￥388.00</td>
+                        </tr>
+                        <tr>
+                            <td>白色跑步鞋</td>
+                            <td>2</td>
+                            <td align="right">￥1689.00</td>
+                        </tr>
+                        <tr>
+                            <td>运费	</td>
+                            <td colspan="2" align="right">￥0.00</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="price-info">
+                    <p>
+                        <span>订单原价</span>
+                        <span>￥2010</span>
+                    </p>
+                    <p>
+                        <span>优惠金额</span>
+                        <span>￥2010</span>
+                    </p>
+                    <p>
+                        <span>实付金额</span>
+                        <span>￥2010</span>
+                    </p>
+                </div>
+                <div class="buyer-message {if $info.buy_notes != 1} layui-hide {/if}">
+                    买家留言：物流很快
+                </div>
+                <div class="merchant-message {if $info.seller_notes != 1} layui-hide {/if}">
+                    商家留言：欢迎下次购买
+                </div>
+                <div class="buyer-info {if $info.buy_name != 1 && $info.buy_mobile != 1 && $info.buy_address != 1} layui-hide{/if}">
+                    <span class="name {if $info.buy_name != 1} layui-hide{/if}">niushop</span>
+                    <span class="phone {if $info.buy_mobile != 1} layui-hide{/if}">15135669878</span>
+                    <span class="address {if $info.buy_address != 1} layui-hide{/if}">山西省 太原市 小店区 创业街</span>
+                </div>
+                <div class="shopping-info {if $info.shop_mobile != 1 && $info.shop_address != 1}layui-hide{/if}">
+                    <span class="phone {if $info.shop_mobile != 1} layui-hide{/if}">4008867993 </span>
+                    <span class="address {if $info.shop_address != 1} layui-hide{/if}">山西省 太原市 小店区 创业街 世纪中心4单元1025</span>
+                </div>
+                <div class="shopping-code {if $info.shop_qrcode != 1} layui-hide{/if}">
+                    <img src="SHOP_IMG/shopping_code.png" alt="">
+                </div>
+                <div class="button-info">{$info.bottom}</div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{/block}
+{block name="script"}
+<script>
+
+    layui.use(['form', 'laydate'], function() {
+        var form = layui.form,
+            laydate = layui.laydate,
+            repeat_flag = false;
+
+		form.render();
+
+        /**
+         * 表单验证
+         */
+        form.verify({
+            time: function(value) {
+                var now_time = (new Date()).getTime();
+                var start_time = (new Date($("#start_time").val())).getTime();
+                var end_time = (new Date(value)).getTime();
+                if (now_time > end_time) {
+                    return '结束时间不能小于当前时间!'
+                }
+                if (start_time > end_time) {
+                    return '结束时间不能小于开始时间!';
+                }
+            },
+            flnum: function(value) {
+                var arrMen = value.split(".");
+                var val = 0;
+                if (arrMen.length == 2) {
+                    val = arrMen[1];
+                }
+                if (val.length > 2) {
+                    return '保留小数点后两位！'
+                }
+            },
+            int: function(value) {
+                if (value <= 1 || value % 1 != 0) {
+                    return '请输入大于1的正整数！'
+                }
+            }
+        });
+
+        form.on('checkbox(shop_qrcode)', function(data){
+
+            var value = data.elem.checked;
+            if(value == true){
+                $(".preview .shopping-code").removeClass("layui-hide");
+                $(".qrcode_url").show();
+                $("input[name='qrcode_url']").attr("lay-verify", "required");
+
+            }else{
+                $(".preview .shopping-code").addClass("layui-hide");
+                $(".qrcode_url").hide();
+                $("input[name='qrcode_url']").attr("lay-verify", "");
+            }
+        });
+
+        /**
+         * 表单提交
+         */
+        form.on('submit(save)', function(data){
+
+            if(repeat_flag) return;
+            repeat_flag = true;
+
+            var field = data.field;
+
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("printer://shop/template/edit"),
+                data: field,
+                async: false,
+                success: function(res){
+                    repeat_flag = false;
+
+                    if (res.code == 0) {
+                        layer.confirm('编辑成功', {
+                            title:'操作提示',
+                            btn: ['返回列表', '继续编辑'],
+                            yes: function(){
+                                location.href = ns.url("printer://shop/template/lists");
+                            }
+                        });
+                    }else{
+                        layer.msg(res.message);
+                    }
+                }
+            })
+        });
+
+        /*
+        * 效果图
+        * */
+
+        // 小票打印
+        $("input[name='title']").bind("input propertychange",function(event){
+            $(".preview .receipt-name").text($("input[name='title']").val());
+        });
+
+        //商城名称
+        form.on('radio(shop_name)', function(data){
+            if (parseInt(data.value)) $(".shopping-name").removeClass("layui-hide");
+            else $(".shopping-name").addClass("layui-hide");
+        });
+
+        //买家留言
+        form.on('checkbox(buyer_message)', function(data){
+            if(data.elem.checked)
+                $(".buyer-message").removeClass("layui-hide");
+            else
+                $(".buyer-message").addClass("layui-hide");
+        });
+        //卖家留言
+        form.on('checkbox(merchant_message)', function(data){
+            if(data.elem.checked)
+                $(".merchant-message").removeClass("layui-hide");
+            else
+                $(".merchant-message").addClass("layui-hide");
+        });
+
+        var buyerName = true,buyerPhone=true,buyerAddress=true;
+        //买家姓名
+        form.on('checkbox(buyer_name)', function(data){
+            buyerName = data.elem.checked;
+
+            if(data.elem.checked)
+                $(".buyer-info .name").removeClass("layui-hide");
+            else
+                $(".buyer-info .name").addClass("layui-hide");
+
+            buyerFn();
+        });
+        //买家手机号
+        form.on('checkbox(buyer_phone)', function(data){
+            buyerPhone = data.elem.checked;
+
+            if(data.elem.checked)
+                $(".buyer-info .phone").removeClass("layui-hide");
+            else
+                $(".buyer-info .phone").addClass("layui-hide");
+
+            buyerFn();
+        });
+        //买家地址
+        form.on('checkbox(buyer_address)', function(data){
+            buyerAddress= data.elem.checked;
+            if(data.elem.checked)
+                $(".buyer-info .address").removeClass("layui-hide");
+            else
+                $(".buyer-info .address").addClass("layui-hide");
+            buyerFn();
+        });
+
+        function buyerFn() {
+            if (!buyerName && !buyerPhone && !buyerAddress)
+                $(".buyer-info").addClass("layui-hide");
+            else
+                $(".buyer-info").removeClass("layui-hide");
+        }
+
+
+        var shoppingPhone=true,shoppingAddress=true;
+        //商家手机号
+        form.on('checkbox(shopping_phone)', function(data){
+            shoppingPhone = data.elem.checked;
+
+            if(data.elem.checked)
+                $(".shopping-info .phone").removeClass("layui-hide");
+            else
+                $(".shopping-info .phone").addClass("layui-hide");
+
+            shoppingFn();
+        });
+        //商家地址
+        form.on('checkbox(shopping_address)', function(data){
+            shoppingAddress= data.elem.checked;
+
+            if(data.elem.checked)
+                $(".shopping-info .address").removeClass("layui-hide");
+            else
+                $(".shopping-info .address").addClass("layui-hide");
+            shoppingFn();
+        });
+
+        function shoppingFn() {
+            if (!shoppingPhone && !shoppingAddress)
+                $(".shopping-info").addClass("layui-hide");
+            else
+                $(".shopping-info").removeClass("layui-hide");
+        }
+
+        // 底部信息
+        $("input[name='bottom']").bind("input propertychange",function(event){
+            $(".preview .button-info").text($("input[name='bottom']").val());
+        });
+    });
+
+    function back() {
+        location.href = ns.url("printer://shop/template/lists");
+    }
+</script>
+{/block}

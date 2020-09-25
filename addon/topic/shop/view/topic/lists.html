@@ -1,0 +1,99 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<input type="text" name="topic_name" placeholder="请输入活动名称" autocomplete="off" class="layui-input">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+				<i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- 列表 -->
+<table id="activity_list" lay-filter="activity_list"></table>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="manage" href='{{ns.url("topic://shop/topic/goods?topic_id=")}}{{d.topic_id}}'>商品管理</a>
+	</div>
+</script>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form'], function() {
+		var table, 
+			form = layui.form;
+			
+		table = new Table({
+			elem: '#activity_list',
+			url: '{:addon_url("topic://shop/topic/lists")}',
+			cols: [
+				[{
+					type: 'checkbox',
+					unresize: 'false',
+					width: '3%'
+				}, {
+					field: 'topic_name',
+					title: '专题活动名称',
+					unresize: 'false',
+					width: '30%'
+				}, {
+					field: 'start_time',
+					title: '开始时间',
+					unresize: 'false',
+					width: '23%',
+					templet: function (data){
+						return ns.time_to_date(data.start_time);
+					}
+				}, {
+					field: 'end_time',
+					title: '结束时间',
+					unresize: 'false',
+					width: '23%',
+					templet: function(data){
+						return ns.time_to_date(data.end_time);
+					}
+				},
+				{
+					title: '状态',
+					unresize: 'false',
+					width: '10%',
+					templet: function (data) {
+						if(data.status == 1){
+							return '未开始';
+						}else if(data.status == 2){
+							return '进行中';
+						}else if(data.status == 3){
+							return '已结束';
+						}
+					}
+				},{
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width: '11%'
+				}]
+			]
+		});
+		
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+	});
+</script>
+{/block}

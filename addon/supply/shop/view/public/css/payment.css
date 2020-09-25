@@ -1,0 +1,237 @@
+body {
+  color: #333333;
+}
+
+.ns-supply-payment {
+  margin-top: 10px;
+}
+
+.ns-order-list {
+  width: 100%;
+}
+
+.ns-order-li {
+  width: 100%;
+  margin-top: 10px;
+  background-color: #ffffff;
+}
+
+.ns-order-site {
+  width: 100%;
+  height: 40px;
+  line-height: 40px;
+  padding-left: 20px;
+  border-bottom: 1px solid #F1F1F1;
+  box-sizing: border-box;
+}
+
+.ns-order-goods {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.ns-order-goods ul {
+  border: 1px solid #F1F1F1;
+  border-top: 0;
+  display: flex;
+}
+
+.ns-order-goods ul:first-child {
+  border-top: 1px solid #F1F1F1;
+}
+
+.ns-order-goods ul.ns-goods-li {
+  height: 80px;
+  line-height: 60px;
+}
+
+.ns-order-goods ul li {
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.ns-order-goods ul .goods-info-wrap {
+  width: 65%;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.ns-order-goods ul .goods-info-wrap .img-wrap {
+  width: 60px;
+  height: 60px;
+}
+
+.ns-order-goods ul .goods-info-wrap .img-wrap img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+}
+
+.ns-order-goods ul .goods-info-wrap .info-wrap {
+  margin-left: 10px;
+}
+
+.ns-order-goods ul .goods-info-wrap .info-wrap:hover {
+  color: #ff8143;
+}
+
+.ns-order-goods ul .goods-price, .ns-order-goods ul .goods-buy-num, .ns-order-goods ul .goods-total-price {
+  width: 15%;
+}
+
+.buyer-message {
+  width: 100%;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.buyer-message .layui-form-item {
+  width: 500px;
+  margin-bottom: 0;
+}
+
+.buyer-message .layui-form-item .layui-form-label {
+  width: auto;
+}
+
+.buyer-message .layui-form-item .layui-form-label + .layui-input-block {
+  margin-left: 95px;
+}
+
+.buyer-message .layui-form-item .layui-textarea {
+  min-height: 60px;
+}
+
+.buyer-message .total-info p {
+  line-height: 25px;
+}
+
+.buyer-message .total-info span.title {
+  display: inline-block;
+  width: 100px;
+  text-align: right;
+}
+
+.buyer-message .total-info span.price {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.ns-pay-wrap {
+  margin-top: 10px;
+  background-color: #ffffff;
+  padding: 10px 20px;
+  line-height: 25px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ns-pay-wrap span.title {
+  display: inline-block;
+  width: 160px;
+  text-align: right;
+}
+
+.ns-pay-btn {
+  margin-top: 10px;
+  background-color: #ffffff;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.ns-pay-btn div {
+  margin-right: 20px;
+}
+
+.ns-pay-btn div span {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ns-shipping-address {
+  background-color: #ffffff;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.address-item {
+  width: 23%;
+  border: 3px solid #eee;
+  box-sizing: border-box;
+  margin: 1%;
+  height: 130px;
+  cursor: pointer;
+}
+
+.address-item .add-address {
+  padding: 10px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.address-item .add-address i {
+  font-size: 12px;
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  line-height: 15px;
+  text-align: center;
+  border: 1px solid #666666;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.address-item .address-info {
+  padding: 10px;
+  height: 100%;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.address-item .address-info .options {
+  position: absolute;
+  right: 0;
+  top: 10px;
+  width: 50%;
+  text-align: right;
+}
+
+.address-item .address-info .options div {
+  display: inline-block;
+  margin-right: 10px;
+  color: #999999;
+}
+
+.address-item .address-info .address-name {
+  color: #ff8143;
+  padding: 0px 0 6px;
+  border-bottom: 1px solid #eee;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 71px;
+  box-sizing: border-box;
+  line-height: 25px;
+}
+
+.address-item .address-info .address-mobile {
+  padding: 10px 0 4px;
+}
+
+.address-item.active {
+  background-color: #fffbf9;
+  border-color: #ff8143;
+}
+
+.layui-form-item .area-select {
+  width: 150px;
+}

@@ -1,0 +1,92 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>管理员可以在此页编辑文字设置</li>
+		</ul>
+	</div>
+</div>
+<div class="layui-form ns-form">
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">分销概念：</label>
+		<div class="layui-input-block">
+			<input type="text" name="concept" lay-verify="required" {if condition="isset($config_info.concept)"} value='{$config_info.concept}' {/if} autocomplete="off" class="layui-input ns-len-mid">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">分销商名称：</label>
+		<div class="layui-input-block">
+			<input type="text" name="fenxiao_name" lay-verify="required" {if condition="isset($config_info.fenxiao_name)"} value='{$config_info.fenxiao_name}' {/if} autocomplete="off" class="layui-input ns-len-mid">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">提现：</label>
+		<div class="layui-input-block">
+			<input type="text"  name="withdraw" lay-verify="required" {if condition="isset($config_info.withdraw)"} value='{$config_info.withdraw}' {/if} autocomplete="off" class="layui-input ns-len-mid">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">佣金：</label>
+		<div class="layui-input-block">
+			<input type="text"  name="account" lay-verify="required" {if condition="isset($config_info.account)"} value='{$config_info.account}' {/if} autocomplete="off" class="layui-input ns-len-mid">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">我的团队：</label>
+		<div class="layui-input-block">
+			<input type="text"  name="my_team" lay-verify="required" {if condition="isset($config_info.my_team)"} value='{$config_info.my_team}' {/if} autocomplete="off" class="layui-input ns-len-mid">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">下线：</label>
+		<div class="layui-input-block">
+			<input type="text"  name="child" lay-verify="required" {if condition="isset($config_info.child)"} value='{$config_info.child}' {/if} autocomplete="off" class="layui-input ns-len-mid">
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+	</div>
+
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form'], function() {
+		var form = layui.form,
+			repeat_flag = false;
+		form.render();
+		
+		/**
+		 * 表单提交
+		 */
+		form.on('submit(save)', function(data){
+
+			if(repeat_flag) return;
+			repeat_flag = true;
+			
+			$.ajax({
+				type: 'POST',
+				dataType: 'JSON',
+				url: ns.url("fenxiao://admin/config/words"),
+				data: data.field,
+				async: false,
+				success: function(res){
+					repeat_flag = false;
+                    layer.msg(res.message);
+				}
+			})
+		});
+	});
+</script>
+{/block}

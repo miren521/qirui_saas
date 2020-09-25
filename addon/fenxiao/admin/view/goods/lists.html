@@ -1,0 +1,233 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+
+<div class="ns-screen layui-collapse" lay-filter="selection_panel">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">筛选</h2>
+		<form class="layui-colla-content layui-form layui-show">
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">搜索方式：</label>
+					<div class="layui-input-inline">
+						<select name="search_text_type">
+							<option value="goods_name">商品名称</option>
+							<option value="site_name">店铺名称</option>
+						</select>
+					</div>
+					<div class="layui-input-inline">
+						<input type="text" name="search_text" autocomplete="off" class="layui-input" placeholder="输入商品名称/店铺名称" />
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+
+				<div class="layui-inline">
+					<label class="layui-form-label">商品类型：</label>
+					<div class="layui-input-inline">
+						<select name="goods_class" lay-filter="goods_class">
+							<option value="">全部</option>
+							<option value="1">实物商品</option>
+							<option value="2">虚拟商品</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="layui-inline">
+					<label class="layui-form-label">商品分类：</label>
+					<div class="layui-input-inline">
+						{include file="goods/category_select" /}
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">商品品牌：</label>
+					<div class="layui-input-inline">
+						<select name="goods_brand" lay-search="">
+							<option value="">全部</option>
+							{foreach $goods_brand as $v}
+							<option value="{$v.brand_id}">{$v.brand_name}</option>
+							{/foreach}
+						</select>
+					</div>
+				</div>
+
+			</div>
+
+			<input type="hidden" name="goods_state" />
+			<input type="hidden" name="verify_state" />
+
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit id="" lay-filter="search">筛选</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</form>
+	</div>
+</div>
+<div class="layui-tab ns-table-tab" lay-filter="fenxiao_goods_tab">
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="fenxiao_list" lay-filter="fenxiao_list"></table>
+	</div>
+</div>
+
+
+<!-- 商品 -->
+<script type="text/html" id="goods_info">
+	<div class="ns-table-tuwen-box">
+		<div class="ns-img-box">
+			<img layer-src src="{{ns.img(d.goods_image.split(',')[0])}}"/>
+		</div>
+		<div class="ns-font-box">
+			<a href="javascript:;" class="ns-multi-line-hiding ns-text-color" title="{{d.goods_name}}">{{d.goods_name}}</a>
+		</div>
+	</div>
+</script>
+
+
+<!-- 状态 -->
+<script type="text/html" id="status">
+	{{# if(d.status == 0){ }}
+		<span style="color: red;">待审核</span>
+	{{# }else if(d.status == 1){ }}
+		<span style="color: green;">审核通过</span>
+	{{# }else if(d.status == 2){ }}
+		<span style="color: gray;">审核拒绝</span>
+	{{# }else if(d.status == -1){ }}
+	<span style="color: gray;">冻结</span>
+	{{# } }}
+</script>
+
+<!-- 工具栏操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="detail">查看</a>
+	</div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+	layui.use(['form', 'laydate','element'], function() {
+		var table,
+			form = layui.form,
+            element = layui.element,
+			laydate = layui.laydate;
+		form.render();
+
+		//渲染时间
+		laydate.render({
+			elem: '#start_time',
+			type: 'datetime'
+		});
+
+		laydate.render({
+			elem: '#end_time',
+			type: 'datetime'
+		});
+
+		table = new Table({
+			elem: '#fenxiao_list',
+			url: ns.url("fenxiao://admin/goods/lists"),
+			cols: [
+				[{
+					title: '商品名称',
+					unresize: 'false',
+                    templet: '#goods_info',
+					width:'20%'
+				}, {
+					field: 'site_name',
+					title: '店铺名称',
+					unresize: 'false',
+					width:'15%'
+				}, {
+					field: 'price',
+					title: '价格',
+					unresize: 'false',
+					align: 'right',
+					width:'10%',
+					templet: function(data) {
+						return '￥'+data.price;
+					}
+				}, {
+					unresize: 'false',
+					width:'5%'
+				}, {
+					field: 'goods_stock',
+					title: '库存',
+					unresize: 'false',
+					width:'10%'
+				},{
+					field: 'sale_num',
+					title: '销量',
+					unresize: 'false',
+					width:'10%'
+				}, {
+                    title: '是否参与',
+                    unresize: 'false',
+                    width:'10%',
+                    templet: function(data) {
+                        if(data.is_fenxiao == 0){
+							return '不参与';
+						}else{
+                            return '参与';
+						}
+                    }
+                }, {
+					title: '分销规则',
+					unresize: 'false',
+					width:'10%',
+					templet: function(data) {
+						if(data.fenxiao_type == 1){
+							return '默认规则';
+						}else if(data.fenxiao_type == 2){
+							return '单独设置';
+						}
+					}
+				}, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width:'10%'
+				}]
+			]
+		});
+
+
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+			return false;
+		});
+
+
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data,
+					event = obj.event;
+			switch (event) {
+				case 'detail': //查看
+					location.href = ns.url('fenxiao://admin/goods/detail', {'goods_id': data.goods_id});
+					break;
+			}
+		});
+	});
+
+	function clickAdd() {
+		location.href = ns.url("admin/shop/addShop");
+	}
+</script>
+{/block}

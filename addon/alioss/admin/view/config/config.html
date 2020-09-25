@@ -1,0 +1,131 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.ns-form {margin-top: 0;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否开启：</label>
+        <div class="layui-input-block" id="isOpen">
+			<input type="checkbox" name="status" lay-filter="isOpen" value="1" lay-skin="switch" {if condition="$info.is_use == 1"} checked {/if} />
+        </div>
+		<div class="ns-word-aux">当前使用阿里云上传配置</div>
+    </div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>AccessKeyID：</label>
+		<div class="layui-input-block">
+			<input type="text" name="access_key_id" lay-verify="required" placeholder="请输入Access Key ID" value="{$info.value.access_key_id ?? ''}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+        <div class="ns-word-aux">填写阿里云Access Key管理的(ID)。</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>AccessKeySecret：</label>
+		<div class="layui-input-block">
+			<input type="text" name="access_key_secret" lay-verify="required" placeholder="请输入Access Key Secret" value="{$info.value.access_key_secret ?? ''}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+        <div class="ns-word-aux">Access Key Secret是您访问阿里云API的密钥，具有该账户完全的权限，请您妥善保管。(填写完Access Key ID 和 Access Key Secret 后请选择bucket)</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>Bucket：</label>
+		<div class="layui-input-block">
+			<input type="text" name="bucket" lay-verify="required" placeholder="请输入存储空间的名称" value="{$info.value.bucket ?? ''}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+        <div class="ns-word-aux">与阿里云OSS开通对象名称一致</div>
+	</div>
+    <div class="layui-form-item">
+        <label class="layui-form-label"><span class="required">*</span>endpoint：</label>
+        <div class="layui-input-block">
+            <input type="text" name="endpoint" lay-verify="required" placeholder="请输入endpoint" value="{$info.value.endpoint ?? ''}" autocomplete="off" class="layui-input ns-len-long">
+        </div>
+        <div class="ns-word-aux">Bucket地域endpoint</div>
+    </div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否开启自定义域名：</label>
+		<div class="layui-input-block" >
+			<input type="checkbox" name="is_domain" lay-filter="is_domain" value="1" lay-skin="switch" {if condition="!empty($info.value.is_domain) && $info.value.is_domain == 1"} checked {/if} />
+		</div>
+		<div class="ns-word-aux">默认选关闭，官方建议开启绑定域名，域名格式：http://xx.xxxx.com/（不可绑定当前网站域名，建议新开二级域名）</div>
+	</div>
+	<div class="layui-form-item domain-view" {if empty($info.value.is_domain) ||  $info.value.is_domain == 0}style="display:none;"{/if}>
+		<label class="layui-form-label"><span class="required">*</span>domain：</label>
+		<div class="layui-input-block">
+			<input type="text" name="domain" lay-verify="domain" placeholder="请输入domain" value="{$info.value.domain ?? ''}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+		<div class="ns-word-aux">域名格式：http://xx.xxxx.com/（不可绑定当前网站域名，建议新开二级域名）</div>
+	</div>
+    <!-- 表单操作 -->
+    <div class="ns-form-row">
+        <button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+        <button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+    </div>
+
+</div>
+{/block}
+{block name="script"}
+<script>
+    layui.use('form', function() {
+        var form = layui.form,
+            repeat_flag = false; //防重复标识
+
+
+
+		form.on('switch(is_domain)', function(data){
+			if(data.elem.checked){
+				$(".domain-view").show();
+			}else{
+				$(".domain-view").hide();
+			}
+		});
+		form.verify({
+			domain: function (value, item) { //value：表单的值、item：表单的DOM对象
+				var is_domain = $("input[name=is_domain]").prop("checked");
+
+				if(is_domain > 0 && value == ""){
+					return '自定义域名不可为空!';
+				}
+
+
+			},
+		})
+		form.on('submit(save)', function(data) {
+            if (repeat_flag) return;
+            repeat_flag = true;
+			
+            $.ajax({
+                url: ns.url("alioss://admin/config/config"),
+                data: data.field,
+                dataType: 'JSON',
+                type: 'POST',
+                success: function(res) {
+					repeat_flag = false;
+					if (res.code >= 0) {
+						layer.confirm('编辑成功', {
+							title:'操作提示',
+							btn: ['返回列表', '继续操作'],
+							yes: function(){
+								location.href = ns.url("admin/upload/oss")
+							},
+							btn2: function() {
+								location.reload();
+							}
+						});
+					}else{
+						layer.msg(res.message);
+					}
+                }
+            });
+        });
+		form.render();
+    });
+
+    function back() {
+        location.href = ns.url("admin/upload/oss");
+    }
+</script>
+{/block}

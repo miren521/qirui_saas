@@ -1,0 +1,67 @@
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/header.css">
+
+<div class="ns-supply-header-wrap">
+	<div class="ns-supply-header">
+		<div class="ns-supply-header-index"><a href="{:addon_url('supply://shop/market/index')}">市场首页</a></div>
+		<div class="ns-supply-header-opretion">
+			<a href="{:addon_url('supply://shop/order/lists')}"><i class="iconfont iconjinhuodan"></i><span>我的订单</span></a>
+			<span></span>
+			<a href="#" onclick="toCartList()"><i class="iconfont iconjinhuodan"></i><span>我的供货单</span></a>
+			<span></span>
+			<a href="{:addon_url('supply://supply/index/index')}" target="_blank"><i class="iconfont iconwo"></i><span>我是供货商</span></a>
+			<span></span>
+			<a href="{:addon_url('shop/index/index')}" target="_blank"><span>返回店铺</span></a>
+		</div>
+	</div>
+
+	<!-- 顶部搜索栏 -->
+	<div class="ns-supply-header-search">
+		<a href="{:addon_url('supply://shop/market/index')}">
+			<div class="ns-supply-logo">
+				<img src="{:img($website_info.logo)}" onerror="this.src='SHOP_SUPPLY_LOCAL_IMG/logo.png'"/>
+			</div>
+		</a>
+	
+		<div class="ns-supply-search">
+			<div class="ns-supply-search-box layui-form">
+				<!-- <select name="" lay-verify="">
+					<option value="">商品</option>
+					<option value="">供货商</option>
+				</select> -->
+				<input type="text" name="keyword" placeholder="请输入关键字" autocomplete="off" class="layui-input ns-border-color">
+				<button type="button" class="layui-btn ns-bg-color" lay-submit lay-filter="search">搜索</button>
+			</div>
+			<button class="layui-btn ns-bg-color" onclick="toPurchase()">发布求购单</button>
+		</div>
+
+		<div class="ns-supply-header-cart" onclick="toCartList()">
+			<span>我的供货单</span>
+			<i class="iconfont icongouwuche"></i>
+			<span class="cart-num layui-hide"></span>
+			<input type="hidden" value="" id="cartCount" />
+		</div>
+	</div>
+</div>
+
+<script src="SHOP_SUPPLY_LOCAL_JS/common.js"></script>
+<script>
+	$(document).ready(function() {
+		cartCount();
+	})
+
+	layui.use('form', function () {
+		var form = layui.form;
+		// 商品搜索
+		form.on('submit(search)', function(data) {
+			location.href = ns.url("supply://shop/goods/goodslist", {"keyword": data.field.keyword})
+		})
+	})
+	
+	function toCartList() {
+		location.href = ns.url("supply://shop/cart/cart", {"count": $("#cartCount").val()});
+	}
+
+	function toPurchase() {
+		location.href = ns.url("supply://shop/purchase/release");
+	}
+</script>

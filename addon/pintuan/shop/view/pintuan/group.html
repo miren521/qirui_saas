@@ -1,0 +1,293 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<style>
+	.ns-tips .layui-colla-content li {list-style: none;}
+	.layui-collapse li p {display: inline-block; width: 230px;}
+	.layui-input-inline input, .layui-input-block input, .layui-input-block textarea {
+	    outline: none;
+	    border: none;
+	}
+	.upload-img-block {border: none; width: 100%;}
+	.upload-img-block .upload-img-box {display: inline-block; width: 80px; height: 80px;}
+	.layui-form-item {margin-bottom: 0;}
+	.ns-detail-form {display: inline-block; width: 49%; vertical-align: top;}
+	.ns-detail-form:first-child {border-right: 1px solid #EEEEEE;}
+</style>
+{/block}
+{block name="main"}
+{if condition="$list.data.pintuan_info"}
+<div class="ns-detail-card ns-tips">
+	<div class="ns-detail-img">
+		<img layer-src src="{:img(explode(',', $list.data.pintuan_info.goods_image)[0])}"/>
+	</div>
+		
+	<div class="ns-detail-con">
+		<p class="ns-detail-line">
+			<span class="ns-goods-name">{$list.data.pintuan_info.goods_name}</span>
+			<span class="ns-text-color">（活动名称：{$list.data.pintuan_info.pintuan_name}）</span>
+		</p>
+		<p class="ns-detail-line">
+			<span class="ns-text-color">{if condition="$list.data.pintuan_info.status == 0"}未开始{/if}{if condition="$list.data.pintuan_info.status ==1"}进行中{/if}
+			{if condition="$list.data.pintuan_info.status == 2"}已结束{/if}
+			{if condition="$list.data.pintuan_info.status == 3"}已失效{/if}</span>
+			<span class="ns-text-color">（{$list.data.pintuan_info.pintuan_num}人团）</span>
+		</p>
+		<p class="ns-detail-line">限 {$list.data.pintuan_info.buy_num}件/人</p>
+		<p class="ns-detail-line">活动时间：{:date('Y-m-d H:i:s', $list.data.pintuan_info.start_time)} — {:date('Y-m-d H:i:s', $list.data.pintuan_info.end_time)}</p>
+		<p class="ns-detail-line">
+			<span class="ns-inline-span">是否是虚拟商品：{$list.data.pintuan_info.is_virtual_goods == 0 ? '否' : '是'}</span>
+			<span class="ns-inline-span">是否是单独购买：{$list.data.pintuan_info.is_single_buy == 0 ? '否' : '是'}</span>
+			<span class="ns-inline-span">是否是虚拟成团：{$list.data.pintuan_info.is_virtual_buy == 0 ? '否' : '是'}</span>
+			<span class="ns-inline-span">是否有团长优惠：{$list.data.pintuan_info.is_promotion == 0 ? '否' : '是'}</span>
+		</p>
+	</div>
+</div>
+
+<!-- <div class="layui-collapse ns-tips">
+	<div class="ns-detail-form">
+		<div class="layui-form-item">
+			<label class="layui-form-label">活动名称：</label>
+			<div class="layui-input-block">
+				<input class="layui-input ns-len-mid" value="{$list.data.pintuan_info.pintuan_name}" />
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label img-upload-lable">商品图片：</label>
+			<div class="layui-input-block img-upload">
+				<input type="hidden" class="layui-input" name="image" />
+				<div class="upload-img-block">
+					{volist name=":explode(',', $list.data.pintuan_info.goods_image)" id="v"}
+					<div class="upload-img-box" id="couponImg">
+						<img layer-src src="{:img($v)}"/>
+					</div>
+					{/volist}
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">商品名称：</label>
+			<div class="layui-input-block">
+				<input class="layui-input ns-len-mid" value="{$list.data.pintuan_info.goods_name}" />
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">是否是虚拟商品：</label>
+			<div class="layui-input-block">
+				<input class="layui-input ns-len-mid" value="{$list.data.pintuan_info.is_virtual_goods == 0 ? '否' : '是'}" />
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">活动状态：</label>
+			<div class="layui-input-block">
+				{if condition="$list.data.pintuan_info.status == 0"}
+				<input class="layui-input ns-len-mid" value="未开始" />
+				{/if}
+				{if condition="$list.data.pintuan_info.status == 1"}
+				<input class="layui-input ns-len-mid" value="进行中" />
+				{/if}
+				{if condition="$list.data.pintuan_info.status == 2"}
+				<input class="layui-input ns-len-mid" value="已结束" />
+				{/if}
+				{if condition="$list.data.pintuan_info.status == 3"}
+				<input class="layui-input ns-len-mid" value="已失效" />
+				{/if}
+			</div>
+		</div>
+	</div>
+	
+	<div class="ns-detail-form">
+		<div class="layui-form-item">
+			<label class="layui-form-label">成团人数：</label>
+			<div class="layui-input-block">
+				<input class="layui-input ns-len-mid" value="{$list.data.pintuan_info.pintuan_num}" />
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">拼团限购量：</label>
+			<div class="layui-input-block">
+				<input class="layui-input ns-len-mid" value="{$list.data.pintuan_info.buy_num}件/人" />
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label">是否单独购买：</label>
+			<div class="layui-input-block">
+				<input class="layui-input ns-len-mid" value="{$list.data.pintuan_info.is_single_buy == 0 ? '否' : '是'}" />
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label">是否虚拟成团：</label>
+			<div class="layui-input-block">
+				<input class="layui-input ns-len-mid" value="{$list.data.pintuan_info.is_virtual_buy == 0 ? '否' : '是'}" />
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">是否团长优惠：</label>
+			<div class="layui-input-block">
+				<input class="layui-input ns-len-mid" value="{$list.data.pintuan_info.is_promotion == 0 ? '否' : '是'}" />
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">活动时间：</label>
+			<div class="layui-input-block">
+				<input class="layui-input ns-len-long" value="{:date('Y-m-d H:i:s', $list.data.pintuan_info.start_time)} - {:date('Y-m-d H:i:s', $list.data.pintuan_info.end_time)}" />
+			</div>
+		</div>
+	</div>
+</div> -->
+{/if}
+
+{if condition="$list.data.pintuan_info"}
+<input type="hidden" class="pintuan-id" value="{$list.data.pintuan_info.pintuan_id}" />
+{else/}
+<input type="hidden" class="pintuan-id" value="" />
+{/if}
+
+<div class="layui-tab ns-table-tab"  lay-filter="status">
+	<ul class="layui-tab-title">
+		<li class="layui-this" lay-id="">全部</li>
+		<li lay-id="3">拼团成功</li>
+		<li lay-id="2">组团中</li>
+		<li lay-id="1">拼团失败</li>
+	</ul>
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="team_list" lay-filter="team_list"></table>
+	</div>
+</div>
+
+<!-- 商品 -->
+<script type="text/html" id="goods">
+	<div class="ns-table-title">
+		<div class="ns-title-pic">
+			{{#  if(d.goods_image){  }}
+			<img layer-src src="{{ns.img(d.goods_image.split(',')[0])}}"/>
+			{{#  }  }}
+		</div>
+		<div class="ns-title-content">
+			<a href="javascript:;" class="ns-multi-line-hiding ns-text-color"
+				title="{{d.goods_name}}">{{d.goods_name}}</a>
+		</div>
+	</div>
+</script>
+
+<!-- 状态 -->
+<script type="text/html" id="status">
+	{{#  if(d.status == 1){  }}
+	拼团失败
+	{{#  }else if(d.status == 2){  }}
+	组团中
+	{{#  }else if(d.status == 3){  }}
+	拼团成功
+	{{#  }  }}
+</script>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="check">查看</a>
+	</div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+	layui.use(['form', 'element'], function() {
+		var table,
+			form = layui.form,
+			element = layui.element;
+		form.render();
+
+
+		table = new Table({
+			elem: '#team_list',
+			url: ns.url("pintuan://shop/pintuan/group"),
+			parseData: function(res) { //res 即为原始返回的数据
+				return {
+					"code": res.code, //解析接口状态
+					"msg": res.message, //解析提示文本
+					"count": res.data.list.list.length,
+					"data": res.data.list.list //解析数据列表
+				};
+			},
+			where: {
+				"pintuan_id": $(".pintuan-id").val()
+			},
+			cols: [
+				[ {
+					title: '拼团商品',
+					unresize: 'false',
+					width: '22%',
+					templet: '#goods'
+				}, {
+					title: '开团时间',
+					unresize: 'false',
+					width: '17%',
+					templet: function(data) {
+						var create_time = ns.time_to_date(data.create_time);
+						return create_time;
+					}
+				}, {
+					title: '结束时间',
+					unresize: 'false',
+					width: '17%',
+					templet: function(data) {
+						return ns.time_to_date(data.end_time);
+					}
+				}, {
+					title: '差几人成团',
+					unresize: 'false',
+					width: '12%',
+					templet: function(data) {
+						return data.pintuan_num - data.pintuan_count;
+					}
+				}, {
+					title: '拼团状态',
+					unresize: 'false',
+					width: '12%',
+					templet: '#status'
+				}, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width: '10%'
+				}]
+			],
+
+		});
+
+		//监听Tab切换
+		element.on('tab(status)', function(data) {
+			var status = $(this).attr("lay-id");
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: {
+					'status': status
+				}
+			});
+		});
+		
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'check': //查看
+					location.href = ns.url("pintuan://shop/pintuan/grouporder?group_id="+ data.group_id);
+					break;
+			}
+		});
+	});
+</script>
+{/block}

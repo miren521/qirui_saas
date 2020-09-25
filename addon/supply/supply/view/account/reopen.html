@@ -1,0 +1,301 @@
+{extend name="addon/supply/supply/view/base.html"/}
+{block name="resources"}
+<style>
+    .ns-shop-account {
+        display: flex;
+        align-items: center;
+        position: relative;
+        padding: 15px;
+        box-sizing: border-box;
+    }
+
+    .ns-shop-detail p {
+        display: inline-block;
+        width: 300px;
+        line-height: 30px;
+    }
+
+    .ns-shop-account > a {
+        position: absolute;
+        right: 15px;
+        bottom: 15px;
+        cursor: pointer;
+    }
+
+    #renewal_list {
+        margin-top: 15px;
+    }
+</style>
+{/block}
+{block name="main"}
+
+<div class="layui-collapse ns-tips">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">操作提示</h2>
+        <ul class="layui-colla-content layui-show">
+            <li>1、供货商到期30日内可以申请续签</li>
+            <li>2、请认准官方收款账户，支付凭据上传之后请联系官方客服人员</li>
+        </ul>
+    </div>
+</div>
+
+{if isset($apply_data.is_reopen) && $apply_data.is_reopen  == 2 && $apply_data['cert_id'] == 0}
+<div class="ns-form">
+    <input class="end-time" type="hidden" value="{$apply_data.end_time}"/>
+    <button class="ns-bg-color layui-btn shop_auth_apply">申请续签</button>
+</div>
+{elseif isset($apply_data.is_reopen) && $apply_data.is_reopen  == 2 && $apply_data['cert_id'] > 0}
+<div class="ns-form">
+    <input class="end-time" type="hidden" value="{$apply_data.end_time}"/>
+    {if $is_reopen == 1}
+    <button class="ns-bg-color layui-btn reopen_apply">申请续签</button>
+    {else/}
+    <button class="ns-bg-color layui-btn reopen_apply_detail">申请续签</button>
+    {/if}
+</div>
+{/if}
+
+<table id="renewal_list" lay-filter="renewal_list"></table>
+
+<input class="shop-group-id" type="hidden" value="{$apply_data.group_id}" name="group_id"/>  <!-- 分组ID -->
+<input class="shop-category-id" type="hidden" value="{$apply_data.category_id}" name="category_id"/>  <!-- 分类ID -->
+
+<!-- 付款凭证 -->
+<script type="text/html" id="paymentVoucher">
+    <div class="ns-img-box">
+        {{# if(d.paying_money_certificate){ }}
+        <img layer-src src="{{ns.img(d.paying_money_certificate)}}"/>
+        {{# } }}
+    </div>
+</script>
+
+<!-- 状态 -->
+<script type="text/html" id="status">
+    {{#  if(d.apply_state == 1){  }}
+    待审核
+    {{#  }else if(d.apply_state == -1){  }}
+    审核失败
+    {{#  }else if(d.apply_state == 2){  }}
+    审核成功
+    {{#  }  }}
+</script>
+
+<!-- 工具栏操作 -->
+<script type="text/html" id="operation">
+
+    <div class="ns-table-btn">
+        {{# if(d.apply_state == 1 || d.apply_state == 2){ }}
+<!--        <a class="layui-btn" lay-event="show">查看</a>-->
+        {{# }else if(d.apply_state == -1){ }}
+<!--        <a class="layui-btn" lay-event="show">查看</a>-->
+        <a class="layui-btn" lay-event="edit">编辑</a>
+        {{# } }}
+    </div>
+
+</script>
+{/block}
+{block name="script"}
+<script>
+    // 到期时间
+    var end_time = $(".end-time").val();
+    //	var end_time_date = ns.time_to_date(end_time);
+    //	$(".ns-end-time").text(end_time_date);
+
+    var table, form, laytpl, laydate, upload, repeat_flag = false;
+    layui.use(['form', 'laytpl', 'laydate', 'upload'], function () {
+        form = layui.form;
+        laytpl = layui.laytpl;
+        laydate = layui.laydate;
+        upload = layui.upload;
+
+        form.render();
+
+        /**
+         * 加载表格
+         */
+        table = new Table({
+            elem: '#renewal_list',
+            url: ns.url("supply://supply/account/reopenlist"),
+            cols: [
+                [{
+                    field: 'reopen_no',
+                    title: '续签编号',
+                    unresize: 'false'
+                }, {
+                    field: 'apply_year',
+                    title: '续签时长（年）',
+                    unresize: 'false'
+                }, {
+                    field: 'paying_amount',
+                    title: '缴费金额（元）',
+                    unresize: 'false'
+                }, {
+                    field: 'paying_money_certificate',
+                    title: '付款凭证',
+                    unresize: 'false',
+                    templet: '#paymentVoucher'
+                }, {
+                    title: '状态',
+                    unresize: 'false',
+                    templet: '#status'
+                }, {
+                    field: 'create_time',
+                    title: '创建时间',
+                    unresize: 'false',
+                    templet: function (data) {
+                        return ns.time_to_date(data.create_time)
+                    }
+                }, {
+                    title: '操作',
+                    unresize: 'false',
+                    toolbar: '#operation',
+                }]
+            ]
+        });
+
+        /**
+         * 监听供货商等级下拉选(添加)
+         */
+        form.on('select(shop_group)', function (data) {        //对应lay-filter
+            obj.group_id = data.value;
+            moneyChange(obj);
+        });
+
+        /**
+         * 监听续签年限(添加)
+         */
+        form.on('select(apply_year)', function (data) {        //对应lay-filter
+            obj.apply_year = data.value;
+            moneyChange(obj);
+        });
+
+
+        /**
+         * 监听工具栏操作
+         */
+        var obj_edit = {};
+        table.tool(function (obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'edit': //编辑
+
+                    location.href = ns.url("supply://supply/cert/editreopeninfo?id=" + data.id);
+                    break;
+                case 'del': //删除
+
+                    deleteApply(data.id);
+                    break;
+                case 'show':
+
+                    laytpl($("#renewal_show").html()).render(data, function (html) {
+                        layer_edit_renewal = layer.open({
+                            title: '续签记录详情',
+                            skin: 'layer-tips-class',
+                            type: 1,
+                            area: ['650px'],
+                            content: html,
+                        });
+                    });
+                    break;
+            }
+        });
+
+
+        /**
+         * 监听供货商等级下拉选(编辑)
+         */
+        form.on('select(shop_group_edit)', function (data) {        //对应lay-filter
+            obj_edit.group_id = data.value;
+            moneyChange(obj_edit);
+        });
+
+        /**
+         * 监听续签年限(编辑)
+         */
+        form.on('select(apply_year_edit)', function (data) {        //对应lay-filter
+            obj_edit.apply_year = data.value;
+            moneyChange(obj_edit);
+        });
+
+
+        /**
+         * 删除
+         */
+        function deleteApply(id) {
+            if (repeat_flag) return false;
+            repeat_flag = true;
+
+            layer.confirm('确定要删除续签申请吗?', function () {
+                $.ajax({
+                    url: ns.url("supply://supply/reopen/deleteReopen"),
+                    data: {id},
+                    dataType: 'JSON',
+                    type: 'POST',
+                    success: function (res) {
+                        layer.msg(res.message);
+                        repeat_flag = false;
+
+                        if (res.code == 0) {
+                            table.reload();
+                        }
+                    }
+                });
+            }, function () {
+                layer.close();
+                repeat_flag = false;
+            });
+        }
+
+    });
+
+    //申请续签
+    $(".reopen_apply").click(function () {
+        location.href = ns.url("supply://supply/cert/reopen");
+    });
+    //认证
+    $(".shop_auth_apply").click(function () {
+        location.href = ns.url("supply://supply/cert/index");
+    });
+    //编辑续签
+    $(".reopen_apply_detail").click(function () {
+        location.href = ns.url("supply://supply/cert/editreopeninfo");
+    });
+
+</script>
+<script type="text/html" id="renewal_show">
+    <table class="layui-table">
+        <colgroup>
+            <col width="30%">
+            <col width="70%">
+        </colgroup>
+        <thead>
+        <tr>
+            <th>供货商名称</th>
+            <th>{$apply_data.title}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>续签时长</td>
+            <td>{{d.apply_year}}年</td>
+        </tr>
+        <tr>
+            <td>支付凭证</td>
+            <td>
+                {{# if(d.paying_money_certificate){ }}
+                <div class="ns-img-box">
+                    <img layer-src src={{ns.img(d.paying_money_certificate)}} alt="">
+                </div>
+                {{# } }}
+            </td>
+        </tr>
+        <tr>
+            <td>付款凭证说明</td>
+            <td>
+                <div style="word-break: break-all;">{{d.paying_money_certificate_explain}}</div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</script>
+{/block}

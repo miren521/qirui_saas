@@ -1,0 +1,70 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+
+
+
+<div class="layui-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label">赠品名称：</label>
+		<div class="layui-input-inline">{$present_info.sku_name}</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">赠品图片：</label>
+		<div class="layui-input-inline">
+			<div class="upload-img-block square">
+				<div class="upload-img-box">
+					<img src="{:img($present_info.sku_image)}" />
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">所在店铺：</label>
+		<div class="layui-input-inline">{$present_info.site_name}</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">开始时间：</label>
+		<div class="layui-input-inline">
+			{:date('Y-m-d H:i:s',$present_info.start_time)}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">结束时间：</label>
+		<div class="layui-input-inline">
+			{:date('Y-m-d H:i:s',$present_info.end_time)}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">商品原价：</label>
+		<div class="layui-input-inline">{$present_info.sku_price}</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">已发放数量：</label>
+		<div class="layui-input-inline">
+			{$present_info.sale_num}
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">剩余数量：</label>
+		<div class="layui-input-inline">
+			{$present_info.stock}
+		</div>
+	</div>
+	<div class="ns-form-row">
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+
+</div>
+{/block}
+{block name="script"}
+<script>
+	function back() {
+		location.href = ns.url("present://admin/present/lists");
+	}
+</script>
+{/block}

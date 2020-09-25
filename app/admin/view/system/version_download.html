@@ -1,0 +1,190 @@
+{extend name="base"/}
+{block name="resources"}
+<script type="text/javascript" src="ADMIN_JS/upgrade/html5.js"></script>
+<script type="text/javascript" src="ADMIN_JS/upgrade/excanvas.js"></script>
+<script type="text/javascript" src="ADMIN_JS/upgrade/jquery.easy-pie-chart.js"></script>
+
+<script type="text/javascript" src="ADMIN_JS/progressbar.js"></script>
+<link rel="stylesheet" type="text/css" href="ADMIN_CSS/upgrade/style.css" media="screen">
+<link rel="stylesheet" type="text/css" href="ADMIN_CSS/upgrade/jquery.easy-pie-chart.css" media="screen">
+<style>
+    .chart{
+        display:inline-block;
+        float:unset;
+    }
+    .up-footer{padding:20px;text-align:center;}
+    .up-footer button{
+        background-color: #067cf3;
+        padding:8px 15px;
+        color:#FFF;
+        border:none;
+        border-radius:3px;
+        font-size:15px;
+        margin: 0 10px;
+    }
+    .install-content{
+        margin-top:40px;
+		padding: 10px 0 10px 20px;
+		border: 1px solid #AAD2E5;
+		background-color: #E1F2FA;
+    }
+    .panel-title{
+        font-size:15px;
+        margin:7px auto;
+        line-height:30px;
+        color: #31708f;
+        border-bottom:1px solid #aad2e5 !important;
+    }
+    .step-title{
+        color: #31708f;
+        font-weight:bold;
+    }
+    .step-text{
+        color: #31708f;
+    }
+    .alert-dismissable{
+        display: none;
+        position: absolute;
+        top: 50%;
+        right: 50%;
+        transform: translate(50%,50%);
+    }
+    #container {
+        width: 300px;
+        height: 300px;
+        margin: 50px auto;
+        position: relative;
+    }
+	
+	.alert-warning-word {
+		background-color: #FCF8E3;
+		border-top: 1px solid #FBEED5;
+		border-bottom: 1px solid #FBEED5;
+		padding: 5px 20px;
+		line-height: 30px;
+		color: #C09853;
+	}
+</style>
+{/block}
+{block name="main"}
+<div class="ns-tips">
+	<div id="container"></div>
+
+	<div style="clear:both;"></div>
+	
+	<div class="alert alert-warning alert-warning-word">
+		<strong>警告！</strong>版本下载中,请不要关闭当前页面!
+	</div>
+	
+	<div class="install-content alert alert-info">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">
+					详细过程
+				</h3>
+			</div>
+			<div class="panel-body">
+				<span class="step-title">整体进度&nbsp;：&nbsp;</span><span class="step-text count-percent">0%</span><br/>
+				<span class="step-title">正在进行&nbsp;：&nbsp;</span><span class="step-text step-content"></span></span>
+			</div>
+		</div>
+	</div>
+	<div class="space-10"></div>
+</div>
+{/block}
+{block name="script"}
+<script type="text/javascript">
+    var container = document.querySelector('#container');
+
+    var bar = new ProgressBar.Circle(container, {
+        color: '#067cf3',
+        strokeWidth: 5,  // 正好是从圆心开始画起，>50会越过圆心，<50画出的是圆环
+        trailWidth: 0,  // 也设置为50，就是一个未填充的圆形，而不是圆环。要么设置为0
+        easing: 'easeInOut',
+        duration: 10,
+        text: {
+            style: {
+                color: '#31708f',
+                display: 'inline-block',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%,-50%)'
+            },
+            autoStyleContainer: false
+        },
+        fill: '#e1f2fa',   // 圆形内容区域填充色，当需要画圆环时，效果应该最好。
+        from: { color: '#aaa', width: 1},
+        to: { color: '#333', width: 5},
+        step: function(state, circle) {
+            circle.path.setAttribute('stroke-width', state.width);
+
+            var value = Math.round(circle.value() * 100);
+            circle.setText(value+'%');
+        }
+    });
+    bar.text.style.fontFamily = '"Raleway", Helvetica, sans-serif';
+    bar.text.style.fontSize = '32px';
+
+    upgradeAction();
+    //升级操作
+    function upgradeAction(){
+        $(".up-btn").attr('disabled',true);
+        $(" .up-footer .up-btn").addClass("btn-disabled");
+
+        var index  = 0;
+        if({$version_info.file_count} > 0){
+            upgrade(index);
+        }else{
+			layer.alert('当前没有需下载的文件,如果要查看下载的记录请直接查看目录{$download_path}', {
+				icon: 8,
+				title: '提示',
+				skin: 'layer-ext-moon'
+			}, function () {
+				location.href=ns.url('admin/system/upgrade');
+			})
+        }
+    }
+    //下载文件
+    function upgrade(index){
+        $.ajax({
+            type:'post',
+            url : ns.url("admin/system/download"),
+            data:{
+                "index":index,
+            },
+            success:function(res){
+                if(res.code >= 0){
+                    //下载完毕
+                    if(res.code == 10){
+                        setProgress(100,"文件下载完成");
+						layer.alert("如果要查看下载的记录请直接查看目录"+ res.message, {
+							icon: 1,
+							title: '提示',
+							skin: 'layer-ext-moon'
+						}, function () {
+							location.href=ns.url('admin/system/upgrade');
+						})
+                        return;
+                    }
+                    setProgress((index+1)/{$version_info.file_count}*100, res.message +"下载完成");
+                    index++;
+                    upgrade(index);//递归调用
+                }else{
+                    layer.msg(res.title);
+                }
+            }
+        })
+    }
+
+    //控制进度条
+    function setProgress(width, text){
+        var barValue = width /100;
+        width = width.toFixed(2);
+
+        bar.animate(barValue);
+        $(".count-percent").text(width+"%");
+        $(".step-content").text(text);
+    }
+</script>
+{/block}

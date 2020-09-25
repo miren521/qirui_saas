@@ -1,0 +1,226 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>点击添加活动按钮可以添加限时折扣活动，点击商品管理按钮可以对限时折扣活动内的商品进行管理</li>
+			<li>进行中的活动需先关闭才可进行删除操作</li>
+			<li>点击删除按钮可以删除限时折扣活动</li>
+			<li>时间超过折扣活动的结束时间时，活动自动结束</li>
+		</ul>
+	</div>
+</div>
+
+<div class="ns-single-filter-box">
+	<button class="layui-btn ns-bg-color" onclick="add()">添加活动</button>
+
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<input type="text" name="discount_name" placeholder="请输入活动名称" autocomplete="off" class="layui-input">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+				<i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="discount_tab">
+	<ul class="layui-tab-title">
+		<li class="layui-this" lay-id="">所有活动</li>
+		<li lay-id="1">进行中</li>
+		<li lay-id="2">已结束</li>
+		<li lay-id="-1">已关闭</li>
+	</ul>
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="discount_list" lay-filter="discount_list"></table>
+	</div>
+</div>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<!-- 未开始 -->
+	<div class="ns-table-btn">
+		{{#  if(d.status == 0){ }}
+		<a class="layui-btn" lay-event="edit">编辑</a>
+		<a class="layui-btn" lay-event="manage">商品管理</a>
+		<a class="layui-btn" lay-event="del">删除</a>
+		{{#  } }}
+		<!-- 进行中  时间不能编辑-->
+		{{#  if(d.status == 1){ }}
+		<a class="layui-btn" lay-event="edit">编辑</a>
+		<a class="layui-btn" lay-event="manage">商品管理</a>
+		<a class="layui-btn" lay-event="colse">关闭</a>
+		{{#  } }}
+		<!-- 已结束 -->
+		{{#  if(d.status == 2){ }}
+		<a class="layui-btn" lay-event="detail">查看详情</a>
+		<a class="layui-btn" lay-event="del">删除</a>
+		{{#  } }}
+		<!-- 已关闭 -->
+		{{#  if(d.status == -1){ }}
+		<a class="layui-btn" lay-event="detail">查看详情</a>
+		<a class="layui-btn" lay-event="del">删除</a>
+		{{#  } }}
+	</div>
+</script>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'element'], function() {
+		var table,
+			form = layui.form,
+			element = layui.element,
+			repeat_flag = false; //防重复标识
+		form.render();
+
+		//监听Tab切换，以改变地址hash值
+		element.on('tab(discount_tab)', function() {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: {
+					'status': this.getAttribute('lay-id')
+				}
+			});
+		});
+
+		table = new Table({
+			elem: '#discount_list',
+			url: ns.url("discount://shop/discount/lists"),
+			cols: [
+				[{
+					field: 'discount_name',
+					title: '活动名称',
+					unresize: 'false',
+					width: '20%'
+				}, {
+					field: 'start_time',
+					title: '开始时间',
+					unresize: 'false',
+					widht: '20%',
+					templet: function(data) {
+						return ns.time_to_date(data.start_time);
+					}
+				}, {
+					field: 'end_time',
+					title: '结束时间',
+					unresize: 'false',
+					width: '20%',
+					templet: function(data) {
+						return ns.time_to_date(data.end_time);
+					}
+				}, {
+					field: 'status_name',
+					title: '状态',
+					unresize: 'false',
+					width: '20%'
+				}, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width: '20%'
+				}]
+			]
+		});
+
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'edit': //编辑
+					location.href = ns.url("discount://shop/discount/edit", {
+						"discount_id": data.discount_id,
+						"site_id": data.site_id
+					});
+					break;
+				case 'del': //删除
+					layer.confirm('您确定要删除该限时折扣活动吗?', function() {
+						console.log(repeat_flag);
+						if (repeat_flag) return;
+						repeat_flag = true;
+
+						$.ajax({
+							url: ns.url("discount://shop/discount/delete"),
+							data: data,
+							dataType: 'JSON',
+							type: 'POST',
+							success: function(res) {
+								layer.msg(res.message);
+								repeat_flag = false;
+								if (res.code == 0) {
+									table.reload();
+								}
+							}
+						});
+					}, function() {
+						layer.close();
+						repeat_flag = false;
+					});
+					break;
+				case 'colse': //关闭
+					layer.confirm('您确定要关闭吗?', function() {
+						if (repeat_flag) return;
+						repeat_flag = true;
+
+						$.ajax({
+							url: ns.url("discount://shop/discount/close"),
+							data: data,
+							dataType: 'JSON',
+							type: 'POST',
+							success: function(res) {
+								repeat_flag = false;
+								layer.msg(res.message);
+
+								if (res.code == 0) {
+									table.reload();
+								}
+							}
+						});
+					}, function() {
+						layer.close();
+						repeat_flag = false;
+					});
+
+					break;
+				case 'add': //详情
+					location.href = ns.url("discount://shop/discount/add");
+					break;
+				case 'manage': //管理活动
+					location.href = ns.url("discount://shop/discount/manage", {
+						"discount_id": data.discount_id
+					});
+					break;
+				case 'detail': //详情
+					location.href = ns.url("discount://shop/discount/detail", {
+						"discount_id": data.discount_id
+					});
+					break;
+			}
+		});
+		
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+
+	});
+
+	function add() {
+		location.href = ns.url("discount://shop/discount/add");
+	}
+</script>
+{/block}

@@ -1,0 +1,176 @@
+{extend name="base"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>不同开店套餐的商家功能权限不同，平台可以设置不同的套餐年费以及权限。</li>
+			<li>用户申请入驻或者续签可以选择不同套餐，同时根据入驻年限和套餐支付不同的金额。</li>
+			<li>前台用户只能申请加盟店铺，自营只能后台添加店铺可选。</li>
+		</ul>
+	</div>
+</div>
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<button class="layui-btn ns-bg-color" onclick="clickAdd()">添加开店套餐</button>
+
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<input type="text" id="search_text" name="search_text" placeholder="请输入套餐名称" autocomplete="off" class="layui-input">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+				<i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- 店铺分类列表 -->
+<table id="shopgroup_info" lay-filter="shopgroup_info"></table>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="edit">编辑</a>
+		<a class="layui-btn" lay-event="delete">删除</a>
+	</div>
+</script>
+
+<!-- 创建时间 -->
+<script id="create_time" type="text/html">
+	<div>{{ns.time_to_date(d.create_time)}}</div>
+</script>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form'], function() {
+		var table,
+			form = layui.form,
+			repeat_flag = false; //防重复标识
+		
+		/**
+		 * 加载表格
+		 */
+		table = new Table({
+			elem: '#shopgroup_info',
+			url: ns.url("admin/shopgroup/lists"),
+			cols: [
+				[{
+					unresize: 'false',
+					field: 'group_name',
+					title: '套餐名称',
+					width: '25%'
+				}, {
+					unresize: 'false',
+					field: 'fee',
+					title: '<span style="padding-right: 15px;">年费</span>',
+					width: '15%',
+					align: 'right',
+					templet: function(data) {
+						return '<span style="padding-right: 15px;">￥'+ data.fee +'</span>';
+					}
+				},{
+                    unresize: 'false',
+                    title: '是否自营',
+                    width: '20%',
+                    templet: function(data) {
+                        if(data.is_own == 1){
+							return '是';
+						}else{
+                            return '否';
+						}
+                    }
+                }, {
+					unresize: 'false',
+					field: 'create_time',
+					title: '创建时间',
+					width: '25%',
+					templet: '#create_time',
+				}, {
+					unresize: 'false',
+					title: '操作',
+					toolbar: '#action',
+					width: '15%'
+				}]
+			]
+		});
+
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'edit': //编辑
+					location.href = ns.url("admin/shopgroup/editGroup?group_id=" + data.group_id)
+					break;
+				case 'delete': //删除
+					deleteGroup(data.group_id);
+					break;
+			}
+		});
+		
+		/**
+		 * 删除
+		 */
+		function deleteGroup(group_ids) {
+			if (repeat_flag) return false;
+			repeat_flag = true;
+			
+			layer.confirm('确定要删除该套餐吗?', function() {
+				$.ajax({
+					url: ns.url("admin/shopgroup/deleteGroup"),
+					data: {
+						group_ids: group_ids
+					},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						layer.msg(res.message);
+						repeat_flag = false;
+
+						if (res.code == 0) {
+							table.reload();
+						}
+					}
+				});
+			}, function() {
+				layer.close();
+				repeat_flag = false;
+			});
+		}
+
+		/**
+		 * 批量操作
+		 */
+		table.bottomToolbar(function(obj) {
+			if (obj.data.length < 1) {
+				layer.msg('请选择要操作的数据');
+				return;
+			}
+			switch (obj.event) {
+				case "del":
+					var id_array = new Array();
+					for (i in obj.data) id_array.push(obj.data[i].group_id);
+					deleteGroup(id_array.toString());
+					break;
+			}
+		});
+
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+	});
+
+	function clickAdd() {
+		location.href = ns.url('admin/shopgroup/addGroup');
+	}
+</script>
+{/block}

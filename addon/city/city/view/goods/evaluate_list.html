@@ -1,0 +1,78 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" type="text/css" href="CITY_CSS/evaluate.css" />
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>会员购买商品之后可以针对购买的商品进行评价或者追评。</li>
+			<li>商品评价之后会在前台的商品详情中进行显示。</li>
+			<li>商家可以针对会员的商品评价进行回复。</li>
+		</ul>
+	</div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<select name="explain_type">
+				<option value="">请选择评分类型</option>
+				<option value="1">好评</option>
+				<option value="2">中评</option>
+				<option value="3">差评</option>
+			</select>
+		</div>
+	
+		<div class="layui-input-inline">
+			<select name="search_type">
+				<option value="">搜索方式</option>
+				<option value="sku_name">商品名称</option>
+				<option value="member_name">评价人名称</option>
+			</select>
+		</div>
+		
+		<div class="layui-inline">
+			<input type="text" name="search_text" placeholder="请输入商品名称/评价人名称" class="layui-input ns-len-mid">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+				<i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<table class="layui-table ns-evaluate-table" lay-skin="line" lay-size="lg">
+	<colgroup>
+		<!-- <col width="3%"> -->
+		<col width="55%">
+		<col width="30%">
+		<col width="15%">
+	</colgroup>
+	<thead>
+		<tr>
+			<th>评论内容</th>
+			<th>商品信息</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	</tbody>
+</table>
+
+<div id="laypage"></div>
+
+<!-- <div class="ns-del-eval">
+	<div class="layui-form">
+		<input type="checkbox" name="" lay-filter="selectAllBot" lay-skin="primary">
+	</div>
+	<button class="layui-btn layui-btn-primary" lay-event="del">批量删除</button>
+</div> -->
+{/block}
+{block name="script"}
+<script>
+	var CITYIMG = "CITY_IMG";
+</script>
+<script src="CITY_JS/evaluate.js"></script>
+{/block}

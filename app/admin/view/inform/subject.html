@@ -1,0 +1,262 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="ns-single-filter-box">
+    <button class="layui-btn ns-bg-color" onclick="add()">添加主题</button>
+</div>
+
+<!-- 列表 -->
+<table id="gift_list" lay-filter="gift_list"></table>
+
+<!-- 编辑删除操作 -->
+<script type="text/html" id="action">
+    <div class="ns-table-btn">
+        <a class="layui-btn" lay-event="editsubject">编辑</a>
+        <a class="layui-btn" lay-event="deletesubject">删除</a>
+    </div>
+</script>
+{/block}
+{block name="script"}
+<script>
+	var form, laytpl;
+    layui.use(['form','laytpl'], function() {
+		form = layui.form;
+		laytpl = layui.laytpl;
+		repeat_flag = false; //防重复标识
+        form.render();
+
+        table = new Table({
+            elem: '#gift_list',
+            url: ns.url("admin/inform/subject"),
+            cols: [
+                [{
+                    field: 'subject_content',
+                    title: '举报主题',
+                    unresize: 'false',
+                    width: '45%',
+                    templet: '#gift_info'
+                }, {
+                    field: 'subject_type_name',
+                    title: '举报类型',
+                    unresize: 'false',
+                    width: '40%'
+                }, {
+                    title: '操作',
+                    toolbar: '#action',
+                    unresize: 'false',
+                    width: '15%'
+                }]
+            ]
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'deletesubject': //删除举报类型
+                    deletesubject(data.subject_id);
+                    break;
+                case 'editsubject': //编辑举报类型
+                    editsubject(data);
+                    break;
+            }
+        });
+
+        /**
+         * 删除
+         */
+        function deletesubject(subject_id) {
+            if (repeat_flag) return false;
+            repeat_flag = true;
+
+            layer.confirm('确定要删除该举报主题吗?', function() {
+                $.ajax({
+                    url: ns.url("admin/inform/deletesubject"),
+                    data: {subject_id: subject_id},
+                    dataType: 'JSON',
+                    type: 'POST',
+                    success: function(res) {
+                        layer.msg(res.message);
+                        repeat_flag = false;
+
+                        if (res.code == 0) {
+                            table.reload();
+                        }
+                    }
+                });
+            }, function () {
+                layer.close();
+                repeat_flag = false;
+            });
+        }
+		
+        form.on('submit(editsubject)', function(data){
+			
+			var subject_type_name = $("select[name=subject_type_id] option:selected").text();
+			data.field.subject_type_name = subject_type_name;
+			
+            $.ajax({
+                url: ns.url("admin/inform/editsubject"),
+                data: data.field,
+                type: "POST",
+                dataType: "JSON",
+                success: function(res) {
+                    layer.msg(res.message);
+                    repeat_flag = false;
+                    if (res.code == 0) {
+                        table.reload();
+                        layer.closeAll('page');
+                    }
+                }
+            });
+        });
+		
+        form.on('submit(save)', function(data){
+            layer.closeAll();
+            var $type_name;
+            $type_name = $("select[name=subject_type_id] option:selected").text();
+            $.ajax({
+                url: ns.url("admin/inform/subjectadd"),
+                data: {"subject_content":data.field.subject_content,"type_name":$type_name,"subject_type_id":data.field.subject_type_id},
+                type: "POST",
+                dataType: "JSON",
+                success: function(res) {
+                    layer.msg(res.message);
+                    repeat_flag = false;
+                    if (res.code == 0) {
+                        table.reload();
+                        layer.closeAll('page');
+                    }
+                }
+            });
+        });
+    });
+
+    /**
+     * 编辑
+     * @param data
+     */
+    function editsubject(data) {
+		
+		laytpl($("#editsubject").html()).render(data, function(html) {
+		        layer.open({
+		        title: '添加举报主题',
+		        skin: 'layer-tips-class',
+		        type: 1,
+		        area: ['540px'],
+		        content: html
+		    });
+		    form.render();
+		});
+		
+        // $.ajax({
+        //     type: 'POST',
+        //     dataType: 'JSON',
+        //     url: ns.url("admin/inform/subjectinfo"),
+        //     data: {'subject_id': data.subject_id},
+        //     success: function (res) {
+                
+        //     }
+        // });
+    }
+
+    /**
+     * 添加
+     * @param data
+     */
+    function add() {
+        $.ajax({
+            type: 'POST',
+            dataType: 'JSON',
+            url: ns.url("admin/inform/subject"),
+            success: function (res) {
+                laytpl($("#addsubject").html()).render(res.data, function(html) {
+                    layer.open({
+                        title: '添加举报主题',
+                        skin: 'layer-tips-class',
+                        type: 1,
+                        area: ['540px'],
+                        content: html
+                    });
+                    form.render();
+                });
+            }
+        });
+    }
+
+//    function add() {
+//        location.href = ns.url("admin/inform/subjectadd");
+//    }
+    function cancel()
+    {
+        layer.closeAll()
+    }
+</script>
+<!-- 配送管理html -->
+<script type="text/html" id="editsubject">
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label mid"><span class="required">*</span>举报主题：</label>
+            <div class="layui-input-block ns-len-mid">
+				<input type="text" name="subject_content" lay-verify="required" class="layui-input ns-len-mid" value="{{ d.subject_content }}" autocomplete="off">
+            </div>
+        </div>
+		
+        <div class="layui-form-item">
+            <label class="layui-form-label mid"><span class="required">*</span>举报类型：</label>
+            <div class="layui-input-block ns-len-mid">
+                <select name="subject_type_id" lay-verify="required" >
+                    <option value="">请选择举报类型</option>
+                    {volist name="$list" id="typeid"}
+                    {{# if(d.subject_type_id == {$typeid['type_id']} ){ }}
+                    <option value="{$typeid.type_id}"  selected>{$typeid.type_name}</option>
+                    {{# }else{ }}
+                    <option value="{$typeid.type_id}">{$typeid.type_name}</option>
+                    {{# } }}
+                    <!--<option value="{$typeid.type_id}" >{$typeid.type_name}</option>-->
+                    {/volist}
+                </select>
+            </div>
+        </div>
+		
+        <input type="hidden" name="subject_id" value="{{d.subject_id}}" class="layui-input">
+		
+		<div class="ns-form-row mid">
+		    <button class="layui-btn ns-bg-color" lay-submit lay-filter="editsubject">确定</button>
+		    <button type="reset" onclick="cancel()" class="layui-btn layui-btn-primary">返回</button>
+		</div>
+    </div>
+</script>
+
+<script type="text/html" id="addsubject">
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label mid"><span class="required">*</span>举报主题：</label>
+            <div class="layui-input-block">
+                <input type="text" name="subject_content" lay-verify="required" class="layui-input ns-len-mid" autocomplete="off">
+            </div>
+        </div>
+		
+        <div class="layui-form-item">
+            <label class="layui-form-label mid"><span class="required">*</span>举报类型：</label>
+            <div class="layui-input-block ns-len-mid">
+                <select name="subject_type_id" lay-verify="required" >
+                    <option value="">请选择举报类型</option>
+                    {volist name="$list" id="typeid"}
+                    <option value="{$typeid.type_id}">{$typeid.type_name}</option>
+                    {/volist}
+                </select>
+            </div>
+        </div>
+		
+        <div class="ns-form-row mid">
+            <button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+            <button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+        </div>
+        <input type="hidden" name="type" value="1">
+    </div>
+</script>
+{/block}

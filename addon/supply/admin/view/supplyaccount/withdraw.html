@@ -1,0 +1,755 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+    .ns-card-brief:nth-child(1) {
+        margin-top: 0;
+    }
+
+    .layui-card-body {
+        display: flex;
+        flex-wrap: wrap;
+        padding-bottom: 0 !important;
+        padding-left: 50px !important;
+        padding-right: 50px !important;
+    }
+
+    .layui-card-body .content {
+        width: 33.3%;
+        margin-bottom: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .layui-card-body .money {
+        font-size: 20px;
+        color: #000;
+        font-weight: bold;
+        margin-top: 10px;
+        max-width: 250px;
+    }
+
+    .layui-card-body .subhead {
+        font-size: 12px;
+        margin-left: 3px;
+        cursor: pointer;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <div>
+            <span class="ns-card-title">供应商提现</span>
+        </div>
+    </div>
+    <div class="layui-card-body">
+        <div class="content">
+            <p class="title">已提现金额（元）</p>
+            <p class="money">{$account_data['account_withdraw'] ?? 0.00}</p>
+        </div>
+        <div class="content">
+            <p class="title">提现中金额（元）</p>
+            <p class="money">{$account_data['account_withdraw_apply'] ?? 0.00}</p>
+        </div>
+    </div>
+</div>
+
+<div class="ns-single-filter-box">
+    <div class="layui-form">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" placeholder="开始时间" name="start_date" id="start_time"
+                           autocomplete="off" readonly>
+                </div>
+                <div class="layui-input-inline end-item">
+                    <input type="text" class="layui-input" placeholder="结束时间" name="end_date" id="end_time"
+                           autocomplete="off" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="layui-input-inline">
+            <input type="text" name="search_text" placeholder="请输入供应商名称" autocomplete="off" class="layui-input">
+            <button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+                <i class="layui-icon">&#xe615;</i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<input id="period_id" type="hidden" value="{$period_id}"/>
+
+<div class="layui-tab ns-table-tab" lay-filter="status">
+    <ul class="layui-tab-title">
+        <li class="layui-this" lay-id="">全部</li>
+        <li lay-id="0">待审核</li>
+        <li lay-id="1">待转账</li>
+        <li lay-id="2">已转账</li>
+    </ul>
+
+    <div class="layui-tab-content">
+        <!-- 列表 -->
+        <table id="supply_withdraw_list" lay-filter="supply_withdraw_list"></table>
+    </div>
+</div>
+
+<!--商家信息-->
+<script type="text/html" id="supply_info">
+    <div class="layui-elip" title="{{d.site_name}}">{{d.site_name}}</div>
+    <!--    <div class="layui-elip">联系人：{{d.name}}</div>-->
+    <!--    <div class="layui-elip">联系电话：{{d.mobile}}</div>-->
+</script>
+
+<!--账户信息-->
+<script type="text/html" id="account">
+    {{# if(d.bank_type == 1){ }}
+    <div class="layui-elip">银行卡</div>
+    {{# }else{ }}
+    <div class="layui-elip">支付宝</div>
+    {{# } }}
+
+</script>
+
+<!--时间-->
+<script type="text/html" id="times">
+    <div class="layui-elip" title="申请时间：{{ns.time_to_date(d.apply_time)}}">
+        申请时间：{{ns.time_to_date(d.apply_time)}}
+    </div>
+    <div class="layui-elip" title="转账时间：{{ns.time_to_date(d.payment_time)}}">
+        转账时间：{{ns.time_to_date(d.payment_time)}}
+    </div>
+</script>
+
+<!--状态-->
+<script type="text/html" id="status">
+    {{# if(d.status == 0){ }}
+    <div class="layui-elip" style="color: red">待审核</div>
+    {{# }else if(d.status == 1){ }}
+    <div class="layui-elip" style="color: blue">待转账</div>
+    {{# }else if(d.status == 2){ }}
+    <div class="layui-elip" style="color: green">已转账</div>
+    {{# } }}
+</script>
+
+<!--操作-->
+<script type="text/html" id="operation">
+    <div class="ns-table-btn">
+        {{# if(d.status == 0){ }}
+        <a class="layui-btn" lay-event="apply_pass">通过</a>
+        {{# }else if(d.status == 1){ }}
+        <a class="layui-btn" lay-event="apply_pay">转账</a>
+        {{# }else if(d.status == 2){ }}
+        {{# }else if(d.status == -1){ }}
+        {{# } }}
+        <a class="layui-btn" lay-event="memo">备注</a>
+        <a class="layui-btn" lay-event="detail">查看</a>
+    </div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+    layui.use(['form', 'laytpl', 'laydate', 'element', 'upload'], function () {
+        var table,
+            form = layui.form,
+            laydate = layui.laydate,
+            element = layui.element,
+            upload = layui.upload,
+            currentDate = new Date(),
+            repeat_flag = false,
+            laytpl = layui.laytpl;
+        minDate = "";
+        form.render();
+
+        currentDate.setDate(currentDate.getDate() - 7);
+
+        //申请开始时间
+        laydate.render({
+            elem: '#start_time',
+            type: 'datetime'
+        });
+
+        //申请结束时间
+        laydate.render({
+            elem: '#end_time',
+            type: 'datetime'
+        });
+
+        /**
+         * 重新渲染结束时间
+         */
+        function reRender() {
+            $("#end_time").remove();
+            $(".end-time").html('<input type="text" class="layui-input" placeholder="申请结束时间" name="end_date" id="end_time" >');
+            laydate.render({
+                elem: '#end_time',
+                type: 'datetime',
+                min: minDate
+            });
+        }
+
+        //监听Tab切换
+        element.on('tab(status)', function (data) {
+            var status = $(this).attr("lay-id");
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: {
+                    'status': status
+                }
+            });
+        });
+
+        /**
+         * 表格加载
+         */
+        table = new Table({
+            elem: '#supply_withdraw_list',
+            url: ns.url("supply://admin/supplyaccount/withdraw"),
+            where: {
+                "period_id": $("#period_id").val()
+            },
+            cols: [
+                [{
+                    width: "3%",
+                    type: 'checkbox',
+                    unresize: 'false'
+                }, {
+                    field: 'withdraw_no',
+                    title: '提现流水编号',
+                    width: '13%',
+                    unresize: 'false'
+                }, {
+                    title: '供应商名称',
+                    width: '11%',
+                    unresize: 'false',
+                    templet: '#supply_info',
+                }, {
+                    field: 'name',
+                    title: '姓名',
+                    unresize: 'false',
+                    width: '10%',
+                    templet: function (data) {
+                        return '<span class="ns-line-hiding" title="' + data.name + '">' + data.name + '</span>'
+                    }
+                }, {
+                    field: 'mobile',
+                    title: '电话',
+                    unresize: 'false',
+                    width: '9%',
+
+                }, {
+                    title: '账户类型',
+                    unresize: 'false',
+                    width: '8%',
+                    templet: function (res) {
+                        return res.bank_type == 1 ? "银行" : "支付宝";
+                    }
+                }, {
+                    field: 'money',
+                    title: '提现金额',
+                    width: '8%',
+                    unresize: 'false',
+                    align: 'right',
+                    templet: function (data) {
+                        return '￥' + data.money;
+                    }
+                }, {
+                    field: 'status',
+                    title: '状态',
+                    width: '6%',
+                    unresize: 'false',
+                    templet: '#status'
+                }, {
+                    title: '时间',
+                    width: '18%',
+                    unresize: 'false',
+                    templet: '#times'
+                }, {
+                    title: '操作',
+                    width: '14%',
+                    toolbar: '#operation',
+                    unresize: 'false'
+                }]
+            ],
+            bottomToolbar: "#batchOperation"
+        });
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function (data) {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+            // return false;
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function (obj) {
+            var data = obj.data,
+                event = obj.event;
+
+            switch (event) {
+                case 'detail': //查看
+                    withdrawDetail(data);
+                    break;
+                case 'apply_pass': //通过
+                    applyPass(data.id);
+                    break;
+                case 'apply_reject': //拒绝
+                    applyReject(data.id);
+                    break;
+                case 'apply_pay': //转账
+                    applyPay(data);
+                    break;
+                case 'memo': //备注
+                    memo(data);
+                    break;
+                case 'transfer': //备注
+                    transfer(data.id);
+                    break;
+            }
+        });
+
+        /**
+         * 批量操作
+         */
+        table.bottomToolbar(function (obj) {
+
+            if (obj.data.length < 1) {
+                layer.msg('请选择要操作的数据');
+                return;
+            }
+
+            switch (obj.event) {
+                case "apply_pass":
+                    var id_array = new Array();
+                    for (i in obj.data) id_array.push(obj.data[i].id);
+                    applyPass(id_array.toString());
+                    break;
+                case "apply_pay":
+                    var id_array = new Array();
+                    for (i in obj.data) id_array.push(obj.data[i].id);
+                    applyPay(id_array.toString());
+                    break;
+            }
+        });
+
+        /**
+         * 通过
+         */
+        function applyPass(ids) {
+            if (repeat_flag) return false;
+            repeat_flag = true;
+
+            layer.confirm('确定要通过申请吗?', function () {
+                $.ajax({
+                    url: ns.url("supply://admin/supplyaccount/applypass"),
+                    data: {'apply_ids': ids},
+                    dataType: 'JSON',
+                    type: 'POST',
+                    success: function (res) {
+                        layer.msg(res.message);
+                        repeat_flag = false;
+
+                        if (res.code == 0) {
+                            table.reload();
+                        }
+                    }
+                });
+            }, function () {
+                layer.close();
+                repeat_flag = false;
+            });
+        }
+
+        /**
+         * 拒绝
+         */
+        function applyReject(id) {
+            if (repeat_flag) return false;
+            repeat_flag = true;
+            layer.confirm('确定要拒绝申请吗?', function () {
+                $.ajax({
+                    url: ns.url("supply://admin/supplyaccount/applyreject"),
+                    data: {'apply_id': id},
+                    dataType: 'JSON',
+                    type: 'POST',
+                    success: function (res) {
+                        layer.msg(res.message);
+                        repeat_flag = false;
+                        if (res.code == 0) {
+                            table.reload();
+                        }
+                    }
+                });
+            }, function () {
+                layer.close();
+                repeat_flag = false;
+            });
+        }
+
+        /**
+         * 转账
+         */
+        function applyPay(data) {
+            laytpl($("#applyPay").html()).render(data, function (html) {
+                layer_pass = layer.open({
+                    title: '商家转账',
+                    skin: 'layer-tips-class',
+                    type: 1,
+                    area: ['800px'],
+                    content: html,
+                });
+            });
+            //转账凭证
+            var uploadInst = upload.render({
+                elem: '#paying_money_certificate',
+                url: ns.url("admin/upload/upload"),
+                done: function (res) {
+                    if (res.code >= 0) {
+                        $("input[name='paying_money_certificate']").val(res.data.pic_path);
+                        $("#paying_money_certificate").html("<img src=" + ns.img(res.data.pic_path) + " >");
+                    }
+                    return layer.msg(res.message);
+                }
+            });
+        }
+
+        //提交
+        form.on('submit(repass)', function (data) {
+            if (repeat_flag) return false;
+            repeat_flag = true;
+
+            layer.confirm('确定要转账吗?', function () {
+                $.ajax({
+                    url: ns.url("supply://admin/supplyaccount/applypay"),
+                    data: data.field,
+                    dataType: 'JSON',
+                    type: 'POST',
+                    success: function (res) {
+                        layer.msg(res.message);
+                        repeat_flag = false;
+
+                        if (res.code == 0) {
+                            layer.closeAll();
+                            table.reload();
+                        }
+                    }
+                });
+            }, function () {
+                layer.closeAll();
+                repeat_flag = false;
+            });
+        });
+
+        /**
+         * 备注
+         */
+        function memo(data) {
+            layer.prompt({
+                formType: 2,
+                value: '',
+                title: '备注',
+                area: ['300px', '100px'],//自定义文本域宽高
+                yes: function (index, layero) {
+                    // 获取文本框输入的值
+                    var value = layero.find(".layui-layer-input").val();
+                    if (value) {
+                        $.ajax({
+                            type: "POST",
+                            url: ns.url("supply://admin/supplyaccount/withdrawMemo"),
+                            data: {
+                                "memo": value,
+                                "apply_id": data.id
+                            },
+                            dataType: 'JSON',
+                            success: function (res) {
+                                layer.msg(res.message);
+                                repeat_flag = false;
+
+                                if (res.code == 0) {
+                                    table.reload();
+                                }
+                            }
+                        });
+                        layer.close(index);
+                    } else {
+                        layer.msg('请输入备注内容!', {icon: 5, anim: 6});
+                        return;
+                    }
+                }
+            });
+        }
+
+        //详情
+        function withdrawDetail(data) {
+            var detailHtml = $("#withdrawDetail").html();
+            laytpl(detailHtml).render(data, function (html) {
+                layer.open({
+                    type: 1,
+                    title: '转账详情',
+                    area: ['700px'],
+                    content: html
+
+                });
+            })
+        }
+    });
+
+    //在线转账
+    var transfer_repeat_flag = false;
+
+    function transfer(id) {
+        if (transfer_repeat_flag) return false;
+        transfer_repeat_flag = true;
+
+        layer.confirm('确定要在线转账吗?', function () {
+            $.ajax({
+                type: "POST",
+                url: ns.url("shopwithdraw://admin/withdraw/transfer"),
+                data: {id: id},
+                dataType: 'JSON',
+                success: function (res) {
+                    layer.msg(res.message);
+                    transfer_repeat_flag = false;
+
+                    if (res.code == 0) {
+                        table.reload();
+                    }
+                }
+            });
+        }, function () {
+            layer.close();
+            transfer_repeat_flag = false;
+        });
+    }
+
+    function closeMemo() {
+        layer.close(layer_memo);
+    }
+
+    function closePass() {
+        layer.closeAll('page');
+    }
+</script>
+
+<!-- 重置密码弹框html -->
+<script type="text/html" id="applyPay">
+    <div class="layui-form" lay-filter="form">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">供应商名称：</label>
+            <div class="layui-input-block">
+                <p class="ns-input-text ">{{ d.site_name }}</p>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">联系人：</label>
+            <div class="layui-input-block">
+                <p class="ns-input-text ">{{ d.name }}</p>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">联系电话：</label>
+            <div class="layui-input-block">
+                <p class="ns-input-text ">{{ d.mobile }}</p>
+            </div>
+        </div>
+
+        {{# if(d.bank_type == 1){ }}
+        <div class="layui-form-item">
+            <label class="layui-form-label">账户类型：</label>
+            <div class="layui-input-block">
+                <p class="ns-input-text ">银行卡</p>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">账户名称：</label>
+            <div class="layui-input-block">
+                <p class="ns-input-text ">{{d.settlement_bank_name}}</p>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">提现账号：</label>
+            <div class="layui-input-block">
+                <p class="ns-input-text ">{{d.settlement_bank_account_number}}</p>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">开户名：</label>
+            <div class="layui-input-block">
+                <p class="ns-input-text ">{{d.settlement_bank_account_name}}</p>
+            </div>
+        </div>
+        {{# }else{ }}
+        <div class="layui-form-item">
+            <label class="layui-form-label">账户类型：</label>
+            <div class="layui-input-block">
+                <p class="ns-input-text ">支付宝</p>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">支付宝用户名：</label>
+            <div class="layui-input-block">
+                <p class="ns-input-text ">{{d.settlement_bank_account_name}}</p>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">支付宝账号：</label>
+            <div class="layui-input-block">
+                <p class="ns-input-text ">{{d.settlement_bank_account_number}}</p>
+            </div>
+        </div>
+        {{# } }}
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">提现金额：</label>
+            <div class="layui-input-block">
+                <p class="ns-input-text ">{{d.money}}</p>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label img-upload-lable">支付凭证：</label>
+            <div class="layui-input-block img-upload">
+                <div class="upload-img-block">
+                    <input type="hidden" name="paying_money_certificate">
+                    <div class="upload-img-box" id="paying_money_certificate">
+                        <div class="ns-upload-default">
+                            <img src="__STATIC__/img/upload_img.png"/>
+                            <p>点击上传</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">付款凭证说明：</label>
+            <div class="layui-input-block ns-len-long">
+                <textarea name="paying_money_certificate_explain" class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+        <input type="hidden" name="id" value="{{ d.id }}">
+        <div class="ns-form-row">
+            <button class="layui-btn ns-bg-color" lay-submit lay-filter="repass">确定</button>
+            <button class="layui-btn layui-btn-primary" onclick="closePass()">返回</button>
+        </div>
+    </div>
+</script>
+
+<!-- 备注弹框 -->
+<script type="text/html" id="memo_content">
+    <div class="layui-form" lay-filter="form">
+        <textarea name="memo" id="memo" placeholder="请输入内容" class="layui-textarea"></textarea>
+        <input class="reset-pass-id" type="hidden" name="apply_id" value="{{d.id}}"/>
+    </div>
+</script>
+<script type="text/html" id="batchOperation">
+    <button class="layui-btn layui-btn-primary" lay-event="apply_pass">批量通过</button>
+    <!--<button class="layui-btn layui-btn-primary" lay-event="apply_pay">批量转账</button>-->
+</script>
+
+<script type="text/html" id="withdrawDetail">
+    <table class="layui-table">
+        <colgroup>
+            <col width="150">
+            <col width="200">
+        </colgroup>
+        <tbody>
+        <tr>
+            <td>供应商名称</td>
+            <td>{{d.site_name}}</td>
+        </tr>
+        <tr>
+            <td>联系人</td>
+            <td>{{d.name}}</td>
+        </tr>
+        <tr>
+            <td>联系电话</td>
+            <td>{{d.mobile}}</td>
+        </tr>
+        <tr>
+            <td>账户类型</td>
+            {{# if(d.bank_type == 1){ }}
+            <td>银行卡</td>
+            {{# }else{ }}
+            <td>支付宝</td>
+            {{# } }}
+        </tr>
+        {{# if(d.bank_type == 1){ }}
+        <tr>
+            <td>账户名称</td>
+            <td>{{d.settlement_bank_name}}</td>
+        </tr>
+        <tr>
+            <td>提现账号</td>
+            <td>{{d.settlement_bank_account_number}}</td>
+        </tr>
+        <tr>
+            <td>开户名</td>
+            <td>{{d.settlement_bank_account_name}}</td>
+        </tr>
+        {{# }else{ }}
+        <tr>
+            <td>支付宝用户名</td>
+            <td>{{d.settlement_bank_account_name}}</td>
+        </tr>
+        <tr>
+            <td>支付宝账号</td>
+            <td>{{d.settlement_bank_account_number}}</td>
+        </tr>
+        {{# } }}
+        <tr>
+            <td>提现金额</td>
+            <td>{{d.money}}元</td>
+        </tr>
+        <tr>
+            <td>状态</td>
+            {{# if(d.status == 0){ }}
+            <td>待审核</td>
+            {{# }else if(d.status == 1){ }}
+            <td>待转账</td>
+            {{# }else if(d.status == 2){ }}
+            <td>已转账</td>
+            {{# }else if(d.status == -1){ }}
+            <td>已拒绝</td>
+            {{# } }}
+        </tr>
+        <tr>
+            <td>申请时间</td>
+            <td>{{ ns.time_to_date(d.apply_time) }}</td>
+        </tr>
+        {{# if(d.status == 2){ }}
+        <tr>
+            <td>转账时间</td>
+            <td>{{ ns.time_to_date(d.payment_time) }}</td>
+        </tr>
+        <tr>
+            <td>转账凭证</td>
+            <td><img src="{{ ns.img(d.paying_money_certificate) }}" alt=""></td>
+        </tr>
+        <tr>
+            <td>转账凭证说明</td>
+            <td>{{ d.paying_money_certificate_explain }}</td>
+        </tr>
+        {{# } }}
+        <tr>
+            <td>备注</td>
+            <td id="detail_memo">{{d.memo}}</td>
+        </tr>
+        </tbody>
+    </table>
+</script>
+{/block}

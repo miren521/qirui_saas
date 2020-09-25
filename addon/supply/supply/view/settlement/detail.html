@@ -1,0 +1,161 @@
+{extend name="base" /}
+{block name="resources"}
+<style>
+	#detail_list {
+		margin-top: 15px;
+	}
+    .ns-card-brief:nth-child(1){
+        margin-top: 0;
+    }
+    .layui-card-body{
+        display: flex;
+        flex-wrap: wrap;
+        padding-bottom: 0 !important;
+        padding-left: 50px !important;
+        padding-right: 50px !important;
+    }
+    .layui-card-body .content{
+        width: 25%;
+        margin-bottom: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .layui-card-body .money{
+        font-size: 20px;
+        color: #000;
+        font-weight: bold;
+        margin-top: 10px;
+        max-width: 250px;
+    }
+    .layui-card-body .subhead{
+        font-size: 12px;
+        margin-left: 3px;
+        cursor: pointer;
+    }
+</style>
+{/block}
+{block name='main'}
+
+<div class="layui-collapse ns-tips">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">操作提示</h2>
+        <ul class="layui-colla-content layui-show">
+            <li>供应商收入金额 = 供应商结算总金额 - 供应商退款金额 - 佣金金额</li>
+            <li>平台抽成金额 = 平台结算总抽成 - 平台退款抽成</li>
+        </ul>
+    </div>
+</div>
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <div>
+            <span class="ns-card-title">供应商结算</span>
+            <span>账期时间：{:date('Y-m-d H:i:s', $info.period_start_time)} 至 {:date('Y-m-d H:i:s', $info.period_end_time)}</span>
+        </div>
+    </div>
+    <div class="layui-card-body">
+        <div class="content">
+            <p class="title">供应商收入金额（元）</p>
+            <p class="money">{$supply_money}</p>
+        </div>
+        <div class="content">
+            <p class="title">供应商结算总金额（元）</p>
+            <p class="money">{$info.supply_money}</p>
+        </div>
+        <div class="content">
+            <p class="title">供应商退款金额（元）</p>
+            <p class="money">{$info.refund_supply_money}</p>
+        </div>
+        <div class="content">
+            <p class="title">佣金金额（元）</p>
+            <p class="money">{$info.commission}</p>
+        </div>
+        <div class="content">
+            <p class="title">平台抽成金额（元）</p>
+            <p class="money">{$money}</p>
+        </div>
+        <div class="content">
+            <p class="title">平台结算总抽成（元）</p>
+            <p class="money">{$info.platform_money}</p>
+        </div>
+        <div class="content">
+            <p class="title">平台退款抽成（元）</p>
+            <p class="money">{$info.refund_platform_money}</p>
+        </div>
+    </div>
+</div>
+
+<table id="detail_list" lay-filter="detail_list"></table>
+{/block}
+{block name="script"}
+<script>
+    layui.use(['laydate','form'], function () {
+        var form = layui.form;
+		form.render();
+
+        var table = new Table({
+            elem: '#detail_list',
+            url: ns.url("supply://supply/settlement/detail"),
+            where:{id:"{$info.id}"},
+            cols: [
+                [{
+                    field: 'order_no',
+                    title: '订单编号',
+                    unresize: 'false',
+					width: '20%'
+                }, {
+                    field:'order_money',
+                    title: '订单销售额（元）',
+                    unresize: 'false',
+					align: 'right',
+					templet: function (res){
+					    return '￥'+res.order_money;
+					},
+					width: '15%'
+                }, {
+                    field:'refund_money',
+                    title: '订单退款（元）',
+                    unresize: 'false',
+					align: 'right',
+					templet: function (res){
+					    return '￥'+res.refund_money;
+					},
+					width: '15%'
+                }, {
+                    field:'supply_money',
+                    title: '供应商收入（元）',
+                    unresize: 'false',
+					align: 'right',
+					templet: function (res){
+					    return '￥'+res.supply_money;
+					},
+					width: '15%'
+                }, {
+                    field:'platform_money',
+                    title: '平台抽成（元）',
+                    unresize: 'false',
+					align: 'right',
+					templet: function (res){
+					    return '￥'+res.platform_money;
+					},
+					width: '15%'
+                }, {
+                    field: 'finish_time',
+                    title: '订单完成时间',
+                    unresize: 'false',
+                    templet: function (res){
+                        if(res.finish_time == 0){
+                            return '--';
+                        }else{return ns.time_to_date(res.finish_time)
+
+                        }
+                    },
+					width: '20%'
+                }]
+            ]
+        });
+        
+    });
+</script>
+{/block}

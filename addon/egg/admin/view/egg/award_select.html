@@ -1,0 +1,280 @@
+<script type="text/html" id="add_award">
+    <div class="layui-form ns-form add-award">
+        {{#  if($.isEmptyObject(d)){ }}
+
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="required">*</span>名称：</label>
+            <div class="layui-input-block">
+                <input type="text" maxlength="6"  placeholder="最多可输入6个字" value="" name="award_name" lay-verify="required" autocomplete="off" class="layui-input ns-len-mid">
+            </div>
+        </div>
+
+        <div class="layui-form-item award-type">
+            <label class="layui-form-label">奖品：</label>
+            <div class="layui-input-block">
+                {if addon_is_exit('platformcoupon')}
+                <div class="layui-input-block coupon">
+                    <input type="radio" name="award_type" value="3" title="优惠券" checked>
+                    <div class="ns-len-mid coupon-box">
+                        <span class="coupon-title">请选择</span>
+                        <div class="coupon-option layui-hide">
+                            <div class="coupon-search">
+                                <i class="layui-icon">&#xe615;</i>
+                                <input type="text" class="layui-input" placeholder="请输入搜索内容">
+                            </div>
+                            <div class="coupon-item-box">
+                                <div class="coupon-item">内容</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {/if}
+                <input type="hidden" name="relate_name">
+                <input type="hidden" name="relate_id">
+
+                <div class="layui-input-block">
+                    <input type="radio" name="award_type" value="1" title="积分"{if !addon_is_exit('platformcoupon')} checked{/if}>
+                    <input type="text" name="point" onchange="detectionType(this)" value="1" class="layui-input ns-len-mid">
+                    <div class="layui-word-aux">积分</div>
+                </div>
+                <div class="layui-input-block">
+                    <input type="radio" name="award_type" value="2" title="红包">
+                    <input type="text" name="balance" onchange="detectionInteger(this)" value="1" class="layui-input ns-len-mid">
+                    <div class="layui-word-aux">元</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="required">*</span>数量：</label>
+            <div class="layui-input-block">
+                <input type="text" name="award_num" value="1" onchange="detectionNumType(this,'positiveInteger')" lay-verify="required" autocomplete="off" class="layui-input ns-len-mid">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="required">*</span>奖项权重：</label>
+            <div class="layui-input-inline">
+                <input type="text" name="award_winning_rate" value="1" onchange="detectionNumType(this,'positiveInteger')" lay-verify="required" autocomplete="off" class="layui-input ns-len-mid">
+            </div>
+        </div>
+        {{# }else{ }}
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="required">*</span>名称：</label>
+            <div class="layui-input-block">
+                <input type="text" maxlength="6" placeholder="最多可输入6个字" value="{{d.award_name}}" name="award_name" lay-verify="required" autocomplete="off" class="layui-input ns-len-mid">
+            </div>
+        </div>
+
+        <div class="layui-form-item award-type">
+            <label class="layui-form-label">奖品：</label>
+            <div class="layui-input-block">
+
+                <!-- 红包 -->
+                {{# if(d.award_type == 3){ }}
+                <div class="layui-input-block coupon">
+                    <input type="radio" name="award_type" value="3" title="优惠券" checked>
+                    <div class="ns-len-mid coupon-box">
+                        <span class="coupon-title">{{d.relate_name}}</span>
+                        <div class="coupon-option layui-hide">
+                            <div class="coupon-search">
+                                <i class="layui-icon">&#xe615;</i>
+                                <input type="text" class="layui-input" placeholder="请输入搜索内容">
+                            </div>
+                            <div class="coupon-item-box"></div>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="relate_name" value="{{d.relate_name}}">
+                <input type="hidden" name="relate_id" value="{{d.relate_id}}">
+                {{# }else{ }}
+                <div class="layui-input-block coupon">
+                    <input type="radio" name="award_type" value="3" title="优惠券" checked>
+                    <div class="ns-len-mid coupon-box">
+                        <span class="coupon-title">请选择</span>
+                        <div class="coupon-option layui-hide">
+                            <div class="coupon-search">
+                                <i class="layui-icon">&#xe615;</i>
+                                <input type="text" class="layui-input" placeholder="请输入搜索内容">
+                            </div>
+                            <div class="coupon-item-box"></div>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="relate_name">
+                <input type="hidden" name="relate_id">
+                {{# } }}
+
+                <!-- 积分 -->
+                {{# if(d.award_type == 1){ }}
+                <div class="layui-input-block">
+                    <input type="radio" name="award_type" value="1" title="积分" checked>
+                    <input type="text" name="point" value="{{d.point}}" onchange="detectionType(this)" class="layui-input ns-len-mid">
+                    <div class="layui-word-aux">积分</div>
+                </div>
+                {{# }else{ }}
+                <div class="layui-input-block">
+                    <input type="radio" name="award_type" value="1" title="积分">
+                    <input type="text" name="point" value="1" onchange="detectionType(this)" class="layui-input ns-len-mid">
+                    <div class="layui-word-aux">积分</div>
+                </div>
+                {{# } }}
+
+                <!-- 红包 -->
+                {{# if(d.award_type == 2){ }}
+                <div class="layui-input-block">
+                    <input type="radio" name="award_type" value="2" title="红包" checked>
+                    <input type="text" name="balance" value="{{d.balance}}" onchange="detectionInteger(this)" class="layui-input ns-len-mid">
+                    <div class="layui-word-aux">元</div>
+                </div>
+                {{# }else{ }}
+                <div class="layui-input-block">
+                    <input type="radio" name="award_type" value="2" title="红包">
+                    <input type="text" name="balance" value="1" class="layui-input ns-len-mid" onchange="detectionInteger(this)">
+                    <div class="layui-word-aux">元</div>
+                </div>
+                {{# } }}
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="required">*</span>数量：</label>
+            <div class="layui-input-block">
+                <input type="text" name="award_num" value="{{d.award_num}}" onchange="detectionNumType(this,'positiveInteger')" lay-verify="required" autocomplete="off" class="layui-input ns-len-mid">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="required">*</span>奖项权重：</label>
+            <div class="layui-input-inline">
+                <input type="text" name="award_winning_rate" value="{{d.award_winning_rate}}" onchange="detectionNumType(this,'positiveInteger')" lay-verify="required" autocomplete="off" class="layui-input ns-len-mid">
+            </div>
+        </div>
+
+        <input type="hidden" name="ident" value="{{d.ident}}">
+        {{# } }}
+
+
+        <div class="ns-form-row">
+            <button class="layui-btn ns-bg-color" lay-submit lay-filter="addAwardSave">确定</button>
+            <button class="layui-btn layui-btn-primary" onclick="cancelAward()">取消</button>
+        </div>
+    </div>
+</script>
+
+<script>
+
+    /*
+    * 奖品弹框
+    * */
+    function awardPop(data = {}){
+        laytpl($('#add_award').html()).render(data,function(html){
+            layer.open({
+                type: 1,
+                title: '添加奖品',
+                area:['650px','auto'],
+                content: html,
+                success: function(layero, index){
+                    form.render();
+                    form.on('submit(addAwardSave)', function(data) {
+                        if (data.field.award_type == 3 && !data.field.relate_name){
+                            layer.msg("请选择优惠券");
+                            return false;
+                        }
+
+
+                        if (tableData.length > 0 && data.field.ident){
+                            for (var i = 0; i < tableData.length; i++){
+                                if(tableData[i].ident == data.field.ident){
+                                    tableData[i] = data.field;
+                                    break;
+                                }
+                            }
+                        }else{
+                            data.field.ident = ++awardId;
+                            tableData.push(data.field);
+                        }
+                        renderTable(tableData);
+                        layer.closeAll();
+                    })
+                }
+            });
+        });
+
+        getCouponData();
+        //选择框效果
+        $(".award-type .coupon-title").click(function (e) {
+            e.stopPropagation(); //阻止事件冒泡
+            if (!$(this).hasClass("focus")){
+
+                $(this).addClass("focus ns-border-color");
+                $(this).parents(".coupon-box").find(".coupon-option").removeClass("layui-hide");
+
+
+            } else{
+                $(this).removeClass("focus ns-border-color");
+                $(this).parents(".coupon-box").find(".coupon-option").addClass("layui-hide");
+            }
+        })
+    }
+
+
+    /*
+    * 获取优惠券数据
+    * */
+    var getCouponIdent = false;
+    function getCouponData(data = ''){
+        if (getCouponIdent) return false;
+        getCouponIdent = true;
+
+        $.ajax({
+            url: ns.url("platformcoupon://admin/platformcoupon/lists"),
+            dataType: 'json',
+            data: data,
+            type: 'post',
+            success : function(res) {
+                getCouponIdent = false;
+                $(".coupon-search input").val();
+                var data = res.data.list,
+                    html = '';
+                if (res.code >= 0){
+
+                    for(var i = 0; i < data.length; i++){
+                        html += '<div class="coupon-item layui-elip" data-coupon_id="'+data[i].platformcoupon_type_id+'">'+ data[i].platformcoupon_name +'</div>';
+                    }
+                    $(".add-award .coupon .coupon-item-box").html(html);
+
+                }else
+                    layer.msg(res.message);
+            }
+        });
+    }
+
+    //点击搜素对应优惠券
+    $("body").on("click",".coupon-search i",function (e) {
+        e.stopPropagation(); //阻止事件冒泡
+        var data = {'coupon_name': $(".coupon-search input").val()};
+        getCouponData(data);
+    });
+
+    //选择具体优惠券
+    $("body").on("click",".add-award .coupon .coupon-item",function (e) {
+        e.stopPropagation(); //阻止事件冒泡
+        $("input[name='relate_name']").val($(this).text());
+        $("input[name='relate_id']").val($(this).attr('data-coupon_id'));
+        $(this).parents(".coupon-box").find(".coupon-title").text($(this).text());
+        $(".coupon-option").addClass("layui-hide");
+        $(".award-type .coupon-title").removeClass("focus ns-border-color");
+    });
+
+    $("body").click(function () {
+        $(".coupon-option").addClass("layui-hide");
+        $(".award-type .coupon-title").removeClass("focus ns-border-color");
+    });
+
+    $("body").on("click",".add-award .coupon-search", function (e) {
+        e.stopPropagation(); //阻止事件冒泡
+    });
+
+    function cancelAward (){
+        layer.closeAll();
+    }
+</script>

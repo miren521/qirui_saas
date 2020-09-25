@@ -1,0 +1,147 @@
+{extend name="addon/supply/supply/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+    <div class="layui-form">
+        <div class="layui-input-inline">
+            <input type="text" name="start_time" id="start_time" placeholder="开始时间" class="layui-input" autocomplete="off" readonly>
+            <i class="ns-calendar"></i>
+        </div>
+        <div class="layui-input-inline end-time">
+            <input type="text" name="end_time" id="end_time" placeholder="结束时间" class="layui-input" autocomplete="off" readonly>
+            <i class="ns-calendar"></i>
+        </div>
+
+        <div class="layui-input-inline">
+            <input type="text" name="search_name" placeholder="请输入求购标题" class="layui-input" autocomplete="off">
+            <button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+                <i class="layui-icon">&#xe615;</i>
+            </button>
+        </div>
+    </div>
+</div>
+<!-- 列表 -->
+<table id="purchase_list" lay-filter="purchase_list"></table>
+
+
+
+<!-- 商品信息 -->
+<script type="text/html" id="goods_info">
+    <div class="ns-table-title">
+        <div class="ns-title-pic" id="goods_img_{{d.goods_id}}">
+            <img layer-src src="{{ns.img(d.goods_image.split(',')[0])}}"/>
+        </div>
+        <div class="ns-title-content">
+            <a href="javascript:;" class="ns-multi-line-hiding ns-text-color"
+               title="{{d.goods_name}}" >{{d.goods_name}}</a>
+        </div>
+    </div>
+</script>
+<!-- 操作 -->
+<script type="text/html" id="operation">
+    <div class="ns-table-btn">
+        <a class="layui-btn" lay-event="basic">查看</a>
+    </div>
+</script>
+{/block}
+{block name="script"}
+<script>
+    layui.use(['form', 'laydate'], function() {
+        var table,
+            form = layui.form,
+            laydate = layui.laydate;
+        form.render();
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time' //指定元素
+            ,done: function(value, date, endDate){
+                start_time = ns.date_to_time(value);
+
+            }
+        });
+        //结束时间
+        laydate.render({
+            elem: '#end_time' //指定元素
+            ,done: function(value, date, endDate){
+                end_time = ns.date_to_time(value);
+            }
+        });
+
+
+        table = new Table({
+            elem: '#purchase_list',
+            url: ns.url("supply://supply/purchase/lists"),
+            cols: [
+                [{
+                    field: 'goods_info',
+                    title: '求购商品',
+                    unresize: 'false',
+                    templet: "#goods_info"
+                },{
+                    field: 'title',
+                    title: '求购标题',
+                    unresize: 'false'
+                },{
+                    field: 'end_time',
+                    title: '求购截止时间',
+                    unresize: 'false',
+                    templet: function (data) {
+                        return ns.time_to_date(data.end_time);
+                    }
+                },{
+                    field: 'status',
+                    title: '状态',
+                    unresize: 'false',
+                    templet: function (data) {
+                        if(data.status == 1){
+                            return '进行中';
+                        }else{
+                            return '已截止求购';
+                        }
+                    }
+                },{
+                    field: 'create_time',
+                    title: '发布时间',
+                    unresize: 'false',
+                    templet: function (data) {
+                        return ns.time_to_date(data.create_time);
+                    }
+                }, {
+                    title: '操作',
+                    width: '15%',
+                    toolbar: '#operation',
+                    unresize: 'false'
+                }]
+            ],
+        });
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function(data) {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+            return false;
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'basic': //编辑
+                    location.href = ns.url("supply://supply/purchase/detail?purchase_id=" + data.purchase_id);
+                    break;
+            }
+        });
+    });
+</script>
+{/block}

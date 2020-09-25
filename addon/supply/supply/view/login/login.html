@@ -1,0 +1,191 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SUPPLY_CSS/login.css">
+<style>
+	/* .login-body{background-image: url("{:img('SUPPLY_IMG/login/login_bg.png')}"); background-size: cover;} */
+</style>
+{/block}
+{block name="body"}
+<div class="layui-layout layui-layout-admin">
+	<div class="apply-header">
+		<div class="apply-header-box">
+			<div class="apply-header-title">
+				<a href="{:addon_url('supply://supply/index/index')}">
+					{notempty name="$website_info.logo"}
+					<img src="{:img($website_info.logo)}">
+					{else/}
+					<img src="SUPPLY_IMG/shop_logo.png">
+					{/notempty}
+					<span>开源商城</span>
+					<span class="ns-text-color">B2B2C多商户供应商端</span>
+				</a>
+			</div>
+			<span class="phone">联系电话：{$website_info['web_phone']} </span>
+		</div>
+	</div>
+</div>
+<div class="login-body">
+	<div class="login-content">
+		
+		<div class="ns-login-middel">
+			<div class="ns-login-box">
+				<div class="ns-login-banner">
+					<div class="layui-carousel" id="test1">
+						<div carousel-item>
+							<div class="ns-banner-box">
+								<img src="SUPPLY_IMG/login/supply_1.png" />
+								<p>供应商是直接向零售商提供商品及相应服务的企业及分支机构、个体工商户，为平台提供活跃的商品互通机制。</p>
+							</div>
+							<div class="ns-banner-box">
+								<img src="SUPPLY_IMG/login/supply_2.png" />
+								<p>平台创新性的加入求购单，为供求双方提供更多的选择，活跃供货市场、提供更多渠道、丰富商家的商品多样性。</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="ns-login-mid"></div>
+				
+				<div class="layui-form login-form">
+					<h1>供应商管理中心</h1>
+					
+					<div class="layui-form-item">
+						<img class="ns-input-icon" src="SHOP_IMG/login/login_username.png" alt="">
+						<input type="text" name="username" lay-verify="userName" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+					</div>
+				
+					<div class="layui-form-item">
+						<img class="ns-input-icon" src="SHOP_IMG/login/login_password.png" alt="">
+						<input type="password" name="password" lay-verify="password" placeholder="请输入密码" autocomplete="off" class="layui-input">
+					</div>
+				
+					{if $shop_login == 1}
+					<div class="layui-form-item verify-code-box">
+						<input type="text" name="captcha" lay-verify="verificationCode" placeholder="请输入验证码" class="layui-input" value="">
+						<div class="verify-code-img">
+							<img id='verify_img' src="{$captcha['img']}" alt='captcha' onclick="verificationCode()" />
+						</div>
+					</div>
+					<input type="hidden" name="captcha_id" value="{$captcha['id']}">
+					{/if}
+				
+					<div class="layui-form-item">
+						<button class="layui-btn layui-btn-fluid ns-bg-color ns-login-btn" lay-submit lay-filter="login">登 录</button>
+						<p class="operation-register">还没有成为我们的伙伴？<a href="javascript:;" class="ns-text-color" onclick="register()">&nbsp;申请入驻</a></p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="ns-login-bottom">
+		<a class="ns-footer-img" href="#"><img src="{if !empty($copyright.logo)} {:img($copyright.logo)} {else /}__STATIC__/img/copyright_logo.png{/if}" /></a>
+		<p>{notempty name="$copyright.company_name"}{$copyright.company_name}{else/}上海牛之云网络科技有限公司{/notempty} {notempty name="$copyright.icp"}<a href={$copyright.copyright_link}>&nbsp;&nbsp;备案号{$copyright.icp}</a>{/notempty}</p>
+		{notempty name="$copyright.gov_record"}<a class="gov-box" href={$copyright.gov_url}><img src="SUPPLY_IMG/gov_record.png" alt="">公安备案{$copyright.gov_record}</a>{/notempty}
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use('carousel', function() {
+		var carousel = layui.carousel;
+		//建造实例
+		carousel.render({
+			elem: '#test1',
+			width: '100%', //设置容器宽度
+			arrow: 'none', //始终显示箭头
+			anim: 'default' //切换动画方式
+		});
+	});
+</script>
+<script type="text/javascript">
+	/**
+	 * 验证码
+	 */
+	function verificationCode(){
+		$.ajax({
+			type: "get",
+			url: "{:addon_url('supply://supply/login/captcha')}",
+			dataType: "JSON",
+			async: false,
+			success: function (res) {
+				var data = res.data;
+				$("#verify_img").attr("src",data.img);
+				$("input[name='captcha_id']").val(data.id);
+			}
+		});
+	}
+
+	var form, login_repeat_flag = false;
+	layui.use('form', function(){
+		form = layui.form;
+		form.render();
+
+		/* 登录 */
+		form.on('submit(login)', function(data) {
+
+			if (login_repeat_flag) return;
+			login_repeat_flag = true;
+
+			$.ajax({
+				type: "POST",
+				dataType: "JSON",
+				url: '{:addon_url("supply://supply/login/login")}',
+				data: data.field,
+				success: function(res) {
+
+					if (res.code == 0) {
+						layer.msg('登录成功',{anim: 5,time: 500},function () {
+							window.location = ns.url('supply://supply/index/index');
+						});
+					} else {
+						layer.msg(res.message);
+						login_repeat_flag = false;
+						verificationCode();
+					}
+
+				}
+			})
+		});
+
+		/**
+		 * 表单验证
+		 */
+		form.verify({
+			userName: function(value) {
+				if (!value.trim()) {
+					return "账号不能为空";
+				}
+			},
+			password: function(value) {
+				if (!value.trim()) {
+					return "密码不能为空";
+				}
+			},
+			verificationCode: function(value) {
+				if (!value.trim()) {
+					return "验证码不能为空";
+				}
+			}
+
+		});
+	});
+
+	function register(){
+		location.href = ns.url("supply://supply/login/register");
+	}
+	
+	$("body").on("blur",".login-content .login-input",function(){
+		$(this).removeClass("login-input-select");
+	});
+	$("body").on("focus",".login-content .login-input",function(){
+		$(this).addClass("login-input-select");
+	});
+
+	$(document).keydown(function (event) {
+		if (event.keyCode == 13) {
+			$(".ns-login-btn").trigger("click");
+		}
+	});
+</script>
+{/block}

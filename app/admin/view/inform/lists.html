@@ -1,0 +1,344 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<!-- 搜索框 -->
+<!-- <div class="ns-single-filter-box">
+    <div class="layui-form">
+        <div class="layui-input-inline">
+            <input type="text" name="search_text" placeholder="请输入商品名称" autocomplete="off" class="layui-input">
+            <button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+                <i class="layui-icon">&#xe615;</i>
+            </button>
+        </div>
+    </div>
+</div> -->
+
+<div class="ns-screen layui-collapse" lay-filter="selection_panel">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">筛选</h2>
+		<form class="layui-colla-content layui-form layui-show">
+			<!-- <div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">举报类型</label>
+					<div class="layui-input-inline">
+						<select name="state" lay-search="">
+						</select>
+					</div>
+				</div>
+			</div> -->
+
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">商品名称：</label>
+					<div class="layui-input-inline">
+						<input type="text" name="search_text" placeholder="请输入商品名称" autocomplete="off" class="layui-input">
+					</div>
+				</div>
+				
+				<div class="layui-inline">
+					<label class="layui-form-label">举报主题：</label>
+					<div class="layui-input-inline">
+						<select name="subject_id" lay-search=""></select>
+					</div>
+				</div>
+				
+				<div class="layui-inline">
+					<label class="layui-form-label">处理结果：</label>
+					<div class="layui-input-inline">
+						<select name="state" lay-search="">
+							<option value=""></option>
+							<option value="0">未处理</option>
+							<option value="1">已处理</option>
+						</select>
+					</div>
+				</div>
+			</div>
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="btn_search">筛选</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- 列表 -->
+<table id="inform_list" lay-filter="inform_list"></table>
+
+<script type="text/html" id="state">
+    {{# if(d.state == 0){}}
+        未处理
+    {{# } }}
+    {{# if(d.state == 1){}}
+    已处理
+    {{# } }}
+</script>
+
+<script type="text/html" id="inform_pic">
+    <div class='ns-table-tuwen-box'>
+        <div class='ns-img-box'>
+            {{#  if(d.inform_pic){  }}
+            <img layer-src src="{{ns.img(d.inform_pic.split(',')[0])}}">
+            {{#  }  }}
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="time">
+    <div class='ns-table-tuwen-box'>
+        <p class="ns-multi-line-hiding">{{ns.time_to_date(d.create_time)}}</p>
+    </div>
+</script>
+
+<!-- 编辑删除操作 -->
+<script type="text/html" id="action">
+    <div class="ns-table-btn">
+        <a class="layui-btn" lay-event="detail">详情</a>
+        <a class="layui-btn" lay-event="editinform">处理</a>
+    </div>
+</script>
+{/block}
+{block name="script"}
+<script>
+    var form,laytpl;
+    repeat_flag = false; //防重复标识
+    layui.use(['form','laytpl'], function() {
+        form = layui.form;
+        laytpl = layui.laytpl;
+        form.render();
+
+        subjectType(); //举报类型选择
+		
+        table = new Table({
+            elem: '#inform_list',
+            url: ns.url("admin/inform/lists"),
+            cols: [
+                [{
+                    field: 'sku_name',
+                    title: '商品名称',
+                    unresize: 'false',
+                    width: '20%'
+                }, {
+                    field: 'sku_name',
+                    title: '举报人',
+                    unresize: 'false',
+                    width: '20%'
+                },{
+                    field: 'state',
+                    title: '处理状态',
+                    unresize: 'false',
+                    width: '15%',
+                    templet:'#state'
+                },{
+                    field: 'subject_name',
+                    title: '举报主题',
+                    unresize: 'false',
+                    width: '15%'
+                }, {
+                    field: 'inform_pic',
+                    title: '图片',
+                    unresize: 'false',
+                    width: '10%',
+                    templet:'#inform_pic'
+                }, {
+                    field: 'create_time',
+                    title: '举报时间',
+                    unresize: 'false',
+                    width: '10%',
+                    templet:'#time'
+                }, {
+                    title: '操作',
+                    toolbar: '#action',
+                    unresize: 'false',
+                    width: '10%'
+                }]
+            ]
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'detail': //举报详情
+                    detail(data);
+                    break;
+                case 'editinform': //处理举报
+                    editinform(data);
+                    break;
+            }
+        });
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function(data) {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+        });
+
+        form.on('submit(editinform)', function(data){
+            layer.closeAll();
+            $.ajax({
+                url: ns.url("admin/inform/editinform"),
+                data: data.field,
+                type: "POST",
+                dataType: "JSON",
+                success: function(res) {
+                    if (res.code == 0) {
+                        layer.confirm('处理成功', {
+                            title:'操作提示',
+                            btn: ['返回列表'],
+                            yes: function(){
+                                location.href = ns.url("admin/inform/lists");
+                            }
+                        });
+                    }else{
+                        layer.msg(res.message);
+                        repeat_flag = false;
+                    }
+                }
+            });
+        });
+    });
+	
+    function cancel()
+    {
+        layer.closeAll()
+    }
+	
+    function detail(data) {
+        $.ajax({
+            type: 'POST',
+            dataType: 'JSON',
+            url: ns.url("admin/inform/detail"),
+            data: {'inform_id': data.inform_id},
+            success: function (res) {
+                laytpl($("#detail").html()).render(res.data, function(html) {
+                    layer.open({
+                        title: '礼品订单详情',
+                        skin: 'layer-tips-class',
+                        type: 0,
+                        area: ['450px'],
+                        content: html
+                    });
+                });
+            }
+        });
+    }
+
+    /**
+     * 处理举报
+     * @param data
+     */
+    function editinform(data) {
+        $.ajax({
+            type: 'POST',
+            dataType: 'JSON',
+            url: ns.url("admin/inform/detail"),
+            data: {'inform_id': data.inform_id},
+            success: function (res) {
+                laytpl($("#editinform").html()).render(res.data, function(html) {
+                    layer.open({
+                        title: '编辑',
+                        skin: 'layer-tips-class',
+                        type: 1,
+                        area: ['450px'],
+                        content: html
+                    });
+                });
+            }
+        });
+    }
+	
+	//举报类型
+	function subjectType() {
+	    var html = "";
+	    $.ajax({
+	        url: ns.url("admin/inform/subject"),
+	        type: 'POST',
+	        dataType: 'JSON',
+	        success: function (res) {
+	            html += '<option value="">请选择举报主题</option>';
+	            $.each(res.data.list, function (key, val) {
+	                html += '<option value="${val.subject_id}">${val.subject_content}</option>';
+	            });
+	            $("select[name='subject_id']").html(html);
+	            form.render('select');
+	        }
+	    });
+	}
+</script>
+<!-- 详情弹框html -->
+<script type="text/html" id="detail">
+    <table class="layui-table ns-table-detail">
+        <colgroup>
+            <col width="120">
+            <col width="270">
+        </colgroup>
+        <tbody>
+        <tr>
+            <td>会员名</td>
+            <td>{{d.member_name}}</td>
+        </tr>
+        <tr>
+            <td>举报主题名称</td>
+            <td>{{d.sku_name}}</td>
+        </tr>
+        <tr>
+            <td>举报主题名称</td>
+            <td>{{d.subject_name}}</td>
+        </tr>
+        <tr>
+            <td>举报内容</td>
+            <td>{{d.content}}</td>
+        </tr>
+        <tr>
+            <td>站点名称</td>
+            <td>{{d.site_name}}</td>
+        </tr>
+        <tr>
+            <td>创建时间</td>
+            <td>{{ns.time_to_date(d.create_time)}}</td>
+        </tr>
+        <tr>
+            <td>处理状态</td>
+            <td>{{d.state==0 ? '未处理' : '已处理'}}</td>
+        </tr>
+        <tr>
+            <td>处理类型名称</td>
+            <td>{{d.deal_type_name}}</td>
+        </tr>
+        <tr>
+            <td>完成时间</td>
+            <td>{{d.deal_content}}</td>
+        </tr>
+        <tr>
+            <td>完成时间</td>
+            <td>{{ns.time_to_date(d.deal_time)}}</td>
+        </tr>
+        </tbody>
+    </table>
+</script>
+<!-- 配送管理html -->
+<script type="text/html" id="editinform">
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">处理信息</label>
+            <div class="layui-input-block">
+                <textarea name="deal_content" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <input type="hidden" name="inform_id" value="{{d.inform_id}}" class="layui-input">
+                <button class="layui-btn ns-bg-color" lay-submit lay-filter="editinform">处理</button>
+                <button type="reset" onclick="cancel()" class="layui-btn ns-bg-color">取消</button>
+            </div>
+        </div>
+    </div>
+{/block}

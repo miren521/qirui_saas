@@ -1,0 +1,214 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/order.css">
+{/block}
+{block name="body"}
+<!-- 顶部html文件-->
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-order">
+			<div class="order-menu">
+				<ul class="layui-nav layui-nav-tree" lay-filter="test">
+					<li class="layui-nav-item layui-nav-itemed">
+						<a href="javascript:;">交易中心</a>
+						<dl class="layui-nav-child">
+							<dd class="layui-this"><a href="{:addon_url('supply://shop/order/lists')}">我的订单</a></dd>
+							<dd><a href="{:addon_url('supply://shop/orderrefund/lists')}">退款/售后</a></dd>
+							<dd><a href="{:addon_url('supply://shop/purchase/purchase')}">我的求购单</a></dd>
+						</dl>
+					</li>
+				</ul>
+			</div>
+			<div class="order-list">
+				<div class="order-list-title"><span><a href="{:addon_url('supply://shop/order/lists')}">订单列表</a></span>
+					/ <span>订单详情</span></div>
+
+				<div class="order-detail">
+					<div class="order-status">
+						<h4>
+							订单状态：
+							<span class="ns-text-color">{$detail.order_status_name}</span>
+						</h4>
+						{if $detail.order_status == 0}
+						<div class="go-pay">
+							<p>
+								需付款：
+								<span>￥{$detail.pay_money}</span>
+							</p>
+						</div>
+						{/if}
+
+						{if count($detail.action) > 0}
+						<div class="operation">
+							{if $detail.is_evaluate == 1}
+								{if $detail.evaluate_status == 0}
+								<button class="layui-btn layui-btn-primary" onclick="evaluateFirst{$detail.order_id})">评价</button>
+								{else if $detail.evaluate_status == 1 /}
+								<button class="layui-btn layui-btn-primary" onclick="evaluateAgain({$detail.order_id})">追评</button>
+								{/if}
+							{/if}
+
+							{foreach $detail.action as $action_k => $action_v}
+							<button class="layui-btn layui-btn-primary" onclick="orderAction('{$action_v.action}', {$detail.order_id})">{$action_v.title}</button>
+							{/foreach}
+						</div>
+						{else if count($detail.action) == 0 && $detail.is_evaluate == 1 /}
+						<div class="operation">
+							{if $detail.is_evaluate == 1}
+								{if $detail.evaluate_status == 0}
+								<button class="layui-btn layui-btn-primary" onclick="evaluateFirst({$detail.order_id})">评价</button>
+								{else if $detail.evaluate_status == 1 /}
+								<button class="layui-btn layui-btn-primary" onclick="evaluateAgain({$detail.order_id})">追评</button>
+								{/if}
+							{/if}
+						</div>
+						{/if}
+					</div>
+
+					<div class="order-info">
+						<h4>订单信息</h4>
+						<ul>
+							<li>
+								<i class="iconfont iconmendian"></i>
+								供货商：<a class="order-info-site" href="" target="_blank">{$detail.site_name}</a>
+							</li>
+							<li>订单类型：{$detail.order_type_name}</li>
+							<li>订单编号：{$detail.order_no}</li>
+							<li>订单交易号：{$detail.out_trade_no}</li>
+							<li>配送方式：{$detail.delivery_type_name}</li>
+							<li>创建时间：{:time_to_date($detail.create_time)}</li>
+							{if $detail.close_time > 0}
+							<li>关闭时间：{:time_to_date($detail.close_time)}</li>
+							{/if}
+							<template v-if="orderDetail.pay_status > 0">
+								<li>支付方式：{$detail.pay_type_name}</li>
+								<li>支付时间：{:time_to_date($detail.pay_time)}</li>
+							</template>
+							{if !empty($detail.promotion_type_name)}
+							<li>店铺活动：{$detail.promotion_type_name}</li>
+							{/if}
+							{if !empty($detail.buyer_message)}
+							<li>买家留言：{$detail.buyer_message}</li>
+							{/if}
+							{if !empty($detail.remark)}
+							<li>卖家留言：{$detail.remark}</li>
+							{/if}
+						</ul>
+					</div>
+
+					<div class="take-delivery-info">
+						<h4>收货信息</h4>
+						<ul>
+							<li>收货人：{$detail.name}</li>
+							<li>手机号码：{$detail.mobile}</li>
+							<li>收货地址：{$detail.full_address} {$detail.address}</li>
+						</ul>
+					</div>
+
+					<nav>
+						<li {if !$detail.is_enable_refund} class="no-operation" {/if}>商品信息</li>
+						<li>单价</li>
+						<li>数量</li>
+						<li>小计</li>
+						{if $detail.is_enable_refund}
+						<li>操作</li>
+						{/if}
+					</nav>
+
+					<!-- 订单项·商品 -->
+					<div class="list">
+						{foreach $detail.order_goods as $goods_k => $goods_v}
+						<ul class="item">
+							<li {if !$detail.is_enable_refund} class="no-operation" {/if}>
+								<div class="img-wrap" onclick="toGoodsDetail({$goods_v.sku_id})">
+									<img src="{:img($goods_v.sku_image)}" onerror="this.src = 'SHOP_SUPPLY_LOCAL_IMG/default_goods.png' " />
+								</div>
+								<div class="info-wrap">
+									<h5 onclick="toGoodsDetail({$goods_v.sku_id})">{$goods_v.sku_name}
+									</h5>
+									<!-- <span>规格：规格值</span> -->
+								</div>
+							</li>
+							<li>
+								<span>￥{$goods_v.price }</span>
+							</li>
+							<li>
+								<span>{$goods_v.num}</span>
+							</li>
+							<li>
+								<span>￥{$goods_v.goods_money}</span>
+							</li>
+							{if $detail.is_enable_refund}
+							<li>
+								{if $goods_v.refund_status == 0}
+								<button class="layui-btn ns-bg-color" onclick="refund({$goods_v.order_goods_id})">退款</button>
+								{else/}
+								<button class="layui-btn layui-btn-primary" onclick="refundDetail({$goods_v.order_goods_id})">查看退款</button>
+								{/if}
+							</li>
+							{/if}
+						</ul>
+						{/foreach}
+					</div>
+
+					<!-- 订单总计 -->
+					<ul class="total">
+						<li>
+							<label>商品金额：</label>
+							<span>￥{$detail.goods_money}</span>
+						</li>
+						<li>
+							<label>运费：</label>
+							<span>￥{$detail.delivery_money}</span>
+						</li>
+						{if $detail.invoice_money > 0}
+						<li>
+							<label>税费：</label>
+							<span>￥{$detail.invoice_money}</span>
+						</li>
+						{/if}
+						{if $detail.adjust_money != 0}
+						<li>
+							<label>订单调整：</label>
+							<span>
+								{if $detail.adjust_money < 0}-{else/}+{/if}
+								￥{$detail.adjust_money | abs}
+							</span>
+						</li>
+						{/if}
+						{if $detail.balance_money > 0}
+						<li>
+							<label>使用余额：</label>
+							<span>￥{$detail.balance_money}</span>
+						</li>
+						{/if}
+						<li class="pay-money">
+							<label>实付款：</label>
+							<span>￥{$detail.pay_money}</span>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script src="SHOP_SUPPLY_LOCAL_JS/order_list.js"></script>
+
+<script>
+	function toGoodsDetail(id) {
+		location.href = ns.url("supply://shop/goods/detail", {sku_id: id});
+	}
+
+	function refund(id) {
+		location.href = ns.url("supply://shop/orderrefund/refund", {order_goods_id: id});
+	}
+
+	function refundDetail(id) {
+		location.href = ns.url("supply://shop/orderrefund/detail", {"order_goods_id": id});
+	}
+</script>
+{/block}

@@ -1,0 +1,133 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/order.css">
+{/block}
+{block name="body"}
+<!-- 顶部html文件-->
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-order">
+			<div class="order-menu">
+				<ul class="layui-nav layui-nav-tree" lay-filter="test">
+					<li class="layui-nav-item layui-nav-itemed">
+						<a href="javascript:;">交易中心</a>
+						<dl class="layui-nav-child">
+							<dd><a href="{:addon_url('supply://shop/order/lists')}">我的订单</a></dd>
+							<dd class="layui-this"><a href="{:addon_url('supply://shop/orderrefund/lists')}">退款/售后</a></dd>
+							<dd><a href="{:addon_url('supply://shop/purchase/purchase')}">我的求购单</a></dd>
+						</dl>
+					</li>
+				</ul>
+			</div>
+			<div class="order-list">
+				<div class="order-list-title">
+					<span><a href="{:addon_url('supply://shop/orderrefund/lists')}">退款/售后</a></span>
+					/
+                    <span><a href="{:addon_url('supply://shop/orderrefund/detail')}?order_goods_id={$detail.order_goods_id}">退款详情</a></span>
+                    /
+					<span>发货</span>
+				</div>
+
+				<div class="delivery-wrap layui-form">
+					<div class="goods-lists-wrap">
+						<div class="goods-list">
+							<table>
+								<tr>
+									<td width="62.5%">商品</td>
+									<td width="12.5%">数量</td>
+									<td width="12.5%">退款金额</td>
+								</tr>
+							</table>
+						</div>
+
+						<div class="goods-list">
+							<table>
+								<tr>
+									<td width="62.5%">
+										<div class="ns-table-title">
+											<div class="ns-title-pic">
+												<a href="{:addon_url('supply://shop/goods/detail')}?sku_id={$detail.sku_id}" target="_blank">
+													<img src="{:img($detail.sku_image)}" onerror="this.src = 'SHOP_IMG/default_shop.png' "  />
+												</a>
+											</div>
+											<div class="ns-title-content">
+												<a href="{:addon_url('supply://shop/goods/detail')}?sku_id={$detail.sku_id}" target="_blank">
+													<div class="goods-name">{$detail.sku_name}</div>
+												</a>
+											</div>
+										</div>
+									</td>
+									<td width="12.5%" class="goods-num">{$detail.num}</td>
+									<td width="12.5%" class="goods-money">￥{$detail.refund_apply_money}</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+
+					<div class="delivery-address">
+						<div class="form-wrap">
+							<div class="layui-form-item">
+								<label class="layui-form-label"><span class="required">*</span>物流公司：</label>
+								<div class="layui-input-block">
+									<input type="text" name="refund_delivery_name" class="layui-input" value="" placeholder="请输入物流公司" lay-verify="required">
+								</div>
+							</div>
+
+							<div class="layui-form-item">
+								<label class="layui-form-label"><span class="required">*</span>物流单号：</label>
+								<div class="layui-input-block">
+									<input type="text" name="refund_delivery_no" class="layui-input" value="" placeholder="请输入物流单号" lay-verify="required">
+								</div>
+							</div>
+
+							<div class="layui-form-item layui-form-text">
+								<label class="layui-form-label">物流说明：</label>
+								<div class="layui-input-block">
+									<textarea placeholder="请输入物流说明（选填）" name="refund_delivery_remark" class="layui-textarea"></textarea>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<input type="hidden" name="order_goods_id" value="{$detail.order_goods_id}">
+
+					<div class="order-submit">
+						<button class="layui-btn ns-bg-color" lay-submit lay-filter="submit">提交</button>
+					</div>
+                </div>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script>
+	layui.use('form', function () {
+		var form = layui.form, repeat_flag = false;
+
+		form.on('submit(submit)', function (data) {
+			if (repeat_flag) return;
+			repeat_flag = true;
+			
+			$.ajax({
+				type: 'POST',
+				dataType: 'JSON',
+				async: false,
+				data: data.field,
+				url: ns.url("supply://shop/orderrefund/delivery"),
+				success: function (res) {
+					repeat_flag = false;
+					if(checkLogin(res)) {
+						if (res.code == 0) {
+							location.href = ns.url("supply://shop/orderrefund/detail", {"order_goods_id": $("input[name='order_goods_id']").val()});
+						}
+					}
+				}
+			});
+		})
+	})
+</script>
+{/block}

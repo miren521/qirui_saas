@@ -1,0 +1,179 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.layui-layer-content iframe {padding: 25px;box-sizing: border-box;height: 500px!important;}
+	.ns-goods-intro { width: 100%; display: flex; flex-wrap: nowrap; align-items: center; }
+	.ns-goods-img { width: 50px; height: 50px; text-align: center; line-height: 50px; margin-right: 10px; }
+	.ns-goods-img img { max-width: 100%; max-height: 50px; }
+	.layui-table-view .layui-table[lay-size=lg] td .layui-table-cell { height: auto; line-height: 25px; }
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">操作提示</h2>
+        <ul class="layui-colla-content layui-show">
+            <li>参加专题活动商品列表</li>
+        </ul>
+    </div>
+</div>
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<input type="text" name="sku_name" placeholder="请输入商品名称" class="layui-input" autocomplete="off">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+			  <i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+<!-- 列表 -->
+<table id="good_list" lay-filter="good_list"></table>
+
+<!-- 商品 -->
+<script type="text/html" id="goodIntro">
+    <div class="ns-table-tuwen-box">
+        <div class="ns-img-box">
+        	{{#  if(d.sku_image){  }}
+            <img layer-src src="{{ns.img(d.sku_image.split(',')[0])}}"/>
+            {{#  }  }}
+        </div>
+        <div class="ns-font-box">
+            <a href="javascript:;" class="ns-multi-line-hiding ns-text-color">{{d.sku_name}}</a>
+        </div>
+    </div>
+</script>
+<!--时间-->
+<script type="text/html" id="times">
+    <div class="layui-elip">开始时间：{{ns.time_to_date(d.start_time)}}</div>
+    <div class="layui-elip">结束时间：{{ns.time_to_date(d.end_time)}}</div>
+</script>
+
+<!--操作-->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="delete">删除</a>
+	</div>
+</script>
+{/block}
+{block name="script"}
+<script>
+	var form, table, laytpl;
+	layui.use(['form', 'laytpl'], function() {
+
+		form = layui.form;
+		laytpl = layui.laytpl;
+		var	repeat_flag = false, //防重复标识
+            arr_id_good = [];
+        form.render();
+
+		table = new Table({
+			elem: '#good_list',
+			url: '{:addon_url("topic://admin/topic/goodslist")}',
+			parseData: function(res){
+				arr_id_good = [];
+				for (var i in res.data.list) {
+					arr_id_good.push(res.data.list[i].sku_id);
+				}
+				return {
+					"code": res.code,
+					"msg": res.message,
+					"count": res.data.count,
+					"data": res.data.list,
+				};
+			},
+			cols: [
+				[{
+					title: '商品',
+					unresize: 'false',
+					width: '25%',
+					templet: '#goodIntro'
+				}, {
+                    field: 'topic_name',
+                    title: '专题名称',
+                    unresize: 'false',
+                    width: '20%',
+                }, {
+                    field: 'sale_num',
+                    title: '销量',
+                    unresize: 'false',
+                    width: '8%',
+                }, {
+					field: 'topic_price',
+					title: '<span style="padding-right: 15px;">价格</span>',
+					unresize: 'false',
+					width: '14%',
+					align: 'right',
+					templet: function(data) {
+						return '<span style="padding-right: 15px;">￥'+ data.topic_price +'</span>';
+					}
+				}, {
+                    title: '活动时间',
+                    unresize: 'false',
+                    width: '25%',
+                    templet: '#times'
+                }, {
+                    title: '操作',
+                    width: '8%',
+                    toolbar: '#action',
+                    unresize: 'false'
+                }]
+			]
+		});
+
+		/**
+		 * 搜索功能 控制器沒有增加名称搜索字段
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'delete': //查看
+                    deleteGoods(data.sku_id ,data.topic_id,data.site_id);
+                    break;
+            }
+        });
+
+        /**
+         * 删除
+         */
+        function deleteGoods(sku_id, topic_id,site_id) {
+            if (repeat_flag) return false;
+            repeat_flag = true;
+
+            layer.confirm('确定要删除该商品吗?', function() {
+                $.ajax({
+                    url: '{:addon_url("topic://admin/topic/deletetopicgoods")}',
+                    data: {
+                        "sku_id": sku_id,
+                        "topic_id": topic_id,
+                        "site_id": site_id
+                    },
+                    dataType: 'JSON',
+                    type: 'POST',
+                    success: function(res) {
+                        layer.msg(res.message);
+                        repeat_flag = false;
+
+                        if (res.code == 0) {
+                            table.reload();
+                        }
+                    }
+                });
+            });
+        }
+	});
+</script>
+{/block}

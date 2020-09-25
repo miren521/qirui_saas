@@ -1,0 +1,138 @@
+{extend name="base"/}
+{block name="resources"}
+<style type="text/css">
+	.no-auth{ padding: 50px 0;text-align: center; }
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form">
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">版权设置</span>
+		</div>
+		<div class="layui-card-body">
+			{if $is_auth}
+			<div class="layui-form-item">
+				<label class="layui-form-label">版权logo：</label>
+				<div class="layui-input-block">
+					<input type="hidden" name="logo" value="{$copyright.logo}" />
+					<div class="upload-img-block icon">
+						<div class="upload-img-box" id="webLogoUpload">
+							{if condition="$copyright.logo"}
+							<img src="{:img($copyright.logo)}" />
+							{else/}
+							<div class="ns-upload-default">
+								<img src="__STATIC__/img/upload_img.png" />
+								<p>点击上传</p>
+							</div>
+							{/if}
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<label class="layui-form-label">公司名称：</label>
+				<div class="layui-input-block">
+					<input type="text" name="company_name" value="{$copyright.company_name}" autocomplete="off" class="layui-input ns-len-long">
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<label class="layui-form-label">版权链接：</label>
+				<div class="layui-input-block">
+					<input type="text" name="copyright_link" value="{$copyright.copyright_link}" autocomplete="off" class="layui-input ns-len-long">
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<label class="layui-form-label">版权信息：</label>
+				<div class="layui-input-block">
+					<textarea name="copyright_desc" class="layui-textarea ns-len-long">{$copyright.copyright_desc}</textarea>
+				</div>
+			</div>
+			{else/}
+			<div class="no-auth">授权之后才可修改版权信息，<a href="{:url('admin/system/auth')}" class="ns-text-color">绑定授权</a></div>
+			{/if}
+		</div>
+	</div>
+	
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">备案设置</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">网站ICP备案号：</label>
+				<div class="layui-input-block">
+					<input type="text" name="icp"  value="{$copyright.icp}" autocomplete="off" class="layui-input ns-len-long">
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<label class="layui-form-label">网站公安备案：</label>
+				<div class="layui-input-block">
+					<input type="text" name="gov_record"  value="{$copyright.gov_record}" autocomplete="off" class="layui-input ns-len-long">
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<label class="layui-form-label">网站公安链接：</label>
+				<div class="layui-input-block">
+					<input type="text" name="gov_url"  value="{$copyright.gov_url}" autocomplete="off" class="layui-input ns-len-long">
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="ns-single-filter-box">
+		<div class="ns-form-row">
+			<button type="button" class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		</div>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'upload'], function() {
+		var form = layui.form,
+			upload = layui.upload,
+			repeat_flag = false; //防重复
+		form.render();
+
+		//上传logo
+		var uploadInst = upload.render({
+			elem: '#webLogoUpload',
+			url: ns.url("admin/upload/upload"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='logo']").val(res.data.pic_path);
+					$("#webLogoUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+		
+		//保存配置
+		form.on('submit(save)', function(data) {
+			if(repeat_flag) return;
+			repeat_flag = true;
+
+			$.ajax({
+				url: ns.url("admin/config/copyright"),
+				data: data.field,
+				dataType: 'JSON',
+				type: 'POST',
+				success: function(res) {
+					layer.msg(res.message);
+					repeat_flag = false;
+					if (res.code == 0) {
+						location.reload();
+					}
+				}
+			});
+		});
+	});
+	
+</script>
+{/block}

@@ -1,0 +1,34 @@
+<nc-component v-bind:data="data[index]" v-bind:style="{ backgroundColor : nc.backgroundColor}" class="notice">
+
+	<!-- 预览 -->
+	<template slot="preview" >
+		
+		<template v-if="nc.lazyLoad">
+			<notice></notice>
+		</template>
+		
+	</template>
+
+	<!-- 编辑 -->
+	<template slot="edit">
+		
+		<template v-if="nc.lazyLoad">
+			<div @click.stop="">
+			<notice-edit></notice-edit>
+			</div>
+		</template>
+	
+	</template>
+	
+	<!-- 资源 -->
+	<template slot="resource">
+		
+		<js>
+			var RESOURCEPATH = "{$resource_path}";
+		</js>
+		<css src="{$resource_path}/notice/css/design.css"></css>
+		<js src="{$resource_path}/notice/js/design.js"></js>
+		
+	</template>
+
+</nc-component>

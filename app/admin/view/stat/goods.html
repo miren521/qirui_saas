@@ -1,0 +1,219 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+    .ns-card-head-right {
+        display: flex;
+        align-items: center;
+    }
+
+    .ns-card-head-right .layui-form-item {
+        margin-bottom: 0;
+    }
+	
+	.current-time, .ns-flow-time-today {
+		margin-left: 10px;
+		line-height: 34px;
+	}
+
+    /* 基本信息 */
+    .ns-basic {
+        display: flex;
+    }
+
+    .ns-basic .ns-table-tuwen-box {
+        width: 30%;
+        border-right: 1px solid #EEEEEE;
+        padding: 10px 20px;
+    }
+
+    .ns-basic-count {
+        font-size: 20px;
+        font-weight: 600;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <span class="ns-card-title">商品概况</span>
+       
+		<div class="ns-card-head-right layui-form">
+			<div class="layui-form-item">
+				<div class="layui-input-block ns-len-mid">
+					<select name="date" lay-filter="date">
+						<option value="0">今日实时</option>
+						<option value="1">近7天</option>
+						<option value="2">近30天</option>
+					</select>
+				</div>
+			</div>
+			<div class="ns-flow-time">
+				<div class="ns-flow-time-today"></div>
+			</div>
+		</div>
+    </div>
+    <div class="layui-card-body ns-basic">
+        <div class="ns-table-tuwen-box">
+            <div class="ns-img-box">
+                <img src="ADMIN_IMG/stat/goods_browse.png">
+            </div>
+            <div class="ns-font-box">
+                <p class="ns-text-color-dark-gray">商品浏览数</p>
+                <p class="ns-basic-count" id="visitCount">0</p>
+            </div>
+        </div>
+        <div class="ns-table-tuwen-box">
+            <div class="ns-img-box">
+                <img src="ADMIN_IMG/stat/goods_collect.png">
+            </div>
+            <div class="ns-font-box">
+                <p class="ns-text-color-dark-gray">商品收藏</p>
+                <p class="ns-basic-count" id="collectGoods">0</p>
+            </div>
+        </div>
+        <div class="ns-table-tuwen-box">
+            <div class="ns-img-box">
+                <img src="ADMIN_IMG/stat/goods_order.png">
+            </div>
+            <div class="ns-font-box">
+                <p class="ns-text-color-dark-gray">订单商品数</p>
+                <p class="ns-basic-count" id="goodsPayCount">0</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <span class="ns-card-title">商品趋势分析</span>
+        
+		<div class="ns-card-head-right layui-form">
+			<div class="layui-form-item">
+				<div class="layui-input-block ns-len-mid">
+					<select name="date" lay-filter="date_chart">
+						<option value="1">近7天</option>
+						<option value="2">近30天</option>
+					</select>
+				</div>
+			</div>
+			<span class="current-time"></span>
+		</div>
+    </div>
+    <div class="layui-card-body">
+        <div id="main" style="width: 100%; height: 400px;"></div>
+    </div>
+</div>
+{/block}
+{block name="script"}
+<script src="SHOP_JS/echarts.min.js"></script>
+<script>
+    $(function() {
+        getGoodsStat(0);
+        getGoodsStatChart(1);
+    });
+
+    layui.use(['form'], function() {
+        var form = layui.form;
+
+        /**
+         * 监听下拉框
+         */
+        form.on('select(date)', function(data) {
+            getGoodsStat(data.value);
+        });
+
+        /**
+         * 图表监听下拉框
+         */
+        form.on('select(date_chart)', function(data) {
+            getGoodsStatChart(data.value);
+        });
+    });
+
+    //获取商品统计
+    function getGoodsStat(date_type){
+        $.ajax({
+            dataType: 'JSON',
+            type: 'POST',
+            url: ns.url("admin/stat/goods"),
+            data: {
+                date_type: date_type
+            },
+            success: function(res){
+                if (res.code == 0) {
+                    $("#addGoodsCount").html(res.data.add_goods_count);
+                    $("#visitCount").html(res.data.visit_count);
+                    $("#collectGoods").html(res.data.collect_goods);
+                    $("#goodsPayCount").html(res.data.goods_pay_count);
+                    $(".ns-flow-time-today").html(res.data.time_range);
+                }else{
+                    layer.msg(res.message);
+                }
+            }
+        });
+    }
+
+    //获取商品统计图表
+    function getGoodsStatChart(date_type){
+        $.ajax({
+            dataType: 'JSON',
+            type: 'POST',
+            url: ns.url("admin/stat/getgoodsstatlist"),
+            data: {
+                date_type: date_type
+            },
+            success: function(res){
+                option.xAxis.data = res.time;
+                option.series[0].data = res.visit_count;
+                option.series[1].data = res.collect_goods;
+                option.series[2].data = res.goods_pay_count;
+                $(".current-time").html(res.time_range);
+                myChart.setOption(option);
+            }
+        });
+    }
+
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
+
+    // 指定图表的配置项和数据
+    option = {
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data: ['商品浏览数', '商品收藏数', '订单商品数']
+        },
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: []
+        },
+        yAxis: {
+            type: 'value',
+            axisLabel: {
+                formatter: '{value} 个'
+            }
+        },
+        series: [{
+                name: '商品浏览数',
+                type: 'line',
+                data: [],
+            },
+            {
+                name: '商品收藏数',
+                type: 'line',
+                data: [],
+            },
+            {
+                name: '订单商品数',
+                type: 'line',
+                data: [],
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+{/block}

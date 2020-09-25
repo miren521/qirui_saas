@@ -1,0 +1,228 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	.goods-category-list .layui-table td {
+		border-left: 0;
+		border-right: 0;
+	}
+	.goods-category-list .layui-table .switch {
+		font-size: 16px;
+		cursor: pointer;
+		width: 12px;
+		line-height: 1;
+		display: inline-block;
+		text-align: center;
+		vertical-align: middle;
+	}
+	.goods-category-list .layui-table img {width: 40px;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>商品分类由平台端进行维护，商家添加商品的时候需要选择对应的商品分类,用户可以根据商品分类搜索商品。</li>
+			<li>点击商品分类名前“+”符号，显示当前商品分类的下级分类。</li>
+			<li>商品分类关联类型是前台搜索分类查询商品之后可以通过商品类型的属性进行进一步搜索。</li>
+			<li>商品分类的佣金比率是商家商品销售之后，平台获取佣金，具体佣金金额按照商品分类进行计算。</li>
+		</ul>
+	</div>
+</div>
+<div class="ns-single-filter-box">
+	<button class="layui-btn ns-bg-color" onclick="addCategory()">添加商品分类</button>
+</div>
+
+<div class="goods-category-list">
+	<table class="layui-table ns-pithy-table">
+		<colgroup>
+			<col width="3%">
+			<col width="25%">
+			<col width="10%">
+			<col width="8%">
+			<col width="10%">
+			<col width="12%">
+			<col width="10%">
+			<col width="10%">
+			<col width="12%">
+		</colgroup>
+		<thead>
+			<tr>
+				<th></th>
+				<th>分类名称</th>
+				<th>简称</th>
+				<th>图片</th>
+				<th>关联类型</th>
+				<th>平台抽成比率</th>
+				<th>是否显示</th>
+				<th>排序</th>
+				<th>操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			{if condition="$list"}
+			{foreach name="$list" item="vo"}
+			<tr>
+				<td>
+					{notempty name="$vo['child_list']"}
+					<span class="switch ns-text-color js-switch" data-category-id="{$vo['category_id']}" data-level="{$vo['level']}" data-open="0">+</span>
+					{/notempty}
+				</td>
+				<td>{$vo['category_name']}</td>
+				<td>{$vo['short_name']}</td>
+				<td>
+					{notempty name="$vo['image']"}
+					<div class="ns-img-box">
+						<img layer-src src="{:img($vo['image'])}"/>
+					</div>
+					{/notempty}
+				</td>
+				<td>{$vo['attr_class_name']}</td>
+				<td>{$vo['commission_rate']}%</td>
+				<td>{if $vo['is_show'] == 1}是{else/}否{/if}</td>
+				<td><input type="number" class="layui-input ns-len-short" value="{$vo['sort']}" onchange="editSort('{$vo.category_id}')" id="category_sort{$vo.category_id}"></td>
+				<td>
+					<div class="ns-table-btn">
+						<a class="layui-btn" href="{:addon_url('admin/goodscategory/editcategory',['category_id'=>$vo['category_id']])}">编辑</a>
+						<a class="layui-btn" href="javascript:deleteCategory({$vo['category_id']});">删除</a>
+					</div>
+				</td>
+			</tr>
+				{notempty name="$vo['child_list']"}
+					{foreach name="$vo['child_list']" item="second"}
+					<tr data-category-id-1="{$second['category_id_1']}" style="display:none;">
+						<td></td>
+						<td style="padding-left: 20px;">
+							<span class="switch ns-text-color js-switch" data-category-id="{$second['category_id']}" data-level="{$second['level']}" data-open="1" style="padding-right: 20px;">-</span>
+							<span>{$second['category_name']}</span>
+						</td>
+						<td>{$second['short_name']}</td>
+						<td>
+							{notempty name="$second['image']"}
+							<img layer-src src="{:img($second['image'])}"/>
+							{/notempty}
+						</td>
+						<td>{$second['attr_class_name']}</td>
+						<td>{$second['commission_rate']}%</td>
+						<td>{if $second['is_show'] == 1}是{else/}否{/if}</td>
+						<td><input type="number" class="layui-input ns-len-short" value="{$second['sort']}" onchange="editSort('{$second.category_id}')" id="category_sort{$second.category_id}"></td>
+						<td>
+							<div class="ns-table-btn">
+							<a class="layui-btn" href="{:addon_url('admin/goodscategory/editcategory',['category_id'=>$second['category_id']])}">编辑</a>
+							<a class="layui-btn" href="javascript:deleteCategory({$second['category_id']});">删除</a>
+							</div>
+						</td>
+					</tr>
+						{notempty name="$second['child_list']"}
+							{foreach name="$second['child_list']" item="third"}
+							<tr data-category-id-1="{$third['category_id_1']}" data-category-id-2="{$third['category_id_2']}" style="display:none;">
+								<td></td>
+								<td style="padding-left: 80px;">
+									<span>{$third['category_name']}</span>
+								</td>
+								<td>{$third['short_name']}</td>
+								<td>
+									{notempty name="$third['image']"}
+									<img layer-src src="{:img($third['image'])}"/>
+									{/notempty}
+								</td>
+								<td>{$third['attr_class_name']}</td>
+								<td>{$third['commission_rate']}%</td>
+								<td>{if $third['is_show'] == 1}是{else/}否{/if}</td>
+								<td><input type="number" class="layui-input ns-len-short" value="{$third['sort']}" onchange="editSort('{$third.category_id}')" id="category_sort{$third.category_id}"></td>
+								<td>
+									<div class="ns-table-btn">
+										<a class="layui-btn" href="{:addon_url('admin/goodscategory/editcategory',['category_id'=>$third['category_id']])}">编辑</a>
+										<a class="layui-btn" href="javascript:deleteCategory({$third['category_id']});">删除</a>
+									</div>
+								</td>
+							</tr>
+							{/foreach}
+						{/notempty}
+					{/foreach}
+				{/notempty}
+			{/foreach}
+			{else/}
+			<tr>
+				<td colspan="9" style="text-align: center">无数据</td>
+			</tr>
+			{/if}
+		</tbody>
+	</table>
+</div>
+{/block}
+{block name="script"}
+<script>
+$(function () {
+	loadImgMagnify();  //图片放大
+	
+	//展开收齐点击事件
+	$(".js-switch").click(function () {
+		var category_id = $(this).attr("data-category-id");
+		var level = $(this).attr("data-level");
+		var open = parseInt($(this).attr("data-open").toString());
+		
+		if(open){
+			$(".goods-category-list .layui-table tr[data-category-id-"+ level+"='" + category_id + "']").hide();
+			$(this).text("+");
+		}else{
+			$(".goods-category-list .layui-table tr[data-category-id-"+ level+"='" + category_id + "']").show();
+			$(this).text("-");
+		}
+		$(this).attr("data-open", (open ? 0 : 1));
+		
+	});
+});
+
+function deleteCategory(category_id,level) {
+	
+	layer.confirm('子级分类也会删除，请谨慎操作', function() {
+		$.ajax({
+			url: ns.url("admin/goodscategory/deleteCategory"),
+			data: {category_id : category_id},
+			dataType: 'JSON',
+			type: 'POST',
+			async: false,
+			success: function (res) {
+				layer.msg(res.message);
+				if (res.code == 0) {
+					location.reload();
+				}
+			}
+		});
+	});
+}
+function addCategory() {
+	location.href = ns.url("admin/goodscategory/addcategory");
+}
+
+// 监听单元格编辑
+function editSort(category_id) {
+    var sort = $("#category_sort"+category_id).val();
+
+    if (!new RegExp("^-?[1-9]\\d*$").test(sort)) {
+        layer.msg("排序号只能是整数");
+        return;
+    }
+    if(sort<0){
+        layer.msg("排序号必须大于0");
+        return ;
+    }
+    $.ajax({
+        type: 'POST',
+        url: ns.url("admin/goodscategory/modifySort"),
+        data: {
+            sort: sort,
+            category_id: category_id
+        },
+        dataType: 'JSON',
+        success: function(res) {
+            layer.msg(res.message);
+            if (res.code == 0) {
+                table.reload();
+            }
+        }
+    });
+}
+</script>
+{/block}

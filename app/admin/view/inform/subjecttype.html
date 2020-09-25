@@ -1,0 +1,232 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="ns-single-filter-box">
+    <button class="layui-btn ns-bg-color" onclick="add()">添加类型</button>
+</div>
+
+<!-- 列表 -->
+<table id="subjecttype_list" lay-filter="subjecttype_list"></table>
+
+<!-- 编辑删除操作 -->
+<script type="text/html" id="action">
+    <div class="ns-table-btn">
+        <a class="layui-btn" lay-event="editsubjecttype">编辑</a>
+        <a class="layui-btn" lay-event="deletesubjecttype">删除</a>
+    </div>
+</script>
+{/block}
+{block name="script"}
+<script>
+	var form, laytpl;
+    layui.use(['form','laytpl'], function() {
+		form = layui.form;
+		laytpl = layui.laytpl;
+		repeat_flag = false; //防重复标识
+        form.render();
+
+        table = new Table({
+            elem: '#subjecttype_list',
+            url: ns.url("admin/inform/subjecttype"),
+            cols: [
+                [{
+                    field: 'type_name',
+                    title: '举报类型',
+                    unresize: 'false',
+                    width: '45%',
+                }, {
+                    field: 'type_desc',
+                    title: '举报类型描述',
+                    unresize: 'false',
+                    width: '40%'
+                }, {
+                    title: '操作',
+                    toolbar: '#action',
+                    unresize: 'false',
+                    width: '15%'
+                }]
+            ]
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'deletesubjecttype': //删除举报类型
+                    deletesubjecttype(data.type_id);
+                    break;
+                case 'editsubjecttype': //编辑举报类型
+                    editsubjecttype(data);
+                    break;
+            }
+        });
+
+        /**
+         * 删除
+         */
+        function deletesubjecttype(type_id) {
+            if (repeat_flag) return false;
+            repeat_flag = true;
+
+            layer.confirm('确定要删除该举报类型吗?', function() {
+                $.ajax({
+                    url: ns.url("admin/inform/deletesubjecttype"),
+                    data: {type_id: type_id},
+                    dataType: 'JSON',
+                    type: 'POST',
+                    success: function(res) {
+                        layer.msg(res.message);
+                        repeat_flag = false;
+
+                        if (res.code == 0) {
+                            table.reload();
+                        }
+                    }
+                });
+            }, function () {
+                layer.close();
+                repeat_flag = false;
+            });
+        }
+        
+        form.on('submit(editsubjecttype)', function(data){
+            layer.closeAll();
+            $.ajax({
+                url: ns.url("admin/inform/editsubjecttype"),
+                data: data.field,
+                type: "POST",
+                dataType: "JSON",
+                success: function(res) {
+                    layer.msg(res.message);
+                    repeat_flag = false;
+                    if (res.code == 0) {
+                        table.reload();
+                        layer.closeAll('page');
+                    }
+                }
+            });
+        });
+        
+        form.on('submit(save)', function(data){
+            layer.closeAll();
+            $.ajax({
+                url: ns.url("admin/inform/subjecttypeadd"),
+                data: data.field,
+                type: "POST",
+                dataType: "JSON",
+                success: function(res) {
+                    layer.msg(res.message);
+                    repeat_flag = false;
+                    if (res.code == 0) {
+                        table.reload();
+                        layer.closeAll('page');
+                    }
+                }
+            });
+        });
+    });
+
+    /**
+     * 编辑
+     * @param data
+     */
+    function editsubjecttype(data) {
+        $.ajax({
+            type: 'POST',
+            dataType: 'JSON',
+            url: ns.url("admin/inform/subjecttypeinfo"),
+            data: {'type_id': data.type_id},
+            success: function (res) {
+                laytpl($("#edittype").html()).render(res.data, function(html) {
+                    layer.open({
+                        title: '编辑',
+                        skin: 'layer-tips-class',
+                        type: 1,
+                        area: ['540px'],
+                        content: html
+                    });
+                });
+            }
+        });
+    }
+
+    /**
+     * 添加举报类型
+     * @param data
+     */
+    function add() {
+        $.ajax({
+            type: 'POST',
+            dataType: 'JSON',
+
+            success: function (res) {
+                laytpl($("#addtype").html()).render(res.data, function(html) {
+                    layer.open({
+                        title: '添加举报类型',
+                        skin: 'layer-tips-class',
+                        type: 1,
+                        area: ['540px'],
+                        content: html
+                    });
+                });
+            }
+        });
+    }
+
+    function cancel()
+    {
+        layer.closeAll()
+    }
+</script>
+
+<script type="text/html" id="addtype">
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label mid"><span class="required">*</span>举报类型：</label>
+            <div class="layui-input-block">
+                <input type="text" name="type_name" lay-verify="required" class="layui-input ns-len-mid" autocomplete="off">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mid">举报类型描述：</label>
+            <div class="layui-input-block">
+                <textarea name="type_desc" class="layui-textarea ns-len-mid"></textarea>
+            </div>
+        </div>
+
+        <div class="ns-form-row mid">
+            <button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+            <button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="edittype">
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label mid"><span class="required">*</span>举报类型：</label>
+            <div class="layui-input-block">
+                <input type="text" name="type_name" value="{{d.type_name}}" required  lay-verify="required" autocomplete="off" class="layui-input ns-len-mid">
+            </div>
+        </div>
+		
+        <div class="layui-form-item">
+            <label class="layui-form-label mid">举报类型描述：</label>
+            <div class="layui-input-block ns-len-mid">
+                <textarea name="type_desc" class="layui-textarea">{{d.type_desc}}</textarea>
+            </div>
+        </div>
+		
+        <input type="hidden" name="type_id" value="{{d.type_id}}" class="layui-input">
+		
+		<div class="ns-form-row mid">
+		    <button class="layui-btn ns-bg-color" lay-submit lay-filter="editsubjecttype">保存</button>
+		    <button type="reset" onclick="cancel()" class="layui-btn layui-btn-primary">返回</button>
+		</div>
+    </div>
+</script>
+{/block}

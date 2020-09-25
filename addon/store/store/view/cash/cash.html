@@ -1,0 +1,1342 @@
+{extend name="addon/store/store/view/base.html"/}
+{block name="resources"}
+<link rel="stylesheet" type="text/css" href="STORE_CSS/cash.css"/>
+{/block}
+{block name='crumbs'}
+<div class="ns-crumbs{notempty name='$second_menu'} submenu-existence{/notempty}">
+	<span class="layui-breadcrumb" lay-separator="-">
+		{foreach $crumbs as $crumbs_k => $crumbs_v}
+			{if $crumbs_k == count($crumbs) - 1}
+			<a><cite>{$crumbs_v.title}</cite></a>
+			{else/}
+			<a href="{$crumbs_v.url}">{$crumbs_v.title}</a>
+			{/if}
+		{/foreach}
+	</span>
+	
+	<div class="ns-cash-admin">
+		<div class="ns-cash-login">收银员：<span class="ns-basic-color">{$user_info['username']}</span></div>
+		<div class="ns-cash-logout"><i class="iconfont icontuichu5"></i>退出收银</div>
+	</div>
+</div>
+{/block}
+{block name='head'}
+{/block}
+{block name='side_menu'}
+{/block}
+{block name="main"}
+<div class="ns-cash">
+	<div class="ns-form ns-money">
+		<div class="ns-money-block ns-money-left">
+			<div class="ns-settle-accounts ns-money-box">
+				<div class="layui-card ns-card-common">
+					<div class="layui-card-header">
+						<span class="ns-card-title">结账清单（<span class="goods-total">0</span>件）</span>
+					</div>
+					<div class="layui-card-body">
+						<div class="ns-order-list"></div>
+					</div>
+					
+					<div class="ns-card-bottom">
+						<div class="layui-card-bottom">
+							<p>
+								<span class="ns-settle-sum">购买数量</span>
+								<span class="ns-settle-good-num">0</span>
+							</p>
+							<p>
+								<span class="ns-settle-sum">商品总金额</span>
+								<span class="ns-total-sum ns-red-color">￥<span class="ns-total-money">0.00</span></span>
+							</p>
+						</div>
+						<div class="ns-form-row">
+							<button class="layui-btn layui-btn-primary" onclick="closeCart()">整单取消</button>
+							<button class="layui-btn ns-bg-color" lay-submit lay-filter="settle">结算</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="ns-money-block ns-money-middle"></div>
+		<div class="ns-money-block ns-money-right">
+			<div class="ns-money-box">
+				<div class="layui-tab ns-table-tab ns-cash-member" lay-filter="goods_list_tab">
+					<ul class="layui-tab-title">
+						<li class="layui-this" lay-id="1">商品</li>
+						<li lay-id="2">会员</li>
+					</ul>
+					<div class="layui-tab-content">
+						<div class="layui-tab-item layui-show">
+							<div class="ns-goods-block">
+								<div class="ns-good-left">
+									<!-- 搜索框 -->
+									<div class="ns-single-filter-box">
+										<div class="layui-form">
+											<div class="layui-input-block">
+												<input type="text" name="search_text" placeholder="请输入商品名称/商品编码" autocomplete="off" class="layui-input ns-len-long">
+												<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+													<i class="layui-icon">&#xe615;</i>
+												</button>
+											</div>
+										</div>
+									</div>
+									
+									<!-- 商品列表 -->
+									<div class="layui-form ns-goods-list"></div>
+									
+									<!-- <div id="goods_page"></div> -->
+								</div>
+								
+								<div class="ns-good-right">
+									<ul class="layui-nav layui-nav-tree"  lay-filter="test">
+										<li class="layui-nav-item layui-nav-itemed">
+											<a href="javascript:;">全部商品</a>
+										</li>
+										{foreach $goods_catrgory_list as $cate_k => $cate_v}
+										<li class="layui-nav-item">
+											<a data-id="{$cate_v.category_id}" href="javascript:;">{$cate_v.category_name}</a>
+										</li>
+										{/foreach}
+									</ul>
+								</div>
+							</div>
+						</div>
+						
+						<!-- 会员 -->
+						<div class="layui-tab-item ns-dial ns-member">
+							<!-- 查找会员 -->
+							<div class="ns-menber-dial">
+								<p>询问客户信息查询会员</p>
+								
+								<div class="ns-single-filter-box">
+									<div class="layui-form">
+										<div class="layui-input-block">
+											<input type="text" name="member_search" class="layui-input number-phone" placeholder="会员注册名称/手机号/邮箱" />
+											<button type="button" class="layui-btn layui-btn-primary" lay-filter="search_member" lay-submit>
+												<i class="layui-icon">&#xe615;</i>
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="ns-form-row ns-form-row-sec">
+						<button class="layui-btn layui-btn-primary" onclick="restingCart()">挂单</button>
+						<button class="layui-btn layui-btn-primary rest-cart-btn">取单<span class="rest-cart-num"></span></button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<input id="member_id" type="hidden" value="" />
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script src="__STATIC__/js/qrcode.min.js"></script>
+<script>
+	var STOREIMG = "STORE_IMG";
+	var cart = JSON.parse('{:json_encode($cart, JSON_UNESCAPED_UNICODE)}');
+	var resting_cart = JSON.parse('{:json_encode($resting_cart, JSON_UNESCAPED_UNICODE)}');
+	var buyer_info = {:json_encode($buyer_info, JSON_UNESCAPED_UNICODE)};
+	
+	var form, laypage, laytpl, flow, pay_data = {};
+	layui.use(['form', 'laypage', 'laytpl', 'flow'], function() {
+		form = layui.form;
+		laypage = layui.laypage;
+		laytpl = layui.laytpl;
+		flow = layui.flow;
+		
+		/* var cash = new Cash(12, [12, 24, 36]);
+		cash.getGoodsList({
+			"_this": cash
+		});
+		cash.getPageInit({
+			"_this": cash
+		}); */
+		
+		cartList(cart); // 初始化购物车
+		goodsList(); // 初始化商品列表
+		
+		{if condition="$buyer_info"}
+		memberDetail(buyer_info);
+		{else/}
+		searchMember();
+		{/if}
+		
+		if (resting_cart.length != 0) {
+			$(".rest-cart-num").show();
+			$(".rest-cart-num").text(resting_cart.length);
+		} else {
+			$(".rest-cart-btn").addClass("disabled");
+		}
+		
+		/**
+		 * 搜索
+		 */
+		var search_text = "", cate_id;
+		form.on('submit(search)', function(data) {
+			goodsList(data.field.search_text, cate_id);
+			search_text = data.field.search_text;
+		    return false;
+		});
+		
+		$(".layui-nav-item").click(function () { // 分类
+			$(this).addClass("layui-nav-itemed");
+			$(this).siblings().removeClass("layui-nav-itemed");
+			cate_id = $(this).children().attr("data-id");
+			
+			goodsList(search_text, cate_id);
+		});
+		
+		
+		/**
+		 * 会员搜索
+		 */
+		form.on('submit(search_member)', function(data) {
+			if (data.field.member_search == "") {
+				layer.msg('请输入要查询的会员信息');
+				return;
+			}
+			
+			$.ajax({
+				url: ns.url("store://store/cash/loginBuyer"),
+				type: "POST",
+				dataType: "JSON",
+				data: data.field,
+				success: function(res) {
+					if (res.code == 0) {
+						memberDetail(res.data);
+					} else {
+						layer.msg(res.message);
+						addMember(data.field);
+					}
+				}
+			})
+		})
+		
+		/**
+		 * 更换会员
+		 */
+		form.on('submit(logout_member)', function(data) {
+			$.ajax({
+				url: ns.url("store://store/cash/logoutBuyer"),
+				type: "POST",
+				dataType: "JSON",
+				data: data.field,
+				success: function(res) {
+					if (res.code == 0) {
+						searchMember();
+						$("#member_id").val("");
+					} else {
+						layer.msg(res.message);
+					}
+				}
+			})
+		})
+		
+		/**
+		 * 添加会员
+		 */
+		form.on('submit(member_add)', function(data) {
+			if (data.field.mobile != "" && !(/^1[3456789]\d{9}$/.test(data.field.mobile))) {
+				layer.msg('请输入正确的手机号');
+				return;
+			}
+			
+			$.ajax({
+				url: ns.url("store://store/cash/addBuyer"),
+				type: "POST",
+				dataType: "JSON",
+				data: data.field,
+				success: function(res) {
+					if (res.code == 0) {
+						memberDetail(res.data);
+					} else {
+						layer.msg(res.message);
+					}
+				}
+			})
+		})
+		
+		/**
+		 * 结算
+		 */
+		form.on('submit(settle)', function(data) {
+			if (!$("#member_id").val()) {
+				layer.msg('请选择会员');
+			} else if (cart.length == 0) {
+				layer.msg('请选择商品');
+			} else {
+				settleList();
+			}
+		})
+		
+		/**
+		 * 收款
+		 */
+		form.on('submit(square_accounts)', function(data) {
+			$(".ns-cash-coupon-selected").each(function(){
+				data.field.coupon_id = $(this).find("input").val();
+			});
+			data.field.cart = JSON.stringify(cart);
+			var pay_money = $(".ns-real-money").text();
+			
+			
+			$.ajax({
+				type: "POST",
+				url: ns.url("store://store/ordercreate/create"),
+				data: data.field,
+				dataType: 'JSON',
+				success: function(res) {
+					pay_data.pay_money = pay_money;
+					pay_data.data = res.data;
+					
+					var data = pay_data;
+					if (res.code == 0) {
+						
+						if (Number(pay_money) == 0) {  // 应付金额为0
+							laytpl($("#pay_success").html()).render([], function(html){
+								$(".ns-sellte-block .ns-money-right .ns-money-box").html(html);
+							});
+							
+							cart = [];
+							syncCart();
+							cartList(cart);
+						} else {   // 应付金额大于0
+							laytpl($("#square_accounts").html()).render(data, function(html){
+								$(".ns-sellte-block .ns-money-right .ns-money-box").html(html);
+								$(".ns-pay-type .layui-tab-title li").eq(0).addClass("layui-this");
+							});
+							
+							$(".ns-input-money").bind('input propertychange', function() {
+								var real_money = $(this).val();
+								if (Number(real_money) >= Number(data.pay_money)) {
+									var small_change = accSub(Number(real_money), Number(data.pay_money));
+									$(".ns-small-change").text("￥"+ small_change);
+									$(".ns-small-change").parent().removeClass("layui-hide");
+									$(".not-enough-money").parent().addClass("layui-hide");
+								} else {
+									var notenough_money = accSub(Number(data.pay_money), Number(real_money));
+									$(".not-enough-money").text("￥"+ notenough_money);
+									$(".not-enough-money").parent().removeClass("layui-hide");
+									$(".ns-small-change").text("￥0.00");
+									$(".ns-small-change").parent().addClass("layui-hide");
+								}
+							});
+						}
+						
+					} else {
+						layer.msg(res.message);
+					}
+				}
+			});
+			
+		})
+		
+		
+		/**
+		 * 确定收款
+		 */
+		form.on('submit(submit_payment)', function(data) {
+			var pay_money = $(".ns-pay-money").text();
+			
+			if (data.field.money == "") {
+				layer.msg('请输入现金金额', {icon: 5, anim: 6});
+				return;
+			}
+			if (data.field.money < Number(pay_money)) {
+				layer.msg('支付金额不能小于应付金额', {icon: 5, anim: 6});
+				return;
+			}
+			
+			$.ajax({
+				type: "POST",
+				url: ns.url("store://store/cash/offlinePay"),
+				data: {"out_trade_no": data.field.out_trade_no},
+				dataType: 'JSON',
+				success: function(res) {
+					if (res.code == 0) {
+						laytpl($("#pay_success").html()).render(data, function(html){
+							$(".ns-sellte-block .ns-money-right .ns-money-box").html(html);
+						});
+						
+						cart = [];
+						syncCart();
+						cartList(cart);
+					} else {
+						layer.msg(res.message);
+					}
+				}
+			});
+		})
+		
+		// 在线支付
+		form.on('submit(submit_paytype)', function(data) {
+			var pay_type = data.field.pay_type;
+			console.log(pay_type);
+			$.ajax({
+				type: "POST",
+				url: ns.url("store://store/cash/pay"),
+				data: data.field,
+				dataType: 'JSON',
+				success: function(res) {
+					console.log(res);
+					if (res.code == 0) {
+						console.log(res.data.data);
+						if (pay_type == "alipay") {
+							window.open(res.data.data);
+							laytpl($("#alipay").html()).render([], function(html) {
+								$(".ns-sellte-block .ns-money-right .ns-money-box").html(html);
+							})
+						} else if (pay_type == "wechatpay") {
+							var data = res.data;
+							laytpl($("#wechat").html()).render(data, function(html) {
+								$(".ns-sellte-block .ns-money-right .ns-money-box").html(html);
+							})
+							
+							var qrcode = $(".qrcode").val();
+							
+							var qrcode = new QRCode("qrcode", {
+							    text: qrcode,
+							    width: 150,
+							    height: 150,
+							    colorDark : "#000000",
+							    colorLight : "#ffffff",
+							    correctLevel : QRCode.CorrectLevel.H
+							});
+						}
+					} else {
+						layer.msg(res.message);
+					}
+				},
+			});
+		});
+	});
+	
+	// 商品列表渲染
+	function goodsList(search_text, category_id) {
+		$.ajax({
+			url: ns.url("store://store/cash/getGoodsSkuList"),
+			async: false,
+			data: {
+				"page_size": 20,
+				"search_text": search_text,
+				"category_id": category_id
+			},
+			type: "POST",
+			dataType: "JSON",
+			success: function(res) {
+				if (res.code == 0) {
+					var data = res.data;
+					laytpl($("#goods_list").html()).render(data, function(html) {
+						$(".ns-goods-list").html(html);
+					})
+					
+					isNull();
+				} else {
+					layer.msg(res.message);
+				}
+			}
+		});
+	}
+	
+	// 商品是否售空
+	function isNull() {
+		$(".ns-good-box").each(function() {
+			var _this = this;
+			var stock = $(this).attr("data-store-stock");
+			var id = $(this).attr("data-sku-id");
+			
+			if (stock != 0) {
+				$.each(cart, function(index, item) {
+					if (item.sku_id == id) {
+						if (item.num == stock) {
+							$(_this).addClass("disabled");
+						} else {
+							$(_this).removeClass("disabled");
+						}
+					}
+				});
+			}
+		});
+	}
+	
+	// 会员查询页面渲染
+	function searchMember() {
+		laytpl($("#search_member").html()).render([], function(html) {
+			$(".ns-member").html(html);
+		})
+		
+		$(document).keydown(function (event) {
+			if (event.keyCode == 13) {
+				$(".member-search").trigger("click");
+			}
+		});
+	}
+	
+	// 添加会员页面渲染
+	function addMember(data) {
+		var isPhone = 0;
+		if(!(/^1[3456789]\d{9}$/.test(data.member_search))){
+			isPhone = 0;
+		} else {
+			isPhone = 1;
+		}
+		
+		data.isPhone = isPhone;
+		
+		laytpl($("#member_add").html()).render(data, function(html){
+			$(".ns-member").html(html);
+		});
+	}
+	
+	// 会员详情页面渲染
+	function memberDetail(data) {
+		laytpl($("#member_detail").html()).render(data, function(html) {
+			$(".ns-member").html(html);
+			$("#member_id").val(data.member_id);
+		})
+	}
+	
+	// 返回搜索会员
+	function back() {
+		searchMember();
+	}
+	
+	// 添加商品
+	function addGoods(e) {
+		var sku_id = $(e).attr("data-sku-id"),
+			sku_name = $(e).attr("data-sku-name"),
+			store_stock = $(e).attr("data-store-stock"),
+			sku_price = $(e).attr("data-sku-price");
+		
+		var sku_json = {sku_id: sku_id, sku_name: sku_name, store_stock: store_stock, sku_price: sku_price, num: 1};
+		
+		if (store_stock != 0) {
+			addCart(sku_json);
+		}
+	}
+	
+	// 购物车
+	function addCart(json) {
+		var is_exit = false;
+		var null_stock = false;
+		
+		$.each(cart, function(index, item) {
+			if (item.sku_id == json.sku_id) {  // 购物车中已存在该商品
+				var item_num = parseInt(item.num) + 1;
+				
+				if (item_num > parseInt(item.store_stock)) {
+					null_stock = true;
+					item_num = parseInt(item.store_stock)
+				}
+				item.num = item_num;
+				is_exit = true;
+			}
+		})
+		
+		if (!is_exit) {
+			cart.push(json);
+		}
+		
+		isNull();
+		syncCart();
+		cartList(cart);
+	}
+	
+	
+	// 渲染购物车
+	function cartList(cart) {
+		var data = cart;
+		laytpl($("#render_cart").html()).render(data, function(html) {
+			$(".ns-order-list").html(html);
+		});
+		
+		var total_num = 0, total_price = 0;
+		$.each(cart, function(index, item) {
+			total_num += Number(item.num);
+			total_price = (parseInt(item.num) * parseFloat(item.sku_price) + Number(total_price)).toFixed(2);
+			
+			var id = item.sku_id;
+			console.log(id);
+		});
+		
+		$(".goods-total").text(total_num);
+		$(".ns-settle-good-num").text(total_num);
+		$(".ns-total-money").text(total_price);
+	}
+	
+	// 同步购物车数据
+	function syncCart() {
+		$.ajax({
+			url: ns.url("store://store/cash/cart"),
+			type: "POST",
+			dataType: "JSON",
+			async: false,
+			data: {"cart_json": JSON.stringify(cart)}
+		})
+	}
+	
+	// 加
+	function increase(sku_id) {
+		$.each(cart, function(index, item) {
+			if (item.sku_id == sku_id) {
+				var item_num = parseInt(item.num) + 1;
+				
+				if(item_num > parseInt(item.store_stock)){
+					item_num = parseInt(item.store_stock)
+				}
+				item.num = item_num;
+			}
+		})
+		
+		isNull();
+		syncCart()
+		cartList(cart);
+	}
+	
+	// 减
+	function decrease(sku_id) {
+		$.each(cart, function(index, item) {
+			if (item.sku_id == sku_id) {
+				var item_num = parseInt(item.num) - 1;
+				
+				if(item_num < 1){
+					layer.msg('已经是最小值了，不能再减少了', {icon: 5, anim: 6});
+					item_num = 1
+				}
+				
+				item.num = item_num;
+			}
+		})
+		
+		isNull();
+		syncCart()
+		cartList(cart);
+	}
+	
+	// 改变购物车数量
+	function changeCart(sku_id, obj){
+		var num = $(obj).val();
+		$.each(cart, function(index, item) {
+			if(item.sku_id == sku_id){
+				if(num < 1){
+					num = 1;
+				}
+				if(num > parseInt(item.store_stock)){
+					num = parseInt(item.store_stock);
+				}
+	
+				item.num = num;
+			}
+		});
+		
+		isNull();
+		syncCart();
+		cartList(cart);
+	}
+	
+	// 删除整行
+	function delRow(key) {
+		$.each(cart, function(index, item) {
+			if (index == key) {
+				$(".ns-good-box").each(function() {
+					if ($(this).attr("data-sku-id") == item.sku_id) {
+						$(this).removeClass("disabled");
+					}
+				});
+			}
+		})
+		
+		cart.splice(key, 1);
+		
+		syncCart();
+		cartList(cart);
+	}
+	
+	// 整单取消
+	function closeCart() {
+		$.each(cart, function(index, item) {
+			$(".ns-good-box").each(function() {
+				if ($(this).attr("data-sku-id") == item.sku_id) {
+					$(this).removeClass("disabled");
+				}
+			});
+		})
+		
+		cart = [];
+		syncCart();
+		cartList(cart);
+	}
+	
+	// 挂单
+	function restingCart() {
+		if (cart.length != 0) {
+			resting_cart.push(cart);
+			syncRestCart();
+			if (resting_cart.length != 0) {
+				$(".rest-cart-num").show();
+				$(".rest-cart-num").text(resting_cart.length);
+				$(".rest-cart-btn").removeClass("disabled");
+			} else {
+				$(".rest-cart-btn").addClass("disabled");
+			}
+			
+			cart = [];
+			syncCart();
+			cartList(cart);
+		}
+	}
+	
+	// 挂单数据同步
+	function syncRestCart() {
+		$.ajax({
+			url: ns.url("store://store/cash/restingCart"),
+			type: "POST",
+			dataType: "JSON",
+			async: false,
+			data: {"json": JSON.stringify(resting_cart)}
+		})
+	}
+	
+	// 取单
+	$(".rest-cart-btn").click(function() {
+		if (!$(this).hasClass("disabled")) {
+			fetchRestCart();
+		}
+ 	});
+	
+	function orderCart(key) {
+		var temp = [];
+		$.each(resting_cart, function(index, item) {
+			if (index == key) {
+				temp = item;
+			}
+		})
+		resting_cart.splice(key, 1);
+		syncRestCart();
+		cart = temp;
+		syncCart();
+		location.reload();
+	}
+	
+	// 删除挂单数据
+	function delRestCart(key) {
+		$.each(resting_cart, function(index, item) {
+			if (index == key) {
+				for (var i=0; i<item.length; i++) {
+					$(".ns-good-box").each(function() {
+						if ($(this).attr("data-sku-id") == item[i].sku_id) {
+							$(this).removeClass("disabled");
+						}
+					});
+				}
+			}
+		})
+		
+		resting_cart.splice(key, 1);
+		syncRestCart();
+		if (resting_cart.length == 0) {
+			closeRestCart();
+			$(".rest-cart-btn").addClass("disabled");
+			$(".rest-cart-num").hide();
+		} else {
+			fetchRestCart();
+		}
+		
+	}
+	
+	// 渲染挂单数据
+	function fetchRestCart() {
+		var data = resting_cart;
+		laytpl($("#render_rest_cart").html()).render(data, function(html) {
+			$(".ns-cash").append(html);
+		});
+		
+		if (resting_cart.length != 0) {
+			$(".rest-cart-num").show();
+			$(".rest-cart-num").text(resting_cart.length);
+			$(".rest-cart-btn").removeClass("disabled");
+		} else {
+			$(".rest-cart-btn").addClass("disabled");
+			$(".rest-cart-num").hide();
+		}
+	}
+	
+	// 关闭挂单页面
+	function closeRestCart() {
+		$(".ns-cash .ns-restcart-block").remove();
+	}
+	
+	// 结算
+	var param = {};
+	function settleList() {
+		$.ajax({
+			url: ns.url("store://store/ordercreate/payment"),
+			type: "POST",
+			dataType: "JSON",
+			async: false,
+			data: {"cart": JSON.stringify(cart)},
+			success: function(res) {
+				
+				if (res.code == 0) {
+					var data = res.data;
+					console.log(data);
+					var store_json = JSON.parse(data.delivery_store_info);
+					data.open_date = store_json.open_date,
+					data.phone = store_json.telphone;
+					
+					laytpl($("#settle_page").html()).render(data, function(html) {
+						$(".ns-cash").append(html);
+					});
+					form.render();
+					
+					// 选择优惠券
+					$(".ns-cash-coupon-list").click(function() {
+						if ($(this).hasClass("ns-cash-coupon-selected")) {
+							$(this).removeClass("ns-cash-coupon-selected");
+							param.coupon_id = "";
+						} else {
+							$(this).addClass("ns-cash-coupon-selected");
+							$(this).siblings().removeClass("ns-cash-coupon-selected");
+							
+							var coupon_id = $(this).find("input").val();
+							param.coupon_id = coupon_id;
+							
+						}
+						calculatePrice(param);
+					});
+					
+					// 选择余额
+					form.on('checkbox(is_balance)', function(data){
+						if (data.elem.checked) {
+							param.is_balance = 1;
+							$(".ns-balance-account").removeClass("layui-hide");
+						} else {
+							param.is_balance = 0;
+							$(".ns-balance-account").addClass("layui-hide");
+						}
+						calculatePrice(param);
+					}); 
+				} else {
+					layer.msg(res.message);
+				}
+			}
+		})
+	}
+	
+	// 优惠
+	function calculatePrice(data) {
+		$.ajax({
+			type: "POST",
+			url: ns.url("store://store/ordercreate/calculate"),
+			data: {
+				"coupon_id": data.coupon_id,
+				"is_balance": data.is_balance,
+				"cart": JSON.stringify(cart)
+			},
+			dataType: 'JSON',
+			success: function(res) {
+				if (res.code == 0) {
+					$(".ns-coupot-settle").text("￥" + res.data.coupon_money);
+					$(".ns-balance-settle").text("￥" + res.data.balance_money);
+					$(".ns-order-settle").text("￥" + res.data.order_money);
+					$(".ns-real-money").text(res.data.pay_money);
+				} else {
+					layer.msg(res.message);
+				}
+			},
+		});
+	}
+	
+	// 关闭结算
+	function closeSettle() {
+		$(".ns-cash .ns-sellte-block").remove();
+	}
+	
+	// 支付成功
+	function successPay() {
+		laytpl($("#pay_success").html()).render([], function(html){
+			$(".ns-sellte-block .ns-money-right .ns-money-box").html(html);
+		});
+		
+		cart = [];
+		syncCart();
+		cartList(cart);
+	}
+	
+	// 重新支付
+	function repay() {
+		var data = pay_data;
+		laytpl($("#square_accounts").html()).render(data, function(html){
+			$(".ns-sellte-block .ns-money-right .ns-money-box").html(html);
+			$(".ns-pay-type .layui-tab-title li").eq(0).addClass("layui-this");
+		});
+		
+		$(".ns-input-money").bind('input propertychange', function() {
+			var real_money = $(this).val();
+			if (Number(real_money) >= Number(data.pay_money)) {
+				var small_change = accSub(Number(real_money), Number(data.pay_money));
+				$(".ns-small-change").text("￥"+ small_change);
+				$(".ns-small-change").parent().removeClass("layui-hide");
+				$(".not-enough-money").parent().addClass("layui-hide");
+			} else {
+				var notenough_money = accSub(Number(data.pay_money), Number(real_money));
+				$(".not-enough-money").text("￥"+ notenough_money);
+				$(".not-enough-money").parent().removeClass("layui-hide");
+				$(".ns-small-change").text("￥0.00");
+				$(".ns-small-change").parent().addClass("layui-hide");
+			}
+		});
+	}
+	
+	// 两个浮点数相减
+	function accSub(num1, num2){
+		var r1, r2, m;
+		
+		try{
+			r1 = num1.toString().split(".")[1].length;
+		}catch(e){
+			r1 = 0;
+		}
+		
+		try{
+			r2 = num2.toString().split(".")[1].length;
+		}catch(e){
+			r2 = 0;
+		}
+		
+		m = Math.pow(10, Math.max(r1, r2));
+		n = (r1 >= r2) ? r1 : r2;
+		return (Math.round(num1 * m - num2 * m) / m).toFixed(2);
+	}
+	
+	// 退出收银（返回上一页）
+	$(".ns-cash-logout").click(function() {
+		window.location.href = document.referrer;
+	})
+</script>
+
+
+<!-- 商品渲染 -->
+<script type="text/html" id="goods_list">
+	{{#  if (d.list.length == 0) {  }}
+		<div class="ns-null-good"> 
+			<img src="STORE_IMG/null_goods.png"> 
+			<p class="ns-null-font">暂无商品</p> 
+		</div>
+	{{#  } else {  }}
+		{{#  layui.each(d.list, function(index, item) {  }}
+			{{#  if(item.store_stock == 0){  }}
+			<div class="ns-good-box disabled" data-sku-id="{{item.sku_id}}" data-sku-name="{{item.sku_name}}" data-store-stock="{{item.store_stock}}" data-sku-price="{{item.discount_price}}">
+			{{#  } else {  }}
+			<div class="ns-good-box" data-sku-id="{{item.sku_id}}" data-sku-name="{{item.sku_name}}" data-store-stock="{{item.store_stock}}" data-sku-price="{{item.discount_price}}" onclick="addGoods(this)">
+			{{#  }  }}
+				<div class="ns-table-title">
+					<div class="ns-title-pic">
+						<img src="{{ns.img(item.sku_image)}}" />
+					</div>
+					<div class="ns-title-content">
+						<p class="ns-multi-line-hiding good-name" title="{{item.sku_name}}">{{item.sku_name}}</p>
+						<div class="ns-good-price">
+							<p class="ns-line-hideing good-no" title="{{item.sku_no}}">编码：{{item.sku_no}}</p>
+							<p class="ns-line-hideing store-stock" title="{{item.store_stock}}">库存：{{item.store_stock}}</p>
+							<p class="ns-basic-color">￥<span class="good-price">{{item.discount_price}}</span></p>
+						</div>
+					</div>
+				</div>
+			
+				<div class="ns-empty-stock">
+					<img src="STORE_IMG/null_good.png" />
+				</div>
+			</div>
+		{{#  })  }}
+	{{#  }  }}
+</script>
+
+<!-- 会员查询 -->
+<script type="text/html" id="search_member">
+	<div class="ns-menber-dial">
+		<p>询问客户信息查询会员</p>
+		
+		<div class="ns-single-filter-box">
+			<div class="layui-form">
+				<div class="layui-input-block">
+					<input type="text" name="member_search" class="layui-input number-phone" placeholder="会员注册名称/手机号/邮箱" />
+					<button type="button" class="layui-btn layui-btn-primary member-search" lay-filter="search_member" lay-submit>
+						<i class="layui-icon">&#xe615;</i>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</script>
+
+<!-- 会员添加 -->
+<script type="text/html" id="member_add">
+	<div class="layui-form ns-form ns-member-add">
+		<h2>会员添加</h2>
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label"><span class="required">*</span>会员账号：</label>
+			<div class="layui-input-block">
+				<input name="username" type="text" class="layui-input ns-len-long" lay-verify="required" value="{{d.member_search}}">
+			</div>
+		</div>
+	
+		<div class="layui-form-item">
+			<label class="layui-form-label">会员手机号：</label>
+			<div class="layui-input-block">
+				{{#  if(d.isPhone == 0){  }}
+				<input name="mobile" type="text" class="layui-input ns-len-long" lay-verify="mobile">
+				{{#  }else{  }}
+				<input name="mobile" type="text" class="layui-input ns-len-long" lay-verify="mobile" value="{{d.member_search}}">
+				{{#  }  }}
+			</div>
+		</div>
+		
+		<div class="ns-form-row">
+			<button class="layui-btn ns-bg-color" lay-submit lay-filter="member_add">添加</button>
+			<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+		</div>
+	</div>
+</script>
+
+<!-- 会员详情 -->
+<script type="text/html" id="member_detail">
+	<div class="ns-menber-detail">
+		<div class="ns-table-title">
+			<div class="ns-title-pic">
+				<img src="{{ns.img(d.headimg)}}" onerror=src="STORE_IMG/default_headimg.png" />
+			</div>
+			<div class="ns-title-content">
+				<div class="ns-member-con-first">
+					<h2>{{d.username}}</h2>
+					<p class="ns-text-color ns-member-level">{{d.member_level_name}}</p>
+					<p class="ns-member-sex">{{d.sex == 0 ? '未知' : d.sex == 1 ? '男' : '女'}}</p>
+				</div>
+				<div class="ns-member-con-second">
+					<p class="ns-text-color-gray">手机：<span class="member-mobile">{{d.mobile == "" ? '--' : d.mobile}}</span></p>
+					<p class="ns-text-color-gray">生日：<span class="member-bir">{{d.birthday == "" ? '--' : ns.time_to_date(d.birthday)}}</span></p>
+					<p class="ns-text-color-gray">成为会员：<span class="member-reg">{{d.reg_time == "" ? '--' : ns.time_to_date(d.reg_time)}}</span></p>
+				</div>
+			</div>
+		</div>
+		<button class="layui-btn layui-btn-primary" lay-submit lay-filter="logout_member">更换会员</button>
+		
+		<div class="ns-member-num">
+			<div class="ns-member-num-box">
+				<div class="ns-member-info-box">
+					<p class="ns-member-num-title ns-text-color-gray">余额（元）</p>
+					<p class="ns-member-num-price member-banlance">{{ parseFloat(d.balance) + parseFloat(d.balance_money)}}</p>
+					<p class="ns-member-num-desc"></p>
+					<p class="ns-text-color-light-gray">结算时可用余额抵付</p>
+				</div>
+				
+				<div class="ns-member-info-box">
+					<p class="ns-text-color-gray">积分</p>
+					<p class="ns-member-num-price member-point">{{d.point}}</p>
+					<p class="ns-member-num-desc"></p>
+					<p class="ns-text-color-light-gray">积分抵现未开启</p>
+				</div>
+				
+				<div class="ns-member-info-box">
+					<p class="ns-member-num-title ns-text-color-gray">成长值</p>
+					<p class="ns-member-num-price member-growth">{{d.growth}}</p>
+					<p class="ns-member-num-desc"></p>
+				</div>
+			</div>
+		</div>
+	</div>
+</script>
+
+<!-- 渲染购物车 -->
+<script type="text/html" id="render_cart">
+	{{#  if(d.length == 0){  }}
+		<div class="ns-null-good">
+			<img src="STORE_IMG/shopping_cart.png" />
+			<p class="ns-null-font">未添加任何商品</p>
+		</div>
+	{{#  }else{  }}
+		{{#  layui.each(d, function(index, item){  }}
+		<div class="ns-good-seleted" data-id="{{item.sku_id}}">
+			<div class="ns-good-seleted-name">
+				<p class="ns-line-hiding" style="height: 35px;" title="{{item.sku_name}}">{{item.sku_name}}</p>
+				<span class="ns-del-account ns-basic-color" onclick="delRow({{index}})">删除</span>
+			</div>
+			<div class="ns-good-seleted-info">
+				<span>￥{{item.sku_price}}</span>
+				<div class="ns-align-right ns-selected-num">
+					<span onclick="increase({{item.sku_id}})">+</span>
+					<input type="text" value="{{item.num}}" onchange="changeCart({{item.sku_id}}, this)" class="layui-input" />
+					<span onclick="decrease({{item.sku_id}})">-</span>
+				</div>
+				<span class="ns-basic-color">￥{{(parseFloat(item.sku_price) * parseInt(item.num)).toFixed(2)}}</span>
+			</div>
+		</div>
+		{{#  })  }}
+	{{#  }  }}
+</script>
+
+<!-- 渲染挂单数据 -->
+<script type="text/html" id="render_rest_cart">
+	<div class="ns-form ns-money ns-restcart-block">
+		<div class="ns-money-block ns-money-left">
+			<div class="ns-settle-accounts ns-money-box">
+			</div>
+		</div>
+		<div class="ns-money-block ns-money-middle"></div>
+		<div class="ns-money-block ns-money-right">
+			<div class="ns-money-box">
+				<div class="ns-rest-cart-title">
+					<span>取单</span>
+					<i class="iconfont iconclose_light" onclick="closeRestCart()"></i>
+				</div>
+				<div class="ns-rest-cart-block">
+					{{#  layui.each(d, function(index, item){  }}
+					<div class="ns-rest-cart-box layui-form">
+						<table class="layui-table ns-rest-cart-list" lay-skin="line">
+							<colgroup>
+								<col width="60%">
+								<col width="20%">
+								<col width="20%">
+							</colgroup>
+							<thead>
+								<th>商品名称</th>
+								<th class="ns-align-right">数量</th>
+								<th class="ns-align-right">商品价格</th>
+							</thead>
+							<tbody>
+								{{#  layui.each(item, function(name, value){  }}
+								<tr>
+									<td>{{value.sku_name}}</td>
+									<td class="ns-align-right">{{value.num}}</td>
+									<td class="ns-align-right">￥{{value.sku_price}}</td>
+								</tr>
+								{{#  })  }}
+							</tbody>
+						</table>
+						<div class="ns-form-row">
+							<button class="layui-btn layui-btn-primary" onclick="delRestCart({{index}})">删除</button>
+							<button class="layui-btn ns-bg-color" onclick="orderCart({{index}})">取单</button>
+						</div>
+					</div>
+					{{#  })  }}
+				</div>
+			</div>
+		</div>
+	</div>
+</script>
+
+<!-- 结算页面 -->
+<script type="text/html" id="settle_page">
+	<div class="ns-form ns-money ns-sellte-block">
+		<div class="ns-money-block ns-money-left">
+			<div class="ns-settle-accounts ns-money-box">
+			</div>
+		</div>
+		<div class="ns-money-block ns-money-middle"></div>
+		<div class="ns-money-block ns-money-right">
+			<div class="ns-money-box">
+				<div class="ns-rest-cart-title">
+					<span>收款</span>
+					<i class="iconfont iconclose_light" onclick="closeSettle()"></i>
+				</div>
+				<div class="ns-cash-settle layui-form">
+					<div class="ns-cash-settle-box">
+						<div class="ns-cash-store">
+							<h3><strong>{{d.delivery_store_name}}</strong></h3>
+							<div class="ns-cash-store-info">
+								<p>营业时间：<span class="ns-cash-store-opendate">{{d.open_date}}</span></p>
+								<p>联系电话：<span class="ns-cash-store-phone">{{d.phone}}</span></p>
+							</div>
+						</div>
+						
+						{{#  if(d.shop_goods_list.coupon_list.length) {  }}
+						<div class="ns-cash-store ns-cash-coupon">
+							<h3><strong>优惠券</strong></h3>
+							<div class="ns-cash-store-info ns-cash-member-coupon">
+								{{#  layui.each(d.shop_goods_list.coupon_list, function(index, item){  }}
+								<div class="ns-cash-coupon-list">
+									<input type="hidden" value="{{item.coupon_id}}" />
+									<div class="ns-coupon-box">
+										<div class="ns-coupon-info">
+											{{# if(item.type == 'reward') {  }}
+											<span class="ns-coupon-type">满减优惠券</span>
+											{{#  }  }}
+											{{# if(item.discount == 'discount') {  }}
+											<span class="ns-coupon-type">折扣优惠券</span>
+											{{#  }  }}
+											<p class="ns-coupon-time">有效期至{{ns.time_to_date(item.end_time)}}</p>
+											{{# if(item.type == 'discount') {  }}
+											<div class="ns-coupon-price-box ns-basic-color"><span class="ns-coupon-price">{{item.discount}}</span>折</div>
+											{{#  }  }}
+											{{# if(item.type == 'reward') {  }}
+											<div class="ns-coupon-price-box ns-basic-color">￥<span class="ns-coupon-price">{{item.money}}</span></div>
+											{{#  }  }}
+										</div>
+										<p class="ns-coupon-name">{{item.coupon_name}}</p>
+									</div>
+									<div class="selected-icon"><img src="STORE_IMG/select.png" /></div>
+								</div>
+								{{#  })  }}
+							</div>
+						</div>
+						{{#  }  }}
+						
+						<div class="ns-banlance ns-cash-store">
+							<div class="layui-form-item">
+								<input type="checkbox" name="is_balance" lay-skin="primary" value="1" lay-filter="is_balance" title="是否使用余额">
+							</div>
+							<div class="layui-form-item">
+								余额：￥{{d.member_account.balance}}
+							</div>
+						</div>
+					</div>
+					
+					<div class="ns-card-bottom">
+						<div class="layui-card-bottom">
+							{{#  if(d.shop_goods_list.coupon_list.length != 0) {  }}
+							<p>
+								<span class="ns-settle-sum">优惠券优惠</span>
+								<span class="ns-coupot-settle ns-settle-sum ns-red-color">￥{{d.coupon_money}}</span>
+							</p>
+							{{#  }  }}
+							{{#  if(d.is_balance != 0) {  }}
+							<p>
+							{{#  }else{  }}
+							<p class="ns-balance-account layui-hide">
+							{{#  }  }}
+								<span class="ns-settle-sum">使用余额</span>
+								<span class="ns-balance-settle ns-settle-sum">￥{{d.balance_money}}</span>
+							</p>
+							<p>
+								<span class="ns-settle-sum">订单总金额</span>
+								<span class="ns-order-settle ns-settle-sum">￥{{d.order_money}}</span>
+							</p>
+							<p>
+								<span class="ns-settle-sum">应收金额</span>
+								<span class="ns-total-sum ns-basic-color">￥<span class="ns-total-money ns-real-money">{{d.pay_money}}</span></span>
+							</p>
+						</div>
+						<div class="ns-form-row">
+							<!-- <div>订单总金额：<span class="ns-order-settle ns-settle-sum">￥{{d.pay_money}}</span></div>
+							{{#  if(d.shop_goods_list.coupon_list.length != 0) {  }}
+							<div>优惠券优惠：<span class="ns-order-settle ns-settle-sum">￥{{d.coupon_money}}</span></div>
+							{{#  }  }}
+							<div class="ns-balance-account {{ d.is_balance == 0 ? 'layui-hide' : ''}}">使用余额：<span class="ns-order-settle ns-settle-sum">￥{{d.balance_money}}</span></div>
+							<div>应收金额：<p class="ns-basic-color">￥<span class="ns-total-money ns-real-money">{{d.order_money}}</p></span></div> -->
+							<button class="layui-btn ns-bg-color" lay-submit lay-filter="square_accounts">收款</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</script>
+
+<!-- 收款 -->
+<script type="text/html" id="square_accounts">
+	<div class="layui-tab ns-pay-type">
+		<ul class="layui-tab-title">
+			{foreach $pay_type_list as $type_k => $type_v}
+				<li>
+					{if $type_k == 'OFFLINE_PAY'}
+					<img src="STORE_IMG/charge.png" />
+					{/if}
+					{if $type_k == 'alipay'}
+					<img src="STORE_IMG/alipay.png" />
+					{/if}
+					{if $type_k == 'wechatpay'}
+					<img src="STORE_IMG/wechat.png" />
+					{/if}
+					<p>{$type_v}</p>
+				</li>
+			{/foreach}
+		</ul>
+		<div class="layui-tab-content">
+			{foreach $pay_type_list as $type_k => $type_v}
+			{if $type_k == 'OFFLINE_PAY'}
+			<div class="layui-tab-item layui-show">
+				<h2>应收金额：<span class="ns-basic-color">￥<span class="ns-pay-money">{{d.pay_money}}</span></span></h2>
+				
+				<div class="ns-pay-box">
+					<div class="ns-pay-cash layui-form">
+						<span>实收金额</span>
+						<input type="hidden" name="out_trade_no" value="{{d.data}}" />
+						<input type="text" name="money" class="layui-input ns-input-money" lay-verify="money" placeholder="0" />
+						<p class="layui-hide">剩余金额<label class="not-enough-money"></label>可使用其他收款方式完成订单</p>
+						<p>找零：<label class="ns-small-change ns-red-color">￥：0.00</label></p>
+						<div class="ns-form-row">
+							<button class="layui-btn ns-bg-color" lay-submit lay-filter="submit_payment">确定</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			{else/}
+			<div class="layui-tab-item">
+				<h2>应收金额：<span class="ns-basic-color">￥{{d.pay_money}}</span></h2>
+				<div class="ns-pay-box">
+					<div class="ns-pay-cash layui-form">
+						<input type="hidden" name="out_trade_no" value="{{d.data}}" />
+						<input type="hidden" name="pay_type" value="{$type_k}" />
+						<button class="layui-btn ns-bg-color" lay-submit lay-filter="submit_paytype">收款</button>
+					</div>
+				</div>
+			</div>
+			{/if}
+			{/foreach}
+		</div>
+		
+		<div class="ns-card-bottom">
+			<div class="ns-form-row">
+				<button class="layui-btn layui-btn-primary" onclick="closeSettle()">取消收款</button>
+			</div>
+		</div>
+	</div>
+</script>
+
+<!-- 支付成功 -->
+<script type="text/html" id="pay_success">
+	<div class="ns-pay-success">
+		<div class="ns-success">
+			<div class="ns-success-img"><i class="iconfont iconduihao1"></i></div>
+			<p>收款成功</p>
+		</div>
+		<div class="ns-card-bottom">
+			<div class="ns-form-row">
+				<button class="layui-btn layui-btn-primary" onclick="closeSettle()">返回</button>
+			</div>
+		</div>
+	</div>
+</script>
+
+<!-- 支付宝支付 -->
+<script type="text/html" id="alipay">
+	<div class="ns-pay-success">
+		<div class="ns-success">
+			<button class="layui-btn ns-bg-color" onclick="successPay()">支付成功</button>
+			<button class="layui-btn layui-btn-primary" onclick="repay()">支付失败</button>
+		</div>
+	</div>
+</script>
+
+<!-- 微信支付 -->
+<script type="text/html" id="wechat">
+	<div class="ns-pay-success">
+		<div class="ns-success">
+			<div class="wx-ewm" id="qrcode"></div>
+			<input type="hidden" class="qrcode" value="{{d.qrcode}}" /><br />
+			<button class="layui-btn ns-bg-color" lay-submit lay-filter="submit_payment">确定</button>
+		</div>
+		<div class="ns-card-bottom">
+			<div class="ns-form-row">
+				<button class="layui-btn layui-btn-primary" onclick="closeSettle()">返回</button>
+			</div>
+		</div>
+	</div>
+</script>
+{/block}

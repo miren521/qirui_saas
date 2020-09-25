@@ -1,0 +1,249 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.live-img{max-width:100%;max-height:100%;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form">
+	<input type="hidden" name="id" value="{$info.id}"/>
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">基础配置</span>
+		</div>
+		
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">申请类型：</label>
+				<div class="layui-input-block ns-len-mid">
+					<p class='live-item-block'>
+						{$info.type == 0 ? '手机直播' : '其他'}
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">直播标题：</label>
+				<div class="layui-input-block ns-len-mid">
+					<p class='live-item-block'>
+						{$info.name}
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">审核状态：</label>
+				<div class="layui-input-block ns-len-mid">
+					<p class='live-item-block'>
+						{$info.audit_status_name}
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">开播状态：</label>
+				<div class="layui-input-block ns-len-mid">
+					<p class='live-item-block'>
+						{$info.live_status_name}
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">开播时间：</label>
+				<div class="layui-input-block ns-len-mid">
+					<p class='live-item-block'>
+						{:time_to_date($info.start_time)}
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">结束时间：</label>
+				<div class="layui-input-block ns-len-mid">
+					<p class='live-item-block'>
+						{:time_to_date($info.end_time)}
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">主播昵称：</label>
+				<div class="layui-input-block ns-len-mid">
+					<p class='live-item-block'>
+						{$info.anchor_name}
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">主播微信号：</label>
+				<div class="layui-input-block ns-len-mid">
+					<p class='live-item-block'>
+						{$info.anchor_wechat}
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">分享卡片样式配置</span>
+		</div>
+
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">分享卡片封面：</label>
+				<div class="layui-input-block">
+					<div class="upload-img-block icon">
+						<div class="upload-img-box" >
+							<img class='live-img'src="{:img($info.share_img)}" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">直播间样式配置</span>
+		</div>
+
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">直播间背景墙：</label>
+				<div class="layui-input-block">
+					<div class="upload-img-block icon">
+						<div class="upload-img-box" >
+							<img class='live-img' src="{:img($info.cover_img)}" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">直播间功能：</label>
+			<div class="layui-input-block">
+				<input type="checkbox" name="closeLike" value="0" title="开启点赞" lay-skin="primary" {if $info.close_like == 0}checked{/if} disabled><br>
+				<input type="checkbox" name="closeGoods" value="0" title="开启货架" lay-skin="primary" {if $info.close_goods == 0}checked{/if} disabled><br>
+				<input type="checkbox" name="closeComment" value="0" title="开启评论" lay-skin="primary" {if $info.close_comment == 0}checked{/if} disabled>
+			</div>
+		</div>
+	</div>
+	<div class="ns-single-filter-box">
+		<div class="ns-form-row">
+			{if $info.audit_status == 0}
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="agree">同意</button>
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="refuse">拒绝</button>
+			{/if}
+			<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+		</div>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form'], function() {
+		var form = layui.form,
+			repeat_flag = false; //防重复标识
+		form.render();
+
+
+		
+
+		/**
+		 * 通过
+		 */
+		form.on('submit(agree)', function(data) {
+			agree(data.field);
+		});
+
+		/**
+		 * 拒绝
+		 */
+		form.on('submit(refuse)', function(data) {
+			refuse(data.field);
+		});
+	});
+
+
+	/**
+	 * 通过审核
+	 */
+	var agree_flag = false;
+	function agree(field) {
+		if(agree_flag) return false;
+		agree_flag = true;
+
+		layer.confirm('确定要通过当前直播申请吗?', {title: '提示'}, function() {
+			$.ajax({
+				url: ns.url("live://admin/room/agree"),
+				data: field,
+				dataType: 'JSON', //服务器返回json格式数据
+				type: 'POST', //HTTP请求类型
+				success: function(res) {
+					agree_flag = false;
+					if (res.code >= 0) {
+						location.reload();
+					} else {
+						layer.closeAll();
+						layer.msg(res.message);
+					}
+				}
+			});
+		}, function () {
+			layer.closeAll();
+			agree_flag = false;
+		});
+	}
+
+	/**
+	 * 通过审核
+	 */
+	var refuse_flag = false;
+	function refuse(field) {
+		if(refuse_flag) return false;
+		refuse_flag = true;
+
+		layer.confirm('确定要拒绝当前直播申请吗?', {title: '提示'}, function() {
+
+			layer.prompt({title: '填写拒绝理由，并确认', formType: 2}, function(text, index){
+
+				field.reason = text;
+				$.ajax({
+					url: ns.url("live://admin/room/refuse"),
+					data: field,
+					dataType: 'JSON', //服务器返回json格式数据
+					type: 'POST', //HTTP请求类型
+					success: function(res) {
+						refuse_flag = false;
+						if (res.code >= 0) {
+							location.reload();
+						} else {
+
+							layer.closeAll();
+							layer.msg(res.message);
+						}
+					}
+				});
+			});
+
+		}, function () {
+			layer.closeAll();
+			refuse_flag = false;
+		});
+	}
+	function back() {
+		location.href = ns.url("live://admin/room/index");
+	}
+</script>
+{/block}

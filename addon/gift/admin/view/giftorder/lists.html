@@ -1,0 +1,313 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">操作提示</h2>
+        <ul class="layui-colla-content layui-show">
+            <li>可搜索礼品名称、关键字搜索出具体礼品卡信息</li>
+            <li>可进行礼品添加、删除、编辑等操作</li>
+        </ul>
+    </div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+
+    <div class="layui-form">
+        <div class="layui-input-inline">
+            <input type="text" name="search_text" placeholder="请输入礼品名称" class="layui-input" autocomplete="off">
+            <button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+                <i class="layui-icon">&#xe615;</i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="type_name">
+    <ul class="layui-tab-title">
+        <li class="layui-this" lay-id="">全部</li>
+        <li lay-id="2">未配送</li>
+        <li lay-id="1">已配送</li>
+    </ul>
+
+    <div class="layui-tab-content">
+        <!-- 列表 -->
+        <table id="gift_order_list" lay-filter="gift_order_list"></table>
+    </div>
+</div>
+
+<!-- 礼品信息 -->
+<script type="text/html" id="gift_info">
+    <div class='ns-table-tuwen-box'>
+        <div class='ns-img-box'>
+			{{#  if(d.gift_image){  }}
+            <img layer-src src="{{ns.img(d.gift_image.split(',')[0])}}">
+			{{#  }  }}
+        </div>
+        <div class='ns-font-box'>
+            <p class="ns-multi-line-hiding">礼品名称：{{d.gift_name}}</p>
+            <p class="ns-multi-line-hiding">领取数量：{{d.num}}</p>
+        </div>
+    </div>
+</script>
+
+<!-- 编辑删除操作 -->
+<script type="text/html" id="action">
+    <div class="ns-table-btn">
+        <a class="layui-btn" lay-event="express">配送管理</a>
+        <a class="layui-btn" lay-event="detail">查看</a>
+    </div>
+</script>
+<script type="text/html" id="express_status">
+    {{# if(d.express_status == 0){}}
+    未配送
+    {{# } }}
+    {{# if(d.express_status == 1){}}
+    已配送
+    {{# } }}
+</script>
+{/block}
+{block name="script"}
+<script>
+    layui.use(['form','laytpl', 'element'], function() {
+        var table,
+            form = layui.form,
+            laytpl = layui.laytpl,
+            element = layui.element,
+            repeat_flag = false; //防重复标识
+        form.render();
+
+        //监听Tab切换
+        element.on('tab(type_name)', function(data) {
+            var type = $(this).attr("lay-id");
+            table.reload( {
+                page: {
+                    curr: 1
+                },
+                where: {
+                    'express_status': type
+                }
+            });
+        });
+
+        table = new Table({
+            elem: '#gift_order_list',
+            url: ns.url("gift://admin/giftorder/lists"),
+            where:{gift_id:"{$gift_id}"},
+            cols: [
+                [{
+					field: 'gift_name,num',
+					title: '礼品名称 / 领取数量',
+					width: '20%',
+					unresize: 'false',
+					templet: '#gift_info',
+				},{
+                    field: 'member_name',
+                    title: '会员信息',
+                    unresize: 'false',
+                    width: '25%',
+                    templet: '<div>会员名称：{{d.member_name}}<br>会员电话：{{d.mobile}}<br>会员地址：{{d.full_address}}</div>',
+                }, {
+                    field: 'express_status',
+                    title: '配送信息',
+                    unresize: 'false',
+                    width: '10%',
+                    templet: '#express_status'
+                }, {
+                    field: 'get_type_name',
+                    title: '获取方式',
+                    unresize: 'false',
+                    width: '10%'
+                },  {
+                    title: '操作',
+                    toolbar: '#action',
+                    unresize: 'false',
+                    width: '15%'
+                }]
+            ]
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'detail': //查看
+                    detail(data);
+                    break;
+                case 'express': //配送管理
+                    express(data);
+                    break;
+            }
+        });
+        /**
+         * 配送管理
+         */
+        function express(data) {
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("gift://admin/giftorder/detail"),
+                data: {'order_id': data.order_id},
+                success: function (res) {
+                    laytpl($("#express").html()).render(res.data, function(html) {
+                        layer.open({
+                            title: '配送管理',
+                            skin: 'layer-tips-class',
+                            type: 1,
+                            area: ['800px'],
+                            content: html
+                        });
+                    });
+                }
+            });
+        }
+        
+        form.on('submit(express)', function(data){
+            layer.closeAll();
+            $.ajax({
+                url: ns.url("gift://admin/giftorder/express"),
+                data: data.field,
+                type: "POST",
+                dataType: "JSON",
+                success: function(res) {
+                    if (res.code == 0) {
+                        layer.confirm('礼品配送成功', {
+                            title:'操作提示',
+                            btn: ['返回列表'],
+                            yes: function(){
+                                location.href = ns.url("gift://admin/giftorder/lists");
+                            }
+                        });
+                    }else{
+                        layer.msg(res.message);
+                        repeat_flag = false;
+                    }
+                }
+            });
+
+        });
+
+        /**
+         订单详情
+         */
+        function detail(data) {
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("gift://admin/giftorder/detail"),
+                data: {'order_id': data.order_id},
+                success: function (res) {
+                    laytpl($("#detail").html()).render(res.data, function(html) {
+                        layer.open({
+                            title: '礼品订单详情',
+                            skin: 'layer-tips-class',
+                            type: 0,
+                            area: ['450px'],
+                            content: html
+                        });
+                    });
+                }
+            });
+        }
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function(data) {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+        });
+        
+    });
+</script>
+<!-- 详情弹框html -->
+<script type="text/html" id="detail">
+    <table class="layui-table ns-table-detail">
+        <colgroup>
+            <col width="120">
+            <col width="270">
+        </colgroup>
+        <tbody>
+        <tr>
+            <td>订单编号</td>
+            <td>{{d.order_no}}</td>
+        </tr>
+        <tr>
+            <td>礼品名称</td>
+            <td>{{d.gift_name}}</td>
+        </tr>
+        <tr>
+            <td>领取数量</td>
+            <td>{{d.num}}</td>
+        </tr>
+        <tr>
+            <td>会员名称</td>
+            <td>{{d.member_name}}</td>
+        </tr>
+        <tr>
+            <td>会员电话</td>
+            <td>{{d.mobile}}</td>
+        </tr>
+        <tr>
+            <td>详细地址</td>
+            <td>{{d.full_address}}</td>
+        </tr>
+        <tr>
+            <td>配送状态</td>
+            <td>{{d.express_status==1 ? '已配送' : '未配送'}}</td>
+        </tr>
+        <tr>
+            <td>物流公司</td>
+            <td>{{d.express_company_name}}</td>
+        </tr>
+        <tr>
+            <td>配送编码</td>
+            <td>{{d.express_no}}</td>
+        </tr>
+        <tr>
+            <td>说明</td>
+            <td id="remark">{{d.remark}}</td>
+        </tr>
+        </tbody>
+    </table>
+</script>
+<!-- 配送管理html -->
+<script type="text/html" id="express">
+    <div class="layui-form ns-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label mid">配送编码：</label>
+            <div class="layui-input-block">
+                <input type="text" name="express_no" value="{{d.express_no}}" required  lay-verify="required" autocomplete="off" class="layui-input ns-len-long">
+            </div>
+        </div>
+		
+        <div class="layui-form-item">
+            <label class="layui-form-label mid">物流公司：</label>
+            <div class="layui-input-block">
+                <input type="text" name="express_company_name" value="{{d.express_company_name}}" required  lay-verify="required"  autocomplete="off" class="layui-input ns-len-long">
+            </div>
+        </div>
+       
+        <input type="hidden" name="order_id" value="{{d.order_id}}" class="layui-input">
+		
+		<div class="ns-form-row mid">
+			<button class="layui-btn ns-bg-color" lay-submit lay-filter="express">配送</button>
+			<button type="reset" onclick="cancel()" class="layui-btn ns-bg-color">取消</button>
+		</div>
+    </div>
+</script>
+<script>
+    function cancel()
+    {
+        layer.closeAll()
+    }
+</script>
+{/block}

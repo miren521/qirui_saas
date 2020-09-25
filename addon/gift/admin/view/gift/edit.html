@@ -1,0 +1,189 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label"><span class="required">*</span>礼品编号：</label>
+        <div class="layui-input-block">
+            <input type="text" disabled lay-verify="required" placeholder="" value="{$info['gift_no']}" class="layui-input ns-len-long">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label"><span class="required">*</span>礼品名称：</label>
+        <div class="layui-input-block">
+            <input type="text" value="{$info['gift_name']}" name="gift_name" lay-verify="required" class="layui-input ns-len-long">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label img-upload-lable">礼品图片：</label>
+        <div class="layui-input-inline img-upload">
+            <input type="hidden" name="gift_image" value="{$info.gift_image}" />
+            <div class="upload-img-block icon">
+                <div class="upload-img-box" id="gift_image">
+                    {if empty($info.gift_image)}
+                    <div class="ns-upload-default">
+                        <img src="__STATIC__/img/upload_img.png" />
+                        <p>点击上传</p>
+                    </div>
+                    {else/}
+                    <img src="{:img($info.gift_image)}" alt="">
+                    {/if}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label"><span class="required">*</span>礼品价格：</label>
+        <div class="layui-input-block">
+             <div class="layui-input-inline">
+            <input type="number" value="{$info['gift_price']}" name="gift_price" lay-verify="required|flo" class="layui-input ns-len-short">
+             </div>
+            <span class="layui-form-mid">元</span>
+        </div>
+		<div class="ns-word-aux">价格最低为0，可保留两位小数</div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label"><span class="required"></span>关键字：</label>
+        <div class="layui-input-block">
+            <input type="text"  value="{$info['gift_keywords']}" name="gift_keywords" class="layui-input ns-len-long">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label"><span class="required"></span>简介：</label>
+        <div class="layui-input-block">
+            <textarea name="gift_desc" class="layui-textarea ns-len-long">{$info['gift_desc']}</textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label"><span class="required">*</span>库存：</label>
+        <div class="layui-input-block">
+            <input type="number" value="{$info['gift_stock']}" name="gift_stock" lay-verify="required|num" class="layui-input ns-len-short">
+        </div>
+        <div class="ns-word-aux">请输入大于等于0的整数</div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">上下架：</label>
+        <div class="layui-input-block">
+            <input id="gift_state" type="checkbox" name="gift_state" lay-skin="switch" {if $info['gift_state'] == 1}checked {/if} value="1" lay-filter="gift_state">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label"><span class="required">*</span>礼品详情：</label>
+        <div class="layui-input-block ns-special-length">
+            <script id="container" name="gift_body" type="text/plain" style="height: 300px;"></script>
+        </div>
+    </div>
+
+    <input type="hidden" value="{$info.gift_body}" id="content" />
+    <input type="hidden" value="{$info.gift_id}" name="gift_id" />
+	
+    <div class="ns-form-row">
+        <button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+        <button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+    </div>
+</div>
+{/block}
+{block name="script"}
+<script type="text/javascript" charset="utf-8" src="STATIC_EXT/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" charset="utf-8" src="STATIC_EXT/ueditor/ueditor.all.js"></script>
+<script type="text/javascript" charset="utf-8" src="STATIC_EXT/ueditor/lang/zh-cn/zh-cn.js"></script>
+<script type="text/javascript">
+    //实例化富文本
+    var upload,form,html,
+        ue = UE.getEditor('container'),
+        repeat_flag = false;
+
+    ue.ready(function() {   //对编辑器的操作最好在编辑器ready之后再做
+        var con = $("#content").val();
+        ue.setContent(con);   //获取html内容，返回: <p>hello</p>
+    });
+	
+    layui.use(['form', 'upload'], function() {
+        form = layui.form;
+        upload = layui.upload;
+        form.render();
+
+        form.on('submit(save)', function(data) {
+            ue.ready(function() {   //对编辑器的操作最好在编辑器ready之后再做
+                html = ue.getContent();   //获取html内容，返回: <p>hello</p>
+            });
+            data.field.gift_body = html;
+            if (data.field.gift_body == "") {
+                layer.msg('请输入礼品详情');
+                return;
+            }
+			
+            if (repeat_flag) return;
+            repeat_flag = true;
+			
+            $.ajax({
+                url: ns.url("gift://admin/gift/edit"),
+                data: data.field,
+                type: "POST",
+                dataType: "JSON",
+                success: function(res) {
+					repeat_flag = false;
+                    if (res.code == 0) {
+                        layer.confirm('编辑成功', {
+                            title:'操作提示',
+                            btn: ['返回列表', '继续操作'],
+                            yes: function(){
+                                location.href = ns.url("gift://admin/gift/lists");
+                            },
+							btn2: function() {
+								location.reload();
+							}
+                        });
+                    }else{
+                        layer.msg(res.message);
+                    }
+                }
+            });
+        });
+
+        //礼品图片
+        var uploadInst = upload.render({
+            elem: '#gift_image',
+            url: ns.url("admin/upload/upload"),
+            done: function(res) {
+                if (res.code >= 0) {
+                    $("input[name='gift_image']").val(res.data.pic_path);
+                    $("#gift_image").html("<img src=" + ns.img(res.data.pic_path) + ">");
+                }
+                return layer.msg(res.message);
+            }
+        });
+		
+		//表单验证
+		form.verify({
+			flo: function (value) {
+				if (value == '') {
+					return;
+				}
+				var reg = /^(0|[1-9]\d*)(\s|$|\.\d{1,2}\b)/;
+				if (!reg.test(value)) {
+					return '价格不能小于0，可保留两位小数！'
+				}
+			},
+			num: function (value) {
+				if (value<0 || value%1 != 0) {
+					return '请输入0或大于0的整数'
+				}
+			}
+		});
+    });
+
+    function back() {
+        location.href = ns.url("gift://admin/gift/lists");
+    }
+</script>
+{/block}

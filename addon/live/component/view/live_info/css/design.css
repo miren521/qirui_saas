@@ -1,0 +1,106 @@
+.live-wrap {
+	background: #fff;
+	border-radius: 8px;
+	overflow: hidden;
+	width: 100%;
+}
+
+.banner-wrap {
+	width: 100%;
+	position: relative;
+	line-height: 1;
+	display: flex;
+}
+
+.banner-wrap img {
+	width: 100%;
+	height: 88px;
+}
+
+.banner-wrap .shade {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	background: rgba(180, 180, 180, 0.3);
+	left: 0;
+	top: 0;
+	z-index: 5;
+}
+
+.banner-wrap .wrap {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 10;
+	padding: 10px;
+	box-sizing: border-box;
+}
+
+.banner-wrap .wrap .room-name {
+	font-size: 14px;
+	color: #fff;
+	line-height: 1;
+	width: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: flex;
+	align-items: center;
+}
+
+.banner-wrap .room-name .status-name {
+	display: inline-block;
+	font-size: 12px;
+	color: #fff;
+	padding: 4px 10px;
+	background-color: #FF4544;
+	border-radius: 18px;
+	margin-right: 10px;
+}
+
+.room-name .status-name .iconzhibozhong {
+	font-size: 12px;
+	color: #fff;
+	margin-right: 2px;
+}
+
+
+.room-info {
+	padding: 5px 10px;
+	background: #fff;
+	display: flex;
+	align-items: center;
+	height: 30px;
+}
+
+.room-info .anchor-img {
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	overflow: hidden;
+	margin-right: 10px;
+}
+
+.room-info .anchor-name,
+.room-info .goods-text {
+	font-size: 12px;
+	line-height: 1;
+}
+
+.room-info .separate {
+	color: #808080;
+	margin: 0 5px;
+	line-height: 1;
+}
+
+.component-live-info h3 {
+	font-size: 14px;
+	font-weight: 600;
+	padding: 5px 10px 10px 10px;
+}
+
+.component-live-info .layui-form-item .layui-input-inline {
+	padding-left: 20px;
+}

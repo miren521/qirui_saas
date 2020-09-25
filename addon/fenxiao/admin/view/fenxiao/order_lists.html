@@ -1,0 +1,249 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>分销商列表</li>
+		</ul>
+	</div>
+</div>
+
+<div class="ns-screen layui-collapse" lay-filter="selection_panel">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">筛选</h2>
+		<form class="layui-colla-content layui-form layui-show">
+
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">搜索方式：</label>
+					<div class="layui-input-inline">
+						<select name="search_text_type">
+							<option value="order_no">订单编号</option>
+							<option value="goods_name">商品名称</option>
+							<option value="site_name">店铺名称</option>
+						</select>
+					</div>
+					<div class="layui-input-inline">
+						<input type="text" name="search_text" autocomplete="off" class="layui-input" placeholder="输入订单编号/商品名称/店铺名称" />
+					</div>
+				</div>
+
+				<div class="layui-inline">
+					<label class="layui-form-label">结算状态：</label>
+					<div class="layui-input-inline">
+						<select name="status">
+							<option value="">全部</option>
+							<option value="1">未结算</option>
+							<option value="2">已结算</option>
+						</select>
+					</div>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">下单时间：</label>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input" name="start_time" placeholder="开始时间" id="start_time" readonly>
+						<i class="ns-calendar"></i>
+					</div>
+					<div class="layui-form-mid">-</div>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input" name="end_time" placeholder="结束时间" id="end_time" readonly>
+						<i class="ns-calendar"></i>
+					</div>
+					<button class="layui-btn layui-btn-primary date-picker-btn" onclick="datePick(7, this);return false;">近7天</button>
+					<button class="layui-btn layui-btn-primary date-picker-btn" onclick="datePick(30, this);return false;">近30天</button>
+				</div>
+
+			</div>
+
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit id="" lay-filter="search">筛选</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</form>
+	</div>
+</div>
+<div class="layui-tab ns-table-tab" lay-filter="status">
+
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="fenxiao_list" lay-filter="fenxiao_list"></table>
+	</div>
+</div>
+
+<!-- 商品 -->
+<script type="text/html" id="goods_info">
+	<div class="ns-table-tuwen-box">
+		<div class="ns-img-box">
+			<img layer-src src="{{ns.img(d.sku_image.split(',')[0])}}"/>
+		</div>
+		<div class="ns-font-box">
+			<a href="javascript:;" class="ns-multi-line-hiding ns-text-color" title="{{d.sku_name}}">{{d.sku_name}}</a>
+		</div>
+	</div>
+</script>
+
+<!-- 买家信息 -->
+<script type="text/html" id="order_info">
+	<div class="ns-table-tuwen-box">
+		<div class="ns-font-box">
+			<p>姓名：{{ d.member_name }}</p>
+			<p>电话：{{ d.member_mobile }}</p>
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="action">
+    <div class="ns-table-btn">
+        <a class="layui-btn" lay-event="detail">查看</a>
+    </div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+	layui.use(['form', 'laydate'], function() {
+		var table,
+			form = layui.form,
+			laydate = layui.laydate;
+		form.render();
+
+		//渲染时间
+		laydate.render({
+			elem: '#start_time',
+			type: 'datetime'
+		});
+
+		laydate.render({
+			elem: '#end_time',
+			type: 'datetime'
+		});
+
+		table = new Table({
+			elem: '#fenxiao_list',
+			url: ns.url("fenxiao://admin/fenxiao/order"),
+			where:{
+			    "fenxiao_id" : {$fenxiao_id}
+			},
+			cols: [
+				[{
+					title: '商品信息',
+					unresize: 'false',
+                    templet: '#goods_info',
+				}, {
+			        field: 'order_no',
+                    title: '订单编号',
+                    unresize: 'false',
+                }, {
+					field: 'site_name',
+					title: '店铺名称',
+					unresize: 'false',
+				}, {
+					field: 'price',
+					title: '单价（元）/ 数量',
+					unresize: 'false',
+                    templet: function(data) {
+                        return data.price+' / '+data.num
+                    }
+				}, {
+					field: 'real_goods_money',
+					title: '商品总金额（元）',
+					unresize: 'false',
+				},{
+			        field: 'commission',
+                    title: '分佣总金额（元）',
+                    unresize: 'false',
+                },{
+                    field:'status',
+                    title: '结算状态',
+                    unresize: 'false',
+                    templet: function(data) {
+                        if (data.is_redund == 1) {
+                            return '已退款';
+                        } else {
+                            if(data.$is_settlement == 1){
+                                return '已结算';
+                            }else{
+                                return '未结算';
+                            }
+                        }
+                    }
+                },{
+                    title: '下单时间',
+                    unresize: 'false',
+                    templet: function(data) {
+                        return ns.time_to_date(data.create_time);
+                    }
+                },{
+			        title: '详情',
+                    unresize: 'false',
+                    templet: '#action'
+                }]
+			]
+		});
+
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+			return false;
+		});
+
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data,
+					event = obj.event;
+			switch (event) {
+				case 'detail': //查看
+                    location.href = ns.url('fenxiao://admin/fenxiao/orderdetail', {'fenxiao_order_id': data.fenxiao_order_id})
+					break;
+			}
+		});
+	});
+
+    /**
+     * 七天时间
+     */
+    function datePick(date_num,event_obj){
+        $(".date-picker-btn").removeClass("selected");
+        $(event_obj).addClass('selected');
+        // alert(new Date().format("yyyy-MM-dd hh:mm"));
+        var now_date = new Date();
+
+        Date.prototype.Format = function (fmt,date_num) { //author: meizz
+            this.setDate(this.getDate()-date_num);
+            var o = {
+                "M+": this.getMonth() + 1, //月份
+                "d+": this.getDate(), //日
+                "H+": this.getHours(), //小时
+                "m+": this.getMinutes(), //分
+                "s+": this.getSeconds(), //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                "S": this.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+        }
+        // var now_time =  new Date().Format("yyyy-MM-dd HH:mm:ss",0);//当前日期
+        var now_time =  new Date().Format("yyyy-MM-dd 23:59:59",0);//当前日期
+        var before_time =  new Date().Format("yyyy-MM-dd 00:00:00",date_num-1);//前几天日期
+        $("input[name=start_time]").val(before_time,0);
+        $("input[name=end_time]").val(now_time,date_num-1);
+
+    }
+</script>
+{/block}

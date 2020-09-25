@@ -1,0 +1,671 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/detail.css">
+{/block}
+{block name="body"}
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		<!-- 顶部html文件-->
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-detail ns-goods-wrap">
+			<div class="ns-goods-detail">
+				<div class="ns-goods-detail-wrap">
+					<div class="ns-goods-pic">
+						<div class="ns-goods-img">
+							<a href="#" {if !$detail['goods_sku_detail']['video_url']}style="display:none"{/if}><video src="{:img($detail['goods_sku_detail']['video_url'])}" style="height: 100%;width: 100%;" loop="loop" controls="controls" class="jqzoom_video" id="movie"></video></a>
+							<a href="#" {if $detail['goods_sku_detail']['video_url']}style="display:none"{/if}><img src="{:img($detail.goods_sku_detail.sku_image)}"
+									onerror="this.src = 'SHOP_SUPPLY_LOCAL_IMG/default_goods.png' " class="jqzoom" /></a>
+						</div>
+						<div class="ns-goods-pic-wrap">
+							<div class="ns-goods-pic-small">
+								<ul class="ns-goods-pic-list">
+									{php}
+									$sku_images = explode(",", $detail['goods_sku_detail']['sku_images']);
+									{/php}
+									<li class="ns-pic-selected" data-type="video" {if !$detail['goods_sku_detail']['video_url']}style="display:none"{/if}>
+										<div class="ns-pic"><a href="#"><video src="{:img($detail['goods_sku_detail']['video_url'])}" style="height: 100%;margin: auto;"></video></a></div>
+									</li>
+									{foreach $sku_images as $img_k => $img_v}
+									
+									<li {if $img_v==$detail.goods_sku_detail.sku_image && !$detail['goods_sku_detail']['video_url']}class="ns-pic-selected" {/if} data-type="img">
+										<div class="ns-pic"><a href="#"><img src="{:img($img_v)}" onerror="this.src = 'SHOP_SUPPLY_LOCAL_IMG/default_goods.png' " /></a></div>
+									</li>
+									{/foreach}
+								</ul>
+							</div>
+
+							<div class="left-arrow ns-goods-pic-arrow"><i class="iconfont iconback_light"></i></div>
+							<div class="right-arrow ns-goods-pic-arrow"><i class="iconfont iconyoujiantou"></i></div>
+						</div>
+					</div>
+
+					<div class="ns-goods-info layui-form">
+						<div class="ns-goods-name">
+							<!-- <div class="ns-goods-qualify">
+								<img src="SHOP_SUPPLY_LOCAL_IMG/tuijian.png" />
+							</div> -->
+
+							<p class="ns-multi-line-hiding" title="{$detail.goods_sku_detail.sku_name}">{$detail.goods_sku_detail.sku_name}</p>
+						</div>
+
+						<div class="ns-goods-money">
+							{php}
+							$price_json = json_decode($detail['goods_sku_detail']['price_json'], true);
+							{/php}
+
+							<div class="ns-goods-buy-price ns-goods-attr">
+								<span>供货价：</span>
+								<ul class="ns-goods-wholesale-price">
+									{foreach $price_json as $price_k => $price_v}
+									<li class="ns-red-color">
+										￥<span>{$price_v.price}</span>
+									</li>
+									{/foreach}
+								</ul>
+							</div>
+
+							<div class="ns-goods-buy-price ns-goods-attr">
+								<span>起批量：</span>
+								<ul class="ns-goods-wholesale-num">
+									{foreach $price_json as $price_k => $price_v}
+									<li>
+										≥<span>{$price_v.num} {$detail.goods_sku_detail.unit}</span>
+									</li>
+									{/foreach}
+								</ul>
+							</div>
+						</div>
+
+						<div class="ns-goods-attribute">
+							{if $detail.goods_sku_detail.is_free_shipping == 1}
+							<div class="ns-goods-freight ns-goods-attr">
+								<span>运费</span>
+								<span>包邮</span>
+							</div>
+							{/if}
+
+							<div class="ns-goods-sales-volume ns-goods-attr">
+								<span>总销量</span>
+								<span>{$detail.goods_sku_detail.sale_num} {$detail.goods_sku_detail.unit}</span>
+							</div>
+
+							<div class="ns-goods-stock ns-goods-attr">
+								<span>总库存</span>
+								<span>{$detail.goods_sku_detail.stock} {$detail.goods_sku_detail.unit}</span>
+							</div>
+
+							<div style="border-top: 1px solid rgb(241, 241, 241);"></div>
+
+							{php}
+							$sku_spec = json_decode($detail['goods_sku_detail']['goods_spec_format'], true);
+							{/php}
+
+							{if !empty($sku_spec)}
+							{foreach $sku_spec as $sku_k => $sku_v}
+							<div class="ns-goods-specs ns-goods-attr">
+								<span>{$sku_v.spec_name}</span>
+								<ul class="ns-goods-specs-list">
+									{foreach $sku_v.value as $k => $v}
+									<li {if $v.selected}class="selected" {/if} data-sku-id="{$v.sku_id}"
+										onclick="changeSkuDetail(this, {$v.sku_id})">
+										{if empty($v.image)}
+										<span>{$v.spec_value_name}</span>
+										{else/}
+										<img src="{:img($v.image)}" />
+										{/if}
+									</li>
+									{/foreach}
+								</ul>
+							</div>
+							{/foreach}
+							{/if}
+						</div>
+
+						<div class="ns-goods-buy-num ns-goods-attr">
+							<span>购买数量</span>
+							<span><span class="decrease" onclick="decreaseNum()">-</span><input type="text" name="buy_num"
+									class="layui-input goods-buy-num" value="{$detail.goods_sku_detail.min_num}" /><span
+									class="increase" onclick="increaseNum()">+</span></span>
+						</div>
+
+						<input type="hidden" value="{$detail.goods_sku_detail.sku_id}" name="sku_id" />
+
+						<div class="ns-goods-btn">
+							<button class="layui-btn" lay-submit lay-filter="buy">立即购买</button>
+							<button class="layui-btn layui-btn-primary" lay-submit lay-filter="addCart">加入供货单</button>
+						</div>
+					</div>
+				</div>
+
+				<div class="ns-goods-store">
+					<a href="#">
+						<div class="store-img">
+							<img src="{:img($detail.supply_info.logo)}"  onerror="this.src = 'SHOP_IMG/default_shop.png' " />
+						</div>
+					</a>
+
+					<div class="store-info">
+						<div class="store-name-wrap">
+							<div class="store-name">
+								<a href="#"><span>{$detail.supply_info.title}</span></a>
+							</div>
+							<div class="store-btn">
+								<!-- <button class="layui-btn ns-bg-color">关注店铺</button> -->
+								<button class="layui-btn layui-btn-primary" onclick="toSupply({$detail.supply_info.supplier_site_id})">进入店铺</button>
+							</div>
+						</div>
+						<p class="store-intro">{$detail.supply_info.desc}</p>
+						<div class="store-goods">
+							{if !empty($detail.supply_info.supplier_phone)}
+							<span>电话：{$detail.supply_info.supplier_phone}</span>
+							{/if}
+							{if !empty($detail.supply_info.full_address)}
+							<span>地址：{$detail.supply_info.full_address}</span>
+							{/if}
+						</div>
+					</div>
+				</div>
+
+				<div class="ns-goods-detail-con">
+					<div class="layui-tab ns-table-tab" lay-filter="goods_tab">
+						<ul class="layui-tab-title">
+							<li class="layui-this" data-status="1">商品详情</li>
+							<li class="" data-status="2">商品属性</li>
+							<li class="" data-status="3">商品评价</li>
+						</ul>
+						<div class="layui-tab-content">
+
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="ns-goods-more">
+				<p>其他商家还在看</p>
+			</div>
+		</div>
+	</div>
+</div>
+<input class="content_html" value="{$detail['goods_sku_detail']['goods_content']}" type="hidden" />
+<input class="goods-id" value="{$detail['goods_sku_detail']['goods_id']}" type="hidden" />
+<input type="hidden" class="goods-attr" value="{$detail['goods_sku_detail']['goods_attr_format']}" />
+{/block}
+
+{block name="script"}
+<!-- <script src="SHOP_SUPPLY_LOCAL_JS/jquery.imagezoom.min.js"></script> -->
+<script>
+	var min_num = {$detail.goods_sku_detail.min_num};
+	var max_num = {$detail.goods_sku_detail.stock};
+
+	$(document).ready(function () {
+		// $(".jqzoom").imagezoom();
+
+		imgsRenden();
+
+		$(".ns-goods-buy-num input").blur(function () {
+			var val = $(this).val();
+			verifyNum(val);
+		})
+
+		var content_html = $(".content_html").val();
+		$('.layui-tab-content').html(content_html);
+	});
+
+	var laytpl, form, element, rate, laypage, repeat_flag = false, evaluate_list = [], count = 0;
+	layui.use(['laytpl', 'form', 'element', 'rate', 'laypage'], function () {
+		laytpl = layui.laytpl;
+		form = layui.form;
+		element = layui.element;
+		rate = layui.rate;
+		laypage = layui.laypage;
+
+		form.on('submit(buy)', function (data) {
+			location.href = ns.url("supply://shop/ordercreate/payment", { "sku_id": data.field.sku_id, "num": data.field.buy_num })
+		})
+
+		form.on('submit(addCart)', function (data) {
+			if (repeat_flag) return;
+			repeat_flag = true;
+
+			$.ajax({
+				url: ns.url("supply://shop/cart/add"),
+				data: {
+					"sku_id": data.field.sku_id,
+					"num": data.field.buy_num
+				},
+				dataType: 'JSON',
+				type: 'POST',
+				success: function (res) {
+					repeat_flag = false;
+					if(checkLogin(res)){
+						if (res.code == 0) {
+							layer.open({
+								title: '添加成功',
+								type: 1,
+								offset: 'auto',  //具体配置参考：http://www.layui.com/doc/modules/layer.html#offset
+								id: 'layerDemoauto',  //防止重复弹出
+								content: '<div class="layer-success"><i class="iconfont iconduihao"></i>商品已添加到供货单</div>',
+								shade: 0,  //不显示遮罩
+							});
+							cartCount();
+						}
+					}
+
+				}
+			});
+		})
+
+		$.ajax({
+			url: ns.url("supply://shop/goods/recommend"),
+			dataType: 'JSON',
+			type: 'POST',
+			success: function (res) {
+				console.log(res);
+				laytpl($("#recommendGoods").html()).render(res.data, function (html) {
+					$(".ns-goods-more").append(html);
+				});
+			}
+		});
+				
+		//监听Tab切换，以改变地址hash值
+		element.on('tab(goods_tab)', function() {
+			var status = this.getAttribute('data-status');
+			if (status == 1) {
+				var content_html = $(".content_html").val();
+				$('.layui-tab-content').html(content_html);
+			} else if (status == 2) {
+				var arr = JSON.parse('{:json_encode($detail.goods_sku_detail.goods_attr_format, JSON_UNESCAPED_UNICODE)}');
+				if (arr.length > 0) {
+					laytpl($("#goodsAttr").html()).render(arr, function (html) {
+						$(".layui-tab-content").html(html);
+					});
+				} else {
+					$(".layui-tab-content").html("");
+				}
+			} else {
+				getEvaluateList();
+				console.log(evaluate_list);
+				laytpl($("#goodsEvaluate").html()).render(evaluate_list, function (html) {
+					$(".layui-tab-content").html(html);
+					
+					if (count == 0) {
+						$("#evaluate_page").css("display", "none");
+					} else {
+						$("#evaluate_page").css("display", "block");
+					}
+					
+					page = new Page({
+						elem: 'evaluate_page',
+						count: count,
+						curr: 1,
+						callback: function (obj) {
+							console.log(obj);
+							getEvaluateList(obj.curr);
+						}
+					});
+				});
+				
+				$.each(evaluate_list, function(index, item) {
+					rate.render({
+						elem: '#test'+ index,  //绑定元素
+						value: item.scores,
+						readonly: true
+					});
+				})
+				
+				loadImgMagnify();
+			}
+		});
+	})
+
+	function getEvaluateList(curr) {
+		$.ajax({
+			url: ns.url("supply://shop/goodsevaluate/page"),
+			data: {
+				"goods_id": $(".goods-id").val(),
+				"page": curr,
+			},
+			dataType: 'JSON',
+			type: 'POST',
+			async: false,
+			success: function(res) {
+				if (res.code == 0) {
+					var list = res.data.list;
+					count = res.data.count;
+					
+					for (var i = 0; i < list.length; i++) {
+						if (list[i].is_anonymous == 1) list[i].shop_name = list[i].shop_name.replace(list[i].shop_name.substring(1,
+							list[i].shop_name.length - 1), "***")
+					}
+					
+					evaluate_list = list;
+				}
+			}
+		})
+	}
+
+	function imgsRenden() {
+		$(".ns-goods-pic-list li a").hover(function () {
+			var type = $(this).parents("li").data('type')
+			$(this).parents("li").addClass("ns-pic-selected").siblings().removeClass("ns-pic-selected");
+			if(type == 'video'){
+				$('#movie').get(0).play();
+				$(".jqzoom").parents("a").css('display','none')
+				$(".jqzoom_video").parents("a").css('display','block')
+			}else{
+				$('#movie').get(0).pause();
+				$(".jqzoom").parents("a").css('display','block')
+				$(".jqzoom").attr('src', $(this).find("img").attr("src"));
+				$(".jqzoom_video").parents("a").css('display','none')
+			}
+			
+		});
+
+		// 获取所有小图的总长度
+		var liWidth = $(".ns-goods-pic-list li").outerWidth(true); // 每一个图片的长度（包括margin）
+		var liNum = $(".ns-goods-pic-list li").length; // 获取图片的数量
+		var totalWidth = liWidth * liNum; // 所有图片的总长度
+		var ulLeft = $(".ns-goods-pic-list").position().left; // 左偏移量
+		console.log(ulLeft);
+		$(".left-arrow").click(function () {
+			if (ulLeft < 0) {
+				ulLeft = ulLeft + liWidth;
+				$(".ns-goods-pic-list").css("left", ulLeft + "px");
+			}
+		})
+
+		$(".right-arrow").click(function () {
+			if (Math.abs(ulLeft) < liWidth * (liNum - 4)) {
+				ulLeft = ulLeft - liWidth;
+				$(".ns-goods-pic-list").css("left", ulLeft + "px");
+			}
+		})
+	}
+
+	function changeSkuDetail(e, skuId) {
+		if (!$(e).hasClass("selected")) {
+			$(e).addClass("selected");
+			$(e).siblings().removeClass("selected");
+
+			$.ajax({
+				url: ns.url("supply://shop/goods/info"),
+				data: {
+					"sku_id": skuId
+				},
+				dataType: 'JSON',
+				type: 'POST',
+				success: function (res) {
+					laytpl($("#skuDetail").html()).render(res.data, function (html) {
+						$(".ns-goods-detail-wrap").html(html);
+						imgsRenden();
+						form.render();
+						
+						min_num = res.data.min_num;
+						max_num = res.data.stock;
+						
+						$(".ns-goods-buy-num input").blur(function () {
+							var val = $(this).val();
+							verifyNum(val);
+						})
+					});
+				}
+			});
+		}
+	}
+
+	// 购买数量验证
+	function verifyNum(val) {
+		if (val % 1 != 0 || val < 0) {
+			layer.msg("购买数量必须为大于0的整数");
+			return false;
+		}
+
+		if (val < min_num) {
+			layer.msg("请至少购买" + min_num + "件商品");
+			$(".goods-buy-num").val(min_num);
+			return false;
+		}
+
+		if (val > max_num) {
+			layer.msg("库存不足");
+			$(".goods-buy-num").val(max_num);
+			return false;
+		}
+	}
+
+	function toSupply(id) {
+		location.href = ns.url("supply://shop/supply/index", {"supply_id": id});
+	}
+	
+	function decreaseNum() {
+		var buy_num = Number($(".goods-buy-num").val());
+		if (Number(buy_num) <= Number(min_num)) {
+			layer.msg("请至少购买" + min_num + "件商品");
+			return false;
+		} else {
+			buy_num--;
+		}
+		$(".goods-buy-num").val(buy_num);
+	}
+	
+	function increaseNum() {
+		var buy_num = Number($(".goods-buy-num").val());
+		if (buy_num >= max_num) {
+			layer.msg("库存不足");
+			return false;
+		} else {
+			buy_num++;
+		}
+		$(".goods-buy-num").val(buy_num);
+	}
+</script>
+
+<script type="text/html" id="goodsAttr">
+	<ul class="attr-list">
+		{{#  layui.each(d, function(index, item) {  }}
+			<li>{{ item.attr_name }}：{{ item.attr_value_name }}</li>
+		{{#  })  }}
+	</ul>
+</script>
+
+<script type="text/html" id="goodsEvaluate">
+	{{#  if (d.length > 0) {  }}
+	<div class="layui-tab ns-table-tab" lay-filter="goods_tab">
+		<div class="layui-tab-content">
+			<ul class="list">
+				{{#  layui.each(d, function(index, item) {  }}
+				<li>
+					<div class="member-info">
+						<img src="{{ ns.img(item.shop_img) }}" onerror="this.src='SHOP_SUPPLY_LOCAL_IMG/default_headimg.png'" class="avatar" />
+						<span>{{ item.shop_name }}</span>
+					</div>
+					<div class="info-wrap">
+						<div id="test{{index}}"></div>
+						<span class="evaluate-create-time">{{ ns.time_to_date(item.create_time) }}</span>
+						<p class="content">{{ item.content }}</p>
+						{{#  if(item.images) {  }}
+						<div class="img-list">
+							{{#  layui.each(item.images.split(","), function(img_index, img) {  }}
+							<img layer-src src="{{ ns.img(img) }}" />
+							{{#  })  }}
+						</div>
+						{{#  }  }}
+						<div class="sku-info">
+							<span>{{ item.sku_name }}</span>
+						</div>
+						{{#  if (item.explain_first != '') {  }}
+							<div class="evaluation-reply">店家回复：{{ item.explain_first }}</div>
+						{{#  }  }}
+						{{#  if (item.again_content != '') {  }}
+							<div class="review-evaluation">
+								<span>追加评价</span>
+								<span class="review-time">{{ ns.time_to_date(item.again_time) }}</span>
+							</div>
+							<p class="content">{{ item.again_content }}</p>
+							<div class="img-list">
+								{{#  layui.each(item.again_images.split(","), function(again_index, again_img) {  }}
+								<img layer-src src="{{ ns.img(again_img) }}" />
+								{{#  })  }}
+							</div>
+							{{#  if (item.again_explain != '') {  }}
+								<div class="evaluation-reply">店家回复：{{ item.again_explain }}</div>
+							{{#  }  }}
+						{{#  }  }}
+					</div>
+				</li>
+				{{#  })  }}
+			</ul>
+			
+			<div id="evaluate_page"></div>
+		</div>
+	</div>
+	{{#  } else {  }}
+	<div class="null-evaluate">
+		商品暂无评论
+	</div>
+	{{#  }  }}
+</script>
+
+<script type="text/html" id="skuDetail">
+	<div class="ns-goods-pic">
+		<div class="ns-goods-img">
+			<a href="#"><img src="{{ns.img(d.sku_image)}}" onerror="this.src = 'SHOP_SUPPLY_LOCAL_IMG/default_goods.png' " class="jqzoom" /></a>
+		</div>
+	
+		<div class="ns-goods-pic-wrap">
+			<div class="ns-goods-pic-small">
+				<ul class="ns-goods-pic-list">
+					
+					{{#  var sku_images = d.sku_images.split(",")  }}
+					{{#  layui.each(sku_images, function(index, item){  }}
+						{{#  if (item == d.sku_image) {  }}
+						<li class="ns-pic-selected">
+						{{#  } else {  }}
+						<li>
+						{{#  }  }}
+							<div class="ns-pic"><a href="#"><img src="{{ns.img(item)}}" onerror="this.src = 'SHOP_SUPPLY_LOCAL_IMG/default_goods.png' "></a></div>
+						</li>
+					{{#  })  }}
+				</ul>
+			</div>
+	
+			<div class="left-arrow ns-goods-pic-arrow"><i class="iconfont iconback_light"></i></div>
+			<div class="right-arrow ns-goods-pic-arrow"><i class="iconfont iconyoujiantou"></i></div>
+		</div>
+	</div>
+	
+	<div class="ns-goods-info layui-form">
+		<div class="ns-goods-name">
+			<!-- <div class="ns-goods-qualify">
+				<img src="SHOP_SUPPLY_LOCAL_IMG/tuijian.png" />
+			</div> -->
+	
+			<p class="ns-multi-line-hiding" title="{{d.sku_name}}">{{d.sku_name}}</p>
+		</div>
+	
+		<div class="ns-goods-money">
+			{{#  var price_json = JSON.parse(d.price_json)}}
+			
+			<div class="ns-goods-buy-price ns-goods-attr">
+				<span>供货价：</span>
+				<ul class="ns-goods-wholesale-price">
+					{{#  layui.each(price_json, function(index, item){  }}
+						<li class="ns-red-color">
+							￥<span>{{item.price}}</span>
+						</li>
+					{{#  })  }}
+				</ul>
+			</div>
+			
+			<div class="ns-goods-buy-price ns-goods-attr">
+				<span>起批量：</span>
+				<ul class="ns-goods-wholesale-num">
+					{{#  layui.each(price_json, function(index, item){  }}
+						<li>
+							≥<span>{{item.num}} {{d.unit}}</span>
+						</li>
+					{{#  })  }}
+				</ul>
+			</div>
+		</div>
+	
+		<div class="ns-goods-attribute">
+			{{#  if (d.is_free_shipping == 1) {  }}
+			<div class="ns-goods-freight ns-goods-attr">
+				<span>运费</span>
+				<span>包邮</span>
+			</div>
+			{{#  }  }}
+			 
+			<div class="ns-goods-sales-volume ns-goods-attr">
+				<span>总销量</span>
+				<span>{{d.sale_num}} {{d.unit}}</span>
+			</div>
+	
+			<div class="ns-goods-stock ns-goods-attr">
+				<span>总库存</span>
+				<span>{{d.stock}} {{d.unit}}</span>
+			</div>
+	
+			<div style="border-top: 1px solid rgb(241, 241, 241);"></div>
+			
+			{{#  var sku_spec = JSON.parse(d.goods_spec_format)}}
+			
+			{{#  layui.each(sku_spec, function(index, item){  }}
+			<div class="ns-goods-specs ns-goods-attr">
+				<span>{{item.spec_name}}</span>
+				<ul class="ns-goods-specs-list">
+					{{#  layui.each(item.value, function(key, value){  }}
+						{{#  if (value.selected) {  }}
+						<li class="selected" data-sku-id="{{value.sku_id}}" onclick="changeSkuDetail(this, {{value.sku_id}})">
+						{{#  } else {  }}
+						<li data-sku-id="{{value.sku_id}}" onclick="changeSkuDetail(this, {{value.sku_id}})">
+						{{#  }  }}
+							{{#  if (value.image) {  }}
+							<img src="{{ns.img(value.image)}}" />
+							{{#  } else {  }}
+							<span>{{value.spec_value_name}}</span>
+							{{#  }  }}
+						</li>
+					{{#  })  }}
+				</ul>
+			</div>
+			{{#  })  }}
+		</div>
+	
+		<div class="ns-goods-buy-num ns-goods-attr">
+			<span>购买数量</span>
+			<span><span class="decrease" onclick="decreaseNum()">-</span><input type="text" name="buy_num" class="layui-input goods-buy-num" value="{{d.min_num}}" /><span class="increase"  onclick="increaseNum()">+</span></span>
+		</div>
+		
+		<input type="hidden" value="{{d.sku_id}}" name="sku_id" />
+		
+		<div class="ns-goods-btn">
+			<button class="layui-btn" lay-submit lay-filter="buy">立即购买</button>
+			<button class="layui-btn layui-btn-primary" lay-submit lay-filter="addCart">加入供货单</button>
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="recommendGoods">
+	{{#  layui.each(d.list, function(index, item) {  }}
+	<a href="{{ns.url('supply://shop/goods/detail?sku_id='+ item.sku_id)}}">
+		<div class="ns-goods-more-wrap">
+			<div class="more-goods-img">
+				<img src="{{ns.img(item.sku_image)}}" onerror="this.src = 'SHOP_SUPPLY_LOCAL_IMG/default_goods.png' ">
+			</div>
+			<p>
+				<span>供货价：</span>
+				{{#  if (item.min_price == item.max_price) {  }}
+				<span class="ns-red-color">￥{{item.min_price}}</span>
+				{{#  } else {  }}
+				<span class="ns-red-color">￥{{item.min_price}}</span>
+				<!-- <span class="ns-red-color">￥{{item.min_price}} ~ ￥{{item.max_price}}</span> -->
+				{{#  }  }}
+			</p>
+		</div>
+	</a>
+	{{#  })  }}
+</script>
+{/block}

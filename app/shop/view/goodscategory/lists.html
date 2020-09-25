@@ -1,0 +1,199 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	.goods-category-list .layui-table td {
+		border-left: 0;
+		border-right: 0;
+	}
+	.goods-category-list .layui-table .switch {
+		font-size: 18px;
+		cursor: pointer;
+		width: 20px;
+		height: 20px;
+		line-height: 20px;
+		display: inline-block;
+		text-align: center;
+		vertical-align: middle;
+	}
+	.goods-category-list .layui-table img {width: 40px;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>展示了商家所有的商品分类，商家添加商品的时候需要选择对应的商品分类，用户可以根据商品分类搜索商品</li>
+			<li>点击商品分类名前“+”符号，显示当前商品分类的下级分类</li>
+			<li>商家可以添加、编辑、删除自己的商品分类</li>
+		</ul>
+	</div>
+</div>
+
+<div class="ns-single-filter-box">
+	<button class="layui-btn ns-bg-color" onclick="addCategory()">添加商品分类</button>
+</div>
+
+<div class="goods-category-list">
+	
+	<table class="layui-table ns-pithy-table">
+		<colgroup>
+			<col width="25%">
+			<col width="20%">
+			<col width="15%">
+			<col width="15%">
+			<col width="10%">
+			<col width="15%">
+		</colgroup>
+		<thead>
+		<tr>
+			<th>分类名称</th>
+			<th>简称</th>
+			<th>图片</th>
+			<th>是否显示</th>
+			<th>排序</th>
+			<th>操作</th>
+		</tr>
+		</thead>
+		<tbody>
+			{if condition="$list"}
+				{foreach name="$list" item="vo"}
+				<tr>
+					<td>
+						{notempty name="$vo['child_list']"}
+						<span class="switch ns-text-color js-switch" data-category-id="{$vo['category_id']}" data-level="{$vo['level']}" data-open="0">+</span>
+						{/notempty}
+						{$vo['category_name']}
+					</td>
+					<td>{$vo['short_name']}</td>
+					<td>
+						{notempty name="$vo['image']"}
+						<div class="ns-img-box">
+							<img layer-src src="{:img($vo['image'])}"/>
+						</div>
+						{/notempty}
+					</td>
+					<td>{if $vo['is_show'] == 1}是{else/}否{/if}</td>
+					<td>
+						<input name="sort" type="number" onchange="editSort({$vo['category_id']},this)" value="{$vo['sort']}" placeholder="请输入排序" class="layui-input edit-sort ns-sort-len">
+					</td>
+					<td>
+						<div class="ns-table-btn">
+							<a class="layui-btn" href="{:addon_url('shop/goodscategory/editcategory',['category_id'=>$vo['category_id']])}">编辑</a>
+							<a class="layui-btn" href="javascript:deleteCategory({$vo['category_id']});">删除</a>
+						</div>
+
+					</td>
+				</tr>
+					{notempty name="$vo['child_list']"}
+						{foreach name="$vo['child_list']" item="second"}
+						<tr data-category-id-1="{$second['category_id_1']}" style="display:none;">
+							<td style="padding-left: 40px;">
+								<span>{$second['category_name']}</span>
+							</td>
+							<td>{$second['short_name']}</td>
+							<td>
+								{notempty name="$second['image']"}
+								<div class="ns-img-box">
+									<img layer-src src="{:img($second['image'])}"/>
+								</div>
+								{/notempty}
+							</td>
+							<td>{if $second['is_show'] == 1}是{else/}否{/if}</td>
+							<td>
+								<input name="sort" type="number" onchange="editSort({$second['category_id']},this)" value="{$second['sort']}" placeholder="请输入排序" class="layui-input edit-sort ns-sort-len">
+
+							</td>
+							<td>
+								<div class="ns-table-btn">
+									<a class="layui-btn" href="{:addon_url('shop/goodscategory/editcategory',['category_id'=>$second['category_id']])}">编辑</a>
+									<a class="layui-btn" href="javascript:deleteCategory({$second['category_id']});">删除</a>
+								</div>
+							</td>
+						</tr>
+						{/foreach}
+					{/notempty}
+				{/foreach}
+			{else/}
+			<tr><td colspan="6" align="center">无数据</td></tr>
+			{/if}
+		</tbody>
+	</table>
+
+</div>
+{/block}
+{block name="script"}
+<script>
+$(function () {
+	loadImgMagnify();  //图片放大
+	
+	//展开收齐点击事件
+	$(".js-switch").click(function () {
+		var category_id = $(this).attr("data-category-id");
+		var level = $(this).attr("data-level");
+		var open = parseInt($(this).attr("data-open").toString());
+		
+		if(open){
+			$(".goods-category-list .layui-table tr[data-category-id-"+ level+"='" + category_id + "']").hide();
+			$(this).text("+");
+		}else{
+			$(".goods-category-list .layui-table tr[data-category-id-"+ level+"='" + category_id + "']").show();
+			$(this).text("-");
+		}
+		$(this).attr("data-open", (open ? 0 : 1));
+		
+	});
+});
+
+function deleteCategory(category_id) {
+	
+	layer.confirm('子级分类也会删除，请谨慎操作', function() {
+		$.ajax({
+			url: ns.url("shop/goodscategory/deleteCategory"),
+			data: {category_id : category_id},
+			dataType: 'json',
+			type: 'post',
+			async: false,
+			success: function (res) {
+				layer.msg(res.message);
+				if (res.code == 0) {
+					location.reload();
+				}
+			}
+		});
+	});
+}
+function addCategory() {
+	location.href = ns.url("shop/goodscategory/addcategory");
+}
+
+// 监听单元格编辑
+function editSort(id, event) {
+    var data = $(event).val();
+    if (!new RegExp("^-?[1-9]\\d*$").test(data)) {
+        layer.msg("排序号只能是整数");
+        return;
+    }
+    if(data<0){
+        layer.msg("排序号必须大于0");
+        return ;
+    }
+    $.ajax({
+        type: 'POST',
+        url: ns.url("shop/goodscategory/editCategorySort"),
+        data: {
+            sort: data,
+            category_id: id
+        },
+        dataType: 'JSON',
+        success: function(res) {
+            layer.msg(res.message);
+            if (res.code == 0) {
+                table.reload();
+            }
+        }
+    });
+}
+
+</script>
+{/block}

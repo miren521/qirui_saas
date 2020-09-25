@@ -1,0 +1,220 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+    .ns-card-head-right {
+        display: flex;
+        align-items: center;
+    }
+
+    .ns-card-head-right .layui-form-item {
+        margin-bottom: 0;
+    }
+	
+	.current-time, .ns-flow-time-today {
+		margin-left: 10px;
+		line-height: 34px;
+	}
+
+    /* 基本信息 */
+    .ns-basic {
+        display: flex;
+    }
+
+    .ns-basic .ns-table-tuwen-box {
+        width: 30%;
+        border-right: 1px solid #EEEEEE;
+        padding: 10px 20px;
+    }
+
+    .ns-basic-count {
+        font-size: 20px;
+        font-weight: 600;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <span class="ns-card-title">交易概况</span>
+        
+		<div class="ns-card-head-right layui-form">
+			<div class="layui-form-item">
+				<div class="layui-input-block ns-len-small">
+					<select name="date" lay-filter="date">
+						<option value="0">今日实时</option>
+						<option value="1">近7天</option>
+						<option value="2">近30天</option>
+					</select>
+				</div>
+			</div>
+			<div class="ns-flow-time">
+				<div class="ns-flow-time-today"></div>
+			</div>
+		</div>
+    </div>
+    <div class="layui-card-body ns-basic">
+        <div class="ns-table-tuwen-box">
+            <div class="ns-img-box">
+                <img src="ADMIN_IMG/stat/order_money.png">
+            </div>
+            <div class="ns-font-box">
+                <p class="ns-text-color-dark-gray">订单金额</p>
+                <p class="ns-basic-count" id="orderTotal">0</p>
+            </div>
+        </div>
+        <div class="ns-table-tuwen-box">
+            <div class="ns-img-box">
+                <img src="ADMIN_IMG/stat/order_num.png">
+            </div>
+            <div class="ns-font-box">
+                <p class="ns-text-color-dark-gray">订单数</p>
+                <p class="ns-basic-count" id="orderPayCount">0</p>
+            </div>
+        </div>
+        <div class="ns-table-tuwen-box">
+            <div class="ns-img-box">
+                <img src="ADMIN_IMG/stat/goods_order.png">
+            </div>
+            <div class="ns-font-box">
+                <p class="ns-text-color-dark-gray">订单商品数</p>
+                <p class="ns-basic-count" id="goodsPayCount">0</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <span class="ns-card-title">交易趋势分析</span>
+        
+		<div class="ns-card-head-right layui-form">
+			<div class="layui-form-item">
+				<div class="layui-input-block ns-len-small">
+					<select name="date" lay-filter="date_chart">
+						<option value="1">近7天</option>
+						<option value="2">近30天</option>
+					</select>
+				</div>
+			</div>
+			<span class="current-time"></span>
+		</div>
+    </div>
+	<div class="layui-card-body">
+		<div id="main" style="width: 100%; height: 400px;"></div>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script src="SHOP_JS/echarts.min.js"></script>
+<script>
+    $(function() {
+        getOrderStat(0);
+        getOrderStatChart(1);
+    });
+
+    layui.use(['form'], function() {
+        var form = layui.form;
+
+        /**
+         * 监听下拉框
+         */
+        form.on('select(date)', function(data) {
+            getOrderStat(data.value);
+        });
+
+        /**
+         * 图表监听下拉框
+         */
+        form.on('select(date_chart)', function(data) {
+            getOrderStatChart(data.value);
+        });
+    });
+
+    //获取店铺统计
+    function getOrderStat(date_type){
+        $.ajax({
+            dataType: 'JSON',
+            type: 'POST',
+            url: ns.url("admin/stat/order"),
+            data: {
+                date_type: date_type
+            },
+            success: function(res){
+                console.log(res);
+                if (res.code == 0) {
+                    $("#orderTotal").html(res.data.order_total);
+                    $("#orderPayCount").html(res.data.order_pay_count);
+                    $("#goodsPayCount").html(res.data.goods_pay_count);
+                    $(".ns-flow-time-today").html(res.data.time_range);
+                }else{
+                    layer.msg(res.message);
+                }
+            }
+        });
+    }
+
+    //获取店铺统计图表
+    function getOrderStatChart(date_type){
+        $.ajax({
+            dataType: 'JSON',
+            type: 'POST',
+            url: ns.url("admin/stat/getorderstatlist"),
+            data: {
+                date_type: date_type
+            },
+            success: function(res){
+                console.log(res);
+                option.xAxis.data = res.time;
+                option.series[0].data = res.order_total;
+                option.series[1].data = res.order_pay_count;
+                option.series[2].data = res.goods_pay_count;
+                $(".current-time").html(res.time_range);
+                myChart.setOption(option);
+            }
+        });
+    }
+
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
+
+    // 指定图表的配置项和数据
+    option = {
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data: ['订单金额', '订单数', '订单商品数']
+        },
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: []
+        },
+        yAxis: {
+            type: 'value',
+            axisLabel: {
+                formatter: '{value} '
+            }
+        },
+        series: [{
+            name: '订单金额',
+            type: 'line',
+            data: [],
+        },
+            {
+                name: '订单数',
+                type: 'line',
+                data: [],
+            },
+            {
+                name: '订单商品数',
+                type: 'line',
+                data: [],
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+{/block}

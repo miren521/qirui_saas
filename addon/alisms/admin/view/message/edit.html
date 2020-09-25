@@ -1,0 +1,107 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.layui-btn-primary:hover {border-color: #C9C9C9;}
+	.number-con {margin-right: 10px;}
+	.ns-form {margin-top: 0;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否开启：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="sms_is_open" value="1" {if $sms_is_open == 1}checked{/if} lay-skin="switch">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>模板ID：</label>
+		<div class="layui-input-block">
+			<input name="template_id" type="text" value="{if !empty($info)}{$info.template_id}{/if}" lay-verify="required" placeholder="短信模板ID" class="layui-input ns-len-long">
+		</div>
+		<div class="ns-word-aux">必须与短信接口的模板ID一致，否则无效!</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">数据值：</label>
+		<div class="layui-input-block">
+			{foreach $message_variable_list as $message_variable_k => $message_variable_v}
+			<button class="layui-btn layui-btn-primary number-con" onclick="clickBtn('{$message_variable_k}')">{$message_variable_v}</button>
+			{/foreach}
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">短信内容：</label>
+		<div class="layui-input-block">
+			<textarea id="text_area" name="content" class="layui-textarea ns-len-long">{if !empty($info)}{$info.content}{/if}</textarea>
+		</div>
+		<div class="ns-word-aux">变量只能使用上方的可用变量中的变量，否则不会被解析；如果要使用凌凯短信时，短信内容必须进行设置。</div>
+	</div>
+	
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>        
+	<input type="hidden" name="keywords" value="{$keywords}">
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use('form', function() {
+		var form = layui.form;
+			repeat_flag = false; //防重复标识
+
+		form.render();
+
+		/**
+		 * 监听提交
+		 */
+		form.on('submit(save)', function(data) {
+			if (repeat_flag) return;
+			repeat_flag = true;
+			
+			$.ajax({
+				dataType: 'JSON',
+				type: 'POST',
+				url: ns.url("alisms://admin/message/edit"),
+				data: data.field,
+				success: function(res){
+					repeat_flag = false;
+					
+					if (res.code == 0) {
+						layer.confirm('编辑成功', {
+							title:'操作提示',
+							btn: ['返回列表', '继续操作'],
+							yes: function(){
+								location.href = ns.url("admin/message/lists")
+							},
+							btn2: function() {
+								location.reload();
+							}
+						});
+					}else{
+						layer.msg(res.message);
+					}
+				}
+			});
+		});
+	});
+	
+	function back(){
+		location.href = ns.url("admin/message/lists");
+	}
+	
+	function clickBtn(con) {
+		var txtArea = $("#text_area")[0];
+		var content = txtArea.value;   //文本域内容
+		var start = txtArea.selectionStart;  //光标的初始位置，selectionStart：选区开始位置；selectionEnd：选区结束位置。
+		
+		txtArea.value = content.substring(0, txtArea.selectionStart) + '{' + con + '}' + content.substring(txtArea.selectionEnd, content.length);
+		var position = start + con.length;
+		$("#text_area").focus();
+		txtArea.setSelectionRange(position+1, position+1); //setSelectionRange()方法用来设置<input>元素当前选中的文本的开始和结束位置
+	}
+</script>
+{/block}

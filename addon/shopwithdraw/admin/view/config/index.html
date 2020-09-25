@@ -1,0 +1,70 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">操作说明</h2>
+        <ul class="layui-colla-content layui-show">
+            <li>店铺可提现余额申请提现</li>
+        </ul>
+    </div>
+</div>
+
+<div class="layui-form ns-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否启用在线转账：</label>
+        <div class="layui-input-block">
+            <input type="checkbox" name="is_use" lay-filter="is_use" value="1" lay-skin="switch" {if !empty($config) &&
+                   $config.is_use==1 } checked {/if} >
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">转账方式：</label>
+        <div class="layui-input-block">
+            <div class="layui-input-inline">
+                {foreach $transfer_type_list as $k => $v}
+                <input type="checkbox" name="transfer_type[]" title="{$v}" lay-skin="primary" value="{$k}" {if
+                       !empty($config['value']) && stripos($config['value']['transfer_type'], $k) !==
+                false}checked{/if}>
+                {/foreach}
+
+            </div>
+        </div>
+    </div>
+    <div class="ns-form-row">
+        <button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+    </div>
+</div>
+{/block}
+{block name="script"}
+<script>
+    layui.use('form', function () {
+        var form = layui.form,
+            repeat_flag = false; //防重复标识
+        form.render();
+
+        form.on('submit(save)', function (data) {
+            if (repeat_flag) return;
+            repeat_flag = true;
+
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("shopwithdraw://admin/config/index"),
+                data: data.field,
+                success: function (res) {
+                    if (res.code == 0) {
+                        layer.msg(res.message);
+                    } else {
+                        repeat_flag = false;
+                        layer.msg(res.message);
+                    }
+                }
+            });
+        });
+
+    });
+
+</script>
+{/block}

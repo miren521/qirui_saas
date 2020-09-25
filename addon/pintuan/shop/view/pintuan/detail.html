@@ -1,0 +1,67 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<style>
+	.layui-table[lay-skin=line] {margin-top: 15px; border-width: 0;}
+	.ns-align-right {text-align: right!important;}
+</style>
+{/block}
+{block name="main"}
+<div class="ns-detail-card ns-tips">
+	<div class="ns-detail-con">
+		<p class="ns-detail-line">
+			<span class="ns-goods-name">{$pintuan_info.data.pintuan_name}</span>
+			<span class="ns-text-color">（{if condition="$pintuan_info.data.status == 0"}未开始{/if}{if condition="$pintuan_info.data.status ==
+				1"}进行中{/if}{if
+				condition="$pintuan_info.data.status == 2"}已结束{/if}{if condition="$pintuan_info.data.status == 3"}已失效{/if}）</span>
+		</p>
+		<p class="ns-detail-line">
+			<span class="ns-text-color">{$pintuan_info.data.pintuan_num}人团</span>
+		</p>
+		<p class="ns-detail-line">限 {$pintuan_info.data.buy_num}件/人</p>
+		<p class="ns-detail-line">活动时间：{:date('Y-m-d H:i:s', $pintuan_info.data.start_time)} — {:date('Y-m-d H:i:s', $pintuan_info.data.end_time)}</p>
+		<p class="ns-detail-line">
+			<span class="ns-inline-span">是否是虚拟商品：{$pintuan_info.data.is_virtual_goods == 0 ? '否' : '是'}</span>
+			<span class="ns-inline-span">是否是单独购买：{$pintuan_info.data.is_single_buy == 0 ? '否' : '是'}</span>
+			<span class="ns-inline-span">是否是虚拟成团：{$pintuan_info.data.is_virtual_buy == 0 ? '否' : '是'}</span>
+			<span class="ns-inline-span">是否有团长优惠：{$pintuan_info.data.is_promotion == 0 ? '否' : '是'}</span>
+		</p>
+	</div>
+</div>
+
+<table class="layui-table" id="goods" lay-skin="line" lay-size="lg">
+	<colgroup>
+		<col width="40%">
+		<col width="20%">
+		<col width="20%">
+		<col width="20%">
+	</colgroup>
+	<thead>
+		<tr>
+			<th>商品名称</th>
+			<th class="ns-align-right">商品价格(元)</th>
+			<th class="ns-align-right">拼团价格(元)</th>
+			{if condition="$pintuan_info.data.is_promotion == 1"}
+				<th class="ns-team-leader">团长优惠价(元)</th>
+			{else/}
+				<th class="ns-team-leader layui-hide">团长优惠价(元)</th>
+			{/if}
+		</tr>
+	</thead>
+	<tbody>
+		{foreach name=$pintuan_info.data.sku_list as $k => $v}
+			<tr data-sku_id="{$v.sku_id}">
+				<td>{$v.sku_name}</td>
+				<td class="price ns-align-right">{$v.price}</td>
+				<td class="ns-align-right">{$v.pintuan_price}</td>
+				{if condition="$pintuan_info.data.is_promotion == 1"}
+					<td class="ns-team-leader">{$v.promotion_price}</td>
+				{else/}
+					<td class="ns-team-leader layui-hide">{$v.promotion_price}</td>
+				{/if}
+			</tr>
+		{/foreach}
+	</tbody>
+</table>
+{/block}
+{block name="script"}
+{/block}

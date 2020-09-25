@@ -1,0 +1,116 @@
+{extend name="base"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-form">
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">认证资料</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>会员id：</label>
+				<div class="layui-input-block">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$info.member_id}</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>会员会员名：</label>
+				<div class="layui-input-block ns-len-mid">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$info.member_username}</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>真实姓名：</label>
+				<div class="layui-input-block ns-len-mid">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$info.auth_card_name}</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>身份证号：</label>
+				<div class="layui-input-block ns-len-mid">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$info.auth_card_no}</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">身份证照片</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label img-upload-lable ns-company-pic-front">身份证正面照片：</label>
+				<div class="layui-input-block img-upload">
+					<div class="upload-img-block icon">
+						<div class="upload-img-box">
+							<img layer-src  src="{:img($info.auth_card_front)}" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="layui-field-box">
+			<div class="layui-form-item">
+				<label class="layui-form-label img-upload-lable ns-company-pic-front">身份证背面照片：</label>
+				<div class="layui-input-block img-upload">
+					<div class="upload-img-block icon">
+						<div class="upload-img-box">
+							<img layer-src src="{:img($info.auth_card_back)}" alt="">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="layui-field-box">
+			<div class="layui-form-item">
+				<label class="layui-form-label img-upload-lable ns-company-pic-front">手持身份证半身照：</label>
+				<div class="layui-input-block img-upload">
+					<div class="upload-img-block icon">
+						<div class="upload-img-box">
+							<img layer-src src="{:img($info.auth_card_back)}" alt="">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">认证审核</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">通过时间：</label>
+				<div class="layui-input-block">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$info.audit_time|date='Y-m-d H:i:s'}</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">审核状态：</label>
+				<div class="layui-input-block">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$info.status_name}</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">备注：</label>
+				<div class="layui-input-block">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$info.remark}</p>
+				</div>
+			</div>
+			<div class="ns-form-row">
+				<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+	function back() {
+		location.href = ns.url("admin/memberauth/lists")
+	}
+</script>
+{/block}

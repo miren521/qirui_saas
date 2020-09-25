@@ -1,0 +1,174 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.ns-form {margin-top: 0;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>活动标题：</label>
+		<div class="layui-input-block">
+			<input type="text" name="topic_name" value="{$info.topic_name}" lay-verify="required" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>开始时间：</label>
+		<div class="layui-input-block">
+			<input type="text" id="start_time" name="start_time" lay-verify="required" class="layui-input ns-len-mid" autocomplete="off">
+			<i class="ns-calendar"></i>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>结束时间：</label>
+		<div class="layui-input-block end-time">
+			<input type="text" id="end_time" name="end_time" lay-verify="required|time" class="layui-input ns-len-mid" autocomplete="off">
+			<i class="ns-calendar"></i>
+		</div>
+		<div class="ns-word-aux">结束时间不能小于开始时间，也不能小于当前时间</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">横幅图片：</label>
+		<div class="layui-input-inline img-upload">
+			<input type="hidden" name="topic_adv" value="{$info.topic_adv}"/>
+			<div class="upload-img-block icon">
+				<div class="upload-img-box" id="webLogoUpload">
+					{if empty($info.topic_adv)}
+					<div class="ns-upload-default">
+						<img src="__STATIC__/img/upload_img.png" />
+						<p>点击上传</p>
+					</div>
+					{else/}
+					<img src="{:img($info.topic_adv)}" alt="">
+					{/if}
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">主色调：</label>
+		<div class="layui-input-inline">
+			<div id="colorpicker"></div>
+			<input type="hidden" name="bg_color" id="bg_color" value="{$info.bg_color}" />
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>活动内容：</label>
+		<div class="layui-input-block">
+			<textarea lay-verify="required" class="layui-textarea ns-len-long" name="remark">{$info.remark}</textarea>
+		</div>
+	</div>
+	
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+	<input type="hidden" name="topic_id" value="{$info.topic_id}">
+</div>
+
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form','laydate','upload','colorpicker'], function() {
+		var form = layui.form,
+			laydate = layui.laydate,
+			colorpicker = layui.colorpicker,
+			upload = layui.upload,
+            startTime = {$info.start_time},
+		    endTime = {$info.end_time},
+            currentDate = new Date(),
+            minDate = "",
+			repeat_flag = false;//防重复标识
+		form.render();
+
+		var uploadInst = upload.render({
+			elem: '#webLogoUpload' //绑定元素
+			,url: ns.url("admin/upload/upload") //上传接口
+			,done: function(res){
+				if (res.code >= 0) {
+					$("input[name='topic_adv']").val(res.data.pic_path);
+					$("#webLogoUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+		
+		/**
+		 * 颜色
+		 */
+		colorpicker.render({
+			elem: '#colorpicker', //绑定元素
+			color: "{$info.bg_color}",
+			done: function(color) {
+				$("#bg_color").val(color);
+			}
+		});
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time', //指定元素
+            type: 'datetime',
+            value: ns.time_to_date(startTime),
+            done: function(value) {
+                minDate = value;
+                reRender();
+            }
+        });
+
+        //结束时间
+        laydate.render({
+            elem: '#end_time', //指定元素
+            type: 'datetime',
+            value:  ns.time_to_date(endTime)
+        });
+
+        /**
+         * 重新渲染结束时间
+         * */
+        function reRender() {
+            $("#end_time").remove();
+            $(".end-time").html('<input type="text" id="end_time" name="end_time" placeholder="请输入结束时间" lay-verify="required|time" class = "layui-input ns-len-mid" > ');
+            laydate.render({
+                elem: '#end_time',
+                type: 'datetime',
+                min: minDate
+            });
+        }
+		
+		form.on("submit(save)",function(data){
+			data.field.start_time = ns.date_to_time(data.field.start_time);
+			data.field.end_time = ns.date_to_time(data.field.end_time);
+
+			$.ajax({
+				url: ns.url("topic://admin/topic/edit"),
+				dataType: 'JSON',
+				type: 'POST',
+				data: data.field,
+				success: function(res){
+					repeat_flag = false;
+					if(res.code == 0){
+						layer.confirm('编辑成功',{
+							title: '操作提示',
+							btn: ['返回列表', '继续操作'],
+							yes: function() {
+								location.href = ns.url("topic://admin/topic/lists");
+							},btn2: function() {
+								location.reload();
+							}
+						})
+					}else{
+						layer.msg(res.message);
+					}
+				}
+			})
+		})
+	});
+	function back(){
+		location.href = ns.url("topic://admin/topic/lists");
+	}
+</script>
+{/block}

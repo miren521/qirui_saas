@@ -1,0 +1,661 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.gift-box{padding: 20px;}
+	.gift-box .layui-form{padding: 0!important;}
+	.layui-layer-content{overflow: auto !important;background-color: #f7f7f7;}
+	.ns-form{margin-top: 0;}
+	.layui-input{
+		display:inline-block;
+	}
+</style>
+{/block}
+{block name="main"}
+{if $exchange_info['type'] == 1}
+<!-- 礼品 -->
+<div class="exchange-gift content layui-form ns-form">
+	<!--<div class="layui-form-item">-->
+		<!--<label class="layui-form-label"><span class="required">*</span>选择礼品：</label>-->
+		<!--<div class="layui-input-block">-->
+			<!--<button class="layui-btn layui-btn-primary upload-gift">编辑</button>-->
+		<!--</div>-->
+	<!--</div>-->
+	<div class="layui-form-item">
+	    <label class="layui-form-label">礼品图片：</label>
+		<div class="layui-input-block img-upload">
+			<div class="upload-img-block square">
+				<div class="upload-img-box">
+					{if condition="$exchange_info.image"}
+					<img src="{:img($exchange_info.image)}" id="exchange_type_1_img">
+					{else/}
+					<img src="__STATIC__/img/shape.png" />
+					{/if}
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+	    <label class="layui-form-label">礼品名称：</label>
+	    <div class="layui-input-block" id="exchange_type_1_name">
+	    	<p class="ns-input-text ns-len-long">{$exchange_info.name}</p>
+	    </div>
+	</div>
+	
+	<div class="layui-form-item">
+	    <label class="layui-form-label">礼品价格：</label>
+	    <div class="layui-input-block" id="exchange_type_1_price">
+			<p class="ns-input-text ns-len-long">{$exchange_info.market_price}</p>
+	    </div>
+	</div>
+	
+	<div class="layui-form-item">
+	    <label class="layui-form-label">库存：</label>
+	    <div class="layui-input-block" id="exchange_type_1_stock">
+			<p class="ns-input-text ns-len-long">{$exchange_info.stock}</p>
+	    </div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>兑换方式：</label>
+		<div class="layui-input-block">
+			<input type="radio" name="pay_type" lay-filter="pay_type" value="0" title="积分" {if empty($exchange_info.pay_type) || $exchange_info.pay_type == 0} checked {/if}>
+			<input type="radio" name="pay_type" lay-filter="pay_type" value="1" title="积分+金额" {if $exchange_info.pay_type == 1} checked {/if}>
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>兑换积分：</label>
+		<div class="layui-input-block pay_price">
+			{if $exchange_info.pay_type == 1}
+			<input type="number" name="point" min="0" value="{$exchange_info.point}" lay-verify="required_point" autocomplete="off" class="layui-input ns-len-short"> 积分
+			&nbsp;&nbsp;+ &nbsp;&nbsp;
+			<input type="number" name="price" min="0" value="{$exchange_info.price}" lay-verify="required_money" autocomplete="off" class="layui-input ns-len-short"> 元
+			{else/}
+			<input type="number" name="point" min="0" value="{$exchange_info.point}"  lay-verify="required_point" autocomplete="off" class="layui-input ns-len-short"> 积分
+			{/if}
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否上架：</label>
+		<div class="layui-input-block">
+			<p class="ns-input-text ns-len-long"><input id="state" type="checkbox" name="state" lay-skin="switch" {if $exchange_info['state'] == 1}checked {/if} value="1" lay-filter="state"></p>
+		</div>
+	</div>
+	
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+
+	<input type="hidden" name="type" value="1">
+	<input type="hidden" name="id" value="{$exchange_info.id}">
+	<input type="hidden" name="gift_id" value="{$exchange_info.type_id}">
+</div>
+{/if}
+
+{if $exchange_info['type'] == 2}
+<!-- 优惠券 -->
+<div class="exchange-coupon content layui-form ns-form">
+	<div class="layui-form-item">
+	    <label class="layui-form-label">优惠券图片：</label>
+		<div class="layui-input-block img-upload">
+			<div class="upload-img-block square">
+				<div class="upload-img-box">
+					{if condition="$exchange_info.image"}
+					<img src="{:img($exchange_info.image)}" id="exchange_type_2_img">
+					{else/}
+					<img src="__STATIC__/img/shape.png" />
+					{/if}
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+	    <label class="layui-form-label">优惠券名称：</label>
+	    <div class="layui-input-block" id="exchange_type_2_name">
+			<p class="ns-input-text ns-len-long">{$exchange_info.name}</p>
+	    </div>
+	</div>
+	
+	<div class="layui-form-item">
+	    <label class="layui-form-label">优惠券面值：</label>
+	    <div class="layui-input-block" id="exchange_type_2_price">
+			<p class="ns-input-text ns-len-long">{$exchange_info.market_price}</p>
+	    </div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>兑换积分：</label>
+		<div class="layui-input-block">
+			<input type="number" name="point" lay-verify="required|gtzero" placeholder="请输入所需的兑换积分数" value="{$exchange_info.point}"
+			 class="layui-input ns-len-short">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否上架：</label>
+		<div class="layui-input-block">
+			<input id="state" type="checkbox" name="state" lay-skin="switch" {if $exchange_info['state'] == 1}checked {/if} value="1" lay-filter="state">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>优惠券描述：</label>
+		<div class="layui-input-block ns-special-length">
+			<script id="container" name="content" type="text/plain" style="width: 800px; height: 300px;"></script>
+		</div>
+	</div>
+	
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+
+	<input type="hidden" name="type" value="2">
+	<input type="hidden" name="id" value="{$exchange_info.id}">
+	<input type="hidden" name="coupon_type_id" value="{$exchange_info.type_id}">
+	<input type="hidden" id="content" value="{$exchange_info.content}" />
+</div>
+{/if}
+
+{if $exchange_info['type'] == 3}
+<!-- 红包 -->
+<div class="exchange-red-packet content layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>红包名称：</label>
+		<div class="layui-input-block">
+			<input type="text" name="name" lay-verify="required" placeholder="请输入红包名称" value="{$exchange_info.name}" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">红包封面：</label>
+		<input type="hidden" name="image" value="{$exchange_info.image}" />
+		<div class="layui-input-inline img-upload">
+			<div class="upload-img-block icon">
+				<div class="upload-img-box" id="redPacket">
+					{if condition="$exchange_info.image"}
+					<img src="{:img($exchange_info.image)}" alt="">
+					{else/}
+					<div class="ns-upload-default">
+						<img src="__STATIC__/img/upload_img.png" />
+						<p>点击上传</p>
+					</div>
+					{/if}
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>发放红包数量：</label>
+		<div class="layui-input-block">
+			<input type="number" name="stock" lay-verify="required" placeholder="请输入红包数量" value="{$exchange_info.stock}" class="layui-input ns-len-short">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>兑换积分：</label>
+		<div class="layui-input-block">
+			<input type="number" name="point" lay-verify="required|gtzero" placeholder="请输入所需的兑换积分数" value="{$exchange_info.point}"
+			 class="layui-input ns-len-short">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>余额：</label>
+		<div class="layui-input-block">
+			<input type="number" name="balance" lay-verify="required" placeholder="请输入红包余额" value="{$exchange_info.market_price}"
+			 class="layui-input ns-len-short">
+		</div>
+		<p class="ns-word-aux">兑换的红包会以余额的形式发放给指定会员</p>
+	</div>
+	
+    <div class="layui-form-item">
+		<label class="layui-form-label">是否上架：</label>
+		<div class="layui-input-block">
+			<input id="state" type="checkbox" name="state" lay-skin="switch" {if $exchange_info['state'] == 1}checked {/if} value="1" lay-filter="state">
+		</div>
+    </div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>红包描述：</label>
+		<div class="layui-input-block ns-special-length">
+			<script id="containerT" name="content" type="text/plain" style="height: 300px;"></script>
+		</div>
+	</div>
+	
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+
+	<input type="hidden" name="type" value="3">
+	<input type="hidden" name="id" value="{$exchange_info.id}">
+	<input type="hidden" id="contentT" value="{$exchange_info.content}" />
+</div>
+{/if}
+
+<input type="hidden" id="type" value="{$exchange_info.type}" />
+{/block}
+{block name="script"}
+<script type="text/javascript" charset="utf-8" src="STATIC_EXT/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" charset="utf-8" src="STATIC_EXT/ueditor/ueditor.all.js"></script>
+<script type="text/javascript" charset="utf-8" src="STATIC_EXT/ueditor/lang/zh-cn/zh-cn.js"></script>
+<script>
+	var _time = $(".coupon-create-time input").val();
+	$(".coupon-create-time").text(ns.time_to_date(_time));
+
+	var _type = $("#type").val();
+
+	//实例化富文本
+	var ue, html = '';
+	if (_type == 2) {
+		ue = UE.getEditor('container');
+		ue.ready(function() {   //对编辑器的操作最好在编辑器ready之后再做
+			var con = $("#content").val();
+			ue.setContent(con);   //获取html内容，返回: <p>hello</p>
+		});
+	} else if (_type == 3) {
+		ue = UE.getEditor('containerT');
+		ue.ready(function() {   //对编辑器的操作最好在编辑器ready之后再做
+			var con = $("#contentT").val();
+			ue.setContent(con);   //获取html内容，返回: <p>hello</p>
+		});
+	}
+
+	var giftTable, couponTable, form, laytpl,upload;
+
+	layui.use(['form', 'laytpl', "upload"], function() {
+		form = layui.form;
+		laytpl = layui.laytpl;
+		upload = layui.upload;
+		form.render();
+
+		var uploadInst = upload.render({
+			elem: '#redPacket',
+			url: ns.url("admin/upload/upload"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='image']").val(res.data.pic_path);
+					$("#redPacket").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+
+
+		form.verify({
+			gtzero: function(value) {
+				if (parseFloat(value) <= 0) {
+					return '请输入大于0的数!'
+				}
+			}
+		});
+
+		/**
+		 * 礼品列表搜索
+		 */
+		form.on('submit(gift-search)', function(data) {
+			giftTable.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+
+		/**
+		 * 优惠券列表搜索
+		 */
+		form.on('submit(coupon-search)', function(data) {
+			couponTable.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+
+
+		//监听兑换方式
+		form.on('radio(pay_type)', function(data){
+			var value = data.value;
+			var html = '';
+			if(value == 1){
+				html = '<input type="number" name="point" min="0" lay-verify="required_point" autocomplete="off" class="layui-input ns-len-short"> 积分' +
+						'&nbsp;&nbsp;+ &nbsp;&nbsp;<input type="number" name="price" min="0" lay-verify="required_money" autocomplete="off" class="layui-input ns-len-short"> 元' +
+						'';
+			}
+			if(value == 0){
+				html = '<input type="number" name="point" min="0"  lay-verify="required_point" autocomplete="off" class="layui-input ns-len-short"> 积分';
+			}
+			$('.pay_price').html(html);
+		});
+
+
+		form.verify({
+			required_point: function(value) {
+				if (value == "") {
+					return '积分不能为空';
+				}
+			},
+			required_money: function(value) {
+				if (value == "") {
+					return '金额不能为空';
+				}
+			}
+		})
+		/**
+		 * 监听表单提交
+		 */
+		form.on('submit(save)', function(data) {
+			if (_type == 2) {
+				ue.ready(function() {   //对编辑器的操作最好在编辑器ready之后再做
+					html = ue.getContent();   //获取html内容，返回: <p>hello</p>
+				});
+			} else if (_type == 3) {
+				ue.ready(function() {   //对编辑器的操作最好在编辑器ready之后再做
+					html = ue.getContent();   //获取html内容，返回: <p>hello</p>
+				});
+			}
+
+			data.field.content = html;
+
+			$.ajax({
+				url: ns.url("pointexchange://admin/exchange/edit"),
+				data: data.field,
+				dataType: 'JSON',
+				type: 'POST',
+				async: false,
+				success: function(res) {
+					if (res.code == 0) {
+						layer.confirm('编辑成功', {
+							title: '操作提示',
+							btn: ['返回列表', '继续操作'],
+							yes: function() {
+								location.href = ns.url("pointexchange://admin/exchange/lists")
+							},
+							btn2: function() {
+								location.reload();
+							}
+						});
+					} else {
+						layer.msg(res.message);
+					}
+				}
+			});
+		});
+		
+	});
+
+	/* 礼品 */
+	$("body").on("click", ".upload-gift", function() {
+
+		layer.open({
+			type: 1,
+			area: ["850px", "600px"],
+			title: '礼品列表选择',
+			content: $("#giftList").html()
+		});
+
+		giftTable = new Table({
+			elem: "#gift_list",
+			url: ns.url("gift://admin/gift/lists"),
+			where: {'gift_state': 1},
+			cols: [
+				[{
+						title: '礼品名称',
+						unresize: 'false',
+						width: '25%',
+						templet: '#giftName'
+					},
+					{
+						field: 'gift_keywords',
+						title: '礼品关键字',
+						unresize: 'false',
+						width: '20%'
+					},
+					{
+						field: 'gift_price',
+						title: '礼品价格',
+						unresize: 'false',
+						width: '15%'
+					},
+					{
+						field: 'gift_stock',
+						title: '库存',
+						unresize: 'false',
+						width: '10%'
+					},
+					{
+						field: 'gift_state',
+						title: '礼品状态',
+						unresize: 'false',
+						width: '20%',
+						templet: function(res) {
+							return res.gift_state == 1 ? '正常' : '锁定';
+						}
+					},
+					{
+						title: '操作',
+						toolbar: '#action',
+						unresize: 'false',
+						width: '10%'
+					}
+				]
+			]
+		});
+
+		giftTable.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case "add":
+					addGift(data);
+					break;
+			}
+		});
+	});
+	function addGift(data){
+	    var img_path = ns.img(data.gift_image);
+	    $("#exchange_type_1_name").html(data.gift_name);
+	    $("#exchange_type_1_img").attr('src',img_path);
+	    $("#exchange_type_1_price").html(data.gift_price);
+	    $("#exchange_type_1_stock").html(data.gift_stock);
+	    $("#exchange_type_1_state").html(data.gift_state == 1 ? '正常' : '锁定');
+	    $(".select-gift-list tbody").html(html);
+	    $("input[name=gift_id]").val(data.gift_id);
+	    layer.closeAll();
+	}
+
+	/* 优惠券 */
+	$("body").on("click", ".upload-coupon", function() {
+
+		layer.open({
+			type: 1,
+			area: ["850px", "600px"],
+			title: '优惠券列表',
+			content: $("#couponList").html()
+		});
+
+		couponTable = new Table({
+			elem: "#coupon_list",
+			url: ns.url("coupon://admin/coupon/lists"),
+			where: {'status': 1},
+			cols: [
+				[{
+						title: '优惠券名称',
+						unresize: 'false',
+						width: '20%',
+						templet: '#couponName'
+					},
+					{
+						field: 'money',
+						title: '发放面额',
+						unresize: 'false',
+						width: '15%'
+					},
+					{
+						field: 'count',
+						title: '发放数量',
+						unresize: 'false',
+						width: '15%'
+					},
+					{
+						field: 'max_fetch',
+						title: '最大领取数量',
+						unresize: 'false',
+						width: '10%'
+					},
+					{
+						field: 'gift_state',
+						title: '有效期限',
+						unresize: 'false',
+						width: '20%',
+						templet: function(res) {
+							if (res.validity_type == 0) {
+								return "有效时间至" + ns.time_to_date(res.end_time);
+							} else {
+								return "有效时间" + res.fixed_term + "天";
+							}
+						}
+					},
+					{
+						field: 'status_name',
+						title: '状态',
+						unresize: 'false',
+						width: '10%',
+					},
+					{
+						title: '操作',
+						toolbar: '#couponOperation',
+						align: 'right',
+						unresize: 'false',
+						width: '10%'
+					}
+				]
+			]
+		});
+
+		couponTable.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case "add":
+					addcoupon(data);
+					break;
+			}
+		});
+	});
+
+	function addcoupon(data){
+	    var img_path = ns.img(data.image);
+	    $("#exchange_type_2_name").html(data.coupon_name);
+	    $("#exchange_type_2_img").attr('src',img_path);
+	    $("#exchange_type_2_price").html(data.money);
+	    $("#exchange_type_2_count").html(data.count);
+	    $("#exchange_type_2_state").html(data.status_name);
+	    $("input[name=coupon_type_id]").val(data.coupon_type_id);
+	    layer.closeAll();
+	}
+	
+	function addcoupon2(data) {
+		var html = `<tr>`;
+		html += `<td> `;
+		html += `<div class="ns-table-tuwen-box"> `;
+		html += `<div class="ns-img-box"> `;
+		html += `<img src="${ns.img(data.image)}">`;
+		html += `</div> `;
+		html += `<div class="ns-font-box">`;
+		html += `<p class="ns-multi-line-hiding">${data.coupon_name}</p>`;
+		html += `</div>`;
+		html += `</div> `;
+		html += `</td> `;
+		html += `<td>${data.money}</td>`;
+		html += `<td>${data.count}</td>`;
+		html += `<td>${data.max_fetch}</td>`;
+		html +=
+			`<td>${data.validity_type == 0 ? "有效时间至" + ns.time_to_date(data.end_time) : "有效时间" + data.fixed_term + "天"}</td>`;
+		html += `<td>${data.status_name}</td>`;
+		html += `</tr> `;
+		$(".select-coupon-list tbody").html(html);
+		$("input[name=coupon_type_id]").val(data.coupon_type_id);
+		layer.closeAll();
+	}
+	
+	//返回
+	function back() {
+		location.href = ns.url("pointexchange://admin/exchange/lists");
+	}
+</script>
+
+<!-- 礼品 -->
+<script type="text/html" id="giftList">
+	<div class="gift-box">
+        <div class="ns-single-filter-box">
+            <div class="layui-form">
+                <div class="layui-input-inline ns-len-mid">
+                    <input type="text" name="search_text" placeholder="请输入礼品名称/关键字" class="layui-input">
+                    <button type="button" class="layui-btn layui-btn-primary" lay-filter="gift-search" lay-submit>
+                        <i class="layui-icon">&#xe615;</i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <table id="gift_list" lay-filter="gift_list"></table>
+    </div>
+</script>
+
+<!-- 礼品-名称 -->
+<script type="text/html" id="giftName">
+	<div class="ns-table-tuwen-box">
+        <div class="ns-img-box">
+            <img src="{{ns.img(d.gift_image)}}" alt="">
+        </div>
+        <div class="ns-font-box">
+            <p class="ns-multi-line-hiding">{{d.gift_name}}</p>
+        </div>
+    </div>
+</script>
+
+<!-- 礼品-操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="add">添加</a>
+	</div>
+</script>
+
+<!-- 优惠券 -->
+<script type="text/html" id="couponList">
+	<div class="gift-box">
+        <div class="ns-function-search">
+            <div class="layui-form">
+                <div class="layui-input-inline ns-len-mid">
+                    <input type="text" name="coupon_name" placeholder="请输入礼品名称/关键字" class="layui-input">
+                    <button type="button" class="layui-btn layui-btn-primary" lay-filter="coupon-search" lay-submit>
+                        <i class="layui-icon">&#xe615;</i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <table id="coupon_list" lay-filter="coupon_list"></table>
+    </div>
+</script>
+
+<!-- 优惠券-名称 -->
+<script type="text/html" id="couponName">
+	<div class="ns-table-tuwen-box">
+        <div class="ns-img-box">
+            <img src="{{ns.img(d.image)}}" alt="">
+        </div>
+        <div class="ns-font-box">
+            <p class="ns-multi-line-hiding">{{d.coupon_name}}</p>
+        </div>
+    </div>
+</script>
+
+<!-- 优惠券-操作 -->
+<script type="text/html" id="couponOperation">
+	<a class="layui-btn" lay-event="add">添加</a>
+</script>
+{/block}

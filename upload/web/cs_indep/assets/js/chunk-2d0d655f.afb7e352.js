@@ -1,0 +1,2 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d0d655f"],{"71b1":function(t,e,n){"use strict";n.r(e);var c=function(){var t=this,e=t.$createElement,n=t._self._c||e;return n("div",[t._v("专题活动详情："+t._s(t.id))])},i=[],o=(n("ac1f"),n("5319"),{name:"topic_detail",components:{},data:function(){return{id:0}},created:function(){this.id=this.$route.path.replace("/promotion/topic-","")},methods:{}}),a=o,r=n("2877"),d=Object(r["a"])(a,c,i,!1,null,"c3004b16",null);e["default"]=d.exports}}]);
+//# sourceMappingURL=chunk-2d0d655f.afb7e352.js.map

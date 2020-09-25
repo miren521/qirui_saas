@@ -1,0 +1,292 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/supply.css">
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/list.css">
+{/block}
+{block name="body"}
+<!-- 顶部html文件-->
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-index">
+			<div class="ns-supply-store">
+				<div class="ns-goods-store">
+                    <div class="ns-store-info">
+                        <a href="#">
+                            <div class="store-img">
+                                <img src="{:img($detail.logo)}"  onerror="this.src = 'SHOP_IMG/default_shop.png' " />
+                            </div>
+                        </a>
+
+                        <div class="store-info">
+                            <div class="store-name-wrap">
+                                <div class="store-name">
+                                    <a href="#"><span>{$detail.title}</span></a>
+                                </div>
+                                <!-- <div class="store-btn">
+                                    <button class="layui-btn ns-bg-color">关注店铺</button>
+                                    <button class="layui-btn layui-btn-primary" onclick="toSupply({$detail.supplier_id})">进入店铺</button>
+                                </div> -->
+                            </div>
+                            <p class="store-intro">{$detail.desc}</p>
+                            <div class="store-goods">
+                                {if !empty($detail.supplier_phone)}
+                                <span>电话：{$detail.supplier_phone}</span>
+                                {/if}
+                                {if !empty($detail.full_address)}
+                                <span>地址：{$detail.full_address}</span>
+                                {/if}
+                            </div>
+                        </div>
+						
+						<div class="ns-store-score">
+							<p><span>描述相符：</span>{$detail.supply_desccredit}</p>
+							<p><span>服务态度：</span>{$detail.supply_servicecredit}</p>
+							<p><span>配送服务：</span>{$detail.supply_deliverycredit}</p>
+						</div>
+					</div>
+                </div>
+
+                <div class="ns-supply-goods-term">
+                    <ul class="ns-goods-term-list">
+                        <li class="ns-text-color">综合</li>
+                        <li data-name="sale_num">销量
+                            <div><span><i class="iconfont iconfold i-color"></i></span><span><i class="iconfont iconunfold i-color"></i></span></div>
+                            <input type="hidden" name="sale_num" value="desc" />
+                        </li>
+                        <li data-name="min_price">供货价
+                            <div><span><i class="iconfont iconfold i-color"></i></span><span><i class="iconfont iconunfold i-color"></i></span></div>
+                            <input type="hidden" name="min_price" value="desc" />
+                        </li>
+                        <li data-name="create_time">上架时间
+                            <div><span><i class="iconfont iconfold i-color"></i></span><span><i class="iconfont iconunfold i-color"></i></span></div>
+                            <input type="hidden" name="create_time" value="desc" />
+                        </li>
+                        <div></div>
+                    </ul>
+                    <div class="ns-goods-term-form">
+                        <div class="layui-inline ns-goods-price-range">
+                            <label class="layui-form-label">供货价：</label>
+                            <div class="layui-input-inline">
+                                <span>￥</span>
+                                <input type="text" autocomplete="off" class="layui-input supply-min-price">
+                            </div>
+                            <div class="layui-form-mid">-</div>
+                            <div class="layui-input-inline">
+                                <span>￥</span>
+                                <input type="text" autocomplete="off" class="layui-input supply-max-price">
+                            </div>
+    
+                            <button class="layui-btn layui-btn-primary">确定</button>
+                        </div>
+    
+                        <div class="ns-goods-service layui-form">
+                            <input type="checkbox" name="is_free_shipping" title="包邮" lay-skin="primary" lay-filter="is_free_shipping">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ns-goods-list">
+		
+                </div>
+
+                <!-- 分页 -->
+			    <div id="list_page"></div>
+
+                <input type="hidden" name="supplier_site_id" value="{$detail.supplier_site_id}">
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/html" id="goodsList">
+	{{#  layui.each(d.list, function(index, item){ }}
+		<div class="ns-goods-li">
+			<a href="#" onclick="toGoodsDetail({{ item.sku_id }})">
+				<div class="ns-goods-img">
+					<img src="{{ ns.img(item.sku_image.split(',')[0]) }}" onerror="this.src = 'SHOP_SUPPLY_LOCAL_IMG/default_goods.png' " />
+				</div>
+			</a>
+			<a href="#" onclick="toGoodsDetail({{ item.sku_id }})">
+				<p class="ns-goods-name ns-multi-line-hiding" title="{{ item.sku_name }}">{{ item.sku_name }}</p>
+			</a>
+			<div class="ns-goods-info">
+				<p>
+					<span>供货价：</span>
+					{{#  if(item.max_price == item.min_price) {  }}
+					<span class="ns-goods-profit ns-red-color">￥{{ item.max_price }}</span>
+					{{#  } else if(item.max_price != item.min_price) {  }}
+					<!-- <span class="ns-goods-profit ns-red-color">￥{{ item.min_price }}~￥{{ item.max_price }}</span> -->
+					<span class="ns-goods-profit ns-red-color">￥{{ item.min_price }}</span>
+					{{#  }  }}
+				</p>
+				<p><span>库存：</span><span>{{ item.stock }}</span></p>
+				<p class="ns-goods-sale"><span class="sale-label">销量</span>&nbsp;<span class="sale-num">{{ item.sale_num }}</span></p>
+			</div>
+		</div>
+	{{#  }); }}
+</script>
+{/block}
+
+{block name="script"}
+<script>
+    var sale_num, // 销量
+		min_price, // 供应价最低价格
+		create_time, // 商品上架时间
+		order, // 销量/供应价/商品上架时间
+		sort, // 正序asc/倒序desc
+        form, 
+        keyword = $(".search-keyword").val(), // 搜索框内容
+		laypage, 
+		laytpl, 
+		list_count = 0, // 商品总数
+		limit = 20, // 每页商品数
+		curr = 1, // 当前页
+		range_min, // 供应价最低价
+		range_max, // 供应价最高价
+        is_free_shipping; // 包邮
+        
+    $(".ns-goods-term-list li").click(function() { // 点击改变排序
+		if ($(this).hasClass("ns-text-color")) {
+			if ($(this).find("input").val() == "desc") {
+				$(this).find("input").val("asc");
+				$(this).find("i.iconfold").removeClass("i-color");
+				$(this).find("i.iconunfold").addClass("i-color");
+			} else {
+				$(this).find("input").val("desc");
+				$(this).find("i.iconfold").addClass("i-color");
+				$(this).find("i.iconunfold").removeClass("i-color");
+			}
+		} else {
+			$(this).find("input").val("desc");
+			$(this).addClass("ns-text-color");
+			$(this).siblings().removeClass("ns-text-color");
+			$(this).find("i.iconfold").addClass("i-color");
+			$(this).find("i.iconunfold").removeClass("i-color");
+		}
+
+		var attr = $(this).attr("data-name");
+
+		if (attr == "sale_num") { // 销量
+			order = "sale_num";
+			sort = $("input[name='sale_num']").val();
+		} else if (attr == "min_price") { // 供货价最低价
+			order = "min_price";
+			sort = $("input[name='min_price']").val();
+		} else if (attr == "create_time") { // 商品创建时间
+			order = "create_time";
+			sort = $("input[name='create_time']").val();
+		}
+
+		goodsList();
+    })
+    
+    $("input[name='keyword']").val(keyword);
+
+    $(".ns-goods-price-range button").mousedown(function() {
+		range_min = Number($(".supply-min-price").val());
+		range_max = Number($(".supply-max-price").val());
+		console.log(range_min)
+		console.log(range_max)
+		if (range_min < 0 || range_max < 0) {
+			layer.msg("供货价最低为0");
+			return false;
+		}
+		
+		if (range_min > range_max) {
+			layer.msg("供货价范围最高价不能小于最低价");
+			$(".supply-max-price").val("")
+			return false;
+		}
+		
+		if (range_min * 100 % 1 != 0) {
+			layer.msg("价格最多可保留两位小数");
+			$(".supply-min-price").val("");
+			return false;
+		}
+		
+		if (range_max * 100 % 1 != 0) {
+			layer.msg("价格最多可保留两位小数");
+			$(".supply-max-price").val("");
+			return false;
+		}
+
+		goodsList();
+    })
+    
+    layui.use(['form', 'laypage', 'laytpl'], function() {
+		form = layui.form;
+		laypage = layui.laypage;
+		laytpl = layui.laytpl;
+		form.render();
+
+		goodsList(); // 初始化
+		pageList(list_count);
+
+		// 监听复选框(包邮)
+		form.on('checkbox(is_free_shipping)', function(data) {
+			if (data.elem.checked) {
+				is_free_shipping = 1;
+			} else {
+				is_free_shipping = undefined;
+			}
+			goodsList();
+		});
+    });
+    
+    function goodsList() {
+		$(".ns-goods-list").empty();
+		$.ajax({
+			url: ns.url("supply://shop/goods/goodslist"),
+			data: {
+				"page": curr,
+                "page_size": limit,
+                "site_id": $("input[name='supplier_site_id']").val(),
+				"category_id": $(".goods-category-id").val(),
+				"category_level": $(".goods-category-level").val(),
+				"order": order,
+				"sort": sort,
+				"min_price": range_min,
+				"max_price": range_max,
+				"is_free_shipping": is_free_shipping,
+				"keyword": $(".search-keyword").val()
+			},
+			async: false,
+			dataType: 'JSON',
+			type: 'POST',
+			success: function(res) {
+				list_count = res.data.count;
+
+				if (res.data.list.length == 0) {
+					var html = '<div class="empty-null">暂无商品</div>';
+					$(".ns-goods-list").html(html);
+				} else {
+					laytpl($("#goodsList").html()).render(res.data, function(html) {
+						$(".ns-goods-list").append(html)
+					});
+				}
+			}
+		});
+	}
+
+	function pageList(count) {
+		if (!count) return false;
+		page = new Page({
+			elem: 'list_page',
+			count: count,
+			limit: limit,
+			curr: curr,
+			callback: function(obj) {
+				goodsList();
+			}
+		});
+	}
+
+	function toGoodsDetail(id) {
+		location.href = ns.url("supply://shop/goods/detail", {
+			"sku_id": id
+		});
+	}
+</script>
+{/block}

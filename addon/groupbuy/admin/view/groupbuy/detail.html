@@ -1,0 +1,27 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="ns-detail-card ns-tips">
+	<div class="ns-detail-img">
+		<img layer-src src="{:img(explode(',', $groupbuy_info.data.goods_image)[0])}"/>
+	</div>
+		
+	<div class="ns-detail-con">
+		<p class="ns-detail-line">
+			<span class="ns-goods-name">{$groupbuy_info.data.goods_name}</span>
+		</p>
+		<p class="ns-detail-line">
+			<span class="ns-text-color">{$groupbuy_info.data.status == 1 ? '未开始' : ($groupbuy_info.data.status == 2 ? '进行中' : '已结束')}</span>
+		</p>
+		<p class="ns-detail-line">所属店铺：{$groupbuy_info.data.site_name}</p>
+		<p class="ns-detail-line">
+			<span>团购价格：￥{$groupbuy_info.data.groupbuy_price}元</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<span>商品原价：￥{$groupbuy_info.data.goods_price}</span>
+		</p>
+		<p class="ns-detail-line">活动时间：{:time_to_date($groupbuy_info.data.start_time)} — {:time_to_date($groupbuy_info.data.end_time)}</p>
+	</div>
+</div>
+{/block}
+{block name="script"}
+{/block}

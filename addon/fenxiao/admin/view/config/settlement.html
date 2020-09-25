@@ -1,0 +1,115 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.ns-form {margin-top: 0;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+    <!-- 基础上传 -->
+    <!--<div class="layui-card ns-card-common ns-card-brief">-->
+        <!--<div class="layui-card-header">-->
+            <!--<span class="ns-card-title">结算设置</span>-->
+        <!--</div>-->
+        <!--<div class="layui-card-body">-->
+            <!--<div class="layui-form-item">-->
+                <!--<label class="layui-form-label">佣金计算方式：</label>-->
+                <!--<div class="layui-input-block">-->
+                    <!--<div class="layui-input-inline">-->
+                        <!--<input type="radio" name="account_type" value="1" lay-filter="account_type" title="实际支付" {if $settlement_info.account_type == 1} checked {/if}/>-->
+
+                    <!--</div>-->
+                <!--</div>-->
+                <!--<div class="ns-word-aux">[实际支付金额-运费]*佣金比例</div>-->
+            <!--</div>-->
+        <!--</div>-->
+
+    <!--</div>-->
+
+    <div class="layui-card ns-card-common ns-card-brief">
+        <div class="layui-card-header">
+            <span class="ns-card-title">提现设置</span>
+        </div>
+        <div class="layui-card-body">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">提现审核：</label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline">
+                        <input type="radio" name="withdraw_status" value="1" lay-filter="withdraw_type" title="手动审核" {if $withdraw_info.withdraw_status == 1} checked {/if} />
+                        <input type="radio" name="withdraw_status" value="2" lay-filter="withdraw_type" title="自动审核" {if $withdraw_info.withdraw_status == 2} checked {/if}/>
+                    </div>
+
+                </div>
+            </div>
+			
+            <div class="layui-form-item">
+                <label class="layui-form-label">最低提现金额：</label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline">
+                        <input type="number" name="withdraw" lay-verify="required" value="{$withdraw_info.withdraw}" autocomplete="off" class="layui-input ns-len-short">
+                    </div>
+                    <div class="layui-form-mid">元</div>
+                </div>
+            </div>
+			
+            <div class="layui-form-item">
+                <label class="layui-form-label">佣金提现手续费：</label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline">
+                        <input type="number" name="withdraw_rate" lay-verify="required" value="{$withdraw_info.withdraw_rate}" autocomplete="off" class="layui-input ns-len-short">
+                    </div>
+                    <div class="layui-form-mid">%</div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">免手续费区间：</label>
+                <div class="layui-inline">
+                    <div class="layui-input-inline ns-len-short ns-noboder-searchbox">
+                        <input type="number" name="min_no_fee" lay-verify="required|number" value="{$withdraw_info.min_no_fee}" autocomplete="off" class="layui-input ">
+                    </div>
+                    <span class="layui-form-mid">元&nbsp;&nbsp;至 </span>
+                    <div class="layui-input-inline ns-len-short">
+                        <input type="number" name="max_no_fee" lay-verify="required|number" value="{$withdraw_info.max_no_fee}" autocomplete="off" class="layui-input ">
+                    </div>
+                    <span class="layui-form-mid">元</span>
+                </div>
+            </div>
+
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+			</div>
+        </div>
+    </div>
+
+</div>
+{/block}
+{block name="script"}
+<script>
+    layui.use(['form'], function() {
+        var form = layui.form,
+            repeat_flag = false; //防重复标识
+
+
+        form.on('submit(save)', function(data) {
+            if (repeat_flag) return;
+            repeat_flag = true;
+
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("fenxiao://admin/config/settlement"),
+                data: data.field,
+                success: function(res) {
+                    layer.msg(res.message);
+					repeat_flag = false;
+                    if (res.code == 0) {
+                        location.reload();
+                    }
+                }
+            });
+        });
+    });
+</script>
+{/block}

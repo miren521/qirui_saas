@@ -1,0 +1,1825 @@
+.layui-layout-admin .layui-body {
+	z-index: -1;
+}
+
+/**************** 颜色字体统一 ********************/
+/* 文字基本颜色 */
+$base-color: #4685FD; //主色调
+$ns-color-black: #333; //基本色
+$ns-color-content: #5a5a5a; //基本色
+
+
+/* 特殊颜色 */
+$ns-color-red: red; //红色提示
+$ns-color-dark-grey: #898989; //辅助深灰色
+$ns-color-gray: #e5e5e5; //辅助灰色
+$ns-color-light-gray: #f9f9f9;
+
+//文字颜色
+.ns-text-color {
+  color: $base-color !important;
+}
+
+.ns-text-color-black {
+  color: $ns-color-black !important;
+}
+
+.ns-text-color-gray {
+  color: $ns-color-gray !important;
+}
+
+.ns-text-color-light-gray {
+  color: $ns-color-light-gray !important;
+}
+
+.ns-text-color-dark-gray {
+  color: $ns-color-dark-grey !important;
+}
+
+.ns-text-color-red {
+	color: $ns-color-red;
+}
+
+//边框
+.ns-border-color {
+  border-color: $base-color !important;
+}
+
+.ns-border-color-gray {
+  border-color: $ns-color-gray !important;
+}
+
+//背景色
+.ns-bg-color {
+  background-color: $base-color !important;
+}
+
+.ns-bg-color-black {
+  background-color: $ns-color-black;
+}
+
+.ns-bg-color-dark-gray {
+  background-color: $ns-color-dark-grey !important;
+}
+
+.ns-bg-color-gray {
+  background-color: $ns-color-gray !important;
+}
+
+.ns-bg-color-light-gray {
+  background-color: $ns-color-light-gray !important;
+  background-clip: padding-box;
+}
+.ns-bg-color-after::after{
+	background-color: $base-color;
+}
+
+// 居右
+.ns-align-right {
+	text-align: right !important;
+}
+
+/**************** 组件颜色 ********************/
+//简洁tab
+.layui-tab-brief li.layui-this{
+	color: $base-color !important;
+}
+.layui-tab-brief li.layui-this:after{
+	border-bottom-color: $base-color  !important;
+}
+
+
+/**************** base中的样式 ********************/
+// logo
+.ns-logo{
+	display: flex;
+	align-items: center;
+	height: 40px;
+	line-height: 40px;
+	background-color: #363638;
+	.logo-box{
+		display: flex;
+		justify-content: left;
+		align-items: center;
+		margin-left: 25px;
+		height: 14px;
+		img{
+			max-height: 100%;
+		}
+	}
+	span:nth-of-type(1){
+		font-size: 12px;
+		color: #D8D8D9;
+		margin-left: 20px;
+		position: relative;
+		height: 40px;
+		line-height: 40px;
+	}
+	span:nth-of-type(1):after{
+		content: "";
+		height: 15px;
+		width: 2px;
+		background-color: #D8D8D9;
+		position: absolute;
+		left: -9px;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+	span:nth-of-type(2){
+		margin-left: auto;
+		color: white;
+		margin-right: 25px;
+		font-size: 12px;
+	}
+}
+
+.layui-layout-admin{
+	.layui-header{		
+		z-index: 99999;
+		height: 54px;
+		background-color: #fff;
+		border-bottom: 1px solid #f1f1f1;
+	}
+	.layui-side{
+		top: 94px;
+		width: 252px;
+	}
+	.layui-body{
+		top: 94px;
+		left: 252px;
+		bottom: 0;
+		background-color: #fff;
+	}
+}
+
+//一级菜单
+.layui-header{
+	.layui-layout-left{
+		left: 0;
+		padding: 0;
+		height: 54px;
+		li{height: 54px;}
+		 a{    
+			padding: 0;
+			margin-left: 34px;
+			height: 54px;
+			line-height: 54px;
+			&:hover{
+				color: $base-color;
+			}
+		 }
+		.layui-this{
+			&::after{
+				width: 0;
+			}
+			a{
+				color: $base-color !important;
+			}
+		}
+	}
+	.layui-layout-right{
+		height: 54px;
+		li{line-height: 54px;}
+		dd.layui-this a{
+			background-color: $base-color !important;
+		}
+	}
+	.layui-nav .layui-nav-more{
+		border-top-color: #000;
+	}
+	.layui-nav .layui-nav-mored{
+		border-color: transparent transparent #000;
+	}
+	.layui-nav-bar{width: 0 !important;}
+	.layui-nav .layui-nav-item a{color: #000; font-size: 15px;}
+}
+
+//二级菜单
+.layui-side{
+	background-color: #F7F8FA;
+	.layui-side-scroll{
+		width: 272px;
+	}
+	.ns-side-title{
+		display: inline-block;
+		width: 190px;
+		height: 90px;
+		line-height: 100px;
+		margin-left: 38px;
+		border-bottom: 1px solid #E5E5E5;
+		text-align: center;
+		font-size:24px;
+		font-weight:400;
+		color:rgba(51,51,51,1);
+	}
+	.layui-nav-tree{
+		position: absolute;
+		top: 100px;
+		width: 252px;
+		background-color: #F7F8FA !important;
+		li.layui-this, li.layui-this a{
+			background-color: #E2E5EB !important;
+		}
+		.layui-nav-item > a{
+			padding-left: 50px;
+			height: 36px;
+			line-height: 36px;
+			color: #333 !important;
+			&:hover{
+				background-color: #E2E5EB !important;
+			}
+		}
+		.layui-nav-child{
+			background-color: transparent !important;
+			dd.layui-this a, dd.layui-this{
+				background-color: transparent !important;
+			}
+			dd.layui-this a{
+				color: $base-color !important;
+				&::after{
+					background-color: $base-color !important;
+				}
+			}
+			a{
+				position: relative;
+				padding-left: 78px;
+				height: 36px;
+				line-height: 36px;
+				color: #5B5A5A;
+				font-weight: 400;
+				&::after{
+					content: "";
+					position: absolute;
+					width: 4px;
+					height: 4px;
+					background-color: #5B5B5B;
+					border-radius: 50%;
+					top: 50%;
+					left: 66px;
+					transform: translateY(-50%);
+				}
+				&:hover{
+					color: $base-color !important;
+					&::after{
+						background-color: $base-color !important;
+					}
+				}
+			}
+		}
+	}
+	.layui-nav-bar{width: 0 !important;}
+	.layui-nav .layui-nav-more{
+		width: 8px;
+		height: 8px;
+		top: 16px;
+		right: 35px;
+	}
+	.layui-nav-itemed>a .layui-nav-more{
+		margin-top: -3px;
+		border: 1px solid #333;
+		border-color: transparent #333 #333 transparent;
+		transform: rotate(45deg);
+	}
+	.layui-nav-tree .layui-nav-more{
+		border: 1px solid #333;
+		border-color: transparent #333 #333 transparent;
+		transform: rotate(-45deg);
+	}
+}
+
+/* 面包屑 */
+.ns-crumbs {
+	position: fixed;
+	width: calc(100% - 252px);
+	height: 44px;
+	line-height: 44px;
+	padding-left: 30px;
+	border-bottom: 1px solid #f1f1f1;
+	background-color: #fff;
+	z-index: 9999;
+	&.child_no_exit{
+		left: 0;
+		width: 100%;
+	}
+	a:hover{
+		color: $base-color!important;
+	}
+}
+.layui-body{
+	overflow: auto;
+	&.child_no_exit{
+		left: 0;
+	}
+	.ns-body-content{
+		&.crumbs_no_exit{
+			margin-top: 0;
+		}
+		border-top: 1px solid transparent;
+		margin-top: 45px;
+		min-width: 1000px;
+		padding: 0 15px 15px;
+		
+		.ns-body {
+			width: 100%;
+			min-height: 620px;
+		}
+	}
+	/* 四级菜单 */
+	.fourstage-nav{margin: 0 0 10px;}
+	.fourstage-nav ul{
+		border: 0;
+		li{
+			margin: 0 15px;
+			padding: 0;
+		}
+		li.layui-this{
+			&:after{
+				border: none !important;
+				width: 100%;
+				height: 4px;
+				background-color: $base-color;
+				border-radius: 30px !important;
+				position: absolute;
+				top: 40px;
+			}
+			a{
+				color: $base-color;
+			}
+		}
+	}
+}
+// 	/* 内容 */
+// 	.layui-body{
+// 		position: absolute;
+// 		overflow: auto !important;
+// 		top: 111px;
+// 		bottom: 0;
+// 		left: 220px;
+// 		background-color: #f4f6f8;
+// 		.ns-body-content{
+// 			min-width: 1100px;
+// 			min-height: 650px;
+// 			padding: 10px;
+// 		}
+// 	}
+// 	/* 四级菜单 */
+// 	.fourstage-nav{margin: 0 0 10px;}
+// 	.fourstage-nav ul{
+// 		border: 0;
+// 		li.layui-this{
+// 			&:after{
+// 				border: none !important;
+// 				width: 100%;
+// 				height: 4px;
+// 				background-color: $base-color;
+// 				border-radius: 30px !important;
+// 				position: absolute;
+// 				top: 40px;
+// 			}
+// 			a{
+// 				color: $base-color;
+// 			}
+// 		}
+// 	}
+// }
+
+
+//版权信息
+.ns-footer {
+  box-sizing: border-box;
+  text-align: center;
+  padding-bottom: 30px;
+  padding-top: 50px;
+}
+.ns-footer > p{line-height: 25px;}
+.ns-footer .gov-box img{
+	max-width: 20px;
+	max-height: 20px;
+	margin-right: 5px;
+}
+.ns-footer-img {
+	margin-bottom: 18px;
+	
+	a {
+		display: block;
+		text-align: center;
+	}
+	
+	img {
+		max-width: 100px;
+		max-height: 27px;
+	}
+}
+
+.ns-footer-img, .ns-copyright, .ns-put-on-record {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  span {
+    display: inline-block;
+    color: #898989;
+    line-height: 25px;
+    margin-right: 12px;
+  }
+}
+
+.ns-put-on-record img {
+  margin-right: 3px;
+}
+
+/*********************** 组件样式 ***************************/
+//***************** 操作提示 ***************/
+.ns-tips{
+	padding: 20px;
+	background-color: #fff;
+	border: 1px dashed $base-color;
+	margin-top: 20px;
+	.layui-colla-title{
+		padding-left: 10px;
+		height: 30px;
+		font-size: 16px;
+		font-weight: 400;
+		line-height: 30px;
+		background-color: transparent;
+		.layui-colla-icon{
+			left: 80px;
+		}
+	}
+	.layui-colla-content{
+		padding: 0;
+		padding-left: 34px;
+		border: none;
+		li{
+			line-height: 25px;
+			list-style: initial;
+		}
+	}
+}
+
+//***************** 展示面板 ***************/
+.ns-card-common {
+	margin-top: 15px;
+	margin-bottom: 0;
+	box-shadow: inherit;
+	
+	.layui-card-header {
+		padding: 0 20px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	
+	.layui-card-body {
+		padding: 20px;
+	}
+	
+	.ns-card-title {
+		font-size: 16px;
+		font-weight: 600;
+	}
+	
+	.ns-card-sub {
+		color: #999999;
+		font-size: 14px;
+	}
+}
+
+.ns-card-brief {
+	.layui-card-header {
+		border-bottom: 0;
+		padding-bottom: 0;
+	}
+	
+	.ns-card-title {
+		position: relative;
+		padding-left: 10px;
+	}
+	
+	.ns-card-title::before {
+		content: '';
+		display: inline-block;
+		width: 3px;
+		height: 14px;
+		background-color: $base-color;
+		position: absolute;
+		left: 0;
+		top: 50%;
+		border-radius: 5px;
+		transform: translateY(-50%);
+	}
+}
+
+
+// 服务面板
+.ns-card-block {
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	
+	.ns-card-sev {
+		background-color: #FFFFFF;
+		width: 32.8%;
+		
+		.layui-card-header {
+			height: auto !important;
+			line-height: normal;
+			padding-top: 20px;
+			padding-bottom: 20px;
+		}
+		
+		.ns-sev-left {
+			display: flex;
+			justify-content: flex-start;
+			align-items: center;
+		}
+		
+		.ns-img-box {
+			width: 60px;
+			height: 60px;
+			line-height: 60px;
+			margin-right: 10px;
+		}
+		
+		.ns-text-box {
+			line-height: 30px;
+		}
+		
+		.ns-sev-right {
+			display: flex;
+			align-items: center;
+		}
+	}
+	
+	.layui-card-body div {
+		height: 76px;
+		overflow: auto;
+		font-size: 13px;
+		color: #999;
+		scrollbar-width: none; /* firefox */
+		-ms-overflow-style: none; /* IE 10+ */
+	}
+	
+	.layui-card-body div::-webkit-scrollbar { /* Chrome Safari */
+		display:none
+	}
+}
+	
+	
+/* 详情面板 */
+.ns-detail-card {
+	width: 100%;
+	border: 1px solid #F1F1F1;
+	padding: 20px 0 20px 50px;
+	box-sizing: border-box;
+	display: flex;
+
+	.ns-detail-img {
+		width: 60px;
+		height: 60px;
+		text-align: center;
+		margin-right: 15px;
+		
+		img {
+			max-width: 100%;
+			max-height: 100%;
+		}
+	}
+
+	.ns-goods-name {
+		font-size: 16px;
+		font-weight: 600;
+		color: #333333;
+	}
+
+	.ns-detail-line {
+		height: 32px;
+		line-height: 32px;
+		color: #666666;
+	}
+
+	.ns-inline-span {
+		display: inline-block;
+		width: 220px;
+	}
+}
+
+	
+
+
+//*************** 筛选面板 ***************/
+.ns-screen {
+  margin-top: 20px;
+  border: 0;
+  background-color: #fff;
+  border-radius: 5px;
+  .layui-colla-item {
+    position: relative;
+  }
+  .layui-colla-title {
+    position: initial;
+    height: 0;
+    .layui-colla-icon {
+      left: auto;
+	  transform: translateX(-50%);
+	  top: 0;
+	  color: #BEBEBE;
+	  right: 10px;
+	  z-index: 2;
+	  padding: 5px;
+    }
+  }
+  .layui-colla-content {
+    padding: 15px 0;
+    border: 1px solid #f1f1f1;
+    .layui-input, .layui-form-select {
+      width: 185px !important;
+    }
+  }
+  .layui-form-label {
+    width: 120px;
+  }
+  .ns-form-row {
+    margin-left: 120px;
+  }
+}
+
+//单行筛选面板
+.ns-single-filter-box {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  background-color: #fff;
+  .layui-form {
+    margin-left: auto;
+	.layui-btn {
+	  border-color:  #e6e6e6;
+	  padding: 0 10px;
+	}
+    .layui-input + .layui-btn {
+	  height: 32px;
+	  line-height: 32px;
+	  position: absolute;
+	  right: 1px;
+	  top: 1px;
+      border-width: 0;
+	  border-left-width: 1px;
+    }
+	
+	.layui-input:focus + .layui-btn {
+	    border-color: $base-color !important;
+	}
+  }
+  .layui-input-inline {
+    margin-left: 8px;
+  }
+}
+
+
+//*************** 表格 ***************/
+.layui-table-view {
+  border-width: 0;
+  background-color: #fff;
+  .layui-input{
+  	width: 80px;
+  }
+  thead th{
+  	background-color: #fff;
+  }
+
+  .layui-table[lay-skin='line'] {
+    border-width: 0;
+  }
+  .layui-table {
+    width: 100%;
+    td {
+      padding: 13px 0;
+    }
+    thead tr,
+    tr:hover {
+      background-color: $ns-color-light-gray;
+    }
+	thead span{
+	 font-weight: bold;
+	}
+  }
+  
+  .layui-table-cell {
+    height: auto;
+    line-height: 20px;
+
+    .layui-form-switch {
+      margin-top: 0;
+      i {
+        width: 22px;
+        height: 22px;
+        top: 0;
+        left: 0;
+        transition: 0.2s linear;
+        box-shadow: 0 2px 5px #999;
+        background-color: #fff;
+      }
+    }
+
+    .layui-form-onswitch {
+      border-color: $base-color;
+      background-color: $base-color;
+
+      i {
+        left: 100%;
+      }
+    }
+
+    // .layui-btn {
+    //   padding: 0;
+    //   height: 40px;
+    //   line-height: 40px;
+    //   background-color: transparent;
+    //   color: #666;
+    //   font-size: 14px;
+    // }
+
+    a:hover {
+      color: $base-color;
+    }
+  }
+  
+  //分页
+  .layui-table-page {
+    padding-top: 22px;
+    height: 56px;
+  }
+
+  #layui-table-page1 {
+    text-align: right;
+  }
+
+  .layui-laypage-count,
+  .layui-laypage-limits {
+    float: left;
+  }
+
+  .layui-laypage-skip {
+    display: none;
+  }
+
+  //表格每一行的悬浮背景色
+  .layui-table-hover {
+    background-color: $ns-color-light-gray;
+  }
+
+  //表格每一行的单选按钮颜色
+  .layui-form-checked[lay-skin='primary'] i {
+    border-color: $base-color !important;
+    background-color: $base-color;
+  }
+
+  //表格每一行的单选按钮颜色悬浮效果
+  .layui-form-checkbox[lay-skin='primary']:hover i {
+    border-color: $base-color;
+  }
+
+  //表格分页输入框，下拉选被选中边框颜色
+  .layui-laypage input:focus,
+  .layui-laypage select:focus {
+    border-color: $base-color !important;
+  }
+
+  //当前页按钮背景色
+  .layui-laypage .layui-laypage-curr .layui-laypage-em {
+    background-color: $base-color;
+  }
+}
+
+// 表格操作栏
+.layui-table-view .layui-table[lay-size=lg] td .layui-table-cell {
+	height: auto;
+    line-height: 1.8;
+}
+
+td:last-child .layui-table-cell {
+    white-space: normal;
+	
+	.layui-btn {
+		height: inherit;
+		line-height: inherit;
+		margin-left: 5px;
+	}
+}
+
+/* .layui-btns-box {
+	line-height: 1.6;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
+.layui-btns-box .default {
+	color: #666666;
+} */
+
+//表格图文内容（商品：包含商品图片及名称）
+.ns-table-tuwen-box {
+	display: flex;
+	align-items: center;
+	
+	.ns-img-box {
+		flex-shrink: 0;
+	}
+
+	.ns-font-box {
+		margin-left: 10px;
+		flex: 1;
+		overflow: hidden;
+	}
+}
+
+//img
+.ns-img-box {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  line-height: 40px;
+}
+
+.ns-img-box img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+//超出范围下拉箭头隐藏
+.layui-table-grid-down {
+  display: none;
+}
+
+.ns-over-hide-second {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+  line-height: 25px!important;
+  height: auto!important;
+}
+
+//多行超出隐藏
+.ns-line-hiding {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-line-clamp: 1;
+	line-clamp: 1;
+	-webkit-box-orient: vertical;
+	white-space: normal;
+	word-break: break-all;
+	line-height: 22px!important;
+	max-height: 42px!important;
+}
+
+.ns-multi-line-hiding {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+  word-break: break-all;
+  line-height: 22px!important;
+  max-height: 42px!important;
+}
+
+/* 表格分页颜色 */
+.layui-laypage a:hover {
+	color: $base-color!important;
+}
+
+.layui-laypage .layui-laypage-curr .layui-laypage-em {
+	background-color: $base-color!important;
+}
+
+.layui-laypage input:focus, .layui-laypage select:focus {
+    border-color: $base-color!important;
+}
+
+//*************** 静态表格 ***************/
+.layui-table th{font-weight: bold; background-color: #f7f7f7 !important;}
+.layui-table, .layui-table-view{margin-top: 20px;margin-bottom: 0;}
+.layui-table.ns-pithy-table{
+	.layui-input{
+		width: 80px;
+	}
+	border: 0;
+	thead th{
+		padding: 5px 15px!important;
+		height: 40px;
+		line-height: 40px;
+		border: 0;
+		border-bottom: 1px solid #e6e6e6;
+	}
+	tbody td{
+		padding: 13px 15px;
+		min-height: 40px;
+		line-height: 40px;
+		border: 0;
+	}
+	tbody tr{
+		border-bottom: 1px solid #e6e6e6;
+		&:last-of-type{
+			border-bottom: 0;
+		}
+	}
+}
+
+.ns-table-btn{
+	display: flex;
+	flex-wrap: wrap;
+	
+	.layui-btn{
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 23px;
+		border-radius: 50px;
+		background-color: transparent;
+		font-size: 13px;
+		color: $base-color;
+		text-align: center;
+		padding: 2px 8px 2px 0;
+		margin: 5px 0 5px 5px;
+		position: relative;
+	}
+}
+
+
+//*************** 弹框 ***************/
+//弹框阴影
+.layui-layer{
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;	
+}
+//弹框遮罩层颜色
+.layui-layer-shade{
+	background-color: #373737 !important;
+	opacity: 0.6 !important;
+}
+
+//选择框的层级问题
+.layui-layer-page .layui-layer-content{
+	padding: 20px;
+	overflow: initial;
+	.layui-form-selected dl{
+		position: absolute;
+	}
+}
+
+.layui-layer-page #layui-layer-photos {
+	padding: 0;
+}
+
+//*************** 表单 ***************/
+.ns-form {
+	background-color: #fff;
+	padding: 20px;
+	margin-top: 10px;
+	border-radius: 5px;
+}
+
+//input宽度
+.ns-len-long {
+  width: 450px !important;
+}
+.ns-len-mid {
+  width: 250px !important;
+}
+.ns-len-short {
+	width: 120px !important;
+}
+.ns-special-length{
+	width: 650px;
+}
+
+//input其他设置
+.layui-input, .layui-select, .layui-textarea{
+	border-color: #E6E6E6;
+	&:focus{
+		border-color: $base-color !important;
+	}
+}
+
+.layui-input, .layui-select, .ns-input-text, .layui-btn {
+  height: 34px;
+  line-height: 34px;
+}
+
+.ns-btn-hover{
+	color: $base-color !important;
+	border-color: $base-color !important;
+}
+
+//label宽度
+.layui-form-label {
+  width: 200px;
+  height: 34px;
+  line-height: 34px;
+  padding: 0 10px 0 0;
+  box-sizing: border-box;
+  font-size: 14px;
+  color: #454545 !important;
+  &.sm {
+    width: 80px;
+  }
+  &.mid {
+  	  width: 150px;
+  }
+}
+//layui-input-block的边距
+.layui-form-label + .layui-input-block {
+  margin-left: 200px;
+}
+.layui-form-label.sm + .layui-input-block {
+  margin-left: 80px;
+}
+.layui-form-label.mid + .layui-input-block {
+  margin-left: 150px;
+}
+
+//必填标志
+.required {
+  color: $ns-color-red;
+  margin-right: 3px;
+}
+
+//注释
+.ns-word-aux{
+	margin-left: 200px;
+	display: block;
+	margin-top: 5px;
+	color: #B2B2B2;    
+	font-size: 12px;
+    line-height: 1.6;
+	&.sm {
+		margin-left: 80px;
+	}
+	&.mid {
+		margin-left: 150px;
+	}
+}
+
+//下拉框
+.layui-form-select dl dd.layui-this {
+  background-color: $base-color;
+}
+
+//复选框
+.layui-form-checked[lay-skin='primary'] i {
+  border-color: $base-color !important;
+  background-color: $base-color;
+  color: #fff;
+}
+
+.layui-form-checkbox[lay-skin='primary']:hover i {
+  border-color: $base-color;
+}
+
+//单选框
+.layui-form-radio > i:hover,
+.layui-form-radioed > i {
+  color: $base-color;
+}
+
+//开关按钮
+.layui-form-switch {
+  margin-top: 6px;
+  border-radius: 16px;
+  border-color: #DDDDDD;
+  i{
+    width: 21px;
+    height: 21px;
+    border-radius: 25px;
+    background-color: #fff;
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 1px;
+    -webkit-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+    -webkit-box-shadow: 0 2px 5px $ns-color-content;
+    box-shadow: 0 2px 5px $ns-color-content;
+  }
+  &.layui-form-onswitch i {
+    left: 46px;
+  }
+}
+
+.layui-form-onswitch {
+  background-color: $base-color;
+}
+
+// 文本域
+.layui-textarea {
+  display: inline-block;
+  color: $ns-color-black !important;
+  resize: none;
+  &::-webkit-scrollbar {display:none}
+}
+
+//按钮
+.ns-form-row {
+  margin-top: 20px;
+  margin-left: 200px;
+  &.sm {
+    margin-left: 80px;
+  }
+  &.mid {
+  	margin-left: 150px;
+  }
+  .layui-btn {
+    height: 34px;
+	line-height: 34px;
+  }
+}
+
+
+// 上传图片
+.upload-img-block.square{
+	width: 100px;
+	height: 100px;
+}
+
+.upload-img-block {
+	padding: 10px;
+	width: 250px;
+	height: 100px;
+	border: 1px dashed #ddd;
+	box-sizing: border-box;
+	
+	.upload-img-box {
+		width: 100%;
+		height: 100%;
+		text-align: center;
+		position: relative;
+		cursor: pointer;
+		
+		.ns-upload-default {
+			position: absolute;
+			top: 50%; /*偏移*/
+			left: 50%;
+			transform: translate(-50%, -50%);
+			
+			p {
+				color: $ns-color-content;
+				line-height: 20px;
+				white-space: nowrap;
+			}
+		}
+		
+		>img {
+			position: absolute;
+			top: 50%; /*偏移*/
+			left: 50%;
+			transform: translate(-50%, -50%);
+			max-height: 100%;
+			max-width: 100%;
+		}
+	}
+}
+
+// 弹框按钮
+.layui-layer-btn .layui-layer-btn0 {
+	border-color: $base-color !important;
+	background-color: $base-color !important;
+}
+
+//表单的其他设置
+:root input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  box-shadow: 0 0 0 0 white inset;
+}
+
+.layui-form-item .layui-input-inline{
+	width: auto;
+	line-height: 34px;
+}
+
+.layui-form-radio{
+	margin: 0;
+}
+.layui-input-block{
+	line-height: 34px;
+}
+.layui-form-mid, .layui-word-aux {
+	display: inline-block;
+	height: 34px;
+	line-height: 34px;
+	padding: 0!important;
+}
+
+
+.layui-btn-primary:hover {
+  border-color: #C9C9C9;
+}
+
+//禁止选择
+.ns-dis-input{background-color: #f7f7f7; cursor: no-drop;}
+.ns-dis-input:hover{border-color: #e6e6e6 !important;}
+
+//日历图标
+.ns-calendar{
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 34px;
+	height: 34px;
+}
+
+
+
+
+//*************** tab页 ***************/
+.ns-table-tab {
+	margin-top: 20px;
+  .layui-tab-title {
+    height: 41px;
+    border-color: #f1f1f1;
+    li {
+      background-color: #F7F7F7;
+      border-top: 1px solid #f1f1f1;
+      border-bottom: 1px solid #f1f1f1;
+      border-left: 1px solid #f1f1f1;
+      &:first-child {
+        border-left: 1px solid #f1f1f1;
+        border-top-left-radius: 3px;
+      }
+      &:last-child {
+        border-right: 1px solid #f1f1f1;
+        border-top-right-radius: 3px;
+      }
+      &.layui-this {
+        //color: $base-color;
+        background-color: #fff;
+        border-bottom-color: #fff;
+        //border-right-color: #fff;
+        &::after {
+          border: none;
+          //border-top: 2px solid $base-color;
+          border-radius: 0;
+        }
+      }
+    }
+
+  }
+  .layui-tab-content {
+    padding: 0;
+    border: none;
+    background-color: #fff;
+  }
+}
+
+//时间选择框
+.layui-laydate li.layui-this, .layui-laydate td.layui-this {
+    background-color: $base-color!important;
+}
+
+.layui-laydate-footer span:hover {
+    color: $base-color!important;
+}
+
+.layui-laydate-header i:hover, .layui-laydate-header span:hover {
+    color: $base-color!important;
+}
+
+.layui-laydate-footer span[lay-type=date] {
+    color: $base-color!important;
+}
+
+//分页
+.ns-table-bottom {
+  border-top: 1px solid $ns-color-gray;
+  padding-top: 10px;
+  padding-left: 17px;
+  padding-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  .layui-form-checkbox[lay-skin=primary]{
+	  padding-left: 25px;
+  }
+  .layui-table-bottom-tool-temp {
+    line-height: 34px;
+    .layui-table-view .layui-form-checkbox {
+      padding-left: 15px;
+    }
+  }
+  .layui-btn {
+    padding: 0px 5px;
+    font-size: 12px;
+    line-height: 2 !important;
+    height: auto;
+    display: inline-block;
+  }
+  .layui-table-page {
+    width: auto;
+    border-top: 0;
+    padding: 0 !important;
+    height: 34px !important;
+    padding-top: 2px !important;
+  }
+}
+/**************** 颜色选择器 ********************/
+.layui-colorpicker-main .layui-btn-container .layui-btn:last-of-type{
+	background-color: $base-color;
+}
+
+/**************** 弹窗 ********************/
+.ns-upload-img,
+.ns-upload-wrap {
+  display: inline-block;
+  width: 120px;
+  height: 120px;
+  border: 1px solid #e5e5e5;
+  text-align: center;
+  vertical-align: top;
+  cursor: pointer;
+}
+
+.ns-upload-img .add-style {
+  line-height: 1;
+}
+
+.ns-upload-img .add-img {
+  display: inline-block;
+  margin-top: 25px;
+  margin-bottom: 12px;
+  height: 35px;
+  width: 35px;
+  border-radius: 50%;
+  font-size: 40px;
+  line-height: 37px;
+  text-align: center;
+  color: #fff;
+  background-color: #12b7f5;
+}
+
+// .layui-layer-content .layui-form {
+//   padding: 25px;
+// }
+
+/**************** 站点logo ********************/
+
+.plus-box {
+  text-align: center;
+  width: 64px;
+  height: 64px;
+  line-height: 64px;
+}
+
+
+//普通
+.layui-fluid {
+  // min-height: 420px;
+  background-color: #fff;
+  margin: 10px 10px 85px;
+  padding: 15px 15px 35px;
+  overflow: hidden;
+}
+
+.layui-form-select {
+  .layui-input {
+    padding-right: 30px;
+    cursor: pointer;
+  }
+  .layui-input {
+    padding-right: 30px;
+    cursor: pointer;
+  }
+}
+
+.layui-layer-content {
+  overflow: inherit !important;
+  .layui-form {
+    padding: 25px;
+  }
+}
+
+.layui-form-item {
+  .layui-input-inline {
+    width: auto;
+  }
+}
+
+.layui-input-block input,
+.layui-input-inline input {
+  color: #4c4c4c;
+  height: 34px;
+}
+
+//select
+.layui-anim.layui-anim-upbit {
+  dd.layui-this {
+    background-color: $base-color;
+  }
+}
+
+//密码最小长度
+.ns-len-tiny {
+  width: inherit;
+}
+
+/*************** 列表 ***************/
+.ns-tabulation {
+  border-color: #e6e6e6 !important;
+  height: 30px;
+  position: relative;
+  display: flex;
+  padding: 13px 0;
+  min-height: 20px;
+  align-items: center;
+  border-bottom: 1px solid;
+
+  label {
+    min-width: 100px;
+    width: 10%;
+    margin-right: 20px;
+    padding-left: 35px;
+    text-align: left;
+    color: #333;
+  }
+  span {
+    width: 70%;
+    color: #999;
+  }
+  .ns-operation {
+    color: $base-color !important;
+    position: absolute;
+    top: 50%;
+    right: 35px;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    transform: translateY(-50%);
+  }
+}
+
+.ns-list {
+  .head {
+    h2 {
+      padding-left: 35px;
+      font-size: 14px;
+    }
+    border-bottom: 1px solid #e5e5e5;
+    background-color: #f7f7f7 !important;
+    display: flex;
+    height: 20px;
+    padding: 13px 0;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+
+/*************** 标签块 ***************/
+.ns-item-block-parent {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+
+  .ns-item-block {
+    position: relative;
+    display: inline-block;
+	background: #f7f8fa;
+    box-sizing: border-box;
+  }
+  
+  .ns-item-block:hover {
+  	background: #f2f3f5;
+  }
+
+  //内容展示
+  .ns-item-block-wrap {
+    padding: 15px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  // 左侧图片
+  .ns-item-pic {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    margin-right: 10px;
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+  }
+
+  // 右侧内容
+  .ns-item-con {
+	flex: 1;
+    overflow: hidden;
+	height: 40px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+
+    .ns-item-content-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .ns-item-content-icon {
+      font-size: 12px;
+      color: #999;
+      margin-top: 2px;
+
+      .label {
+        display: inline-block;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        max-width: 66%;
+        height: 18px;
+        padding-left: 5px;
+        padding-right: 5px;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        border: 1px solid #e5e5e5;
+        vertical-align: middle;
+        line-height: 18px;
+        border-radius: 2px;
+      }
+
+      img {
+        width: 16px;
+        height: 16px;
+        padding: 2px;
+        margin-bottom: 5px;
+      }
+    }
+
+    .ns-item-content-desc {
+      line-height: 20px;
+      font-size: 12px;
+      color: #999;
+    }
+  }
+
+  // 站点列表/操作栏
+  .ns-item-float-wrap {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    opacity: 0;
+    transition: all 0.2s;
+  }
+
+  .ns-item-float {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    line-height: 30px;
+    padding: 0 20px;
+    color: #333;
+    box-sizing: border-box;
+    background-color: #f2f3f5;
+    border-top: 1px solid #e5e5e5;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+
+    i {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 5px;
+    }
+
+    span {
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+  }
+
+  //鼠标悬浮时展示操作栏
+ /* .ns-item-block-hover-a:hover {
+	  border-color: transparent;
+	  box-shadow: 0 0 10px rgba(20, 20, 20, 0.15);
+  }
+  */ 
+  .ns-item-block-hover:hover {
+    border-color: transparent;
+    .ns-item-float-wrap {
+      bottom: -30px;
+      opacity: 1;
+      z-index: 99;
+      // box-shadow: 0 0 10px rgba(20, 20, 20, 0.15);
+    }
+  }
+
+  // 右上角未安装标志
+  .ns-item-poa-pic {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50px;
+    height: 50px;
+
+    img {
+      width: 50px;
+      height: 50px;
+    }
+  }
+}
+
+// 一行5个站点卡片时的排布
+@media screen and (min-width: 1700px) {
+  .ns-item-block {
+    width: 19%;
+    margin-right: 1.25%;
+    margin-bottom: 25px;
+
+    &:nth-child(5n) {
+      margin-right: 0;
+    }
+  }
+}
+
+// 一行4个站点卡片时的排布
+@media screen and (min-width: 1460px) and (max-width: 1699px) {
+  .ns-item-block {
+    width: 23.5%;
+    margin-right: 2%;
+    margin-bottom: 25px;
+
+    &:nth-child(4n) {
+      margin-right: 0;
+    }
+  }
+}
+
+// 一行3个站点卡片时的排布
+@media screen and (max-width: 1459px) {
+  .ns-item-block {
+    width: 31.5%;
+    margin-right: 2%;
+    margin-bottom: 25px;
+
+    &:nth-child(3n) {
+      margin-right: 0;
+    }
+  }
+}
+
+// 一行2个站点卡片时的排布
+/* @media screen and (max-width: 1239px) {
+  .ns-item-block {
+    width: 49%;
+    margin-right: 2%;
+    margin-bottom: 25px;
+
+    &:nth-child(2n) {
+      margin-right: 0;
+    }
+  }
+} */
+
+.ns-bg-color-blue {
+  background-color: $base-color !important;
+}
+
+.ns-bg-color-red {
+  background-color: $ns-color-red !important;
+}
+
+/* 禁止点击 */
+.ns-cursor {
+  cursor: no-drop;
+}
+
+//商品类型编辑
+.goods-edit-attr.brand-list ul.unselected {
+  li:hover, li.selected {
+    background-color: $base-color !important;
+    color: #fff;
+  }
+}
+
+.draggable-element.selected, .draggable-element:hover {
+  border-color: $base-color !important;
+}
+
+// 悬浮框
+.ns-prompt-block {
+	display: flex;
+	align-items: center;
+	
+	.ns-prompt {
+		width: 18px;
+		height: 18px;
+		line-height: 18px;
+		position: relative;
+	}
+	
+	.ns-prompt:hover {
+		.ns-prompt-box {
+			display: inline-block;
+		}
+	}
+	
+	.ns-prompt .iconfont {
+		color: #000;
+	}
+
+	.ns-prompt-box {
+		position: absolute;
+		top: -20px;
+		left: 32px;
+		border: 1px solid #e4e4e4;
+		width: 280px;
+		text-align: left;
+		border-radius: 5px;
+		background-color: #FFFFFF;
+		padding: 15px;
+		box-sizing: border-box;
+		word-break: break-all;
+		color: #666666;
+		line-height: 24px;
+		z-index: 999;
+		display: none;
+	}
+	
+	.ns-prompt-box:before, .ns-prompt-box:after {
+		content: '';
+		display: inline-block;
+		border: solid transparent;
+		width: 0;
+		height: 0;
+		border-width: 12px;
+		top: 16px;
+		position: absolute;
+	}
+
+	.ns-prompt-box:before {
+		border-right-color: #e4e4e4;
+		left: -25px;
+	}
+
+	.ns-prompt-box:after {
+		border-right-color: #FFFFFF;
+		left: -23px;
+	}
+
+	.ns-prompt-con {
+		width: 100%;
+		word-break: break-all;
+		white-space: normal;
+	}
+}
+
+// 去除ie浏览器下input输入框自带的x号
+input::-ms-clear, input::-ms-reveal{
+	display: none;
+}
+
+.ns-table-title {
+	display: flex;
+	align-items: center;
+
+	.ns-title-pic {
+		flex-shrink: 0;
+		display: inline-block;
+		width: 50px;
+		height: 50px;
+		text-align: center;
+		line-height: 50px;
+		margin-left: 5px;
+		img {
+			max-width: 100%;
+			max-height: 100%;
+		}
+	}
+
+	.ns-title-content {
+		overflow: hidden;
+		margin-left: 10px;
+		flex: 1;
+		line-height: 1.8;
+	}
+}

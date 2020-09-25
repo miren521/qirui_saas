@@ -1,0 +1,185 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.ns-form {
+		margin-top: 0;
+	}
+</style>
+{/block}
+{block name="main"}
+<form class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>供应商名称：</label>
+		<div class="layui-input-block">
+			<input name="title" type="text" lay-verify="required" class="layui-input ns-len-long" autocomplete="off">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">LOGO：</label>
+		<div class="layui-input-block">
+			<div class="upload-img-block">
+				<input name="logo" type="hidden"  value="">
+				<div class="upload-img-box" id="imgUpload">
+					<div class="ns-upload-default">
+						<img src="__STATIC__/img/upload_img.png" />
+						<p>点击上传</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="ns-word-aux">
+			<p>建议图片尺寸：200px * 100px。</p>
+			<p>图片格式：jpg、png、jpeg。</p>
+		</div>
+	</div>
+
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>主营行业：</label>
+		<div class="layui-input-block ns-len-mid">
+			<select class="ns-category" name="category_id" lay-verify="required">
+				<option value="">选择主营行业</option>
+				{volist name="$category_list" id="category"}
+				<option value="{$category.category_id}">{$category.category_name}</option>
+				{/volist}
+			</select>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>供应商关键字：</label>
+		<div class="layui-input-block">
+			<input name="keywords" type="text"  lay-verify="required" class="layui-input ns-len-long" autocomplete="off">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>供应商简介：</label>
+		<div class="layui-input-block">
+			<textarea class="layui-textarea ns-len-long" lay-verify="required" name="desc"></textarea>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>联系电话：</label>
+		<div class="layui-input-block">
+			<input type="text" name="supplier_phone" lay-verify="required" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">供应商QQ：</label>
+		<div class="layui-input-block">
+			<input type="text" name="supplier_qq" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">供应商微信：</label>
+		<div class="layui-input-block">
+			<input type="text" name="supplier_weixin" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">供应商邮箱：</label>
+		<div class="layui-input-block">
+			<input type="text" name="supplier_email" lay-verify="isemail" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>供应商地址：</label>
+		<div class="layui-input-block">
+			<input name="supplier_address" type="text" lay-verify="required" class="layui-input ns-len-long" autocomplete="off">
+		</div>
+	</div>
+	<!-- 个人信息 -->
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">用户信息</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>供应商登录用户名：</label>
+				<div class="layui-input-ns">
+					<input name="username" type="text" lay-verify="required" class="layui-input ns-len-long" autocomplete="off">
+				</div>
+				<span class="ns-word-aux">用于登录供应商后台</span>
+			</div>
+
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>供应商登录密码：</label>
+				<div class="layui-input-inline">
+					<input name="password" type="text" lay-verify="required" class="layui-input ns-len-long" autocomplete="off">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button type="reset" class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+</form>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form','upload'], function() {
+		var form = layui.form,
+			upload = layui.upload,
+			repeat_flag = false;//防重复标识
+		form.render();
+		
+		//普通图片上传
+		var uploadInst = upload.render({
+			elem: '#imgUpload', 
+			url: ns.url("admin/upload/upload"),
+			done: function (res) {
+				if (res.code >= 0) {
+					$("input[name='logo']").val(res.data.pic_path);
+					$("#imgUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+		
+		form.on('submit(save)', function (data) {
+			// if (repeat_flag) return false;
+			// repeat_flag = true;
+			//
+			data.field.category_name = $("select[name=category_id] option:selected").text();
+			$.ajax({
+				url: ns.url('supply://admin/supplier/add'),
+				data: data.field,
+				dataType: 'json',
+				type: 'post',
+				success: function (res) {
+					repeat_flag = false;
+					
+					if (res.code == 0) {
+						layer.confirm('添加成功', {
+							title:'操作提示',
+							btn: ['返回列表', '继续添加'],
+							yes: function(){
+								location.href = ns.url("supply://admin/supplier/index")
+							},
+							btn2: function() {
+								location.href = ns.url("supply://admin/supplier/add")
+							}
+						})
+					}else{
+						layer.msg(res.message);
+					}
+				}
+			});
+			return false;
+		});
+	});
+	
+	function back(){
+		location.href = ns.url("supply://admin/supplier/index")
+	}
+</script>
+{/block}

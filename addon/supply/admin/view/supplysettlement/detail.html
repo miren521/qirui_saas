@@ -1,0 +1,251 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+    .ns-card-brief:nth-child(1){margin-top:0}
+    .layui-card-body{display:flex;flex-wrap:wrap;padding-bottom:0!important;padding-left:50px!important;padding-right:50px!important}
+    .layui-card-body .content{width:25%;margin-bottom:30px;display:flex;flex-wrap:wrap;flex-direction:column;justify-content:center}
+    .layui-card-body .money{font-size:20px;color:#000;font-weight:700;margin-top:10px;max-width:250px}
+    .layui-card-body .subhead{font-size:12px;margin-left:3px;cursor:pointer}
+
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">操作提示</h2>
+        <ul class="layui-colla-content layui-show">
+            <li>供应商收入金额 = 供应商结算总金额 - 供应商退款金额 - 佣金金额</li>
+            <li>平台抽成金额 = 平台结算总抽成 - 平台退款抽成</li>
+        </ul>
+    </div>
+</div>
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <div>
+            <span class="ns-card-title">供应商结算</span>
+            <span>账期时间：{:date('Y-m-d H:i:s', $info.period_start_time)} 至 {:date('Y-m-d H:i:s', $info.period_end_time)}</span>
+        </div>
+    </div>
+    <div class="layui-card-body">
+        <div class="content">
+            <p class="title">供应商收入金额（元）</p>
+            <p class="money">{$supply_money}</p>
+        </div>
+        <div class="content">
+            <p class="title">供应商结算总金额（元）</p>
+            <p class="money">{$info.supply_money}</p>
+        </div>
+        <div class="content">
+            <p class="title">供应商退款金额（元）</p>
+            <p class="money">{$info.refund_supply_money}</p>
+        </div>
+        <div class="content">
+            <p class="title">佣金金额（元）</p>
+            <p class="money">{$info.commission}</p>
+        </div>
+        <div class="content">
+            <p class="title">平台抽成金额（元）</p>
+            <p class="money">{$money}</p>
+        </div>
+        <div class="content">
+            <p class="title">平台结算总抽成（元）</p>
+            <p class="money">{$info.platform_money}</p>
+        </div>
+        <div class="content">
+            <p class="title">平台退款抽成（元）</p>
+            <p class="money">{$info.refund_platform_money}</p>
+        </div>
+    </div>
+</div>
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+    <div class="layui-form">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" placeholder="开始时间" name="start_date" id="start_time" autocomplete="off" readonly>
+                </div>
+                <div class="layui-input-inline end-item">
+                    <input type="text" class="layui-input" placeholder="结束时间" name="end_date" id="end_time" autocomplete="off" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="layui-input-inline">
+            <input type="text" name="search_text" placeholder="请输入供应商名称" autocomplete="off" class="layui-input">
+            <button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+                <i class="layui-icon">&#xe615;</i>
+            </button>
+        </div>
+        <input type="hidden" name="period_id" id="period_id" value="{$period_id}" />
+    </div>
+</div>
+<!-- 列表 -->
+<table id="supply_settlement_detail" lay-filter="supply_settlement_detail"></table>
+
+<!--操作-->
+<script type="text/html" id="operation">
+    <div class="ns-table-btn">
+        <a href="javascript:;" class="layui-btn" lay-event="basic">查看</a>
+    </div>
+</script>
+
+<!--账期开始时间-->
+<script type="text/html" id="start_times">
+    <div class="layui-elip">
+        {{#  if(d.period_start_time == 0){ }}
+        --
+        {{#  } else { }}
+        {{ns.time_to_date(d.period_start_time)}}
+        {{#  } }}
+    </div>
+</script>
+
+<!--账期结束时间-->
+<script type="text/html" id="end_times">
+    <div class="layui-elip">{{ns.time_to_date(d.period_end_time)}}</div>
+</script>
+
+<!--时间-->
+<script type="text/html" id="times">
+    <div class="layui-elip">{{ns.time_to_date(d.create_time)}}</div>
+</script>
+
+<!--供应商金额-->
+<script type="text/html" id="supply_money">
+    <div class="layui-elip" style="color: green">￥{{d.real_supply_money}}</div>
+</script>
+
+<!--平台抽成-->
+<script type="text/html" id="platform_money">
+    <div class="layui-elip" style="color: red">￥{{d.real_money}}</div>
+</script>
+<!--分站抽成-->
+<script type="text/html" id="website_money">
+    <div class="layui-elip" style="color: red">￥{{d.website_commission}}</div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+    layui.use(['form', 'laydate'], function() {
+        var table,
+            form = layui.form,
+            laydate = layui.laydate,
+            currentDate = new Date(),
+            minDate = "";
+        var period_id = $("#period_id").val();
+        form.render();
+
+        currentDate.setDate(currentDate.getDate() - 7);
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time',
+            type: 'datetime'
+        });
+
+        //结束时间
+        laydate.render({
+            elem: '#end_time',
+            type: 'datetime'
+        });
+        
+        /**
+         * 重新渲染结束时间
+         */
+        function reRender(){
+            $("#end_time").remove();
+            $(".end-time").html('<input type="text" class="layui-input" placeholder="结束时间" name="end_date" id="end_time" >');
+            laydate.render({
+                elem: '#end_time',
+                type: 'datetime',
+                min: minDate
+            });
+        }
+
+        /**
+         * 表格加载
+         */
+        table = new Table({
+            elem: '#supply_settlement_detail',
+            url: ns.url("supply://admin/supplysettlement/detail"),
+            where: {'period_id': period_id},
+            cols: [
+                [{
+                    field: 'settlement_no',
+                    title: '账单编号',
+                    width: '17%',
+                    unresize: 'false',
+                },{
+                    field: 'site_name',
+                    title: '供应商名称',
+                    width: '13%',
+                    unresize: 'false',
+                }, {
+                    field: 'order_money',
+                    title: '订单总额',
+                    width: '10%',
+                    unresize: 'false',
+					align: 'right',
+					templet: function(data) {
+						return '￥'+ data.order_money;
+					}
+                }, {
+                    title: '供应商收入',
+                    width: '10%',
+                    unresize: 'false',
+                    templet: '#supply_money',
+					align: 'right',
+                }, {
+                    title: '平台总抽成',
+                    width: '8%',
+                    unresize: 'false',
+                    templet: '#platform_money',
+					align: 'right',
+                }, {
+                    title: '账期开始时间',
+                    width: '12%',
+                    unresize: 'false',
+                    templet: '#start_times'
+                },{
+                    title: '账期截止时间',
+                    width: '12%',
+                    unresize: 'false',
+                    templet: '#end_times'
+                }, {
+                    title: '操作',
+                    width: '10%',
+                    toolbar: '#operation',
+                    align: 'left',
+                    unresize: 'false'
+                }]
+            ]
+        });
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function(data) {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data,
+                event = obj.event;
+            switch (obj.event) {
+                case 'basic': //查看
+                    location.href = ns.url("supply://admin/supplysettlement/supply?settlement_id=" + data.id)
+                    break;
+            }
+        })
+    });
+</script>
+{/block}

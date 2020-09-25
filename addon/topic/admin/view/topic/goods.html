@@ -1,0 +1,196 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+    <div class="layui-colla-item">
+        <ul class="layui-colla-content layui-show">
+            <li style="list-style:none; ">活动名称：{$topic_info.topic_name}</li>
+            <li style="list-style:none; ">开始时间：{$topic_info.start_time|date='Y-m-d H:i:s'}</li>
+            <li style="list-style:none; ">结束时间：{$topic_info.end_time|date='Y-m-d H:i:s'}</li>
+        </ul>
+    </div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<input type="text" name="sku_name" placeholder="请输入商品名称" class="layui-input" autocomplete="off">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+			  <i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- 列表 -->
+<table id="good_list" lay-filter="good_list"></table>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="delete">删除商品</a>
+	</div>
+</script>
+
+<script type="text/html" id="goodIntro">
+	<div class="ns-table-tuwen-box">
+		<div class="ns-img-box">
+			<img layer-src src="{{ns.img(d.sku_image)}}" alt="">
+		</div>
+		<div class="ns-font-box">
+			<p class="ns-multi-line-hiding">{{d.sku_name}}</p>
+		</div>
+	</div>
+</script>
+<!-- 编辑价格 -->
+<script type="text/html" id="editPrice">
+	<input name="sort" type="number" onchange="editPrice({{d.sku_id}}, this)" value="{{d.topic_price}}" placeholder="请输入价格" class="layui-input edit-sort ns-len-short" autocomplete="off">
+</script>
+{/block}
+{block name="script"}
+<script>
+	var form, table, laytpl;
+	layui.use(['form', 'laytpl'], function() {
+
+		form = layui.form;
+		laytpl = layui.laytpl;
+		var	repeat_flag = false, //防重复标识
+			arr_id_good = [];
+		form.render();
+
+		table = new Table({
+			elem: '#good_list',
+			url: '{:addon_url("topic://admin/topic/goods")}',
+			where: {"topic_id" : "{$topic_id}"},
+			parseData: function(res){
+				arr_id_good = [];
+				for (var i in res.data.list) {
+					arr_id_good.push(res.data.list[i].sku_id);
+				}
+				return {
+					"code": res.code,
+					"msg": res.message,
+					"count": res.data.count,
+					"data": res.data.list,
+				};
+			},
+			cols: [
+				[{
+					title: '商品',
+					unresize: 'false',
+					width: '47%',
+					templet: '#goodIntro'
+				}, {
+					field: 'topic_price',
+					title: '价格(可编辑)',
+					unresize: 'false',
+					width: '20%',
+					align: 'center',
+					templet: '#editPrice'
+				}, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width: '30%'
+				}]
+			]
+		});
+
+		function goodsSelectCallback(obj){
+			$.ajax({
+				url: '{:addon_url("topic://admin/topic/addTopicGoods")}',
+				type: 'POST',
+				dataType: "JSON",
+				data: {
+					'sku_ids': obj.toString(),
+					'topic_id': "{$topic_id}"
+				},
+				success(res){
+					layer.msg(res.message);
+					table.reload();
+				}
+			})
+		}
+		
+		/**
+		 * 搜索功能 控制器沒有增加名称搜索字段
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'delete': //删除
+					deleteGoods(data.sku_id);
+					break;
+			}
+		});
+
+		/**
+		 * 删除
+		 */
+		function deleteGoods(sku_id) {
+
+			if (repeat_flag) return false;
+			repeat_flag = true;
+
+			layer.confirm('确定要删除该商品吗?', function() {
+				$.ajax({
+					url: '{:addon_url("topic://shop/topic/deleteTopicGoods")}',
+					data: {
+						"sku_id": sku_id,
+						"topic_id": "{$topic_id}"
+					},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						layer.msg(res.message);
+						repeat_flag = false;
+
+						if (res.code == 0) {
+							table.reload();
+						}
+					}
+				});
+			});
+		}
+	});
+
+	// 监听单元格编辑
+	function editPrice(id, event){
+		var data = $(event).val();
+		if(data < 0){
+			layer.msg("价格不能小于0");
+			return;
+		}
+		$.ajax({
+			type: 'POST',
+			url: ns.url("topic://shop/topic/editTopicGoods"),
+			data: {
+				"sku_id": id,
+				"topic_id": "{$topic_id}",
+				"price": data
+			},
+			dataType: 'JSON',
+			success: function(res) {
+				layer.msg(res.message);
+				if(res.code==0){
+					table.reload();
+				}
+			}
+		});
+	}
+</script>
+{/block}

@@ -1,0 +1,125 @@
+{extend name="addon/supply/supply/view/base.html"/}
+{block name="resources"}
+<style>
+.status-name{font-size: 16px;font-weight:bold;}
+.endtime-style{
+    color: #8c8c8c;
+    display: block;
+    margin-top: 5px;
+    font-size:12px;
+}
+.endtime-style em{
+    margin: 0 5px;
+    color: #4dcdd2;
+    font-weight: bold;
+    font-style: normal
+}
+.purchase-table{
+    margin-top:15px;
+}
+.purchase-table .tit {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 10px;
+    font-weight:bold;
+}
+.purchase-table .tit em{
+    font-style: normal;
+    font-size:13px;
+    font-weight:normal;
+}
+
+</style>
+{/block}
+{block name="main"}
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-body">
+        <div class="status-name ns-text-color">
+            {$info.status == 1 ? '进行中' : '已截止'}
+        </div>
+        {if $info.status == 1}
+            <div class="endtime-style">距求购结束还剩<em class="ns-text-color">{$info.day ?? 0}</em>天</div>
+        {/if}
+
+        <div class="purchase-table">
+            <div class="tit">{$info.title}&nbsp;&nbsp;&nbsp;<em class="ns-text-color">{$info.type == 1 ? '现货商品' : '定制商品'}</em></div>
+            {if !empty($info['list'])}
+            <table class="layui-table">
+                <thead>
+                <tr>
+                    <th>求购商品名称</th>
+                    <th>求购商品分类</th>
+                    <th>求购数量</th>
+                    <th>目标单价</th>
+                    <th>备注</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                    {foreach $info['list'] as $k => $v}
+                        <tr>
+                            <td>
+                                <div class="ns-table-title">
+                                    <div class="ns-title-content">
+                                        <a href="javascript:;" class="ns-multi-line-hiding ns-text-color"
+                                           title="{{d.goods_name}}" >{$v.goods_name}</a>
+                                    </div>
+
+                                    {foreach :explode(',', $v['goods_images']) as $goods_key => $goods_item}
+                                        <div class="ns-title-pic" >
+                                            <img layer-src src="{:img($goods_item)}"/>
+                                        </div>
+                                    {/foreach}
+
+                                </div>
+                            </td>
+                            <td>{$v.category_name}</td>
+                            <td>{$v.num}</td>
+                            <td>{$v.price}</td>
+                            <td>{$v.remark}</td>
+                        </tr>
+                    {/foreach}
+
+                </tbody>
+            </table>
+            {/if}
+        </div>
+    </div>
+
+
+
+    <div class="layui-card-body">
+
+        <table class="layui-table">
+            <colgroup>
+                <col width="120">
+                <col>
+            </colgroup>
+            <tbody>
+                <tr>
+                    <td>联系人：</td>
+                    <td>{$info.nickname}</td>
+                </tr>
+                <tr>
+                    <td>联系方式：</td>
+                    <td>{$info.mobile}</td>
+                </tr>
+                <tr>
+                    <td>电子邮箱：</td>
+                    <td>{$info.email}</td>
+                </tr>
+                <tr>
+                    <td>收货信息：</td>
+                    <td>{$info.full_address}</td>
+                </tr>
+                <tr>
+                    <td>补充说明：</td>
+                    <td>{$info.remark}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{/block}
+{block name="script"}
+{/block}

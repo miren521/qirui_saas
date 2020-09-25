@@ -1,0 +1,230 @@
+@import './common.scss';
+
+.ns-supply-payment {
+    margin-top: 10px;  
+}
+
+.ns-order-list {
+	width: 100%;
+}
+
+.ns-order-li {
+	width: 100%;
+	margin-top: 10px;
+	background-color: #ffffff;
+}
+
+.ns-order-site {
+	width: 100%;
+	height: 40px;
+	line-height: 40px;
+	padding-left: 20px;
+	border-bottom: 1px solid #F1F1F1;
+	box-sizing: border-box;
+}
+
+.ns-order-goods {
+	width: 100%;
+	padding: 20px;
+	box-sizing: border-box;
+
+	ul {
+		border: 1px solid #F1F1F1;
+		border-top: 0;
+		display: flex;
+
+		&:first-child {
+			border-top: 1px solid #F1F1F1;
+		}
+
+		&.ns-goods-li {
+			height: 80px;
+			line-height: 60px;
+		}
+
+		li {
+			padding: 10px;
+			box-sizing: border-box;
+		}
+
+		.goods-info-wrap {
+			width: 65%;
+			display: flex;
+			align-items: center;
+			cursor: pointer;
+
+			.img-wrap {
+				width: 60px;
+				height: 60px;
+
+				img {
+					width: 60px;
+					height: 60px;
+					object-fit: cover;
+				}
+			}
+
+			.info-wrap {
+				margin-left: 10px;
+
+				&:hover {
+					color: $base-color;
+				}
+			}
+		}
+
+		.goods-price, .goods-buy-num, .goods-total-price {
+			width: 15%;
+		}
+	}
+}
+
+.buyer-message {
+	width: 100%;
+	margin-top: 20px;
+	display: flex;
+	justify-content: space-between;
+
+	.layui-form-item {
+		width: 500px;
+		margin-bottom: 0;
+		
+		.layui-form-label {
+			width: auto;
+		}
+
+		.layui-form-label + .layui-input-block {
+			margin-left: 95px;
+		}
+
+		.layui-textarea {
+			min-height: 60px;
+		}
+	}
+
+	.total-info {
+		p {
+			line-height: 25px;
+		}
+		span.title {
+			display: inline-block;
+			width: 100px;
+			text-align: right;
+		}
+		span.price {
+			font-size: 16px;
+			font-weight: 600;
+		}
+	}
+}
+
+.ns-pay-wrap {
+	margin-top: 10px;
+	background-color: #ffffff;
+	padding: 10px 20px;
+	line-height: 25px;
+	display: flex;
+	justify-content: flex-end;
+
+	span.title {
+		display: inline-block;
+		width: 160px;
+		text-align: right;
+	}
+}
+
+.ns-pay-btn {
+	margin-top: 10px;
+	background-color: #ffffff;
+	padding: 10px 20px;
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+
+	div {
+		margin-right: 20px;
+
+		span {
+			font-size: 18px;
+			font-weight: 600;
+		}
+	}
+}
+
+// 地址
+.ns-shipping-address {
+	background-color: #ffffff;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.address-item {
+	width: 23%;
+	border: 3px solid #eee;
+	box-sizing: border-box;
+	margin: 1%;
+	height: 130px;
+	cursor: pointer;
+
+	.add-address {
+		padding: 10px;
+		height: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		box-sizing: border-box;
+
+		i {
+			font-size: 12px;
+			display: inline-block;
+			width: 15px;
+			height: 15px;
+			line-height: 15px;
+			text-align: center;
+			border: 1px solid #666666;
+			border-radius: 50%;
+			margin-right: 5px;
+		}
+	}
+	.address-info {
+		padding: 10px;
+		height: 100%;
+		box-sizing: border-box;
+		position: relative;
+		.options {
+			position: absolute;
+			right: 0;
+			top: 10px;
+			width: 50%;
+			text-align: right;
+			div {
+				display: inline-block;
+				margin-right: 10px;
+				color: #999999;
+			}
+		}
+		.address-name {
+			color: $base-color;
+			padding: 0px 0 6px;
+			border-bottom: 1px solid #eee;
+			width: 100%;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			padding-right: 71px;
+			box-sizing: border-box;
+			line-height: 25px;
+		}
+		.address-mobile {
+			padding: 10px 0 4px;
+		}
+	}
+}
+.address-item.active {
+	background-color: #fffbf9;
+	border-color: $base-color;
+}
+
+.layui-form-item .area-select {
+	width: 150px;
+}

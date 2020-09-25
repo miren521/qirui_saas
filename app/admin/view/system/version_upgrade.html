@@ -1,0 +1,304 @@
+{extend name="base" /}
+{block name="resources"}
+<script type="text/javascript" src="ADMIN_JS/progressbar.js"></script>
+<link rel="stylesheet" type="text/css" href="ADMIN_CSS/upgrade/style.css" media="screen">
+<link rel="stylesheet" type="text/css" href="ADMIN_CSS/upgrade/jquery.easy-pie-chart.css" media="screen">
+<style>
+    .chart{
+        display:inline-block;
+        float:unset;
+    }
+    .up-footer{padding:20px;text-align:center;}
+    .up-footer button{
+        background-color: #067cf3;
+        padding:8px 15px;
+        color:#FFF;
+        border:none;
+        border-radius:3px;
+        font-size:15px;
+        margin: 0 10px;
+    }
+    .up-footer button:nth-child(2){
+        display: none;
+    }
+    .install-content{
+        margin-top:40px;
+        padding: 10px 0 10px 20px;
+        border: 1px solid #AAD2E5;
+        background-color: #E1F2FA;
+    }
+    .panel-title{
+        font-size:15px;
+        margin:7px auto;
+        line-height:30px;
+        color: #31708f;
+        border-bottom:1px solid #aad2e5 !important;
+    }
+    .step-title{
+        color: #31708f;
+        font-weight:bold;
+    }
+    .step-text{
+        color: #31708f;
+    }
+    #container {
+        width: 300px;
+        height: 300px;
+        margin: 50px auto;
+        position: relative;
+    }
+	
+	.alert-warning-word {
+		background-color: #FCF8E3;
+		border-top: 1px solid #FBEED5;
+		border-bottom: 1px solid #FBEED5;
+		padding: 5px 20px;
+		line-height: 30px;
+		color: #C09853;
+	}
+</style>
+{/block}
+{block name="main"}
+<div class="ns-tips">
+	<div id="container"></div>
+	
+	<div style="clear:both;"></div>
+	
+	<div class="alert alert-warning alert-warning-word">
+		<strong>警告！</strong>版本升级中,请不要关闭当前页面!
+	</div>
+
+	<div class="install-content alert alert-info">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">
+					详细过程
+				</h3>
+			</div>
+			<div class="panel-body">
+				<span class="step-title">整体进度&nbsp;：&nbsp;</span><span class="step-text count-percent">0%</span><br/>
+				<span class="step-title">正在进行&nbsp;：&nbsp;</span><span class="step-text step-content"></span></span>
+			</div>
+		</div>
+	</div>
+
+	<div class="space-10"></div>
+	
+	<div class="up-view" >
+		<div class="up-footer">
+			<button class="up-btn" onclick="upgradeAction();">点击升级</button>
+			<button class="up-btn" onclick="recovery(this);">撤回更新</button>
+		</div>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script type="text/javascript">
+    var container = document.querySelector('#container');
+    var bar = new ProgressBar.Circle(container, {
+        color: '#067cf3',
+        strokeWidth: 5,  // 正好是从圆心开始画起，>50会越过圆心，<50画出的是圆环
+        trailWidth: 0,  // 也设置为50，就是一个未填充的圆形，而不是圆环。要么设置为0
+        easing: 'easeInOut',
+        duration: 10,
+        text: {
+            style: {
+                color: '#31708f',
+                display: 'inline-block',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%,-50%)'
+            },
+            autoStyleContainer: false
+        },
+        fill: '#e1f2fa',   // 圆形内容区域填充色，当需要画圆环时，效果应该最好。
+        from: { color: '#aaa', width: 1},
+        to: { color: '#333', width: 5},
+        step: function(state, circle) {
+            circle.path.setAttribute('stroke-width', state.width);
+
+            var value = Math.round(circle.value() * 100);
+            circle.setText(value+'%');
+        }
+    });
+    bar.text.style.fontFamily = '"Raleway", Helvetica, sans-serif';
+    bar.text.style.fontSize = '32px';
+
+
+    //升级操作
+    function upgradeAction(){
+        $(".up-btn:eq(0)").attr('disabled',true);
+        $(" .up-footer .up-btn:eq(0)").addClass("btn-disabled");
+        $(" .up-footer .up-btn:eq(0)").css("background-color","#c0c1c1 !important");
+        var index  = 0;
+
+        if({$version_info.file_count} > 0){
+            upgrade(index);
+        }else{
+            execute();
+        }
+    }
+    //下载文件
+    function upgrade(index){
+        $.ajax({
+            type:'post',
+            url : ns.url("admin/system/download"),
+            data:{
+                'index':index,
+            },
+            success:function(data){
+                if(data.code >= 0){
+                    //下载完毕
+                    if(data.code == 10){
+                        setProgress(50, "即将执行升级操作");
+                        execute();
+                        return;
+                    }
+                    setProgress((index+1)/{$version_info.file_count}*50, data.message+"下载完成");
+                    index++;
+                    upgrade(index);//递归调用
+                }else{
+                    layer.msg('error',data.title);
+                }
+            }
+        })
+    }
+    //备份将覆盖的文件
+    function execute(){
+        setProgress(50,"正在备份旧文件");
+        $.ajax({
+            type:'post',
+            url : ns.url("admin/system/backupFile"),
+            success:function(data){
+                if(data.code == 0){
+                    setProgress(62, data.message +"备份完成");
+                    backupSql();
+                }else{
+                    layer.msg(data.message);
+                }
+            }
+        })
+    }
+
+    //备份数据库
+    function backupSql(last_table = '', index = 0, series = ''){
+        setProgress(62,"正在备份数据库...");
+        $.ajax({
+            type:'post',
+            url : ns.url("admin/system/backupSql"),
+			data: {last_table: last_table, index: index, series: series},
+            success:function(data){
+                if(data.code >= 0){
+                	if(data.code == 10) {
+						//执行完毕
+						setProgress(75, data.message+"备份完成");
+						executeFile();
+					} else {
+						backupSql(data.data.last_table, data.data.index, data.data.series);
+						setProgress(62, data.message);
+					}
+
+                }else{
+                    layer.msg(data.message);
+                }
+            }
+        })
+    }
+
+    //更新文件覆盖
+    function executeFile(){
+        setProgress(75,"正在覆盖旧文件");
+        $.ajax({
+            type:'post',
+            url : ns.url("admin/system/executeFile"),
+            success:function(data){
+                if(data.code >= 0){
+                    //执行完毕
+                    setProgress(86, data.message +"覆盖完毕");
+                    executeSql();
+                }else{
+                    layer.msg(data.title);
+                }
+            }
+        })
+    }
+
+    //更新sql 执行
+    function executeSql(){
+        setProgress(86,"正在执行sql语句");
+        $.ajax({
+            type:'post',
+            url : ns.url("admin/system/executeSql"),
+            success:function(data){
+                if(data.code >= 0){
+                    upgradeEnd();
+                    setProgress(99, data.message+"执行完毕");
+                }else{
+                    layer.msg(data.title);
+                }
+            }
+        })
+    }
+
+    //更新结束
+    function upgradeEnd(){
+        setProgress(99,"正在更新");
+        $.ajax({
+            type:'post',
+            url : ns.url("admin/system/upgradeEnd"),
+            success:function(data){
+                if(data.code >= 0){
+                    //执行完毕
+                    setProgress(100, "更新结束");
+                    $(".up-footer button:eq(0)").hide();
+                    $(".up-footer button:eq(1)").show();
+                    layer.alert('更新结束', {
+                        icon: 1,
+                        title: '提示',
+                        skin: 'layer-ext-moon'
+                    })
+                }else{
+                    $(".up-btn").attr('disabled',false);
+                    $(" .up-footer .up-btn").removeClass("btn-disabled");
+                    layer.msg(data.message);
+                }
+            }
+        })
+    }
+
+
+    //控制进度条
+    function setProgress(width, text){
+        var barValue = width /100;
+        width = width.toFixed(2);
+
+        bar.animate(barValue);
+        $(".count-percent").text(width+"%");
+        $(".step-content").text(text);
+    }
+
+
+    //撤回更新
+    function recovery(){
+        layer.msg('还原时间较长,请耐心等待!');
+        $('.up-footer button:nth-child(2)').text("撤回更新...").css("background-color", '#999');
+        $.ajax({
+            type:'post',
+            url : ns.url("admin/system/versionRecovery"),
+            success:function(data){
+                if(data.code >= 0){
+                    //执行完毕
+                    layer.msg('撤回成功');
+                    $(".up-footer button:eq(0)").show();
+                    $(".up-footer button:eq(1)").hide();
+                    location.href = ns.url("admin/system/upgrade");
+                }else{
+                    layer.msg(data.message);
+                }
+            }
+        })
+    }
+
+</script>
+{/block}

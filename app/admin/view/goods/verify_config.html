@@ -1,0 +1,56 @@
+{extend name="base"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>平台可以根据具体的商业模式开启商品审核</li>
+			<li>开启商品审核之后，商家发布或者编辑商品需要平台审核之后才能上架。</li>
+		</ul>
+	</div>
+</div>
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label">开启商品审核：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="is_open" value="1" lay-skin="switch" {if condition="$goods_verify_info && $goods_verify_info.is_open == 1"}checked{/if}/>
+		</div>
+	</div>
+	
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form'], function() {
+		var form = layui.form,
+			repeat_flag = false; //防重复标识
+
+		form.render();
+		form.on('submit(save)', function(data) {
+			
+			if (repeat_flag) return;
+			repeat_flag = true;
+			
+			$.ajax({
+				type: 'POST',
+				dataType: 'JSON',
+				url: ns.url("admin/goods/verifyConfig"),
+				data: data.field,
+				success: function(res) {
+					layer.msg(res.message);
+					if (res.code == 0) {
+						location.reload();
+					}else{
+						repeat_flag = false;
+					}
+				}
+			});
+		});
+	});
+</script>
+{/block}

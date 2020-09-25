@@ -1,0 +1,140 @@
+// 参考文档：https://element.faas.ele.me/#/zh-CN/component/color#fu-zhu-se
+
+//主色调，红色：#FF0036，绿色 #4CAF50，蓝色：#03A9F4，黄色：#FF9800，粉色：#FF547B，棕色：#C3A769，浅绿色：#65C4AA，黑色：#333333，紫色：#B323B4，淡粉色：#FF8B8B,element UI：#409eff
+$base-color: #ff547b;
+$base-color-success: #4caf50;
+$base-color-warning: #e6a23c;
+$base-color-danger: #f56c6c;
+$base-color-info: #909399;
+
+/* 文字基本颜色 */
+$ns-text-color-black: #303133; //基本色
+
+/* 文字尺寸 */
+$ns-font-size-sm: 12px;
+$ns-font-size-base: 14px;
+$ns-font-size-lg: 16px;
+
+$width: 1210px;
+
+// 小
+.ns-font-size-sm {
+	font-size: $ns-font-size-sm;
+}
+
+// 标准
+.ns-font-size-base {
+	font-size: $ns-font-size-base;
+}
+
+// 标准
+.ns-font-size-lg {
+	font-size: $ns-font-size-lg;
+}
+
+//文字颜色
+.ns-text-color {
+	color: $base-color !important;
+}
+
+.ns-text-color-black {
+	color: $ns-text-color-black !important;
+}
+
+//边框
+.ns-border-color {
+	border-color: $base-color !important;
+}
+
+//背景色
+.ns-bg-color {
+	background-color: $base-color !important;
+}
+
+body {
+	line-height: 1.8;
+	font-family: 'Helvetica Neue', Helvetica, 'Microsoft Yahei', 'PingFang SC', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', sans-serif;
+	background-color: #f7f7f7;
+	font-size: $ns-font-size-base;
+	color: $ns-text-color-black;
+}
+#nprogress .bar {
+	background: $base-color !important; //自定义颜色
+}
+
+html,
+body,
+dl,
+dt,
+dd,
+ol,
+ul,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+	margin: 0;
+	padding: 0;
+}
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+	display: block;
+}
+ol,
+ul,
+li {
+	list-style: none;
+}
+i,
+em {
+	font-style: normal;
+}
+
+// 去掉a标签的默认样式
+a {
+	text-decoration: none;
+	color: $ns-text-color-black;
+	&:hover {
+		color: $base-color;
+	}
+}
+
+.el-main {
+	border-top: solid 1px #f2f2f2;
+	overflow: initial;
+	width: $width;
+	margin: 0 auto;
+	padding: 0;
+}
+
+img {
+	border-style: none;
+	max-width: 100%;
+	vertical-align: middle;
+}
+
+// 居中
+.ns-text-align {
+	text-align: center;
+}
+
+// 分页
+.el-pagination {
+	text-align: right;
+	
+	.el-pagination__rightwrapper {
+		margin-left: 20px;
+	}
+}

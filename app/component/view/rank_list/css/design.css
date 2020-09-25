@@ -1,0 +1,8 @@
+@CHARSET "UTF-8";
+.rank-list .head {width: 100%;display: -webkit-box;display: -webkit-flex;display: flex;-webkit-box-pack: justify;-webkit-justify-content: space-between;justify-content: space-between;-webkit-box-align: center;-webkit-align-items: center;align-items: center;margin-bottom: 10px;}
+.rank-list .head h3{font-weight: bold;}
+.rank-list .head .selected{border-bottom: 2px solid;padding-bottom: 5px;}
+.rank-list .list-wrap .item {width: 89px;height: 100%;display: inline-block;background: #ffffff;margin-right: 7px;}
+.rank-list .list-wrap .item .img-wrap {margin-bottom: 5px;}
+.rank-list .list-wrap .item .img-wrap img {width: 90px;height: 80px;padding: 0;margin: 0;}
+.rank-list .list-wrap .item .buy-num {font-size: 12px;text-align: center;display: block;}

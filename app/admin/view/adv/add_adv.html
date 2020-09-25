@@ -1,0 +1,243 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	.adv-url-show{margin-right: 10px;}
+	.ns-form {margin-top: 0;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>广告名称：</label>
+		<div class="layui-input-block">
+			<input name="adv_title" type="text" lay-verify="required" class="layui-input ns-len-long">
+		</div>
+	</div>
+
+	{notempty name="$adv_position_list"}
+	<div class="layui-form-item">
+		<label class="layui-form-label">所属广告位：</label>
+		<div class="layui-input-block ns-len-mid">
+			<select name="ap_id" lay-filter="ap_id">
+				{foreach $adv_position_list as $adv_position_k => $adv_position_v}
+				<option value="{$adv_position_v.ap_id}" data-type="{$adv_position_v.type}">{$adv_position_v.ap_name}</option>
+				{/foreach}
+			</select>
+		</div>
+	</div>
+	<div class="layui-form-item" data-type="1" {if $adv_position_list[0]['type'] == 2}style="display: none"{/if}>
+		<label class="layui-form-label">PC端广告链接：</label>
+		<div class="layui-input-block ns-len-mid">
+			<select name="pc_link" lay-filter="pc_link">
+				<option value="">请选择</option>
+				{foreach $pc_link as $k => $v}
+				<option value="{$v.url}">{$v.title}</option>
+				{/foreach}
+				<option value="diy">自定义</option>
+			</select>
+		</div>
+	</div>
+	
+	<div class="layui-form-item" data-type="2" {if $adv_position_list[0]['type'] == 1}style="display: none"{/if}>
+		<label class="layui-form-label">移动端广告链接：</label>
+		<div class="layui-input-block ns-len-mid">
+			<span class="adv-url-show"></span>
+			<button class="layui-btn layui-btn-primary sm" onclick="selectedLink()">选择链接</button>
+		</div>
+	</div>
+	<input name="adv_url" type="hidden" />
+	{/notempty}
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">广告图片：</label>
+		<div class="layui-input-inline img-upload">
+			<input type="hidden" class="layui-input" name="adv_image" />
+			<div class="upload-img-block icon">
+				<div class="upload-img-box" id="adv_image">
+					<div>
+						<div class="ns-upload-default">
+							<img src="__STATIC__/img/upload_img.png" />
+							<p>点击上传</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">排序：</label>
+		<div class="layui-input-block">
+			<input name="slide_sort" value="0" type="number" placeholder="排序" lay-verify="num" class="layui-input ns-len-short">
+		</div>
+		<div class="ns-word-aux">排序值必须为整数</div>
+	</div>
+	
+	<div class="layui-form-item" style="display: none">
+		<label class="layui-form-label">广告价格：</label>
+		<div class="layui-input-block">
+			<input name="price" value="0.00" type="number" placeholder="广告价格" lay-verify="flo" class="layui-input ns-len-short">
+		</div>
+		<div class="ns-word-aux">广告价格 / 月</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">背景色：</label>
+		<div class="layui-input-inline">
+			<div id="bg_color"></div>
+		</div>
+	</div>
+	
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+	
+	<input type="hidden" name="background" id="ap_background_color" value="#FFFFFF" />
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'upload', 'colorpicker'], function () {
+		var form = layui.form,
+			upload = layui.upload,
+			colorpicker = layui.colorpicker,
+			repeat_flag = false; //防重复标识
+		form.render();
+
+		form.on('select(ap_id)', function(data){
+			var type = $(data.elem).find("option:selected").attr("data-type");
+			$("[data-type]").hide();
+			$("[data-type='"+ type+"']").show();
+		});
+
+		form.on('select(pc_link)', function(data){
+			var title = $(data.elem).find("option:selected").text();
+
+			if(data.value != 'diy'){
+				$("input[name='adv_url']").val(JSON.stringify({
+					"title": title,
+					"url": data.value
+				}));
+			}else{
+				layer.prompt({
+					formType: 2,
+					value :$("input[name='adv_url']").val() ? JSON.parse($("input[name='adv_url']").val()).url : '',
+					title: '自定义链接地址',
+					area: ['450px', '100px'],
+					cancel : function () {
+						$("input[name='adv_url']").val("");
+					}
+				}, function(value, index, elem){
+					$("input[name='adv_url']").val(JSON.stringify({
+						"title": title,
+						"url": value
+					}));
+					layer.close(index);
+				});
+			}
+		});
+
+		/**
+		 * 颜色
+		 */
+		colorpicker.render({
+			elem: '#bg_color', //绑定元素
+			color: "#FFFFFF",
+			done: function(color) {
+				$(".tdrag-name").css("color", color);
+				$("#ap_background_color").val(color);
+			}
+		});
+		
+		/**
+		 * 广告图片
+		 */
+		var uploadInst = upload.render({
+			elem: '#adv_image',
+			url: ns.url("admin/upload/upload"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='adv_image']").val(res.data.pic_path);
+					$("#adv_image").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+		
+		/**
+		 * 监听提交
+		 */
+		form.on('submit(save)', function(data) {
+			if (repeat_flag) return;
+			repeat_flag = true;
+		
+			$.ajax({
+				url: ns.url("admin/adv/addAdv"),
+				data: data.field,
+				dataType: 'JSON',
+				type: 'POST',
+				success: function(res) {
+					repeat_flag = false;
+		
+					if (res.code == 0) {
+						layer.confirm('添加成功', {
+							title:'操作提示',
+							btn: ['返回列表', '继续添加'],
+							yes: function() {
+								location.href = ns.url("admin/adv/lists")
+							},
+							btn2: function() {
+								location.href = ns.url("admin/adv/addAdv")
+							}
+						});
+					} else {
+						layer.msg(res.message);
+					}
+				}
+			});
+		});
+		
+		/**
+		 * 表单验证
+		 */
+		form.verify({
+			num: function (value) {
+				if (value == '') {
+					return;
+				}
+				if (value%1 != 0) {
+					return '排序数值必须为整数';
+				}
+				if (value < 0) {
+					return '排序数值必须为大于0';
+				}
+			},
+			flo: function (value) {
+				if (value == '') {
+					return;
+				}
+				var reg = /^(0|[1-9]\d*)(\s|$|\.\d{1,2}\b)/;
+				if (!reg.test(value)) {
+					return '价格不能小于0，可保留两位小数！'
+				}
+			}
+		});
+	});
+	
+	function back() {
+		location.href = ns.url("admin/adv/lists")
+	}
+	
+	function selectedLink() {
+		ns.select_link('', '', function (data) {
+			for (var o in data) {
+				if (data[o] == null) delete data[o];
+			}
+			
+			$("input[name='adv_url']").val(JSON.stringify(data));
+			$(".adv-url-show").text(data.title);
+		}, 'admin/diy/link');
+	}
+</script>
+{/block}

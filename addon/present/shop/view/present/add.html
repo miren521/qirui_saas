@@ -1,0 +1,203 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<style>
+	.good-name, .good-price {
+		line-height: 34px;
+	}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>管理员可以在此页添加赠品活动</li>
+		</ul>
+	</div>
+</div>
+
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable ns-short-label"><span class="required">*</span>选择商品：</label>
+		<div class="layui-input-block">
+			<div class="upload-img-block square">
+				<div class="upload-img-box" id="goodImg" lay-verify="select" onclick="addGoods()">
+					<div class="ns-upload-default">
+						<img src="SHOP_IMG/upload_img.png" />
+						<p>选择商品</p>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<div class="ns-word-aux">
+			<p>一个赠品活动只可选择一件实物商品</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">商品名称：</label>
+		<div class="layui-input-inline good-name">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">商品原价：</label>
+		<div class="layui-input-inline good-price">
+			￥<span>0.00</span>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>开始时间：</label>
+		<div class="layui-input-block  ns-len-mid">
+			<input type="text" id="start_time" name="start_time" lay-verify="required" class="layui-input" autocomplete="off">
+			<i class="ns-calendar"></i>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>结束时间：</label>
+		<div class="layui-input-block end-time  ns-len-mid">
+			<input type="text" id="end_time" name="end_time" lay-verify="required|time" class="layui-input" autocomplete="off">
+			<i class="ns-calendar"></i>
+		</div>
+		<div class="ns-word-aux">
+			<p>结束时间不能小于开始时间，也不能小于当前时间</p>
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+
+	<input type="hidden" name="goods_id" value="" />
+	<input type="hidden" name="sku_id" value="" />
+</div>
+{/block}
+{block name="script"}
+<script>
+    var goods_id = "";
+    layui.use(['form', 'laydate'], function() {
+        var form = layui.form,
+            laydate = layui.laydate,
+            repeat_flag = false,
+            currentDate = new Date(),
+            minDate = "";
+        currentDate.setDate(currentDate.getDate() + 30);
+		form.render();
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time', //指定元素
+            type: 'datetime',
+            value: new Date(),
+            done: function(value) {
+                minDate = value;
+                reRender();
+            }
+        });
+
+        //结束时间
+        laydate.render({
+            elem: '#end_time', //指定元素
+            type: 'datetime',
+            value: new Date(currentDate)
+        });
+
+        /**
+         * 重新渲染结束时间
+         * */
+        function reRender() {
+            $("#end_time").remove();
+            $(".end-time").html('<input type="text" id="end_time" name="end_time" placeholder="请输入结束时间" lay-verify="required|time" class="layui-input ns-len-mid" autocomplete="off"> ');
+            laydate.render({
+                elem: '#end_time',
+                type: 'datetime',
+                min: minDate
+            });
+        }
+
+        /**
+         * 表单验证
+         */
+        form.verify({
+            time: function(value) {
+                var now_time = (new Date()).getTime();
+                var start_time = (new Date($("#start_time").val())).getTime();
+                var end_time = (new Date(value)).getTime();
+                if (now_time > end_time) {
+                    return '结束时间不能小于当前时间!'
+                }
+                if (start_time > end_time) {
+                    return '结束时间不能小于开始时间!';
+                }
+            },
+        });
+
+        /**
+         * 表单提交
+         */
+        form.on('submit(save)', function(data){
+        	var field = data.field;
+            if (field.goods_id <=  0 || field.sku_id <=  0 ) {
+                layer.msg('请选择参与活动的商品！', {icon: 5, anim: 6});
+                return;
+            }
+            if(repeat_flag) return;
+            repeat_flag = true;
+
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("present://shop/present/add"),
+                data: data.field,
+                async: false,
+                success: function(res){
+                    repeat_flag = false;
+
+                    if (res.code == 0) {
+                        layer.confirm('添加成功', {
+                            title:'操作提示',
+                            btn: ['返回列表', '继续添加'],
+                            yes: function(){
+                                location.href = ns.url("present://shop/present/lists");
+                            },
+                            btn2: function() {
+                                location.href = ns.url("present://shop/present/add");
+                            }
+                        });
+                    }else{
+                        layer.msg(res.message);
+                    }
+                }
+            })
+        });
+    });
+
+    /**
+     * 添加商品
+     */
+	var selectedSkuId = [];
+    function addGoods() {
+		goodsSelect(function (res) {
+			selectedSkuId = [];
+			var sku_selected_data = res[0]['selected_sku_list'][0];
+			var goods_id = sku_selected_data.goods_id;
+			$("input[name=goods_id]").val(goods_id);
+			$("input[name=sku_id]").val(sku_selected_data.sku_id);
+			var image_path = sku_selected_data.sku_image.split(",");
+			$("#goodImg").html("<img src=" + ns.img(image_path[0]) + " >");
+			$(".good-img").val(sku_selected_data.sku_image);
+			$(".good-name").text(sku_selected_data.sku_name);
+			$(".good-price span").text(sku_selected_data.price);
+			selectedSkuId.push(sku_selected_data.sku_id);
+		}, selectedSkuId, {mode: "sku", max_num: 1, min_num: 1, is_virtual: 0});
+	}
+
+    function back() {
+        location.href = ns.url("present://shop/present/lists");
+    }
+</script>
+{/block}

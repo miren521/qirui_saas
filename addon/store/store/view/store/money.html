@@ -1,0 +1,690 @@
+{extend name="addon/store/store/view/base.html"/}
+{block name="resources"}
+<link rel="stylesheet" type="text/css" href="STORE_CSS/money.css"/>
+{/block}
+{block name='head'}
+{/block}
+{block name='side_menu'}
+{/block}
+{block name="main"}
+<div class="ns-form ns-money">
+	<div class="ns-money-block ns-money-left">
+		<div class="ns-settle-accounts ns-money-box">
+			<div class="layui-card ns-card-common">
+				<div class="layui-card-header">
+					<span class="ns-card-title">结账清单（0件）</span>
+					<span class="ns-card-sub">收银员：11111</span>
+				</div>
+				<div class="layui-card-body">
+					<div class="ns-order-list">
+						<table class="layui-table ns-order-account" lay-skin="line">
+							<colgroup>
+								<col width="50%">
+								<col width="30%">
+								<col width="20%">
+							</colgroup>
+							<thead>
+								<tr>
+									<th>商品</th>
+									<th class="ns-align-right">数量</th>
+									<th class="ns-align-right">价格</th>
+							    </tr> 
+							</thead>
+							<tbody>
+								<tr>
+									<td><p class="ns-line-hiding">商品商品商品商品商品商品商品商品商品商品</p></td>
+									<td class="ns-align-right ns-selected-num">
+										<span onclick="increase(this)">+</span>
+										<input type="text" value="1" class="layui-input" />
+										<span onclick="decrease(this)">-</span>
+									</td>
+									<td class="ns-align-right">￥<span class="ns-account-price">10.00</span><span class="ns-del-account" onclick="delRow(this)">X</span></td>
+								</tr>
+								<tr>
+									<td><p class="ns-line-hiding">商品商品商品商品商品商品商品商品商品商品</p></td>
+									<td class="ns-align-right ns-selected-num">
+										<span onclick="increase(this)">+</span>
+										<input type="text" value="1" class="layui-input" />
+										<span onclick="decrease(this)">-</span>
+									</td>
+									<td class="ns-align-right">￥<span class="ns-account-price">10.00</span><span class="ns-del-account" onclick="delRow(this)">X</span></td>
+							    </tr>
+							</tbody>
+						</table>
+					</div>
+					
+					<div class="ns-null-good">
+						<img src="STORE_IMG/shopping_cart.png" />
+						<p class="ns-null-font">未添加任何商品</p>
+					</div>
+				</div>
+				
+				<div class="ns-card-bottom">
+					<div class="layui-card-bottom">
+						<p>
+							<span class="ns-settle-sum">本次优惠</span>
+							<span class="ns-settle-sum ns-red-color">￥0.00</span>
+						</p>
+						<p>
+							<span class="ns-settle-sum">应收金额</span>
+							<span class="ns-total-sum">￥<span class="ns-total-money">0.00</span></span>
+						</p>
+					</div>
+					<div class="ns-form-row">
+						<button class="layui-btn layui-btn-primary">整单取消</button>
+						<button class="layui-btn ns-bg-color">收款</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="ns-money-block ns-money-middle"></div>
+	<div class="ns-money-block ns-money-right">
+		<div class="ns-money-box">
+			<div class="layui-tab ns-table-tab" lay-filter="goods_list_tab">
+				<ul class="layui-tab-title">
+					<li class="layui-this" lay-id="1">商品</li>
+					<li lay-id="2">会员</li>
+				</ul>
+				<div class="layui-tab-content">
+					<div class="layui-tab-item layui-show">
+						<div class="ns-goods-block">
+							<div class="ns-good-left">
+								<!-- 搜索框 -->
+								<div class="ns-single-filter-box">
+									<div class="layui-form">
+										<div class="layui-input-block">
+											<input type="text" name="search_keys" placeholder="搜索商品条编码/简称/唯一码" autocomplete="off" class="layui-input ns-len-long">
+											<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+												<i class="layui-icon">&#xe615;</i>
+											</button>
+										</div>
+									</div>
+								</div>
+								
+								<!-- 商品列表 -->
+								<div class="layui-form ns-goods-list">
+									<div class="ns-good-box" data-id="1">
+										<div class="ns-table-title">
+											<div class="ns-title-pic">
+												<img src="STORE_IMG/goods_icon.png" />
+											</div>
+											<div class="ns-title-content">
+												<p>库存：<span class="ns-text-color good-stock">10</span></p>
+												<p>￥<span class="good-price">10.00</span></p>
+											</div>
+										</div>
+										<p class="ns-multi-line-hiding good-name" title="商品名称">商品名称商品名称商品名称商品名称商品名称商品名称商品名称商品名称商品名称商品名称商品名称商品名称商品名称商品名称</p>
+									</div>
+									
+									<div class="ns-good-box disabled" data-id="2">
+										<div class="ns-table-title">
+											<div class="ns-title-pic">
+												<img src="STORE_IMG/goods_icon.png" />
+											</div>
+											<div class="ns-title-content">
+												<p>库存：<span class="ns-text-color">0</span></p>
+												<p>￥<span class="good-price">10.00</span></p>
+											</div>
+										</div>
+										<p class="ns-multi-line-hiding good-name" title="商品名称">商品名称商品名称商品名称商品名称商品名称商品名称商品名称商品名称商品名称商品名称商品名称商品名称商品名称商品名称</p>
+										<div class="ns-empty-stock">
+											<img src="STORE_IMG/empty_stock.png" />
+										</div>
+									</div>
+								</div>
+							</div>
+							
+							<div class="ns-good-right">
+								<ul class="layui-nav layui-nav-tree"  lay-filter="test">
+									<li class="layui-nav-item layui-nav-itemed">
+										<a class="" href="">全部商品</a>
+									</li>
+									<li class="layui-nav-item">
+										<a href="javascript:;">分类一</a>
+										<!-- <dl class="layui-nav-child">
+											<dd><a href="javascript:;">列表一</a></dd>
+											<dd><a href="javascript:;">列表二</a></dd>
+											<dd><a href="">超链接</a></dd>
+										</dl> -->
+									</li>
+									<li class="layui-nav-item"><a href="">分类二</a></li>
+									<li class="layui-nav-item"><a href="">分类三</a></li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					
+					<!-- 会员 -->
+					<div class="layui-tab-item ns-dial ns-member">
+						<!-- 查找会员 -->
+						<!-- <div class="ns-menber-dial">
+							<p>询问客户手机号以便查询会员</p>
+							<input type="text" name="phone" class="layui-input number-phone" lay-verify="phone" placeholder="请输入会员手机号" />
+							
+							<div class="dial layui-form">
+								<table class="layui-table ns-dial-table">
+									<tbody>
+										<tr>
+											<td onclick="addNum(this)">7</td>
+											<td onclick="addNum(this)">8</td>
+											<td onclick="addNum(this)">9</td>
+											<td onclick="emptyInput()">清空</td>
+										</tr>
+										<tr>
+											<td onclick="addNum(this)">4</td>
+											<td onclick="addNum(this)">5</td>
+											<td onclick="addNum(this)">6</td>
+											<td onclick="delNum()"><i class="iconfont iconbackspace"></i></td>
+										</tr>
+										<tr>
+											<td onclick="addNum(this)">1</td>
+											<td onclick="addNum(this)">2</td>
+											<td onclick="addNum(this)">3</td>
+											<td rowspan="2" class="ns-bg-color" lay-filter="save" lay-submit>确定</td>
+										</tr>
+										<tr>
+											<td></td>
+											<td onclick="addNum(this)">0</td>
+											<td></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div> -->
+						
+						<!-- 添加会员 -->
+						<!-- <div class="ns-menber-add">
+							<p><span>18435164840</span> 还不是会员，快速办理，享 <span class="ns-text-color">VIP1</span> 等级权益</p>
+							<div class="ns-member-intro layui-form">
+								<h3>补充会员信息</h3>
+								
+								<div class="layui-form-item">
+									<label class="layui-form-label sm">性别：</label>
+									<div class="layui-input-block">
+										<input type="radio" name="sex" lay-filter="sex" value="0" title="男" checked>
+										<input type="radio" name="sex" lay-filter="sex" value="1" title="女" >
+									</div>
+								</div>
+								
+								<div class="layui-form-item">
+									<label class="layui-form-label sm">姓名：</label>
+									<div class="layui-input-block">
+										<input type="text" class="layui-input ns-len-mid" autocomplete="off">
+									</div>
+								</div>
+								
+								<div class="layui-form-item">
+									<label class="layui-form-label sm">生日：</label>
+									<div class="layui-input-block">
+										<input type="text" class="layui-input ns-len-mid" id="birthday" autocomplete="off" readonly>
+									</div>
+								</div>
+								
+								<div class="ns-form-row sm">
+									<button class="layui-btn ns-bg-color" lay-filter="define" lay-submit>确定办理</button>
+									<button class="layui-btn layui-btn-primary" onclick="backInput()">返回输入</button>
+								</div>
+							</div>
+						</div> -->
+						
+						<!-- 会员详情 -->
+						<div class="ns-menber-detail">
+							<div class="ns-table-title">
+								<div class="ns-title-pic">
+									<img src="STORE_IMG/default_headimg.png" />
+								</div>
+								<div class="ns-title-content">
+									<div class="ns-member-con-first">
+										<h2>18435164840</h2>
+										<p class="ns-text-color ns-member-level">VIP1普通会员</p>
+										<p class="ns-member-sex">男</p>
+									</div>
+									<div class="ns-member-con-second">
+										<p class="ns-text-color-gray">手机：18435164840</p>
+										<p class="ns-text-color-gray">生日：--</p>
+										<p class="ns-text-color-gray">成为会员：2020-04-21（0天）</p>
+									</div>
+								</div>
+							</div>
+							<button class="layui-btn layui-btn-primary" onclick="backInput()">更换会员</button>
+							
+							<div class="ns-member-num">
+								<div class="ns-member-num-box">
+									<div class="ns-member-info-box">
+										<p class="ns-member-num-title ns-text-color-gray">余额（元）</p>
+										<p class="ns-member-num-price">0.00</p>
+										<p class="ns-member-num-desc"></p>
+										<p><a href="#" class="ns-text-color">充值</a></p>
+									</div>
+									
+									<div class="ns-member-info-box">
+										<p class="ns-text-color-gray">积分</p>
+										<p class="ns-member-num-price">0</p>
+										<p class="ns-member-num-desc"></p>
+										<p class="ns-text-color-gray">积分抵现功能未开启</p>
+									</div>
+								</div>
+								
+								<div class="ns-member-num-box">
+									<div class="ns-member-info-box">
+										<p class="ns-member-num-title ns-text-color-gray">会员权益</p>
+										<p class="ns-member-num-price">1</p>
+										<p class="ns-member-num-desc ns-text-color-gray">已选<span class="member-card-selected">1</span>张</p>
+										<p><a href="#" class="ns-text-color">查看</a></p>
+									</div>
+									
+									<div class="ns-member-info-box">
+										<p class="ns-member-num-title ns-text-color-gray">优惠券/码（张）</p>
+										<p class="ns-member-num-price">0</p>
+										<p class="ns-member-num-desc ns-text-color-gray">已选0张</p>
+										<p><a href="#" class="ns-text-color">查看</a></p>
+									</div>
+								</div>
+								
+								<div class="ns-member-num-box">
+									<div class="ns-member-info-box">
+										<p class="ns-member-num-title ns-text-color-gray">消费总金额</p>
+										<p class="ns-member-num-price">0.00</p>
+									</div>
+									
+									<div class="ns-member-info-box">
+										<p class="ns-member-num-title ns-text-color-gray">消费订单数</p>
+										<p class="ns-member-num-price">0</p>
+									</div>
+									
+									<div class="ns-member-info-box">
+										<p class="ns-member-num-title ns-text-color-gray">客单价（元）</p>
+										<p class="ns-member-num-price">-</p>
+									</div>
+									
+									<div class="ns-member-info-box">
+										<p class="ns-member-num-title ns-text-color-gray">上次到店时间</p>
+										<p class="ns-member-num-desc">暂未到店消费</p>
+									</div>
+								</div>
+							</div>
+							
+							<div class="ns-member-num">
+								<div class="layui-card ns-card-common">
+									<div class="layui-card-header">
+										<span class="ns-card-title">会员权益</span>
+										<span class="ns-card-sub"><a class="ns-text-color">查看</a></span>
+									</div>
+									<div class="layui-card-body">
+										<div class="ns-member-card ns-member-card-selected">
+											<div></div>
+											<div>
+												<p>会员等级：<em>VIP1</em></p>
+												<p>有效期：永久有效</p>
+											</div>
+											
+											<div class="selected-icon">
+												<img src="STORE_IMG/selected.png" />
+											</div>
+										</div>
+									</div>
+								</div>
+								
+								<div class="layui-card ns-card-common">
+									<div class="layui-card-header">
+										<span class="ns-card-title">优惠券</span>
+										<span class="ns-card-sub"><a class="ns-text-color">查看</a></span>
+									</div>
+									<div class="layui-card-body">
+										<div class="ns-member-coupon">
+											<p class="ns-text-color-gray">暂无优惠券</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="ns-form-row ns-form-row-sec">
+					<button class="layui-btn layui-btn-primary">挂单</button>
+					<button class="layui-btn layui-btn-primary">取单</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script>
+	$(".ns-order-account tbody tr").hover(function() {
+		$(this).find(".ns-del-account").show();
+	}, function() {
+		$(this).find(".ns-del-account").hide();
+	});
+	
+	var _str = '';
+	
+	// 添加数字
+	function addNum(e) {
+		var _num = $(e).text();
+		_str = _str + _num;
+		$(".number-phone").val(_str);
+	}
+	
+	//清空数字
+	function emptyInput() {
+		$(".number-phone").val("");
+	}
+	
+	//删除最后一个数字
+	function delNum() {
+		_str = _str.substr(0, _str.length - 1);
+		$(".number-phone").val(_str);
+	}
+	
+	layui.use(['form', 'laydate'], function() {
+		var form = layui.form,
+			laydate = layui.laydate,
+			repeat_flag = false;
+			
+		// 时间选择框
+		laydate.render({
+			elem: '#birthday',
+			type: 'date'
+		});
+		
+		// 手机号提交
+		form.on('submit(save)', function(data) {
+			if (repeat_flag) return false;
+			repeat_flag = true;
+			
+			$.ajax({
+				type: "POST",
+				url: ns.url(""),
+				data: data.field,
+				dataType: 'JSON',
+				success: function(res) {
+					layer.msg(res.message);
+					repeat_flag = false;
+					
+					var html = '';
+					if (res.code == 0) {
+						layer.closeAll('page');
+						$(".ns-menber-dial").hide();
+					} else {
+						
+					}
+				}
+			});
+		})
+		
+		// 办理会员
+		form.on('submit(define)', function(data) {
+			if (repeat_flag) return false;
+			repeat_flag = true;
+			
+			$.ajax({
+				type: "POST",
+				url: ns.url(""),
+				data: data.field,
+				dataType: 'JSON',
+				success: function(res) {
+					layer.msg(res.message);
+					repeat_flag = false;
+					
+					if (res.code == 0) {
+						layer.closeAll('page');
+					}
+				}
+			});
+		})
+		
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data){
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+		
+		/**
+		 * 选中商品
+		 */
+		$(".ns-good-box").click(function () {
+			var _this = this;
+			var good_id = $(this).attr("data-id");
+			var good_name = $(this).find(".good-name").text();
+			var good_stock = $(this).find(".good-stock").text();
+			var good_price = $(this).find(".good-price").text();
+			var isExist = false;
+			
+			$(".ns-order-account tbody tr").each(function() {
+				var _id = $(this).attr("data-id");
+				if (_id == good_id) {
+					isExist = true;
+					
+					if (good_stock == 0) {
+						return;
+					} else {
+						var _val = $(this).find("input").val();
+						$(this).find("input").val(Number(_val) + 1);
+						
+						good_stock--;
+						$(_this).find(".good-stock").text(good_stock);
+						
+						if (good_stock == 0) {
+							$(_this).addClass("disabled");
+							var html = '<div class="ns-empty-stock"><img src="STORE_IMG/empty_stock.png" /></div>';
+							$(_this).append(html);
+							layer.msg('库存不足！', {icon: 5, anim: 6});
+							return;
+						}
+					}
+				}
+			})
+			
+			console.log(good_stock);
+			console.log(isExist);
+			if (!isExist) {
+				if (good_stock == 0) {
+					console.log(1);
+					return;
+				} else {
+					var html = '';
+					html += '<tr data-id='+ good_id +'>'+
+								'<td><p class="ns-line-hiding">'+ good_name +'</p></td>'+
+								'<td class="ns-align-right ns-selected-num">'+
+									'<span onclick="increase(this)">+</span>'+
+									'<input type="text" value="1" class="layui-input" />'+
+									'<span onclick="decrease(this)">-</span>'+
+								'</td>'+
+								'<td class="ns-align-right">￥<span class="ns-account-price">'+ good_price +'</span><span class="ns-del-account" onclick="delRow(this)">X</span></td>'+
+							'</tr>';
+							
+					$(".ns-order-account tbody").append(html);
+					
+					$(".ns-order-account tbody tr").hover(function() {
+						$(this).find(".ns-del-account").show();
+					}, function() {
+						$(this).find(".ns-del-account").hide();
+					});
+					
+					good_stock--;
+					$(this).find(".good-stock").text(good_stock);
+					
+					if (good_stock == 0) {
+						$(this).addClass("disabled");
+						var html = '<div class="ns-empty-stock"><img src="STORE_IMG/empty_stock.png" /></div>';
+						$(this).append(html);
+						layer.msg('库存不足！', {icon: 5, anim: 6});
+						return;
+					}
+				}
+			}
+			
+			totalMoney();
+			accountNull();
+		})
+		
+		// 选中会员卡
+		$(".ns-member-card").click(function() {
+			if ($(this).hasClass("ns-member-card-selected")) {
+				$(this).removeClass("ns-member-card-selected");
+				$(this).find(".selected-icon").empty();
+				$(".member-card-selected").text("0");
+			} else {
+				$(this).addClass("ns-member-card-selected");
+				$(this).find(".selected-icon").html('<div class="selected-icon"><img src="STORE_IMG/selected.png" /></div>');
+				$(".member-card-selected").text("1");
+			}
+		})
+	})
+	
+	// 减
+	function decrease(e) {
+		var _this = e;
+		var _val = $(_this).siblings("input").val();
+		var good_id = $(_this).parents("tr").attr("data-id");
+		
+		var good_stock, i;
+		
+		$(".ns-good-box").each(function(index, item) {
+			var _id = $(this).attr("data-id");
+			if (good_id == _id) {
+				good_stock = $(this).find(".good-stock").text();
+				i = index;
+			}
+		});
+		
+		if (_val == 1) {
+			layer.msg('已经是最小数了，不能再减少了！', {icon: 5, anim: 6});
+			return;
+		}
+		
+		_val--;
+		good_stock++;
+		$(_this).siblings("input").val(_val);
+		
+		$(".ns-good-box").each(function() {
+			var _id = $(this).attr("data-id");
+			if (good_id == _id) {
+				var good_stock = $(this).find(".good-stock").text();
+				$(this).find(".good-stock").text(Number(good_stock) + 1);
+			}
+		})
+		
+		if (good_stock > 0) {
+			$(".ns-good-box").eq(i).removeClass("disabled");
+			var html = '<div class="ns-empty-stock"><img src="STORE_IMG/empty_stock.png" /></div>';
+			$(".ns-good-box").eq(i).find(".ns-empty-stock").remove();
+		}
+		
+		totalMoney();
+	}
+	
+	// 加
+	function increase(e) {
+		var _this = e;
+		var _val = $(_this).siblings("input").val();
+		var good_id = $(_this).parents("tr").attr("data-id");
+		var good_stock, i;
+		
+		$(".ns-good-box").each(function(index, item) {
+			var _id = $(this).attr("data-id");
+			if (good_id == _id) {
+				good_stock = $(this).find(".good-stock").text();
+				i = index;
+			}
+		});
+		
+		if (good_stock == 0) {
+			return;
+		} else {
+			_val++;
+			$(_this).siblings("input").val(_val);
+			$(".ns-good-box").eq(i).find(".good-stock").text(Number(good_stock) - 1);
+			
+			good_stock--;
+			if (good_stock == 0) {
+				$(".ns-good-box").eq(i).addClass("disabled");
+				var html = '<div class="ns-empty-stock"><img src="STORE_IMG/empty_stock.png" /></div>';
+				$(".ns-good-box").eq(i).append(html);
+				layer.msg('库存不足！', {icon: 5, anim: 6});
+				return;
+			}
+		}
+		
+		totalMoney();
+	}
+	
+	// 总价
+	function totalMoney() {
+		var total_money = 0;
+		$(".ns-order-account tbody tr").each(function() {
+			var _num = $(this).find("input").val();
+			var _price = $(this).find(".ns-account-price").text();
+			
+			total_money += Number(_price) * Number(_num);
+		})
+		$(".ns-total-money").text(total_money);
+	}
+	
+	// 删除整行
+	function delRow(e) {
+		var id = $(e).parents("tr").attr("data-id");
+		var stock = $(e).parents("tr").find("input").val();
+		$(e).parents("tr").remove();
+		
+		$(".ns-good-box").each(function(index, item) {
+			var _id = $(this).attr("data-id");
+			if (id == _id) {
+				good_stock = $(this).find(".good-stock").text();
+				good_stock = Number(good_stock) + Number(stock);
+				$(this).find(".good-stock").text(good_stock);
+				
+				$(this).removeClass("disabled");
+				$(this).find(".ns-empty-stock").remove();
+			}
+		});
+		
+		totalMoney();
+		accountNull();
+	}
+	
+	// 是否有结算账单
+	function accountNull() {
+		var _len = $(".ns-order-account tbody tr").length;
+		if (_len == 0) {
+			$(".ns-settle-accounts .ns-null-good").show();
+		} else {
+			$(".ns-settle-accounts .ns-null-good").hide();
+		}
+	}
+	
+	// 库存是否为0
+	/* function stockNull(id, good_stock, i) {
+		$(".ns-good-box").each(function(index, item) {
+			var _id = $(this).attr("data-id");
+			if (id == _id) {
+				good_stock = $(this).find(".good-stock").text();
+				i = index;
+			}
+		});
+		
+		if (good_stock == 0) {
+			$(".ns-good-box").eq(i).addClass("disabled");
+			var html = '<div class="ns-empty-stock"><img src="STORE_IMG/empty_stock.png" /></div>';
+			$(".ns-good-box").eq(i).append(html);
+		} else {
+			$(".ns-good-box").eq(i).removeClass("disabled");
+			$(".ns-good-box").eq(i).find(".ns-empty-stock").remove();
+		}
+	} */
+	
+	function backInput() {
+		
+	}
+</script>
+{/block}

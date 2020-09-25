@@ -1,0 +1,412 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.coupon-box{
+        padding: 20px;
+    }
+	
+    .coupon-box .layui-form{
+        padding: 0!important;
+    }
+	
+    .layui-layer-content{
+        overflow: auto !important;
+    }
+	
+	.ns-del-btn {
+		cursor: pointer;
+	}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作说明</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>管理员可以在此页添加充值套餐</li>
+		</ul>
+	</div>
+</div>
+
+<div class="layui-form ns-form">
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>套餐名称：</label>
+		<div class="layui-input-inline">
+			<input type="text" name="recharge_name" lay-verify="required" autocomplete="off" class="layui-input">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">封面：</label>
+		<div class="layui-input-block img-upload">
+			<input type="hidden" class="layui-input" name="cover_img" />
+			<div class="upload-img-block icon square">
+				<div class="upload-img-box" id="img">
+					<div class="ns-upload-default">
+						<img src="__STATIC__/img/upload_img.png" />
+						<p>点击上传</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<p class="ns-word-aux">建议上传图片尺寸：80px * 80px</p>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>面值：</label>
+		<div class="layui-input-inline">
+			<input type="number" name="face_value" lay-verify="required|sum|number" autocomplete="off" class="layui-input ns-len-short">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>价格：</label>
+		<div class="layui-input-inline">
+			<input type="number" name="buy_price" lay-verify="required|sum|number" autocomplete="off" class="layui-input ns-len-short">
+		</div>
+	</div>
+
+	<!--<div class="layui-form-item">-->
+		<!--<label class="layui-form-label"></label>-->
+		<!--<div class="layui-input-block">-->
+			<!--<table class="layui-table" id="coupon_selected" lay-skin="line" lay-size="lg">-->
+				<!--<colgroup>-->
+					<!--<col width="45%">-->
+					<!--<col width="15%">-->
+					<!--<col width="25%">-->
+					<!--<col width="15%">-->
+				<!--</colgroup>-->
+				<!--<thead>-->
+					<!--<tr>-->
+						<!--<th>礼包名称</th>-->
+						<!--<th>面额</th>-->
+						<!--<th>结束时间</th>-->
+						<!--<th>操作</th>-->
+					<!--</tr>-->
+				<!--</thead>-->
+				<!--<tbody>-->
+					<!--<tr>-->
+						<!--<td class="ns-goods-null" colspan="4">-->
+							<!--<div class="goods-null">尚未选择赠送礼包</div>-->
+						<!--</td>-->
+					<!--</tr>-->
+				<!--</tbody>-->
+			<!--</table>-->
+
+			<!--<button class="layui-btn layui-btn-primary" onclick="addCoupon()">添加礼包</button>-->
+		<!--</div>-->
+	<!--</div>-->
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>赠送积分：</label>
+		<div class="layui-input-inline">
+			<input type="number" name="point" lay-verify="required|num|number" autocomplete="off" class="layui-input ns-len-short">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>赠送成长值：</label>
+		<div class="layui-input-inline">
+			<input type="number" name="growth" lay-verify="required|num|number" autocomplete="off" class="layui-input ns-len-short">
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+</div>
+{/block}
+{block name="script" }
+<script>
+	var coupon_id = [], addCoupon;
+	layui.use(['form', 'upload', 'laytpl'], function() {
+		var form = layui.form,
+			upload = layui.upload,
+			laytpl = layui.laytpl,
+			repeat_flag = false; //防重复标识
+		form.render();
+
+		// 图片上传
+		var uploadInst = upload.render({
+			elem: '#img',
+			url: ns.url("admin/upload/upload"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='cover_img']").val(res.data.pic_path);
+					$("#img").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+		
+		/**
+		 * 表单验证
+		 */
+		form.verify({
+			num: function(value) {
+				if (value < 0 || value % 1 != 0) {
+					return '请输入正整数！';
+				}
+			},
+			number: function (value) {
+				if (value < 0) {
+					return '请输入不小于0的数!'
+				}
+			},
+			sum: function (value) {
+				var arrMen = value.split(".");
+				var val = 0;
+				if (arrMen.length == 2) {
+					val = arrMen[1];
+				}
+				if (val.length > 2) {
+					return '保留小数点后两位'
+				}
+			}
+		});
+
+		form.on('submit(save)', function(data){
+			data.field.coupon_id = coupon_id.toString();
+			
+			if (repeat_flag) return false;
+			repeat_flag = true;
+
+			$.ajax({
+				type: "POST",
+				url: ns.url("memberrecharge://admin/memberrecharge/add"),
+				data: data.field,
+				dataType: 'JSON',
+				success: function(res){
+					repeat_flag = false;
+
+					if (res.code == 0) {
+						layer.confirm('添加成功', {
+							title:'操作提示',
+							btn: ['返回列表', '继续添加'],
+							yes: function(){
+								location.href = ns.url("memberrecharge://admin/memberrecharge/lists");
+							},
+							btn2: function() {
+								location.href = ns.url("memberrecharge://admin/memberrecharge/add");
+							}
+						});
+					}else{
+						layer.msg(res.message);
+					}
+				}
+			});
+		});
+
+		addCoupon = function() {
+			var data = {};
+			data.coupon_id = coupon_id;
+			
+			laytpl($("#couponList").html()).render(data, function(html) {
+				coupon_list = layer.open({
+					title: '礼包列表',
+					skin: 'layer-tips-class',
+					type: 1,
+					area: ['850px', '600px'],
+					content: html,
+				});
+				
+				if ($("tbody tr input:checked").length == $(".coupon-box tbody tr").length) {
+					$("input[lay-filter='selectAll']").prop("checked", true);
+				}
+				
+				form.render();
+			});
+
+			/**
+			 * 监听全选按钮
+			 */
+			form.on('checkbox(selectAll)', function(data) {
+				if (data.elem.checked) {
+					$("tr .ns-check-box input:checkbox").each(function(index) {
+						$(this).prop("checked", true);
+					});
+				} else {
+					$("tr .ns-check-box input:checkbox").each(function() {
+						$(this).prop("checked", false);
+					});
+				}
+				form.render();
+			});
+			
+			/**
+			 * 监听每一行的多选按钮
+			 */
+			var len = $(".coupon-box tbody tr").length;
+			for (var i = 0; i < len; i++) {
+				form.on('checkbox(select' + i + ')', function(data) {
+					if ($("tbody tr input:checked").length == len) {
+						$("input[lay-filter='selectAll']").prop("checked", true);
+					} else {
+						$("input[lay-filter='selectAll']").prop("checked", false);
+					}
+
+					form.render();
+				});
+			}
+		}
+	});
+
+	function couponSelected() {
+		layer.closeAll('page');
+		
+		coupon_id = [];
+		var _len = $("tbody tr input:checked").length;
+		
+		$("#coupon_selected tbody").empty();
+		
+		$("#goods tbody tr").each(function(){
+			var bool = $(this).find("input[type='checkbox']").is(":checked");
+			
+			if (bool) {
+				coupon_id.push($(this).find("#coupon_id").val());
+				var html = '';
+				
+				var _id = $(this).find("#coupon_id").val(),
+					image = $(this).find(".ns-img-box img").attr("src"),
+					coupon_name = $(this).find(".ns-font-box p").text(),
+					money = $(this).find(".coupon-money").text(),
+					end_time = $(this).find(".coupon-end-time").text();
+				
+				html += '<tr>'+
+							'<td>'+
+								'<div class="ns-table-tuwen-box">'+
+									'<input type="hidden" value="'+ _id +'" />';
+									'<div class="ns-img-box">';
+				if (image) {
+					html +=   			'<img src="'+ image +'">';
+				}
+				html +=				'</div>'+
+									'<div class="ns-font-box">'+
+										'<p class="ns-multi-line-hiding">'+ coupon_name +'</p>'+
+									'</div>'+
+								'</div>'+
+							'</td>'+
+							'<td class="layui-elip coupon-money">'+ money +'</td>'+
+							'<td class="layui-elip coupon-end-time">'+ end_time +'</td>'+
+							'<td class="layui-elip"><a class="default ns-del-btn" onclick="delCoupon(this)">删除</a></td>'+
+						'</tr>';
+						
+				$("#coupon_selected tbody").append(html);
+			}
+			
+		});
+		
+		if (_len == 0) {
+			var html = '<tr>'+
+						'<td class="ns-goods-null" colspan="4">'+
+							'<div class="goods-null">尚未选择赠送礼包</div>'+
+						'</td>'+
+					'</tr>';
+			$("#coupon_selected tbody").append(html);
+		}
+	}
+	
+	//删除礼包
+	function delCoupon(e) {
+		$(e).parents("tr").remove();
+		
+		var _len = $("#coupon_selected tbody tr").length;
+		if(_len == 0) {
+		
+			var html = '<tr>'+
+							'<td class="ns-goods-null" colspan="4">'+
+								'<div class="goods-null">尚未选择赠送礼包</div>'+
+							'</td>'+
+						'</tr>';
+			
+			$("#coupon_selected tbody").append(html);
+		}
+		
+		couponId();
+	}
+	
+	function couponId() {
+		coupon_id = [];
+		
+		$("#coupon_selected tbody tr").each(function(){
+			coupon_id.push($(this).find(".ns-table-tuwen-box input").val());
+		});
+	}
+	
+	function back() {
+		location.href = ns.url("memberrecharge://admin/memberrecharge/lists");
+	}
+</script>
+
+<!-- 优惠券 -->
+<script type="text/html" id="couponList">
+	<div class="coupon-box">
+        <div class="ns-single-filter-box">
+            <div class="layui-form">
+                <div class="layui-input-inline">
+                    <input type="text" name="coupon_name" placeholder="请输礼包名称" class="layui-input">
+                    <button type="button" class="layui-btn layui-btn-primary" lay-filter="coupon-search" lay-submit>
+                        <i class="layui-icon">&#xe615;</i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+		<table class="layui-table" id="goods" lay-skin="line" lay-size="lg">
+			<colgroup>
+				<col width="8%">
+				<col width="50%">
+				<col width="15%">
+				<col width="27%">
+			</colgroup>
+			<thead>
+				<tr>
+					<th class="ns-check-box">
+						<div class="layui-form">
+							<input type="checkbox" name="" lay-filter="selectAll" lay-skin="primary">
+						</div>
+					</th>
+					<th class="layui-elip">礼包名称</th>
+					<th class="layui-elip">面额</th>
+					<th class="layui-elip">结束时间</th>
+				</tr>
+			</thead>
+			<tbody>
+				{foreach $coupon_list.data as $coupon_list_k => $coupon_list_v}
+				<tr>
+					<td class="ns-check-box">
+						<div class="layui-form">
+							{{# var a = {$coupon_list_v.coupon_type_id} }}
+							{{#  if($.inArray(a.toString(), d.coupon_id) != -1){  }}
+							<input type="checkbox" name="" lay-filter="select{$coupon_list_k}" lay-skin="primary" checked>
+							{{#  }else{  }}
+							<input type="checkbox" name="" lay-filter="select{$coupon_list_k}" lay-skin="primary">
+							{{#  }  }}
+							<input type="hidden" id="coupon_id" value="{$coupon_list_v.coupon_type_id}">
+						</div>
+					</td>
+					<td>
+						<div class="ns-table-tuwen-box">
+							<div class="ns-img-box">
+								{if condition="$coupon_list_v.image"}
+								<img src="{:img($coupon_list_v.image)}">
+								{/if}
+							</div>
+							<div class="ns-font-box">
+								<p class="ns-multi-line-hiding">{$coupon_list_v.coupon_name}</p>
+							</div>
+						</div>
+					</td>
+					<td class="layui-elip coupon-money">{$coupon_list_v.money}</td>
+					<td class="layui-elip coupon-end-time">{:time_to_date($coupon_list_v.end_time)}</td>
+				</tr>
+				{/foreach}
+			</tbody>
+		</table>
+		
+		<button class="layui-btn ns-bg-color" onclick="couponSelected()">确定</button>
+    </div>
+</script>
+{/block}

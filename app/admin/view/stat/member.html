@@ -1,0 +1,188 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+    .ns-card-head-right {
+        display: flex;
+        align-items: center;
+    }
+
+    .ns-card-head-right .layui-form-item {
+        margin-bottom: 0;
+    }
+	
+	.current-time, .ns-flow-time-today {
+		margin-left: 10px;
+		line-height: 34px;
+	}
+
+    /* 基本信息 */
+    .ns-basic {
+        display: flex;
+    }
+
+    .ns-basic .ns-table-tuwen-box {
+        width: 30%;
+        border-right: 1px solid #EEEEEE;
+        padding: 10px 20px;
+    }
+
+    .ns-basic-count {
+        font-size: 20px;
+        font-weight: 600;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <span class="ns-card-title">会员概况</span>
+        
+		<div class="ns-card-head-right layui-form">
+			<div class="layui-form-item">
+				<div class="layui-input-block ns-len-mid">
+					<select name="date" lay-filter="date">
+						<option value="0">今日实时</option>
+						<option value="1">近7天</option>
+						<option value="2">近30天</option>
+					</select>
+				</div>
+			</div>
+			<div class="ns-flow-time">
+				<div class="ns-flow-time-today"></div>
+			</div>
+		</div>
+    </div>
+    <div class="layui-card-body ns-basic">
+        <div class="ns-table-tuwen-box">
+            <div class="ns-img-box">
+                <img src="ADMIN_IMG/stat/member_num.png">
+            </div>
+            <div class="ns-font-box">
+                <p class="ns-text-color-dark-gray">会员统计</p>
+                <p class="ns-basic-count" id="memberCount">0</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <span class="ns-card-title">会员趋势分析</span>
+        
+		<div class="ns-card-head-right layui-form">
+			<div class="layui-form-item">
+				<div class="layui-input-block ns-len-mid">
+					<select name="date" lay-filter="date_chart">
+						<option value="1">近7天</option>
+						<option value="2">近30天</option>
+					</select>
+				</div>
+			</div>
+			<span class="current-time"></span>
+		</div>
+    </div>
+    <div class="layui-card-body">
+        <div id="main" style="width: 100%; height: 400px;"></div>
+    </div>
+</div>
+{/block}
+{block name="script"}
+<script src="SHOP_JS/echarts.min.js"></script>
+<script>
+    $(function() {
+        getMemberStat(0);
+        getMemberStatChart(1);
+    });
+
+    layui.use(['form'], function() {
+        var form = layui.form;
+
+        /**
+         * 监听下拉框
+         */
+        form.on('select(date)', function(data) {
+            getMemberStat(data.value);
+        });
+
+        /**
+         * 图表监听下拉框
+         */
+        form.on('select(date_chart)', function(data) {
+            getMemberStatChart(data.value);
+        });
+    });
+
+    //获取店铺统计
+    function getMemberStat(date_type){
+        $.ajax({
+            dataType: 'JSON',
+            type: 'POST',
+            url: ns.url("admin/stat/member"),
+            data: {
+                date_type: date_type
+            },
+            success: function(res){
+                console.log(res);
+                if (res.code == 0) {
+                    $("#memberCount").html(res.data.member_count);
+                    $(".ns-flow-time-today").html(res.data.time_range);
+                }else{
+                    layer.msg(res.message);
+                }
+            }
+        });
+    }
+
+    //获取店铺统计图表
+    function getMemberStatChart(date_type){
+        $.ajax({
+            dataType: 'JSON',
+            type: 'POST',
+            url: ns.url("admin/stat/getmemberstatlist"),
+            data: {
+                date_type: date_type
+            },
+            success: function(res){
+                console.log(res);
+                option.xAxis.data = res.time;
+                option.series[0].data = res.member_count;
+                $(".current-time").html(res.time_range);
+                myChart.setOption(option);
+            }
+        });
+    }
+
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
+
+    // 指定图表的配置项和数据
+    option = {
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data: ['会员数']
+        },
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: []
+        },
+        yAxis: {
+            type: 'value',
+            axisLabel: {
+                formatter: '{value} 人'
+            }
+        },
+        series: [{
+                name: '会员数',
+                type: 'line',
+                data: [],
+            },
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+{/block}

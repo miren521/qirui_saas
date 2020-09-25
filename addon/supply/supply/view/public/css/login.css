@@ -1,0 +1,306 @@
+/* 头部*/
+.apply-header {
+	height: 80px;
+	line-height: 80px;
+	border-bottom: 1px solid #EFEFEF;
+}
+
+.apply-header .apply-header-box {
+	position: relative;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 30px;
+	margin: auto;
+}
+
+.apply-header .apply-header-title {
+	color: #5D5D5D;
+}
+
+.apply-header .apply-header-title a {
+	width: 400px;
+	height: 50px;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+}
+
+.apply-header .apply-header-title a img {
+	max-width: 100%;
+	max-height: 50px;
+}
+
+.apply-header .apply-header-title span:nth-of-type(1) {
+	margin-left: 5px;
+}
+
+.apply-header .apply-header-title span:nth-of-type(2) {
+	display: inline-block;
+	background-color: #ffede5;
+	line-height: 1;
+	padding: 5px;
+	border-radius: 3px;
+	margin-left: 5px;
+}
+
+.layui-nav .layui-nav-item a {
+	max-width: 100px;
+}
+
+.layui-nav .layui-nav-item a,
+.layui-nav .layui-nav-item a:hover {
+	color: #5D5D5D;
+}
+
+.apply-header .layui-nav {
+	padding-left: 0;
+	position: relative !important;
+	height: 80px;
+	background-color: transparent;
+}
+
+.layui-nav .layui-nav-more {
+	border-top-color: #5D5D5D;
+}
+
+.layui-nav .layui-nav-mored {
+	border-color: transparent transparent #5D5D5D;
+}
+
+.phone {
+	margin-left: auto;
+}
+
+.apply-header .layui-nav .layui-nav-bar {
+	width: 0 !important;
+}
+
+.apply-body {
+	margin: 80px 0;
+	display: flex;
+	justify-content: center;
+}
+
+/* 内容*/
+.login-body {
+	position: relative;
+	min-height: 800px;
+	height: calc(100vh - 81px);
+}
+
+.login-content {
+	position: absolute;
+	background-color: #fff;
+	left: 0;
+	right: 0;
+	top: 40%;
+	transform: translateY(-50%);
+	margin: auto;
+	width: 100%;
+	box-sizing: border-box;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
+
+.operation-register {
+	height: 30px;
+	line-height: 30px;
+	text-align: center;
+	font-size: 16px;
+	margin-top: 10px;
+	color: rgba(0, 0, 0, .5);
+}
+
+.ns-login-bottom {
+	color: #999;
+	box-sizing: border-box;
+	text-align: center;
+	padding-bottom: 50px;
+	padding-top: 50px;
+	line-height: 1.8;
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+.ns-login-bottom a {
+	color: #999;
+}
+
+.ns-login-bottom .gov-box img {
+	max-width: 20px;
+	max-height: 20px;
+	margin-right: 5px;
+}
+
+.ns-footer-img {
+	margin-bottom: 18px;
+}
+
+.ns-footer-img img {
+	max-width: 100px;
+	max-height: 27px;
+}
+
+
+/* 中间 */
+.ns-login-middel {
+	width: 100%;
+	height: calc(100% - 161px);
+	position: relative;
+}
+
+.ns-login-box {
+	width: 100%;
+	height: 462px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.ns-login-banner {
+	width: 350px;
+	text-align: center;
+}
+
+.ns-login-banner img {
+	height: 300px;
+}
+
+.ns-login-banner p {
+	font-size: 14px;
+	color: #3E3E3E;
+	margin-top: 24px;
+	line-height: 30px;
+}
+
+.layui-carousel {
+	background-color: #FFFFFF;
+	height: 420px !important;
+}
+
+.layui-carousel>[carousel-item]>* {
+	background-color: #FFFFFF;
+}
+
+.layui-carousel-ind {
+	top: -20px;
+}
+
+.layui-carousel-ind ul,
+.layui-carousel-ind ul:hover {
+	background-color: transparent;
+}
+
+.layui-carousel-ind li {
+	background-color: rgba(234, 239, 244, 1);
+}
+
+.layui-carousel-ind li.layui-this {
+	background-color: rgba(39, 171, 255, 1);
+	;
+}
+
+/* 分割线 */
+.ns-login-mid {
+	width: 1px;
+	height: 100%;
+	background-color: #F3F3F3;
+	margin-left: 96px;
+	margin-right: 96px;
+}
+
+/* 表单 */
+.login-form {
+	display: inline-block;
+	width: 350px;
+	box-sizing: border-box;
+	background-color: rgba(255, 255, 255, .15);
+	position: relative;
+
+}
+
+.login-form h1 {
+	font-size: 30px;
+	text-align: center;
+	color: #555555;
+	margin-bottom: 44px;
+}
+
+.layui-form-item {
+	margin: 0 auto;
+	width: 100%;
+	height: 48px;
+	margin-bottom: 32px;
+	position: relative;
+}
+
+.ns-login-btn {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.layui-form-item>input {
+	width: 100%;
+	height: 48px;
+	border-radius: 5px;
+	padding-left: 50px;
+	box-sizing: border-box;
+	border-color: #CCCCCC;
+}
+
+input:-webkit-autofill {
+	transition: background-color 9999s ease-in-out 0s;
+	-webkit-transition-delay: 9999s;
+}
+
+.ns-input-icon {
+	position: absolute;
+	top: 10px;
+	left: 11px;
+}
+
+.layui-form-forget {
+	display: block;
+	margin: 0 auto;
+	width: 80%;
+	text-align: right;
+	font-size: 13px;
+	color: #C2C2C2;
+	margin-top: 10px;
+}
+
+.layui-btn {
+	height: 50px;
+	border-radius: 3px;
+	font-size: 16px;
+	box-shadow: 0 0 10px 3px rgba(255, 255, 255, .15);
+}
+
+/* 验证码 */
+.verify-code-box input {
+	padding-left: 20px;
+}
+
+.verify-code-img {
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 120px;
+	height: 48px;
+	line-height: 46px;
+	overflow: hidden;
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+}
+
+.verify-code-box .verify-code-img {
+	text-align: right;
+	padding-right: 2px;
+}

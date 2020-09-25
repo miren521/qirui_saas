@@ -1,0 +1,223 @@
+{extend name="$extend_base"/}
+{block name="resources"}
+<link rel="stylesheet" href="STATIC_EXT/color_picker/css/colorpicker.css" />
+<link rel="stylesheet" href="STATIC_EXT/diyview/css/diyview.css" />
+{/block}
+{block name="main"}
+<style type="text/css">
+	.empty-box{
+		width: 100%;
+		height: 100%;
+	}
+</style>
+<div class="diy-view-wrap">
+	<div id="diyView" class='layui-form'>
+		<div class="component-list-box">
+			<!-- 组件列表 -->
+			<nav class="component-list">
+				{foreach name="$diy_view_utils" item="vo" key="k"}
+				<h3>{$vo.type_name}</h3>
+				<ul>
+					{foreach name="$vo.list" item="li" key="li_k"}
+					<li title="{$li.title}"
+					    {if condition="$li.value"}v-on:click='addComponent({$li.value},{ name : "{$li.name}", title : "{$li.title}", max_count : {$li.max_count}, addon_name : "{$li.addon_name}", controller : "{$li.controller}" })'
+					    v-bind:class="{ 'disabled' : !checkComponentIsAdd('{$li.name}',{$li.max_count}) }"
+					    {if condition="$li.support_diy_view"}
+					    class="hot"
+					    {/if}
+					{else/}class="disabled"{/if}
+					>{$li.title}</li>
+					{/foreach}
+				</ul>
+				{/foreach}
+			</nav>
+			
+			<div class="custom-save">
+				<button class="layui-btn ns-bg-color save" lay-submit="" lay-filter="save">保存</button>
+			</div>
+		</div>
+		
+		<div class="components-box">
+			<div class="preview-head"  :class="{'active' : global.textColor=='#ffffff'}" :style="{'background-color':global.bgTopColor}" v-on:click="changeCurrentIndex(-99)">
+				<span :style="{color: global.textColor}">{{ global.title }}</span>
+				<div v-bind:class="{selected : currentIndex==-99}" v-bind:data-sort="-99" @click.stop="" style="display:none;" v-show="data.length==0 || currentIndex==-99">
+					<div class="edit-attribute">
+						<div class="layui-form-item">
+							<label class="layui-form-label sm">模板名称</label>
+							<div class="layui-input-block">
+								<input type="text" v-model="global.title" placeholder="请输入模板名称" class="layui-input">
+							</div>
+						</div>
+						
+						<div class="layui-form-item">
+							<label class="layui-form-label sm">底部导航</label>
+							<div class="layui-input-block">
+								<div v-on:click="global.openBottomNav=true" class="layui-unselect layui-form-radio" v-bind:class="{ 'layui-form-radioed' : global.openBottomNav==true }"><i class="layui-anim layui-icon" >&#xe643;</i><div>显示</div></div>
+								<div v-on:click="global.openBottomNav=false" class="layui-unselect layui-form-radio" v-bind:class="{ 'layui-form-radioed' : global.openBottomNav == false }"><i class="layui-anim layui-icon" >&#xe643;</i><div>不显示</div></div>
+								<!-- <div class="layui-unselect layui-form-switch" v-on:click="global.openBottomNav=!global.openBottomNav" v-bind:class="{ 'layui-form-onswitch' : global.openBottomNav }" lay-skin="_switch">
+									<em v-if="global.openBottomNav"></em>
+									<em v-else></em>
+									<i></i>
+								</div> -->
+							</div>
+						</div>
+						<div>
+							<label class="layui-form-label sm">字体颜色</label>
+							<div v-on:click="global.textColor='#ffffff'" class="layui-unselect layui-form-radio" v-bind:class="{'layui-form-radioed' : global.textColor=='#ffffff' }"><i class="layui-anim layui-icon">&#xe643;</i><div>白色</div></div>
+							<div v-on:click="global.textColor='#333333'" class="layui-unselect layui-form-radio" v-bind:class="{'layui-form-radioed' : global.textColor=='#333333' }"><i class="layui-anim layui-icon">&#xe643;</i><div>黑色</div></div>
+						</div>
+						<color v-bind:data="{ field : 'bgTopColor', label : '顶部背景', value : '#ffffff' }"></color>
+						<color v-bind:data="{ field : 'bgColor', label : '页面背景', value : '#ffffff' }"></color>
+						<div class="layui-form-item">
+							<label class="layui-form-label sm">背景图片</label>
+							<div class="layui-input-block">
+								<img-upload v-bind:data="{ data : global, field : 'bgUrl' }"></img-upload>
+							</div>
+						</div>
+					
+					</div>
+				
+				</div>
+			
+			</div>
+			
+			<div class="preview-block" v-bind:style="{ backgroundColor : global.bgColor,backgroundImage : 'url('+changeImgUrl(global.bgUrl)+')',}">
+				<template v-for="(nc,index) in data" v-bind:k="index">
+					<div v-bind:data-index="index" v-on:click="changeCurrentIndex(nc.index)" v-bind:class="{ 'draggable-element nc-border-color-selected' : true,selected : currentIndex == nc.index }" v-bind:data-sort="index">
+						{foreach name="$diy_view_utils" item="vo"}
+						{foreach name="$vo.list" item="li"}
+						<template v-if="nc.type == '{$li.name}'">
+							{:event('DiyViewUtils',['controller'=>$li['controller'],'addon_name'=>$li['addon_name']],true)}
+						</template>
+						{/foreach}
+						{/foreach}
+					</div>
+				</template>
+				
+			</div>
+			<div class="empty-box">
+				
+			</div>
+		</div>
+		
+		{notempty name="$qrcode_info"}
+		<div class="popup-qrcode-wrap" v-if="currentIndex===null">
+			
+			<img src="{:img($qrcode_info.path.h5.img)}" alt="推广二维码">
+			<p class="qrcode-item-description">扫码后直接访问页面</p>
+			<a class="ns-text-color" href="javascript:ns.copy('h5_url');">复制链接</a>
+			<a class="ns-text-color" href="{:img($qrcode_info.path.h5.img)}" download>下载二维码</a>
+			<input class="layui-input nc-len-mid" type="text" value="{$qrcode_info.path.h5.url}" id="h5_url" readonly>
+		</div>
+		{/notempty}
+	</div>
+</div>
+
+{if condition="!empty($diy_view_info) && !empty($diy_view_info.value)"}
+<input type="hidden" id="info" value='{$diy_view_info.value}' />
+{/if}
+{if condition="!empty($diy_view_info) && !empty($diy_view_info.name)"}
+<input type="hidden" id="name" value="{$diy_view_info.name}" />
+{elseif condition="!empty($name)"}
+<input type="hidden" id="name" value="{$name}" />
+{else/}
+<input type="hidden" id="name" value="DIY_VIEW_RANDOM_{$time}" />
+{/if}
+{/block}
+{block name="script"}
+<script>
+	var STATICIMG = 'STATIC_IMG';
+	var link_url = '{$app_module}/diy/link';
+	var module = '{$app_module}';
+</script>
+<script src="STATIC_JS/vue.js"></script>
+<script src="STATIC_EXT/color_picker/js/colorpicker.js"></script>
+<script src="STATIC_EXT/diyview/js/async_load_css.js"></script>
+<script src="STATIC_EXT/diyview/js/ddsort.js"></script>
+<script src="STATIC_EXT/ueditor/ueditor.config.js"></script>
+<script src="STATIC_EXT/ueditor/ueditor.all.js"> </script>
+<script src="STATIC_EXT/ueditor/lang/zh-cn/zh-cn.js"></script>
+<script src="STATIC_EXT/diyview/js/components.js"></script>
+<script src="STATIC_EXT/diyview/js/custom_template.js"></script>
+<script>
+	
+	{if condition="!empty($diy_view_info) && (!empty($diy_view_info.value) || !empty($diy_view_info.id) )"}
+		var id = "{$diy_view_info.id}";
+		var info = JSON.parse($("#info").val().toString());
+		
+		if(!$.isEmptyObject(info) && info.value){
+			for(var i=0;i<info.value.length;i++) vue.addComponent(info.value[i]);
+			vue.setGlobal(info.global);
+		}else{
+			vue.setGlobal({ title : "{$diy_view_info.title}" });
+		}
+		vue.title = "{$diy_view_info.title}";
+	{else/}
+		var id = 0;
+	{/if}
+
+	var repeat_flag = false;//防重复标识
+	$("button.save").click(function(){
+
+		if(vue.verify()){
+			
+			//全局属性
+			var global = JSON.stringify(vue.global);
+			global = eval("("+global+")");
+			
+			//组件属性
+			var value = JSON.stringify(vue.data);
+			value = eval(value);
+			
+			//重新排序
+			value.sort(function(a,b){
+				return a.sort-b.sort;
+			});
+			
+			for(var item in value){
+				delete value[item].verify;
+				delete value[item].lazyLoad;
+				delete value[item].lazyLoadCss;
+				delete value[item].index;
+				delete value[item].sort;
+				delete value[item].outerCountJs;
+			}
+			
+			if(repeat_flag) return;
+			repeat_flag = true;
+			
+			var v = {
+				global : global,
+				value : value
+			};
+
+			$.ajax({
+				type : "post",
+				url : "{:addon_url($request_url)}",
+				data : { id : id, name : $("#name").val(), title : vue.global.title, value : JSON.stringify(v) },
+				dataType : "JSON",
+				success : function(res) {
+					layer.msg(res.message);
+					if (res.code == 0) {
+						
+						if (id > 0 || $("#name").val() != "DIY_VIEW_RANDOM_{$time}") {
+							location.reload();
+						} else {
+							location.href = ns.url("{$app_module}/diy/lists");
+						}
+						
+					} else {
+						repeat_flag = false;
+					}
+				}
+			});
+		}
+	});
+</script>
+
+<script type="text/javascript">
+	var height = $('.layui-side').height() - 45 - 20;
+	$('.components-box').css('height', height);
+	$('.components-box .empty-box').css('height', height/2);
+</script>
+{/block}

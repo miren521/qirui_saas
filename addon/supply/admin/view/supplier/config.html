@@ -1,0 +1,110 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-form">
+    <!-- 基础上传 -->
+    <div class="layui-card ns-card-common ns-card-brief">
+        <div class="layui-card-header">
+            <span class="ns-card-title">供应商设置</span>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">年费：</label>
+            <div class="layui-input-block">
+                <div class="layui-input-inline">
+                    <input type="number" name="fee" value="{$config.fee ?? ''}" lay-verify="flo" autocomplete="off" class="layui-input ns-len-short">
+                </div>
+                <span class="layui-form-mid">元</span>
+            </div>
+            <div class="ns-word-aux">
+                <p>年费不能小于0，可保留两位小数</p>
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">描述：</label>
+            <div class="layui-input-block">
+                <textarea name="remark" class="layui-textarea ns-len-long">{$config.remark ?? ''}</textarea>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 基础上传 -->
+    <div class="layui-card ns-card-common ns-card-brief">
+        <div class="layui-card-header">
+            <span class="ns-card-title">结算周期设置</span>
+        </div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <label class="layui-form-label">结算周期类型：</label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline">
+                        <input type="radio" name="period_type" value="1" lay-filter="period_type" title="按天" {if empty($config.period_type) || $config.period_type == 1} checked {/if} />
+                        <input type="radio" name="period_type" value="2" lay-filter="period_type" title="按周" {if !empty($config.period_type) && $config.period_type == 2} checked {/if} />
+                        <input type="radio" name="period_type" value="3" lay-filter="period_type" title="按月" {if !empty($config.period_type) && $config.period_type == 3} checked {/if} />
+                    </div>
+                </div>
+                <div class="ns-word-aux">按天是指每天0点开始，按周是指每周一0点开始，按月是指每月一号0点开始</div>
+            </div>
+        </div>
+    </div>
+
+	<div class="ns-single-filter-box">
+		<div class="ns-form-row">
+			<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		</div>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+    layui.use(['form'], function() {
+        var form = layui.form,
+            repeat_flag = false; //防重复标识
+
+
+        form.render();
+
+        form.verify({
+			flo: function (value) {
+				if (value == '') {
+					return;
+				}
+				var reg = /^(0|[1-9]\d*)(\s|$|\.\d{1,2}\b)/;
+				if (!reg.test(value)) {
+					return '价格不能小于0，可保留两位小数！'
+				}
+			},
+            rate: function(value){
+                if(value > 100 || value < 0 || value%1 != 0){
+                    return '请填写0-100的整数';
+                }
+            },
+            check_num:function(value){
+                if(parseFloat($("input[name='min_withdraw']").val()) > parseFloat(value)){
+                    return '最小提现金额不能大于最大提现金额！';
+                }
+            }
+        });
+
+        form.on('submit(save)', function(data) {
+            if (repeat_flag) return;
+            repeat_flag = true;
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("supply://admin/supplier/config"),
+                data: data.field,
+                success: function(res) {
+                    layer.msg(res.message);
+					repeat_flag = false;
+                    if (res.code == 0) {
+                        location.reload();
+                    }
+                }
+            });
+        });
+    });
+</script>
+{/block}

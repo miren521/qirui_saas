@@ -1,0 +1,199 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="CITY_CSS/goods_lists.css">
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">操作提示</h2>
+        <ul class="layui-colla-content layui-show">
+            <li>当前显示的是商家发布过的所有商品，当商品处于上架状态时前台显示</li>
+            <li>虚拟商品用户购买之后可以通过订单核销进行商品核销处理。</li>
+            <li>如果商家的商品操作违规，平台可以操作违规下架，违规下架的商品需要商家编辑审核之后才能重新上架</li>
+        </ul>
+    </div>
+</div>
+
+<div class="ns-screen layui-collapse" lay-filter="selection_panel">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">筛选</h2>
+        <form class="layui-colla-content layui-form layui-show">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">搜索方式：</label>
+                    <div class="layui-input-inline">
+                        <select name="search_text_type">
+                            <option value="goods_name">商品名称</option>
+                            <option value="site_name">店铺名称</option>
+                        </select>
+                    </div>
+                    <div class="layui-input-inline">
+                        <input type="text" name="search_text" autocomplete="off" class="layui-input" placeholder="输入商品名称/店铺名称" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                
+                <div class="layui-inline">
+                    <label class="layui-form-label">商品类型：</label>
+                    <div class="layui-input-inline">
+                        <select name="goods_class" lay-filter="goods_class">
+                            <option value="">全部</option>
+                            <option value="1">实物商品</option>
+                            <option value="2">虚拟商品</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">商品分类：</label>
+                    <div class="layui-input-inline">
+                        {include file="goods/category_select" /}
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">商品品牌：</label>
+                    <div class="layui-input-inline">
+                        <select name="goods_brand" lay-search=""></select>
+                    </div>
+                </div>
+
+                <!--<div class="layui-inline">-->
+                    <!--<label class="layui-form-label">商品类型：</label>-->
+                    <!--<div class="layui-input-inline">-->
+                        <!--<select name="goods_attr_class" lay-search=""></select>-->
+                    <!--</div>-->
+                <!--</div>-->
+            </div>
+            
+            <input type="hidden" name="goods_state" />
+            <input type="hidden" name="verify_state" />
+
+            <div class="ns-form-row">
+                <button class="layui-btn ns-bg-color" lay-submit id="" lay-filter="search">筛选</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="goods_list_tab">
+	<ul class="layui-tab-title">
+		<li class="layui-this" lay-id="">全部</li>
+		<li lay-id="1" data-type="goods_state">销售中</li>
+		<li lay-id="0" data-type="goods_state">仓库中</li>
+        {foreach name="$verify_state" item="vo" key="k"}
+        <li lay-id="{$vo['state']}" data-type="verify_state">
+            <div>{$vo['value']}{if $vo['count']>0}<span>(</span><span class="count">{$vo['count']}</span><span>)</span>{/if}</div>
+        </li>
+        {/foreach}
+	</ul>
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="goods_list" lay-filter="goods_list"></table>
+	</div>
+</div>
+
+<!-- 商品信息 -->
+<script type="text/html" id="goods_info">
+    <div class="ns-table-tuwen-box">
+        <div class="contraction" data-goods-id="{{d.goods_id}}" data-open="0">
+            <span>+</span>
+        </div>
+        <div class="ns-img-box" id="goods_img_{{d.goods_id}}">
+            <img layer-src src="{{ns.img(d.goods_image.split(',')[0], 'small')}}"/>
+        </div>
+        <div class="ns-font-box">
+            <a href="javascript:;" class="ns-multi-line-hiding ns-text-color" title="{{d.goods_name}}" lay-event="preview">{{d.goods_name}}</a>
+        </div>
+    </div>
+</script>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+    <div class="operation-wrap" data-goods-id="{{d.goods_id}}">
+        <div class="popup-qrcode-wrap"><img class="popup-qrcode-loadimg" src="__STATIC__/loading/loading.gif" /></div>
+        <div class="ns-table-btn">
+            {{# if(d.verify_state == 1 && d.goods_state == 1){ }}
+            <a class="layui-btn" lay-event="select">推广</a>
+            <!-- <a class="layui-btn" lay-event="preview">预览</a> -->
+            <a class="layui-btn" lay-event="lockup">违规下架</a>
+            {{# } }}
+            {{# if(d.verify_state == 1 && d.goods_state == 0){ }}
+            <a class="layui-btn" lay-event="lockup">违规下架</a>
+            {{# } }}
+            {{# if(d.verify_state == 0){ }}
+            <a class="layui-btn" lay-event="verify_on">通过</a>
+            <a class="layui-btn" lay-event="verify_off">拒绝</a>
+            {{# } }}
+            {{# if(d.verify_state == -2){ }}
+            <a class="layui-btn" lay-event="select_verify_remark">审核失败原因</a>
+            {{# } }}
+            {{# if(d.verify_state == 10){ }}
+            <a class="layui-btn" lay-event="select_violations_remark">违规原因</a>
+            {{# } }}
+        </div>
+    </div>
+</script>
+
+<!-- 批量操作 -->
+<script type="text/html" id="batchOperation"></script>
+
+<!-- SKU商品列表 -->
+<script type="text/html" id="skuList">
+    <tr class="js-sku-list-{{d.index}}" id="sku_img_{{d.index}}">
+        <td></td>
+        <td colspan="6">
+            <ul class="sku-list">
+                {{# for(var i=0;i<d.list.length;i++){ }}
+                <li>
+                    <div class="img-wrap">
+                        <img layer-src src="{{ns.img(d.list[i].sku_image,'small')}}">
+                    </div>
+                    <div class="info-wrap">
+                        <span class="sku-name">{{d.list[i].sku_name}}</span>
+                        <span class="price">价格：￥{{d.list[i].price}}</span>
+                        <span class="stock">库存：{{d.list[i].stock}}</span>
+                        <span class="sale_num">销量：{{d.list[i].sale_num}}</span>
+                    </div>
+                </li>
+                {{# } }}
+            </ul>
+        </td>
+    </tr>
+</script>
+
+<!-- 商品推广 -->
+<script type="text/html" id="goods_url">
+	{{# if(d.path.h5.status == 1){ }}
+	<img src="{{ ns.img(d.path.h5.img) }}" alt="推广二维码">
+	<p class="qrcode-item-description">扫码后直接访问商品</p>
+	<a class="ns-text-color" href="javascript:ns.copy('h5_url_{{ d.goods_id }}');">复制链接</a>
+    <a class="ns-text-color" href="{{ ns.img(d.path.h5.img) }}" download>下载二维码</a>
+    <input class="layui-input nc-len-mid" type="text" value="{{ d.path.h5.url }}" id="h5_url_{{ d.goods_id }}" readonly>
+	{{# } }}
+</script>
+
+<!-- 商品预览 -->
+<script type="text/html" id="goods_preview">
+    <div class="goods-preview">
+        <div class="qrcode-wrap">
+            <img src="{{ ns.img(d.path.h5.img) }}" alt="推广二维码">
+            <p class="tips ns-text-color">手机扫码购买</p>
+        </div>
+        <div class="phone-wrap">
+            <div class="iframe-wrap">
+                <iframe src="{{ d.path.h5.url }}&preview=1" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+</script>
+{/block}
+
+{block name="script"}
+<script src="CITY_JS/goods_list.js"></script>
+{/block}

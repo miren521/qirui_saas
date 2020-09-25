@@ -1,0 +1,129 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<link rel="stylesheet" type="text/css" href="SHOP_CSS/goods_edit.css" />
+<style>
+    .good-name, .good-price {
+        line-height: 34px;
+    }
+	.ns-align-right {text-align: right;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form">
+    <div class="layui-card ns-card-common">
+        <div class="layui-card-header">
+            <span class="ns-card-title">商品信息</span>
+        </div>
+        <div class="layui-card-body">
+            <div class="layui-form-item goods-image-wrap">
+                <label class="layui-form-label">商品图片：</label>
+                <div class="layui-input-block">
+                    <!--商品主图项-->
+                    <div class="js-goods-image"><img layer-src src="{:img($order_info.sku_image)}" width = "50px"/></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">商品名称：</label>
+                <div class="layui-input-inline good-name">
+                    {$order_info.sku_name}
+                </div>
+            </div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">商品价格：</label>
+				<div class="layui-input-inline good-name">
+					￥{$order_info.price}
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">购买数量：</label>
+				<div class="layui-input-inline good-name">
+					{$order_info.num}
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">实际支付：</label>
+				<div class="layui-input-inline good-name">
+					￥{$order_info.real_goods_money}
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">结算状态：</label>
+				<div class="layui-input-inline good-name">
+					{if $order_info.is_refund == 1}
+						已退款
+					{else /}
+						{if $order_info.is_settlement == 1}
+						已结算
+						{else /}
+						未结算
+						{/if}
+					{/if}
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">结算总佣金：</label>
+				<div class="layui-input-inline good-name">
+					￥{$order_info.commission}
+				</div>
+			</div>
+        </div>
+    </div>
+
+    <div class="layui-card ns-card-common">
+        <div class="layui-card-header">
+		<span class="ns-card-title">返佣详情</span>
+	</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+			<label class="layui-form-label"></label>
+			<div class="layui-input-block">
+				<table class="layui-table" id="default_rule_list" lay-skin="line" lay-size="lg">
+					<colgroup>
+						<col width="25%">
+						<col width="25%">
+						<col width="25%">
+					</colgroup>
+					<thead>
+					<tr>
+						<th>分销商等级</th>
+						<th>分销商</th>
+						<th>返佣金额</th>
+					</tr>
+					</thead>
+					<tbody>
+					<tr>
+						<td>一级分销商</td>
+						<td>{$order_info.one_fenxiao_name}</td>
+						<td>{$order_info.one_commission}</td>
+					</tr>
+					<tr>
+						<td>二级分销商</td>
+						<td>{$order_info.two_fenxiao_name}</td>
+						<td>{$order_info.two_commission}</td>
+					</tr>
+					<tr>
+						<td>三级分销商</td>
+						<td>{$order_info.three_fenxiao_name}</td>
+						<td>{$order_info.three_commission}</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		</div>
+	</div>
+
+	<div class="layui-form ns-form">
+		<div class="ns-form-row">
+			<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+		</div>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+    function back() {
+        location.href = ns.url("fenxiao://admin/order/lists");
+    }
+</script>
+{/block}

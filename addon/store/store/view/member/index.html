@@ -1,0 +1,56 @@
+{extend name="addon/store/store/view/base.html"/}
+{block name="resources"}
+<style>
+    .ns-member-block{display: flex;justify-content: space-between;}
+    .ns-member-block .layui-card{box-shadow: initial;margin-bottom: 0;width: calc((100% - 30px) / 4);margin-right: 9px;height: 180px;box-sizing: border-box;}
+    .ns-member-block .layui-card:last-child{margin-right: 0}
+    .ns-member-num{color: red;font-size: 30px;line-height: 50px;}
+    .ns-member-title{color: #666666;font-size: 16px;}
+    .layui-card-body{width: 100%;height: 100%;box-sizing: border-box;padding-left: 20px;display: flex;justify-content: space-between;align-items: center;}
+    .ns-card-member{align-items: flex-start;}
+    #china_echart{width: 600px;height: 600px;flex-shrink: 0;margin: 0 50px}
+    .ns-member-table{flex: 1;}
+    .layui-table-view .layui-table thead tr{background-color: #F5F5F5;}
+    .ns-split{width: 30px;}
+    .ns-member-block .layui-card{border: 1px solid #f1f1f1}
+    .ns-member-table{max-width: 600px;}
+    @media screen and (max-width: 1330px){.ns-member-block .layui-card:nth-child(4){width: 420px;}
+        #china_echart{width: 500px;height: 500px;}}
+</style>
+{/block}
+
+{block name="main"}
+<div class="ns-member-block">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <div class="ns-member">
+                <p class="ns-member-num">{$data.total_count}</p>
+                <p class="ns-member-title">累计会员数</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <div class="ns-member">
+                <p class="ns-member-num">{$data.newadd_count}</p>
+                <p class="ns-member-title">今日新增会员数</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <div class="ns-member">
+                <p class="ns-member-num">{$data.buyed_count}</p>
+                <p class="ns-member-title">下单会员数</p>
+            </div>
+            <div id="main" style="width: 250px; height: 160px;"></div>
+        </div>
+    </div>
+</div>
+{/block}
+
+{block name="script"}
+
+{/block}

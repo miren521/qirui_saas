@@ -1,0 +1,121 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/release.css">
+{/block}
+{block name="body"}
+<!-- 顶部html文件-->
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-order">
+			<div class="order-menu">
+				<ul class="layui-nav layui-nav-tree" lay-filter="test">
+					<li class="layui-nav-item layui-nav-itemed">
+						<a href="javascript:;">交易中心</a>
+						<dl class="layui-nav-child">
+							<dd><a href="{:addon_url('supply://shop/order/lists')}">我的订单</a></dd>
+                            <dd><a href="{:addon_url('supply://shop/orderrefund/lists')}">退款/售后</a></dd>
+                            <dd class="layui-this"><a href="{:addon_url('supply://shop/purchase/purchase')}">我的求购单</a></dd>
+						</dl>
+					</li>
+				</ul>
+			</div>
+			<div class="purchase-wrap">
+				<div class="order-list-title">求购单详情</div>
+
+				<div class="purchase-detail">
+					<div class="purchase-detail-list">
+						<div class="line-height-25">求购单标题：{$info.title}</div>
+						<div class="line-height-25">求购商品类型：{$info.type == 1 ? '现货商品' : '定制商品'}</div>
+						
+						<div class="goods-list">
+							<table>
+								<tr>
+									<td width="40%">商品</td>
+									<td width="15%">价格</td>
+									<td width="12%">数量</td>
+									<td width="33%">备注</td>
+								</tr>
+							</table>
+						</div>
+					
+						<div class="goods-list">
+							<table>
+								{foreach $info.list as $goods_k => $goods_v}
+								<tr>
+									<td width="40%">
+										<div class="ns-table-title">
+											<div class="contraction" data-goods-id="{$goods_v.purchase_item_id}" data-open="0">
+												<span>+</span>
+											</div>
+											<div class="ns-title-pic">
+												<img layer-src src="{:img($goods_v.goods_image)}" />
+											</div>
+											<div class="ns-title-content">
+												<div class="goods-name">{$goods_v.goods_name}</div>
+											</div>
+										</div>
+									</td>
+									<td width="15%" class="goods-money">￥{$goods_v.price}</td>
+									<td width="12%" class="goods-num">{$goods_v.num}</td>
+									<td width="33%"><p class="ns-multi-line-hiding" title="{$goods_v.remark}">{$goods_v.remark}</p></td>
+								</tr>
+								<tr class="layui-hide">
+									{if $goods_v.goods_images}
+									<td colspan="4">
+										<div class="goods-imgs-list">
+												{php}
+												$imgs = explode(",", $goods_v['goods_images']);
+												{/php}
+												
+												{foreach $imgs as $img_k => $img_v}
+												<div class="goods-img">
+													<img layer-src src="{:img($img_v)}" />
+												</div>
+												{/foreach}
+										</div>
+									</td>
+									{/if}
+								</tr>
+								{/foreach}
+							</table>
+						</div>
+					</div>
+					
+					<div class="purchase-detail-buyer">
+						<div class="line-height-25">求购商姓名：{$info.nickname}</div>
+						<div class="line-height-25">联系电话：{$info.mobile}</div>
+						<div class="line-height-25">电子邮箱：{$info.email}</div>
+						<div class="line-height-25">求购截止日期：{:time_to_date($info.end_time)}</div>
+						<div class="line-height-25">是否需要发票：{$info.is_invoice == 1 ? "不需要发票" : $info.is_invoice == 2 ? "普通发票" : "增值税专用发票"}</div>
+						<div class="line-height-25">收货地址：{$info.full_address} {$info.address}</div>
+						<div class="line-height-25">说明：{$info.remark}</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script>
+	$(function() {
+		$("body").on("click", ".contraction", function() {
+			var goods_id = $(this).attr("data-goods-id");
+			var open = $(this).attr("data-open");
+			var tr = $(this).parents("tr");
+	
+			if (open == 1) {
+				$(this).children("span").text("+");
+				$(tr).next().addClass("layui-hide");
+			} else {
+				$(this).children("span").text("-");
+				$(tr).next().removeClass("layui-hide");
+			}
+			$(this).attr("data-open", (open == 0 ? 1 : 0));
+		});
+	});
+</script>
+{/block}

@@ -1,0 +1,397 @@
+@import './common.scss';
+
+.ns-supply-list {
+	background-color: #FFFFFF;
+}
+
+// 面包屑
+.ns-supply-crumb {
+	padding-left: 20px;
+	padding-bottom: 20px;
+	display: flex;
+	align-items: center;
+	color: #969799;
+	
+	>span {
+		cursor: pointer;
+		
+		&:hover {
+			color: $base-color;
+		}
+	}
+	
+	>i {
+		font-size: 12px;
+		margin: 0 10px;
+	}
+	
+	.ns-cate-list {
+		position: relative;
+	}
+	
+	.ns-cate-current {
+		-webkit-box-shadow: 0 0 0 1px #dcdee0;
+		-moz-box-shadow: 0 0 0 1px #dcdee0;
+		box-shadow: 0 0 0 1px #dcdee0;
+		padding: 2px 5px;
+		cursor: pointer;
+		z-index: 9;
+		
+		.iconiconangledown-copy {
+			display: none;
+		}
+		
+		.iconiconangledown {
+			display: inline-block;
+		}
+	}
+	
+	.ns-cate-li {
+		display: none;
+		width: 400px;
+		padding: 15px;
+		font-size: 12px;
+		background-color: #FFFFFF;
+		position: absolute;
+		top: 22px;
+		left: 0;
+		z-index: 9;
+		
+		span {
+			margin-right: 10px;
+			cursor: pointer;
+			line-height: 24px;
+			
+			&:hover {
+				color: $base-color;
+			}
+		}
+	}
+	
+	.ns-cate-list:hover {
+		.ns-cate-current {
+			-webkit-box-shadow: 2px 0 2px rgba(125,126,128,.16), -2px -2px 2px rgba(125,126,128,.16);
+			-moz-box-shadow: 2px 0 2px rgba(125,126,128,.16), -2px -2px 2px rgba(125,126,128,.16);
+			box-shadow: 2px 0 2px rgba(125,126,128,.16), -2px -2px 2px rgba(125,126,128,.16);
+		}
+		
+		.ns-cate-current:before {
+			content: "";
+			position: absolute;
+			display: block;
+			bottom: -2px;
+			left: 0;
+			width: 100%;
+			height: 6px;
+			background: #fff;
+			z-index: 999;
+		}
+		
+		.ns-cate-li {
+			display: block;
+			-webkit-box-shadow: 0 0 2px 2px rgba(125,126,128,.16);
+			-moz-box-shadow: 0 0 2px 2px rgba(125,126,128,.16);
+			box-shadow: 0 0 2px 2px rgba(125,126,128,.16);
+		}
+		
+		.iconiconangledown-copy {
+			display: inline-block;
+		}
+		
+		.iconiconangledown {
+			display: none;
+		}
+	}
+	
+}
+
+// 筛选条件
+.ns-supply-goods-term {
+	padding: 0 10px 20px;
+}
+
+.ns-goods-term-list {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	box-sizing: border-box;
+	height: 36px;
+	line-height: 34px;
+	
+	li {
+		flex-shrink: 0;
+		width: 90px;
+		height: 100%;
+		text-align: center;
+		border: 1px solid #dcdee0;
+		border-right: none;
+		font-size: 12px;
+		color: #646566;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+
+		div {
+			display: inline-block;
+			margin-left: 5px;
+
+			span {
+				display: block;
+				height: 7px;
+				line-height: 7px;
+			}
+
+			i {
+				font-size: 12px;
+			}
+			
+			.i-color {
+				color: #646566;
+			}
+		}
+	}
+	
+	>div {
+		border: 1px solid #dcdee0;
+		height: 34px;
+		flex: 1;
+	}
+	
+	li.ns-text-color {
+		border: 1px solid $base-color;
+	}
+	
+	li.ns-text-color + li {
+		border-left: none;
+	}
+}
+
+.ns-goods-term-form {
+	border: 1px solid #dcdee0;
+	border-top: none;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	font-size: 12px;
+	background-color: #f7f8fa;
+	
+	.layui-inline {
+		height: 40px;
+		padding: 0 15px;
+		border-right: 1px solid #dcdee0;
+		display: flex;
+		align-items: center;
+	}
+	
+	.layui-form-label {
+		width: auto;
+		font-size: 12px;
+	}
+	
+	.layui-input-inline {
+		width: 65px;
+		height: 24px;
+		position: relative;
+
+		span {
+			display: inline-block;
+			width: 30px;
+			height: 22px;
+			text-align: center;
+			line-height: 22px;
+			background-color: #f7f8fa;
+			border-right: 1px solid #E6E6E6;
+			position: absolute;
+			left: 1px;
+			top: 1px;
+		}
+		
+		.layui-input {
+			height: 24px;
+			line-height: 24px;
+			padding-left: 35px;
+		}
+	}
+	
+	.layui-form-mid {
+		margin: 0 5px;
+	}
+	
+	.layui-btn {
+		width: 56px;
+		height: 24px;
+		line-height: 24px;
+		font-size: 12px;
+		text-align: center;
+		padding: 0;
+		color: $base-color;
+		border-color: $base-color;
+		margin-left: 8px;
+	}
+	
+	.ns-goods-profit-rate {
+		.layui-input-inline {
+			span {
+				left: unset;
+				right: 1px;
+				border-left: 1px solid #E5E5E5;
+				border-right: 0;
+			}
+		}
+		
+		.layui-input {
+			padding-left: 5px;
+		}
+	}
+	
+	.ns-goods-service {
+		padding-left: 15px;
+	}
+}
+
+// 商品列表
+.ns-goods-list {
+	width: 100%;
+	padding: 0 10px;
+	box-sizing: border-box;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.ns-goods-li {
+	width: 170px;
+	overflow: hidden;
+	margin-right: 32.5px;
+	margin-bottom: 30px;
+	
+	&:nth-child(5n) {
+		margin-right: 0;
+	}
+	
+	.ns-goods-img {
+		width: 100%;
+		height: 170px;
+		box-sizing: border-box;
+		overflow: hidden;
+		position: relative;
+		
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			transition: all 1s ease-out;
+		}
+		
+		.ns-goods-sale {
+			font-size: 12px;
+			position: absolute;
+			bottom: 0;
+			padding-left: 10px;
+			width: 100%;
+			height: 30px;
+			line-height: 30px;
+			background-color: rgba(0,0,0,.6);
+			color: #c8c9cc;
+			box-sizing: border-box;
+			
+			.sale-label {
+				opacity: .66;
+			}
+			
+			.sale-num {
+				display: inline-block;
+				margin-left: 10px;
+				color: #fff;
+			}
+		}
+		
+		.hover-content {
+			display: none;
+			font-size: 12px;
+		    position: absolute;
+		    bottom: 0;
+		    width: 100%;
+		    height: 30px;
+		    line-height: 30px;
+		    text-align: center;
+		    background-color: $base-color;
+		    color: #fff;
+		    font-weight: bolder;
+		}
+	}
+	
+	.ns-goods-img:hover {
+		border: 2px solid $base-color;
+		
+		img {
+			transform: scale(1.2);
+		}
+		
+		.hover-content {
+			display: block;
+		}
+	}
+	
+	.ns-goods-name {
+		font-size: 12px;
+		color: #323233;
+		margin: 5px 0;
+		height: 42px;
+		
+		&:hover {
+			color: $base-color;
+		}
+	}
+	
+	.ns-goods-info {
+		position: relative;
+		
+		p {
+			font-size: 12px;
+			
+			span:first-child {
+				color: #969799;
+				display: inline-block;
+			}
+		}
+		
+		.ns-goods-profit {
+			font-size: 15px;
+		}
+		
+		p:nth-child(2) {
+			margin-top: 5px;
+		}
+		
+		p:nth-child(3) {
+			position: absolute;
+			right: 0;
+			bottom: 0;
+			cursor: pointer;
+		}
+	}
+}
+
+#list_page {
+	text-align: right;
+	padding: 0 10px;
+}
+
+.empty-null {
+	display: block;
+	width: 100%;
+	text-align: center;
+	padding: 100px 0;
+	color: #646566;
+	
+	p {
+		margin-bottom: 20px;
+	}
+	
+	i {
+		font-size: 62px;
+		color: #999999;
+	}
+}

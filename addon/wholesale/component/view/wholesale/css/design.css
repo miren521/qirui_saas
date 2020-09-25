@@ -1,0 +1,14 @@
+@CHARSET "UTF-8";
+.component-wholesale .wholesale-head {width: 100%;display: -webkit-box;display: -webkit-flex;display: flex;-webkit-box-pack: justify;-webkit-justify-content: space-between;justify-content: space-between;-webkit-box-align: center;-webkit-align-items: center;align-items: center;margin-bottom: 10px;}
+.component-wholesale .wholesale-head .title-wrap {display: -webkit-box;display: -webkit-flex;display: flex;-webkit-box-align: center;-webkit-align-items: center;align-items: center;}
+.component-wholesale .wholesale-head .title-wrap .name {font-weight: bold;margin-right: 8px;}
+.component-wholesale .wholesale-head .more {font-size: 12px;}
+.component-wholesale .list-wrap .item {background: #ffffff;overflow: hidden;}
+.component-wholesale .list-wrap .item .img-wrap {height: 80px;width: 80px;float: left;}
+.component-wholesale .list-wrap .item .img-wrap img {width: 80px;height: 80px;padding: 0;margin: 0;}
+.component-wholesale .list-wrap .item .info-wrap{margin-left: 90px;display: flex;flex-direction: column;justify-content: space-between;height: 80px;}
+.component-wholesale .list-wrap .item .info-wrap h4{margin-bottom: 10px;}
+.component-wholesale .list-wrap .item .info-wrap .price-wrap {display: flex;flex-direction: column;width: 50%;}
+.component-wholesale .list-wrap .item .info-wrap .price-wrap .old-price {font-size: 12px;color: #898989;text-decoration: line-through;margin-right: 5px;}
+.component-wholesale .list-wrap .item .info-wrap .price-wrap .new-price {font-size: 14px;}
+.component-wholesale .list-wrap .item button{padding: 6px 12px;height: initial;float: right;margin-top: 10px;line-height: 30px;}

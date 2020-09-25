@@ -1,0 +1,121 @@
+.layui-form-search {
+	width: 100%;
+	background-color: #F8F8F8;
+	padding: 15px;
+	border: 1px solid #e6e6e6;
+	border-radius: 5px;
+	box-sizing: border-box;
+	margin-bottom: 12px;
+}
+
+.search-form {
+	display: none;
+}
+
+.layui-form-search .layui-btn-container {
+	padding-left: 155px;
+}
+
+.layui-form-search .layui-form-item {
+	margin-bottom: 25px;
+}
+
+.required {
+	margin-right: 3px;
+}
+
+.layui-form-item>p {
+	line-height: 34px;
+	color: #999;
+}
+
+.layui-form-radio>i:hover, .layui-form-radioed>i {
+    color: #12b7f5;
+}
+
+
+.layui-layer-content {
+	height: auto!important;
+}
+
+
+.layui-form-checkbox[lay-skin=primary]:hover i {
+    border-color: #12b7f5;
+}
+
+.layui-input-inline.ns-split {
+	line-height: 34px;
+}
+
+.layui-table-view .layui-table[lay-size=lg] td .layui-table-cell {
+	line-height: 25px;
+}
+
+#member_label_dl {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+#member_label_dl span {
+	margin-right: 5px;
+}
+
+.ns-table-tuwen-box .ns-img-box{
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	overflow: hidden;
+}
+
+.layui-table-view td:last-child>div{overflow: inherit;}
+
+.layui-table-box{
+	overflow: inherit;
+}
+.layui-table-body{
+	overflow: inherit;
+}
+
+.ns-table-btn{
+	position: relative;
+}
+
+.ns-table-btn .more-operation{
+	display: none;
+	font-size: 14px;
+    line-height: 20px;
+    background-color: #fff;
+    border-radius: 2px;
+    box-shadow: 0 2px 8px 0 rgba(200,201,204,.5);
+    position: absolute;
+    z-index: 2000;
+    border-radius: 2px;
+    padding: 13px 12px;
+    top: 40px;
+    transform: translateX(10px);
+}
+
+.ns-table-btn .more-operation:before{
+    right: 8px;
+    top: -14px;
+    border: solid transparent;
+    content: "";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    border-color: transparent;
+    border-bottom-color: #fff;
+    border-width: 8px;
+}
+
+.ns-table-btn .more-operation .operation{
+	display: block;
+    text-align: right;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+
+.ns-table-btn .more-operation .operation:last-child{
+	margin-bottom: 0
+}

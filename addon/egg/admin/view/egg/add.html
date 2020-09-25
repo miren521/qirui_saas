@@ -1,0 +1,422 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_CSS/game.css">
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>管理员可以在此页添加砸金蛋活动</li>
+		</ul>
+	</div>
+</div>
+
+<div class="layui-form">
+
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">活动设置</span>
+		</div>
+
+		<div class="layui-card-body">
+
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>活动名称：</label>
+				<div class="layui-input-block">
+					<input type="text" name="game_name" lay-verify="required" maxlength="15" placeholder="最多可填写15个字" autocomplete="off" class="layui-input ns-len-long">
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>开始时间：</label>
+				<div class="layui-input-inline">
+					<input type="text" id="start_time" name="start_time" lay-verify="required" class="layui-input ns-len-mid" autocomplete="off" readonly>
+					<i class="ns-calendar"></i>
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>结束时间：</label>
+				<div class="layui-input-inline end-time">
+					<input type="text" id="end_time" name="end_time" lay-verify="required|time" class="layui-input ns-len-mid" autocomplete="off" readonly>
+					<i class="ns-calendar"></i>
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<label class="layui-form-label">活动说明：</label>
+				<div class="layui-input-inline">
+					<textarea name="remark" class="layui-textarea ns-len-long"></textarea>
+				</div>
+			</div>
+
+			<div class="layui-form-item participation-condition">
+				<label class="layui-form-label">参与条件：</label>
+				<div class="layui-input-block">
+					<input type="radio" name="level_id" value="0" lay-filter="participation" title="全部会员" checked>
+					<input type="radio" name="level_id" value="1" lay-filter="participation" title="部分会员">
+				</div>
+				<div class="layui-inline layui-hide">
+					<label class="layui-form-label"></label>
+					<div class="layui-input-block">
+						{foreach $member_level_list as $k =>$v}
+						<input type="checkbox" class="level-id" value="{$v.level_id}" title="{$v.level_name}" lay-skin="primary">
+						{/foreach}
+					</div>
+				</div>
+				<div class="ns-word-aux">选择参与的会员等级，默认为所有会员都可参与</div>
+			</div>
+
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>消耗积分：</label>
+				<div class="layui-input-block">
+					<input type="number" min="0" name="points" lay-verify="required" onchange="detectionNumType(this,'integral')" class="layui-input ns-len-short" autocomplete="off" value="1">
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>参与次数：</label>
+				<div class="layui-input-block">
+					<input type="radio" name="join_type" value="1" lay-verify="required" title="每天N次" checked>
+					<input type="radio" name="join_type" value="0" lay-verify="required" title="一人N次">
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<label class="layui-form-label"></label>
+				<div class="layui-input-block">
+					<input type="number" name="join_frequency" min="0" lay-verify="required" onchange="detectionNumType(this,'positiveInteger')" autocomplete="off" class="layui-input ns-len-short" value="1"> 次
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">中奖设置</span>
+		</div>
+
+		<div class="layui-card-body">
+
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>整体中奖概率：</label>
+				<div class="layui-input-block">
+					<input type="text" name="winning_rate" min="0" max="100" lay-verify="required" onchange="detectionNumType(this,'positiveNumber') " value="1.00" autocomplete="off" class="layui-input ns-len-short"> %
+				</div>
+				<div class="ns-word-aux">
+					<span class="aux-title">注意：</span>
+					<div class="aux-item">若整体中奖概率为100%，需满足以下条件：</div>
+					<div class="aux-item">1、奖品对应的活动不能失效，奖品状态正常。</div>
+					<div class="aux-item">2、保持奖品库存需充足，活动库存充足，当奖项被领取完，此时中奖概率已经非100%。</div>
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<label class="layui-form-label">未中奖提示语：</label>
+				<div class="layui-input-block">
+					<input type="text" name="no_winning_desc" value="很遗憾，未中奖" lay-verify="required" autocomplete="off" class="layui-input ns-len-long">
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<label class="layui-form-label">中奖名单：</label>
+				<div class="layui-input-block">
+					<input type="radio" name="is_show_winner" value="0" lay-verify="required" title="不显示" checked>
+					<input type="radio" name="is_show_winner" value="1" lay-verify="required" title="显示">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">奖品设置</span>
+		</div>
+
+		<div class="layui-card-body">
+
+			<div class="layui-form-item">
+				<label class="layui-form-label">奖品明细：</label>
+				<div class="layui-input-block">
+					<table id="award_list"></table>
+				</div>
+				<div class="ns-word-aux">
+					<span class="aux-title">注意：</span>
+					<div class="aux-item">1、奖项发放完毕之后活动将自动关闭</div>
+					<div class="aux-item">2、奖品奖项不能少于1项。</div>
+				</div>
+				<div class="ns-word-aux">
+					<button class="layui-btn ns-bg-color" onclick="addAward()">添加奖品</button>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<!-- 添加奖品 -->
+{include file="egg/award_select" /}
+<script>
+	var form,laydate,laytpl,tableData = [],
+		repeat_flag = false,
+		awardId = 0,
+		currentDate = new Date(),
+		minDate = "";
+
+    layui.use(['form', 'laydate', 'laytpl'], function() {
+
+		form = layui.form;
+		laydate = layui.laydate;
+		laytpl = layui.laytpl;
+
+        currentDate.setDate(currentDate.getDate() + 30);
+        form.render();
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time', //指定元素
+            type: 'datetime',
+            value: new Date(),
+            done: function(value) {
+                minDate = value;
+                reRender();
+            }
+        });
+
+        //结束时间
+        laydate.render({
+            elem: '#end_time', //指定元素
+            type: 'datetime',
+            value: new Date(currentDate)
+        });
+		/**
+		 * 重新渲染结束时间
+		 * */
+		function reRender() {
+			$("#end_time").remove();
+			$(".end-time").html('<input type="text" id="end_time" name="end_time" placeholder="请输入结束时间" lay-verify="required|time" class = "layui-input ns-len-mid" autocomplete="off"> ');
+			laydate.render({
+				elem: '#end_time',
+				type: 'datetime',
+				min: minDate
+			});
+		}
+
+		//参与条件
+		form.on('radio(participation)', function(data){
+			if (parseInt(data.value))
+				$('.participation-condition .layui-inline').removeClass('layui-hide');
+			else
+				$('.participation-condition .layui-inline').addClass('layui-hide');
+		});
+
+        /**
+         * 表单验证
+         */
+        form.verify({
+            time: function(value) {
+                var now_time = (new Date()).getTime();
+                var start_time = (new Date($("#start_time").val())).getTime();
+                var end_time = (new Date(value)).getTime();
+                if (now_time > end_time) {
+                    return '结束时间不能小于当前时间!'
+                }
+                if (start_time > end_time) {
+                    return '结束时间不能小于开始时间!';
+                }
+            },
+            flnum: function(value) {
+                var arrMen = value.split(".");
+                var val = 0;
+                if (arrMen.length == 2) {
+                    val = arrMen[1];
+                }
+                if (val.length > 2) {
+                    return '保留小数点后两位！'
+                }
+            },
+            int: function(value) {
+                if (value <= 1 || value % 1 != 0) {
+                    return '请输入大于1的正整数！'
+                }
+            },
+            detectionNum: function(value, item) {
+                var str = $(item).parents(".layui-form-item").find("label").text().split("*").join("");
+                str = str.substring(0, str.length - 1);
+
+                if (value < 0) {
+                    return str + "不能小于0";
+                }
+            },
+        });
+
+        /**
+         * 表单提交
+         */
+        form.on('submit(save)', function(data){
+			if (parseInt(data.field.level_id)){
+				var levelId = [],
+					levelName = [];
+				$('.level-id').each(function(){
+					if($(this).prop('checked')){
+						levelId.push($(this).val());
+						levelName.push($(this).attr("title"));
+					}
+				});
+				data.field.level_id = levelId.toString();
+				data.field.level_name = levelName.toString();
+			}
+
+			if (!tableData.length){
+				layer.msg("奖品奖项不能少于1项。");
+				return false;
+			}
+
+			data.field.award_json = JSON.stringify(tableData);
+
+            if(repeat_flag) return;
+            repeat_flag = true;
+
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("egg://admin/egg/add"),
+                data: data.field,
+                async: false,
+                success: function(res){
+                    repeat_flag = false;
+
+                    if (res.code == 0) {
+                        layer.confirm('添加成功', {
+                            title:'操作提示',
+                            btn: ['返回列表', '继续添加'],
+                            yes: function(){
+                                location.href = ns.url("egg://admin/egg/lists");
+                            },
+                            btn2: function() {
+                                location.href = ns.url("egg://admin/egg/add");
+                            }
+                        });
+                    }else{
+                        layer.msg(res.message);
+                    }
+                }
+            })
+        });
+    });
+
+    /*
+    * 渲染表格
+    * */
+	renderTable();
+    function renderTable(data = []){
+    	var table = new Table({
+			elem: "#award_list",
+			cols: [
+				[{
+					field: 'award_name',
+					title: '名称',
+					width: '30%',
+					unresize: 'false'
+				},{
+					field: 'award_type',
+					title: '奖品',
+					unresize: 'false',
+					width: '20%',
+					templet: function(data) {
+						var type = data.award_type == 1 ? '积分' : data.award_type == 2 ? '红包' : '优惠券';
+						return type;
+					}
+				}, {
+					field: 'award_num',
+					title: '奖品数量',
+					unresize: 'false',
+					width: '15%',
+				}, {
+					field: 'award_winning_rate',
+					title: '奖项权重',
+					unresize: 'false',
+					width: '15%'
+				},{
+					title: '操作',
+					toolbar: '#action',
+					width: '20%',
+					align: 'right',
+					unresize: 'false'
+				}]
+			],
+			data: data
+		});
+	}
+
+	//添加奖品
+	function addAward(){
+		awardPop();
+	}
+
+	//编辑奖品
+	function ediAward(el) {
+		var data = $(el).attr("data-value");
+		awardPop(JSON.parse(data));
+	}
+
+	//删除奖品
+	function delAward(data) {
+		for (var i = 0; i < tableData.length; i++){
+			if (tableData[i].ident == data){
+				tableData.splice(i,1);
+				renderTable(tableData);
+			}
+		}
+	}
+
+
+
+    function back() {
+        location.href = ns.url("egg://admin/egg/lists");
+    }
+
+
+
+	function detectionNumType(el,type){
+		var value = $(el).val();
+
+
+		//大于零 且 不是小数
+		if (value < 0 && type == 'integral')
+			$(el).val(0);
+		else if(type == 'integral')
+			$(el).val(Math.round(value));
+
+		//大于1 且 不是小数
+		if (value < 1 && type == 'positiveInteger')
+			$(el).val(1);
+		else if (type == 'positiveInteger')
+			$(el).val(Math.round(value));
+
+		//大于零可以是小数
+		if (type == 'positiveNumber'){
+			value = parseFloat(value);
+			if (value < 0)
+				$(el).val(0);
+			else
+				$(el).val(value);
+		}
+	}
+
+</script>
+
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" data-value='{{JSON.stringify(d)}}' onclick="ediAward(this)">编辑</a>
+		<a class="layui-btn" onclick="delAward('{{d.ident}}')">删除</a>
+	</div>
+</script>
+{/block}

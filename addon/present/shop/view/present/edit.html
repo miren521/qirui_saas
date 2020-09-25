@@ -1,0 +1,174 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>管理员可以在此页添加赠品活动</li>
+		</ul>
+	</div>
+</div>
+
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable ns-short-label"><span class="required">*</span>选择商品：</label>
+		<div class="layui-input-inline">
+			<div class="upload-img-block square">
+				<div class="upload-img-box">
+					<img src="{:img($present_info.data.sku_image)}" />
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">商品名称：</label>
+		<div class="layui-input-inline good-name">{$present_info.data.sku_name}</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">商品原价：</label>
+		<div class="layui-input-inline good-price">
+			￥<span>{$present_info.data.sku_price}</span>
+		</div>
+	</div>
+	
+
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>开始时间：</label>
+		<div class="layui-input-block ns-len-mid">
+			<input type="text" id="start_time" name="start_time" lay-verify="required" class="layui-input ns-len-mid" autocomplete="off">
+			<i class="ns-calendar"></i>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>结束时间：</label>
+		<div class="layui-input-block end-time ns-len-mid">
+			<input type="text" id="end_time" name="end_time" lay-verify="required|time" class="layui-input ns-len-mid" autocomplete="off">
+			<i class="ns-calendar"></i>
+		</div>
+		<div class="ns-word-aux">
+			<p>结束时间不能小于开始时间，也不能小于当前时间</p>
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+	
+	<input type="hidden" name="goods_id" value="{$present_info.data.goods_id}" />
+	<input type="hidden" name="sku_id" value="{$present_info.data.sku_id}" />
+	<input type="hidden" name="present_id" value="{$present_info.data.present_id}" />
+	<input type="hidden" class="start-time-hide" value="{$present_info.data.start_time}" />
+	<input type="hidden" class="end-time-hide" value="{$present_info.data.end_time}" />
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'laydate'], function() {
+		var form = layui.form,
+			laydate = layui.laydate,
+			repeat_flag = false,
+			minDate = "";
+		form.render();
+
+		//开始时间
+		laydate.render({
+			elem: '#start_time', //指定元素
+			type: 'datetime',
+			value: ns.time_to_date($(".start-time-hide").val()),
+			done: function(value) {
+				minDate = value;
+				reRender();
+			}
+		});
+		
+		//结束时间
+		laydate.render({
+			elem: '#end_time', //指定元素
+			type: 'datetime',
+			value: ns.time_to_date($(".end-time-hide").val())
+		});
+		
+		/**
+		 * 重新渲染结束时间
+		 * */
+		function reRender() {
+			$("#end_time").remove();
+			$(".end-time").html('<input type="text" id="end_time" name="end_time" placeholder="请输入结束时间" lay-verify="required|time" class = "layui-input ns-len-mid" autocomplete="off"> ');
+			laydate.render({
+				elem: '#end_time',
+				type: 'datetime',
+				min: minDate
+			});
+		}
+		
+		/**
+		 * 表单验证
+		 */
+		form.verify({
+			time: function(value) {
+				var now_time = (new Date()).getTime();
+				var start_time = (new Date($("#start_time").val())).getTime();
+				var end_time = (new Date(value)).getTime();
+				if (now_time > end_time) {
+					return '结束时间不能小于当前时间!'
+				}
+				if (start_time > end_time) {
+					return '结束时间不能小于开始时间!';
+				}
+			}
+		});
+		
+		/**
+		 * 表单提交
+		 */
+		form.on('submit(save)', function(data){
+			var field = data.field;
+			if (field.goods_id <=  0 || field.sku_id <=  0 ) {
+				layer.msg('请选择参与活动的商品！', {icon: 5, anim: 6});
+				return;
+			}
+
+			if(repeat_flag) return;
+			repeat_flag = true;
+			
+			$.ajax({
+				type: 'POST',
+				dataType: 'JSON',
+				url: ns.url("present://shop/present/edit"),
+				data: data.field,
+				async: false,
+				success: function(res){
+					repeat_flag = false;
+					
+					if (res.code == 0) {
+						layer.confirm('编辑成功', {
+							title:'操作提示',
+							btn: ['返回列表', '继续操作'],
+							yes: function(){
+								location.href = ns.url("present://shop/present/lists");
+							},
+							btn2: function() {
+								location.reload();
+							}
+						});
+					}else{
+						layer.msg(res.message);
+					}
+				}
+			})
+		});
+	});
+
+	function back() {
+		location.href = ns.url("present://shop/present/lists");
+	}
+
+</script>
+{/block}

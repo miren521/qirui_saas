@@ -1,0 +1,94 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-form">
+
+
+    <!-- 提现配置 -->
+    <div class="layui-card ns-card-common ns-card-brief">
+        <div class="layui-card-header">
+            <span class="ns-card-title">提现设置</span>
+        </div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <label class="layui-form-label">最低提现金额：</label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline">
+                        <input type="number" name="min_withdraw" lay-verify="required|flo"
+                               value="{$config.min_withdraw ?? ''}" autocomplete="off" class="layui-input ns-len-small">
+                    </div>
+                    <div class="layui-form-mid">元</div>
+                </div>
+                <div class="ns-word-aux">最低提现金额，对手动申请提现有效</div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">最高提现金额：</label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline">
+                        <input type="number" name="max_withdraw" lay-verify="required|flo|check_num"
+                               value="{$config.max_withdraw ?? ''}" autocomplete="off" class="layui-input ns-len-small">
+                    </div>
+                    <div class="layui-form-mid">元</div>
+                </div>
+                <div class="ns-word-aux">最高提现金额，对手动申请提现有效</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ns-single-filter-box">
+        <div class="ns-form-row">
+            <button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="script"}
+<script>
+    layui.use(['form'], function () {
+        var form = layui.form,
+            repeat_flag = false; //防重复标识
+        form.render();
+        form.verify({
+            flo: function (value) {
+                if (value == '') {
+                    return;
+                }
+                var reg = /^(0|[1-9]\d*)(\s|$|\.\d{1,2}\b)/;
+                if (!reg.test(value)) {
+                    return '价格不能小于0，可保留两位小数！'
+                }
+            },
+            rate: function (value) {
+                if (value > 100 || value < 0 || value % 1 != 0) {
+                    return '请填写0-100的整数';
+                }
+            },
+            check_num: function (value) {
+                if (parseFloat($("input[name='min_withdraw']").val()) > parseFloat(value)) {
+                    return '最小提现金额不能大于最大提现金额！';
+                }
+            }
+        });
+
+        form.on('submit(save)', function (data) {
+            if (repeat_flag) return;
+            repeat_flag = true;
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("supply://admin/withdraw/config"),
+                data: data.field,
+                success: function (res) {
+                    layer.msg(res.message);
+                    repeat_flag = false;
+                    if (res.code == 0) {
+                        location.reload();
+                    }
+                }
+            });
+        });
+    });
+</script>
+{/block}

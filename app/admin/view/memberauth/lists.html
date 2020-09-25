@@ -1,0 +1,195 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	.ns-single-filter-box .layui-form .layui-input{width: 250px !important;}
+</style>
+{/block}
+{block name="main"}
+
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>点击审核按钮可以对会员实名认证申请进行审核</li>
+		</ul>
+	</div>
+</div>
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<input type="text" id="search_text" name="search_text" placeholder="请输入会员登录名/真实姓名" autocomplete="off" class="layui-input">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+			  <i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- 实名认证列表 -->
+<table id="member_auth" lay-filter="member_auth" ></table>
+
+<!-- 申请状态 -->
+<script type="text/html" id="status_name">
+	{{#  if(d.status == -1){ }}
+	<span style="color: gray">审核失败</span>
+	{{#  } }} 
+	{{#  if(d.status == 0){ }}
+	<span style="color: red">待审核</span>
+	{{#  } }} 
+	{{#  if(d.status == 1){ }}
+	<span style="color: green">审核通过</span>
+	{{#  } }} 
+</script>
+
+<script type="text/html" id="label_id">
+	{{#  layui.each(res.data, function(index, item){ }}
+	<input type="checkbox" name="label_id" value="{{item.label_id}}"  />
+	{{#  }); }}
+</script>
+
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		{{#  if(d.status == 0 ){ }}
+			<a class="layui-btn" lay-event="pass">审核</a>
+			<a class="layui-btn" lay-event="refuse">拒绝</a>
+		{{#  } }}
+		<a class="layui-btn" lay-event="detail">查看</a>
+	</div>
+</script>
+
+{/block}
+{block name="script"}
+<script>
+	var form, table;
+	layui.use(['form'], function() {
+		form = layui.form;
+
+		/**
+		 * 加载表格
+		 */
+		table = new Table({
+			elem: '#member_auth',
+			url: ns.url("admin/memberauth/lists"),
+			cols: [
+				[   
+					{
+						field: 'member_id',
+						title: '会员ID',
+						width: '10%',
+						unresize:'false'
+					},  {
+						field: 'member_username',
+						title: '会员名',
+						width: '15%',
+						unresize:'false'
+					},  {
+						field: 'auth_card_name',
+						title: '姓名',
+						width: '15%',
+						unresize:'false'
+					},  {
+						width:'10%',
+						field: 'status',
+						title: '申请状态',
+						unresize: 'false',
+						templet: '#status_name',
+					}, {
+						unresize:'false',
+						field: 'create_time',
+						title: '申请时间',
+						width: '15%',
+						templet: function (data) {
+							return ns.time_to_date(data.create_time); //创建时间转换方法
+						}
+					}, {
+						unresize:'false',
+						field: 'audit_time',
+						title: '通过时间',
+						width: '15%',
+						templet: function (data) {
+							return ns.time_to_date(data.audit_time); //创建时间转换方法
+						}
+					}, {
+						unresize:'false',
+						title: '操作',
+						width: '20%',
+						toolbar: '#action',
+						align: 'left'
+					}
+				]
+			]
+		});
+		
+		/**
+		* 监听工具栏操作
+		*/
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'pass': //通过审核
+					layer.confirm('确定要通过审核吗?', function() {
+					$.ajax({
+							url: ns.url("admin/memberauth/pass"),
+							data: {
+								"auth_id":data.auth_id,
+							},
+							dataType: 'JSON', //服务器返回json格式数据
+							type: 'POST', //HTTP请求类型
+							success: function(res) {
+								layer.msg(res.message);
+								if (res.code == 0) {
+									table.reload();
+								}
+							}
+						});
+					});
+					break;
+				case 'refuse':  //拒绝
+				/**
+				 * 拒绝理由弹窗
+				 */
+				layer.confirm('确定要拒绝吗?', function() {
+					layer.prompt({
+					    formType: 2,
+					    value: '',
+					    title: '请输入拒绝理由',
+					    area: ['150px', '50px'] //自定义文本域宽高
+					}, function(reason, index, elem){
+					 	$.ajax({
+					 		url: ns.url("admin/memberauth/reject"),
+					 		data: {
+					 			"auth_id":data.auth_id,
+					 			"reason":reason
+					 		},
+					 		dataType: 'JSON', //服务器返回json格式数据
+					 		type: 'POST', //HTTP请求类型
+					 		success: function(res) {
+					 			layer.msg(res.message);
+					 			if (res.code == 0) {
+					 				table.reload();
+					 			}
+					 		}
+					 	});
+					    layer.close(index);
+					});
+				});
+				break;
+				case 'detail': //查看
+				location.href = ns.url("admin/memberauth/detail?auth_id=" +data.auth_id)
+					break;
+			}
+		});
+
+		// 搜索
+		form.on('submit(search)', function(data){
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+	});
+</script>
+{/block}

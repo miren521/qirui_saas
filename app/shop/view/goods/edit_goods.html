@@ -1,0 +1,728 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="__STATIC__/ext/video/video.css">
+<link rel="stylesheet" type="text/css" href="__STATIC__/ext/searchable_select/searchable_select.css" />
+<link rel="stylesheet" type="text/css" href="SHOP_CSS/goods_edit.css" />
+<style>
+	.js-attr-list {max-width: 1000px !important;}
+	.edui-default .edui-toolbar .edui-for-simpleupload {display: none !important;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form">
+	<div class="ns-tab layui-tab layui-tab-brief" lay-filter="goods_tab">
+		<ul class="layui-tab-title">
+			<li class="layu1i-this" lay-id="basic">基础设置</li>
+			<li lay-id="media">媒体设置</li>
+			<li lay-id="attr">属性设置</li>
+			<li lay-id="detail">商品详情</li>
+		</ul>
+		<div class="layui-tab-content">
+			<!-- 基础设置 -->
+			<div class="layui-tab-item layui-show">
+				<!-- 基础信息 -->
+				<div class="layui-card ns-card-common">
+					<div class="layui-card-header">
+						<span class="ns-card-title">基础信息</span>
+					</div>
+					
+					<div class="layui-card-body">
+						<div class="layui-form-item">
+							<label class="layui-form-label"><span class="required">*</span>商品名称：</label>
+							<div class="layui-input-inline">
+								<input name="goods_name" type="text" value="{$goods_info['goods_name']}" placeholder="请输入商品名称，不能超过60个字符" maxlength="60" autocomplete="off" lay-verify="goods_name" class="layui-input ns-len-long">
+							</div>
+						</div>
+						
+						<div class="layui-form-item">
+							<label class="layui-form-label"><span class="required">*</span>商品分类：</label>
+							<div class="layui-input-inline">
+								<input type="text" readonly onfocus="selectedCategoryPopup()" name="category_name" value="{$goods_info['category_name']}" lay-verify="required" autocomplete="off" class="layui-input ns-len-mid" />
+								<input type="hidden" name="category_id" value="{$goods_info['category_id']}" />
+								<input type="hidden" name="category_id_1" value="{$goods_info['category_id_1']}" />
+								<input type="hidden" name="category_id_2" value="{$goods_info['category_id_2']}" />
+								<input type="hidden" name="category_id_3" value="{$goods_info['category_id_3']}" />
+								<input type="hidden" name="commission_rate" value="{$goods_info['commission_rate']}" />
+							</div>
+							<button class="layui-btn layui-btn-primary" onclick="selectedCategoryPopup()">选择</button>
+						</div>
+						
+						<div class="layui-form-item">
+							<label class="layui-form-label">促销语：</label>
+							<div class="layui-input-inline">
+								<input type="text" name="introduction" maxlength="100" value="{$goods_info['introduction']}" lay-verify="introduction" placeholder="请输入促销语，不能超过100个字符" autocomplete="off" class="layui-input ns-len-long">
+							</div>
+						</div>
+						
+						<div class="layui-form-item">
+							<label class="layui-form-label">关键词：</label>
+							<div class="layui-input-block">
+								<input type="text" name="keywords" value="{$goods_info['keywords']}" placeholder="商品关键词用于SEO搜索" autocomplete="off" class="layui-input ns-len-long">
+							</div>
+						</div>
+						
+						<div class="layui-form-item">
+							<label class="layui-form-label">单位：</label>
+							<div class="layui-input-block">
+								<input type="text" name="unit" value="{$goods_info['unit']}" placeholder="请输入单位" autocomplete="off" class="layui-input ns-len-long">
+							</div>
+						</div>
+						
+						<div class="layui-form-item">
+							<label class="layui-form-label">商品品牌：</label>
+							<div class="layui-input-inline ns-len-mid">
+								<select name="brand_id" lay-search="" lay-filter="brand_id">
+									<option value="">请选择商品品牌</option>
+									{foreach name="$brand_list" item="vo"}
+									<option value="{$vo['brand_id']}" {if $goods_info['brand_id'] == $vo['brand_id'] }selected{/if}>{$vo['brand_name']}</option>
+									{/foreach}
+								</select>
+								<input type="hidden" name="brand_name" value="{$goods_info['brand_name']}" />
+							</div>
+						</div>
+						
+						<div class="layui-form-item js-goods-shop-category">
+							<label class="layui-form-label">店内分类：</label>
+							<div class="layui-input-inline"></div>
+							<input type="hidden" name="goods_shop_category_ids" value="{$goods_info['goods_shop_category_ids']}" />
+							<button class="layui-btn layui-btn-primary">添加</button>
+						</div>
+						
+						{if $is_install_supply}
+						<div class="layui-form-item js-supplier">
+							<label class="layui-form-label">供应商：</label>
+							<div class="layui-input-inline">
+								<select name="supplier">
+									<option value="">请选择供应商</option>
+									{foreach name="$supplier_list" item="vo"}
+									<option value="{$vo['supplier_id']}" {if $goods_info['supplier_id'] ==$vo['supplier_id'] }selected{/if}>{$vo['title']}</option>
+									{/foreach}
+								</select>
+								<input type="hidden" name="supplier_id" value="{$goods_info['supplier_id']}" />
+							</div>
+						</div>
+						{/if}
+					</div>
+				</div>
+				
+				<!-- 价格库存 -->
+				<div class="layui-card ns-card-common">
+					<div class="layui-card-header">
+						<span class="ns-card-title">价格库存</span>
+					</div>
+					
+					<div class="layui-card-body">
+						<div class="layui-form-item">
+							<label class="layui-form-label">启用多规格：</label>
+							<div class="layui-input-inline">
+								<input type="checkbox" value="1" lay-skin="switch" name="spec_type" disabled lay-filter="spec_type" lay-verify="spec_type" {notempty name="$goods_info['goods_spec_format']" }checked{/notempty}>
+							</div>
+						</div>
+						
+						<!-- 单规格 -->
+						<div class="js-single-spec" {notempty name="$goods_info['goods_spec_format']" }style="display:none;"{/notempty}>
+							
+							<div class="layui-form-item">
+								<label class="layui-form-label"><span class="required">*</span>销售价：</label>
+								<div class="layui-input-inline">
+									<input type="text" name="price" value="{$goods_info['price']}" placeholder="0.00" lay-verify="price" class="layui-input ns-len-short" autocomplete="off">
+								</div>
+								<div class="layui-form-mid layui-word-aux">元</div>
+							</div>
+							
+							<div class="layui-form-item">
+								<label class="layui-form-label">市场价：</label>
+								<div class="layui-input-inline">
+									<input type="text" name="market_price" value="{$goods_info['market_price']}" placeholder="0.00" lay-verify="market_price" class="layui-input ns-len-short" autocomplete="off">
+								</div>
+								<div class="layui-form-mid layui-word-aux">元</div>
+							</div>
+							
+							<div class="layui-form-item">
+								<label class="layui-form-label">成本价：</label>
+								<div class="layui-input-inline">
+									<input type="text" name="cost_price" value="{$goods_info['cost_price']}" placeholder="0.00" class="layui-input ns-len-short" lay-verify="cost_price" autocomplete="off">
+								</div>
+								<div class="layui-form-mid layui-word-aux">元</div>
+							</div>
+							
+							<div class="layui-form-item">
+								<label class="layui-form-label">重量：</label>
+								<div class="layui-input-inline">
+									<input type="text" name="weight" value="{$goods_info['sku_list'][0]['weight']}" placeholder="0.00" class="layui-input ns-len-short" lay-verify="weight" autocomplete="off">
+								</div>
+								<div class="layui-form-mid layui-word-aux">kg</div>
+							</div>
+							
+							<div class="layui-form-item">
+								<label class="layui-form-label">体积：</label>
+								<div class="layui-input-inline">
+									<input type="text" name="volume" value="{$goods_info['sku_list'][0]['volume']}" placeholder="0.00" class="layui-input ns-len-short" lay-verify="volume" autocomplete="off">
+								</div>
+								<div class="layui-form-mid layui-word-aux">m3</div>
+							</div>
+							
+							<div class="layui-form-item">
+								<label class="layui-form-label">商品编码：</label>
+								<div class="layui-input-inline">
+									<input type="text" name="sku_no" value="{$goods_info['sku_list'][0]['sku_no']}" placeholder="请输入商品编码" maxlength="50" class="layui-input ns-len-long" autocomplete="off">
+								</div>
+							</div>
+						
+						</div>
+						
+						<!-- 多规格 -->
+						<div class="js-more-spec" {notempty name="$goods_info['goods_spec_format']" }style="display:block;"{/notempty}>
+							
+							<!--规格项/规格值-->
+							<div class="spec-edit-list"></div>
+												
+							<!--编辑商品不允许添加规格项-->
+							<!--<div class="layui-form-item js-add-spec">-->
+								<!---->
+								<!--<label class="layui-form-label"></label>-->
+								<!---->
+								<!--<div class="layui-input-inline">-->
+									<!--<button class="layui-btn ns-bg-color" type="button">添加规格</button>-->
+								<!--</div>-->
+							<!--</div>-->
+							
+							<div class="layui-form-item batch-operation-sku">
+								<label class="layui-form-label">批量操作：</label>
+								<div class="layui-input-inline">
+									<span class="ns-text-color" data-field="spec_name">副标题</span>
+									<span class="ns-text-color" data-field="price" data-verify="price">销售价</span>
+									<span class="ns-text-color" data-field="market_price" data-verify="market_price">市场价</span>
+									<span class="ns-text-color" data-field="cost_price" data-verify="cost_price">成本价</span>
+									<span class="ns-text-color" data-field="stock" data-verify="stock">库存</span>
+									<span class="ns-text-color" data-field="weight" data-verify="weight">重量(kg)</span>
+									<span class="ns-text-color" data-field="volume" data-verify="volume">体积(m³)</span>
+									<span class="ns-text-color" data-field="sku_no" data-verify="">商品编码</span>
+									<input type="text" class="layui-input ns-len-short" name="batch_operation_sku" autocomplete="off" />
+									<button class="layui-btn ns-bg-color confirm" type="button">确定</button>
+									<button class="layui-btn layui-btn-primary cancel" type="button">取消</button>
+								</div>
+							</div>
+												
+							<!--编辑时用到的SKU列表-->
+							<div class="js-edit-sku-list">
+								{foreach name="$goods_info['sku_list']" item="vo" key="k"}
+								<div data-index="{$k}">
+									<input type="hidden" name="edit_sku_id" value="{$vo['sku_id']}" />
+									<input type="hidden" name="edit_spec_name" value="{$vo['spec_name']}" />
+									<input type="hidden" name="edit_sku_no" value="{$vo['sku_no']}" />
+									<input type="hidden" name="edit_sku_spec_format" value="{$vo['sku_spec_format']}" />
+									<input type="hidden" name="edit_price" value="{$vo['price']}" />
+									<input type="hidden" name="edit_market_price" value="{$vo['market_price']}" />
+									<input type="hidden" name="edit_cost_price" value="{$vo['cost_price']}" />
+									<input type="hidden" name="edit_stock" value="{$vo['stock']}" />
+									<input type="hidden" name="edit_weight" value="{$vo['weight']}" />
+									<input type="hidden" name="edit_volume" value="{$vo['volume']}" />
+									<input type="hidden" name="edit_sku_image" value="{$vo['sku_image']}" />
+									<input type="hidden" name="edit_sku_images" value="{$vo['sku_images']}" />
+								</div>
+								{/foreach}
+							</div>
+												
+							<!--sku列表-->
+							<div class="layui-form-item sku-table">
+								<label class="layui-form-label"></label>
+								<div class="layui-input-block"></div>
+							</div>
+						
+						</div>
+						
+						<div class="layui-form-item">
+							<label class="layui-form-label"><span class="required">*</span>总库存：</label>
+							<div class="layui-input-inline">
+								<input type="number" name="goods_stock" value="{$goods_info['goods_stock']}" placeholder="0" lay-verify="goods_stock" class="layui-input ns-len-short" autocomplete="off" {notempty name="$goods_info['goods_spec_format']" }disabled{/notempty}>
+							</div>
+							<div class="layui-form-mid layui-word-aux">/件</div>
+						</div>
+						
+						<div class="layui-form-item">
+							<label class="layui-form-label"><span class="required">*</span>库存预警：</label>
+							<div class="layui-input-inline">
+								<input type="number" name="goods_stock_alarm" value="{$goods_info['goods_stock_alarm']}" placeholder="0" lay-verify="goods_stock_alarm" class="layui-input ns-len-short" autocomplete="off">
+							</div>
+							<div class="layui-form-mid layui-word-aux">/件 (设置最低库存预警值。当库存低于预警值时商家中心商品列表页库存列红字提醒，0为不预警。)</div>
+						</div>
+						
+						<div class="layui-form-item">
+							<label class="layui-form-label">是否免邮：</label>
+							<div class="layui-input-block">
+								<input type="radio" name="is_free_shipping" value="1" title="是" lay-filter="is_free_shipping" {if $goods_info['is_free_shipping'] == 1 }checked{/if}>
+								<input type="radio" name="is_free_shipping" value="0" title="否" lay-filter="is_free_shipping" {if $goods_info['is_free_shipping'] == 0 }checked{/if}>
+							</div>
+						</div>
+						
+						<div class="layui-form-item js-shipping-template" {if $goods_info['is_free_shipping'] == 0 }style="display:block;"{/if}>
+							<label class="layui-form-label">运费模板：</label>
+							<div class="layui-input-inline ns-len-mid">
+								<select name="shipping_template" lay-search="" lay-verify="shipping_template">
+									<option value="">请选择运费模板</option>
+									{foreach name="$express_template_list" item="vo"}
+									<option value="{$vo['template_id']}" {if $goods_info['shipping_template'] ==$vo['template_id'] }selected{/if}>{$vo['template_name']}</option>
+									{/foreach}
+								</select>
+							</div>
+							<div class="layui-input-inline">
+								<a class="default ns-text-color" href="{:addon_url('shop/express/addtemplate')}" target="_blank">添加运费模板</a>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<!-- 其他信息 -->
+				<div class="layui-card ns-card-common">
+					<div class="layui-card-header">
+						<span class="ns-card-title">其他信息</span>
+					</div>
+
+					<div class="layui-card-body">
+						<div class="layui-form-item">
+							<label class="layui-form-label">限购：</label>
+							<div class="layui-input-inline">
+								<input type="number" name="max_buy" placeholder="" lay-verify="max_buy" value="{$goods_info['max_buy']}" class="layui-input ns-len-short" autocomplete="off">
+							</div>
+							<div class="layui-form-mid layui-word-aux">/件 该限购为终身限购，0为不限购</div>
+						</div>
+
+						<div class="layui-form-item">
+							<label class="layui-form-label">起售：</label>
+							<div class="layui-input-inline">
+								<input type="number" name="min_buy" placeholder="" lay-verify="min_buy" value="{$goods_info['min_buy']}" class="layui-input ns-len-short" autocomplete="off">
+							</div>
+							<div class="layui-form-mid layui-word-aux">/件 起售数量超出商品库存时，买家无法购买该商品</div>
+						</div>
+						<div class="layui-form-item">
+							<label class="layui-form-label">排序：</label>
+							<div class="layui-input-inline">
+								<input type="number" name="sort" value="{$goods_info['sort']}" class="layui-input ns-len-small" placeholder="0" autocomplete="off">
+							</div>
+						</div>
+						
+						<div class="layui-form-item">
+							<label class="layui-form-label"><span class="required">*</span>是否上架：</label>
+							<div class="layui-input-block">
+								<input type="radio" name="goods_state" value="1" title="立刻上架"  {if $goods_info['goods_state'] == 1 }checked{/if}>
+								<input type="radio" name="goods_state" value="0" title="放入仓库" {if $goods_info['goods_state'] == 0 }checked{/if}>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 媒体设置 -->
+			<div class="layui-tab-item">
+				<div class="layui-card ns-card-common js-goods-image-wrap" {notempty name="$goods_info['goods_spec_format']" }style="display:none;"{/notempty}>
+					<div class="layui-card-header">
+						<span class="ns-card-title">基础信息</span>
+					</div>
+					
+					<div class="layui-card-body">
+						<div class="layui-form-item goods-image-wrap">
+							<label class="layui-form-label"><span class="required">*</span>图片上传：</label>
+							<div class="layui-input-block">
+								<!--商品主图项-->
+								<div class="js-goods-image"></div>
+								<button class="layui-btn layui-btn-primary layui-btn-sm js-add-goods-image" type="button">上传图片</button>
+							</div>
+							<div class="ns-word-aux">第一张图片将作为商品主图,支持同时上传多张图片,多张图片之间可随意调整位置；支持jpg、gif、png格式上传或从图片空间中选择，建议使用尺寸800x800像素以上、大小不超过1M的正方形图片，上传后的图片将会自动保存在图片空间的默认分类中。</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="layui-card ns-card-common">
+					<div class="layui-card-header">
+						<span class="ns-card-title">展示视频</span>
+					</div>
+					
+					<div class="layui-card-body">
+						<div class="layui-form-item">
+							<label class="layui-form-label">视频上传：</label>
+							<div class="layui-input-block">
+								<div class="video-thumb">
+									<video id="goods_video" class="video-js vjs-big-play-centered" controls="" poster="SHOP_IMG/goods_video_preview.png" preload="auto"></video>
+									<span class="delete-video hide" onclick="deleteVideo()"></span>
+								</div>
+								<div id="videoUpload" title="视频上传" style="position: absolute;left: 0;width: 290px;height: 135px;opacity: 0;cursor: pointer;z-index:10;"></div>
+							</div>
+						</div>
+						
+						<div class="layui-form-item">
+							<label class="layui-form-label">视频地址：</label>
+							<div class="layui-input-block">
+								<input type="text" name="video_url" placeholder="在此输入外链视频地址" value="{$goods_info['video_url']}" autocomplete="off" class="layui-input ns-len-long">
+							</div>
+							<div class="file-title ns-word-aux">
+								<div>注意事项：</div>
+								<ul>
+									<li>1、检查upload文件夹是否有读写权限。</li>
+									<li>2、PHP默认上传限制为2MB，需要在php.ini配置文件中修改“post_max_size”和“upload_max_filesize”的大小。</li>
+									<li>3、视频支持手动输入外链视频地址或者上传本地视频文件</li>
+									<li>4、必须上传.mp4视频格式</li>
+									<li>5、视频文件大小不能超过500MB</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 属性设置 -->
+			<div class="layui-tab-item">
+				<div class="ns-form">
+					<div class="layui-form-item">
+						<label class="layui-form-label">商品类型：</label>
+						<div class="layui-input-inline">
+							<select name="goods_attr_class" lay-search="" lay-filter="goods_attr_class">
+								<option value="">请选择商品类型</option>
+								{foreach name="$attr_class_list" item="vo"}
+								<option value="{$vo['class_id']}" {if $goods_info['goods_attr_class'] == $vo['class_id'] }selected{/if}>{$vo['class_name']}</option>
+								{/foreach}
+							</select>
+							<input type="hidden" name="goods_attr_name" value="{$goods_info['goods_attr_name']}" />
+						</div>
+					</div>
+					
+					<div class="layui-form-item js-attr-list">
+						<label class="layui-form-label"></label>
+						<div class="layui-input-block">
+							<div class="layui-form"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 商品详情 -->
+			<div class="layui-tab-item">
+				<div class="ns-form">
+					<div class="layui-form-item">
+						<label class="layui-form-label">商品详情：</label>
+						<div class="layui-input-inline ns-special-length">
+							<input type="hidden" name="goods_content" value="{$goods_info['goods_content']}" />
+							<script id="editor" type="text/plain" style="width:100%;height:500px;"></script>
+						</div>
+					</div>
+				</div>
+				<script type="text/javascript" charset="utf-8" src="__STATIC__/ext/ueditor/ueditor.config.js"></script>
+				<script type="text/javascript" charset="utf-8" src="__STATIC__/ext/ueditor/ueditor.all.js"> </script>
+				<script type="text/javascript" charset="utf-8" src="__STATIC__/ext/ueditor/lang/zh-cn/zh-cn.js"></script>
+			
+			</div>
+		</div>
+	</div>
+	
+	<input type="hidden" name="goods_id" value="{$goods_info['goods_id']}" />
+	<input type="hidden" name="goods_spec_format" value="{$goods_info['goods_spec_format']}" />
+	<input type="hidden" name="goods_image" value="{$goods_info['goods_image']}" />
+	<input type="hidden" name="goods_attr_format" value="{$goods_info['goods_attr_format']}" />
+
+	
+	<div class="fixed-btn">
+		<button class="layui-btn layui-btn-primary ns-border-color ns-text-color js-prev" lay-submit="" lay-filter="prev">上一步</button>
+		<button class="layui-btn ns-bg-color js-save" lay-submit="" lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary ns-border-color ns-text-color js-next" lay-submit="" lay-filter="next">下一步</button>
+	</div>
+</div>
+
+<!--选择商品分类-->
+<script type="text/html" id="selectedCategory">
+	
+	<div class="category-list">
+		
+		<div class="item">
+			<!--后续做搜索-->
+			<ul>
+				{foreach name="$goods_category_list" item="vo"}
+				{{# if(d.category_id_1 == '{$vo['category_id']}' ){ }}
+				<li data-category-id="{$vo['category_id']}" data-commission-rate="{$vo['commission_rate']}" data-level="{$vo['level']}" class="selected">
+					{{# }else{ }}
+				<li data-category-id="{$vo['category_id']}" data-commission-rate="{$vo['commission_rate']}" data-level="{$vo['level']}">
+					{{# } }}
+					<span class="category-name">{$vo['category_name']}</span>
+					<span class="right-arrow">&gt;</span>
+				</li>
+				{/foreach}
+			</ul>
+		</div>
+		
+		<div class="item" data-level="2">
+			<!--后续做搜索-->
+			<ul></ul>
+		</div>
+		
+		<div class="item" data-level="3">
+			<!--后续做搜索-->
+			<ul></ul>
+		</div>
+	
+	</div>
+	
+	<div class="selected-category-wrap">
+		<label>您当前选择的是：</label>
+		<span class="js-selected-category"></span>
+	</div>
+</script>
+
+<!--店内分类-->
+<script type="text/html" id="goodsShopCategory">
+	{{# for(var i=0;i<d.list.length;i++){ }}
+	<div class="item" data-index="{{i}}">
+		<select name="goods_shop_category_{{i}}" lay-search="" lay-filter="goods_shop_category_{{i}}" data-index="{{i}}">
+			<option value=""></option>
+			{foreach name="$goods_shop_category_list" item="vo"}
+				{{# if(d.list[i] == {$vo['category_id']} ){ }}
+				<option value="{$vo['category_id']}" selected>{$vo['category_name']}</option>
+				{{# }else{ }}
+				<option value="{$vo['category_id']}">{$vo['category_name']}</option>
+				{{# } }}
+					{notempty name="$vo['child_list']"}
+						{foreach name="$vo['child_list']" item="second"}
+							{{# if(d.list[i] == {$second['category_id']} ){ }}
+							<option value="{$second['category_id']}" selected>&nbsp;&nbsp;&nbsp;&nbsp;{$second['category_name']}</option>
+							{{# }else{ }}
+							<option value="{$second['category_id']}">&nbsp;&nbsp;&nbsp;&nbsp;{$second['category_name']}</option>
+							{{# } }}
+						{/foreach}
+					{/notempty}
+			{/foreach}
+		</select>
+		<i class="layui-icon layui-icon-close" data-index="{{i}}"></i>
+	</div>
+	{{# } }}
+</script>
+
+<!--规格项模板-->
+<script type="text/html" id="specTemplate">
+	
+	{{# for(var i=0;i<d.list.length;i++){ }}
+	<div class="spec-item" data-index="{{i}}" style="cursor:default !important;border:none;">
+		<div class="layui-form-item spec">
+			<label class="layui-form-label">规格项{{i+1}}：</label>
+			<div class="layui-input-inline">
+				<select name="spec_item">
+					<option value="0"></option>
+					{{# if(d.list[i].spec_name != ''){ }}
+					<option value="{{d.list[i].spec_id}}" data-attr-name="{{d.list[i].spec_name}}" selected>{{d.list[i].spec_name}}</option>
+					{{# }else{ }}
+					{{# } }}
+				</select>
+			</div>
+			
+			{{# if(i==0){ }}
+			<div class="layui-input-inline">
+				{{# if(d.add_spec_img){ }}
+				<input type="checkbox" name="add_spec_img" title="添加规格图片" lay-skin="primary" lay-filter="add_spec_img" checked>
+				{{# }else{ }}
+				<input type="checkbox" name="add_spec_img" title="添加规格图片" lay-skin="primary" lay-filter="add_spec_img">
+				{{# } }}
+			</div>
+			{{# } }}
+		</div>
+		
+		{{# if(d.list[i].spec_name != ''){ }}
+		<div class="layui-form-item spec-value">
+			{{# }else{ }}
+			<div class="layui-form-item spec-value" style="display:none;">
+				{{# } }}
+				<label class="layui-form-label"></label>
+				<div class="layui-input-block spec-value">
+					{{# if(d.list[i].value.length){ }}
+					<ul>
+						{{# for(var j=0;j<d.list[i].value.length;j++){ }}
+						<li data-index="{{j}}" data-parent-index="{{i}}" >
+							{{# if(i==0 && d.add_spec_img){ }}
+							<div class="img-wrap">
+								{{# if(d.list[i].value[j].image){ }}
+								<img src="{{ns.img(d.list[i].value[j].image)}}" alt="">
+								{{# }else{ }}
+								<img src="SHOP_IMG/goods_spec_value_empty.png" alt="">
+								{{# } }}
+							</div>
+							{{# } }}
+							<span>{{d.list[i].value[j].spec_value_name}}</span>
+							<!--{{1# if(d.list[i].value[j].is_delete === undefined){ }}-->
+							<!--<i class="layui-icon layui-icon-close" data-parent-index="{{i}}" data-index="{{j}}"></i>-->
+							<!--{{1# } }}-->
+						</li>
+						{{# } }}
+					</ul>
+					{{# } }}
+					
+					<!--<a class="ns-text-color" href="javascript:;" data-index="{{i}}">+添加规格值</a>-->
+					
+					<!--<div class="add-spec-value-popup" data-index="{{i}}">-->
+						<!--<select name="spec_value_item"></select>-->
+						<!--<button class="layui-btn layui-btn-primary ns-border-color ns-text-color js-cancel-spec-value">取消</button>-->
+					<!--</div>-->
+				
+				</div>
+			</div>
+		
+		</div>
+		{{# } }}
+
+</script>
+
+<!--SKU列表模板-->
+<script type="text/html" id="skuTableTemplate">
+	
+	{{# if(d.skuList.length){ }}
+	<table class="layui-table">
+		<colgroup>
+			<!--<col width="10%">-->
+			<!--<col width="10%">-->
+			<!--<col width="10%">-->
+			<!--<col width="10%">-->
+			<!--<col width="10%">-->
+			<!--<col width="10%">-->
+			<!--<col width="10%">-->
+			<!--<col width="10%">-->
+			<!--<col width="10%">-->
+			<!--<col width="10%">-->
+		</colgroup>
+		<thead>
+		<tr>
+			{{# if(d.showSpecName){ }}
+			<th colspan="{{d.colSpan}}" style="min-width:60px;">商品规格</th>
+			{{# } }}
+			<th rowspan="{{d.rowSpan}}" style="min-width:60px;"><span class="required">*</span>SKU图片</th>
+			<th rowspan="{{d.rowSpan}}" style="min-width:60px;">副标题</th>
+			<th rowspan="{{d.rowSpan}}" style="min-width:60px;"><span class="required">*</span>销售价</th>
+			<th rowspan="{{d.rowSpan}}" style="min-width:60px;">市场价</th>
+			<th rowspan="{{d.rowSpan}}" style="min-width:60px;">成本价</th>
+			<th rowspan="{{d.rowSpan}}" style="min-width:60px;"><span class="required">*</span>库存</th>
+			<th rowspan="{{d.rowSpan}}" style="min-width:60px;">重量(kg)</th>
+			<th rowspan="{{d.rowSpan}}" style="min-width:60px;">体积(m³)</th>
+			<th rowspan="{{d.rowSpan}}" style="min-width:80px;">SKU编码</th>
+		</tr>
+		{{# if(d.colSpan>1){ }}
+		<tr>
+			{{# for(var i=0;i<d.specList.length;i++){ }}
+			<th>{{d.specList[i].spec_name}}</th>
+			{{# } }}
+		</tr>
+		{{# } }}
+		</thead>
+		<tbody>
+		{{# for(var i=0;i<d.skuList.length;i++){ }}
+		<tr>
+			<td id="sku_img_{{i}}">
+				{{# for(var j=0;j<d.skuList[i].sku_images_arr.length;j++){ }}
+				<div class="img-wrap" data-index="{{j}}" data-parent-index="{{i}}">
+					<a href="javascript:void(0)">
+						<img src="{{ns.img(d.skuList[i].sku_images_arr[j])}}" layer-src />
+					</a>
+					<div class="operation">
+						<i title="图片预览" class="iconfont iconreview js-preview"></i>
+						<i title="删除图片" class="layui-icon layui-icon-delete js-delete"></i>
+					</div>
+				</div>
+				{{# } }}
+				{{# if(d.skuList[i].sku_images_arr.length<d.goods_sku_max){ }}
+				<div class="upload-sku-img" data-index="{{i}}"><i class="layui-icon layui-icon-add-1"></i></div>
+				{{# } }}
+			</td>
+			<td>
+				<input type="text" name="spec_name" placeholder="副标题" maxlength="100" value="{{d.skuList[i].spec_name}}" class="layui-input ns-len-small" autocomplete="off" data-index="{{i}}">
+			</td>
+			<td>
+				<input type="text" name="price" placeholder="销售价" lay-verify="sku_price" value="{{d.skuList[i].price}}" class="layui-input ns-len-small" autocomplete="off" data-index="{{i}}">
+			</td>
+			<td>
+				<input type="text" name="market_price" placeholder="市场价" value="{{d.skuList[i].market_price}}" lay-verify="sku_market_price" class="layui-input ns-len-small" autocomplete="off" data-index="{{i}}">
+			</td>
+			<td>
+				<input type="text" name="cost_price" placeholder="成本价" value="{{d.skuList[i].cost_price}}" lay-verify="sku_cost_price" class="layui-input ns-len-small" autocomplete="off" data-index="{{i}}">
+			</td>
+			<td>
+				<input type="text" name="stock" placeholder="库存" value="{{d.skuList[i].stock}}" lay-verify="sku_stock" class="layui-input ns-len-small" autocomplete="off" data-index="{{i}}">
+			</td>
+			<td>
+				<input type="text" name="weight" placeholder="重量(kg)" value="{{d.skuList[i].weight}}" lay-verify="sku_weight" class="layui-input ns-len-small" autocomplete="off" data-index="{{i}}">
+			</td>
+			<td>
+				<input type="text" name="volume" placeholder="体积(m³)" value="{{d.skuList[i].volume}}" lay-verify="sku_volume" class="layui-input ns-len-small" autocomplete="off" data-index="{{i}}">
+			</td>
+			<td>
+				<input type="text" name="sku_no" placeholder="SKU编码" value="{{d.skuList[i].sku_no}}" maxlength="50" class="layui-input ns-len-small" autocomplete="off" data-index="{{i}}">
+			</td>
+		</tr>
+		{{# } }}
+		
+		</tbody>
+	</table>
+	{{# } }}
+</script>
+
+<!--商品主图列表-->
+<script type="text/html" id="goodsImage">
+	{{# if(d.length){ }}
+	{{# for(var i=0;i<d.length;i++){ }}
+	{{# if(d[i]){ }}
+	<div class="item" data-index="{{i}}">
+		<div class="img-wrap">
+			<img src="{{ns.img(d[i])}}" layer-src>
+		</div>
+		<div class="operation">
+			<i title="图片预览" class="iconfont iconreview js-preview"></i>
+			<i title="删除图片" class="layui-icon layui-icon-delete js-delete" data-index="{{i}}"></i>
+		</div>
+		{{# }else{ }}
+		<div class="item empty">
+			{{# } }}
+		</div>
+		{{# } }}
+		{{# }else{ }}
+		<div class="item empty"></div>
+		{{# } }}
+</script>
+
+<!--属性列表模板-->
+<script type="text/html" id="attrTemplate">
+	<table class="layui-table">
+		<tbody>
+		{{# for(var i=0;i<d.list.length;i++){ }}
+		<tr data-attr-class-id="{{d.list[i].attr_class_id}}" data-attr-class-name="{{d.list[i].attr_class_name}}" data-attr-id="{{d.list[i].attr_id}}" data-attr-name="{{d.list[i].attr_name}}" data-attr-type="{{d.list[i].attr_type}}">
+			<td>{{d.list[i].attr_name}}</td>
+			<td>
+				{{# if(d.list[i].attr_type == 1){ }}
+					{{# for(var j=0;j<d.list[i].attr_value_format.length;j++){ }}
+						{{# if(d.list[i].attr_value_format[j].checked){ }}
+						<input type="radio" name="attr_value_{{d.list[i].attr_id}}" value="{{d.list[i].attr_value_format[j].attr_value_id}}" title="{{d.list[i].attr_value_format[j].attr_value_name}}" data-attr-value-name="{{d.list[i].attr_value_format[j].attr_value_name}}" checked />
+						{{# }else{ }}
+						<input type="radio" name="attr_value_{{d.list[i].attr_id}}" value="{{d.list[i].attr_value_format[j].attr_value_id}}" title="{{d.list[i].attr_value_format[j].attr_value_name}}" data-attr-value-name="{{d.list[i].attr_value_format[j].attr_value_name}}" />
+						{{# } }}
+					{{# } }}
+				{{# }else if(d.list[i].attr_type == 2){ }}
+					{{# for(var j=0;j<d.list[i].attr_value_format.length;j++){ }}
+						{{# if(d.list[i].attr_value_format[j].checked){ }}
+						<input type="checkbox" name="attr_value_{{d.list[i].attr_id}}" value="{{d.list[i].attr_value_format[j].attr_value_id}}" title="{{d.list[i].attr_value_format[j].attr_value_name}}" data-attr-value-name="{{d.list[i].attr_value_format[j].attr_value_name}}" lay-skin="primary" checked>
+						{{# }else{ }}
+						<input type="checkbox" name="attr_value_{{d.list[i].attr_id}}" value="{{d.list[i].attr_value_format[j].attr_value_id}}" title="{{d.list[i].attr_value_format[j].attr_value_name}}" data-attr-value-name="{{d.list[i].attr_value_format[j].attr_value_name}}" lay-skin="primary">
+						{{# } }}
+					{{# } }}
+				{{# }else if(d.list[i].attr_type == 3){ }}
+					{{# if(d.list[i].attr_value_format != ''){ }}
+					<input type="text" name="attr_value_{{d.list[i].attr_id}}" placeholder="{{d.list[i].attr_name}}" value="{{d.list[i].attr_value_format}}" class="layui-input ns-len-mid" autocomplete="off">
+					{{# }else{ }}
+					<input type="text" name="attr_value_{{d.list[i].attr_id}}" placeholder="{{d.list[i].attr_name}}" class="layui-input ns-len-mid" autocomplete="off">
+					{{# } }}
+				{{# } }}
+			</td>
+		</tr>
+		{{# } }}
+		</tbody>
+	</table>
+</script>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}
+<script src="__STATIC__/ext/drag-arrange.js"></script>
+<script src="__STATIC__/ext/video/videojs-ie8.min.js"></script>
+<script src="__STATIC__/ext/video/video.min.js"></script>
+<script src="__STATIC__/ext/searchable_select/searchable_select.js"></script>
+<script src="SHOP_JS/goods_edit.js"></script>
+{/block}

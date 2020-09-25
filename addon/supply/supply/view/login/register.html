@@ -1,0 +1,147 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SUPPLY_CSS/register.css">
+{/block}
+{block name="body"}
+<div class="layui-layout layui-layout-admin">
+    <div class="apply-header">
+        <div class="apply-header-box">
+            <div class="apply-header-title">
+                <a href="{:addon_url('supply://supply/index/index')}">
+                    {notempty name="$website_info.logo"}
+                    <img src="{:img($website_info.logo)}">
+                    {else/}
+                    <img src="SUPPLY_IMG/shop_logo.png">
+                    {/notempty}
+                    <span class="ns-text-color">B2B2C多商户供应商端</span>
+                </a>
+            </div>
+            <span class="phone">联系电话：{$website_info['web_phone']} </span>
+        </div>
+    </div>
+</div>
+<div class="register-body">
+    <div class="layui-form register-content">
+        <h2>供应商账号申请</h2>
+        <div class="register-input register-info">
+            <span>商家账号：</span>
+            <input type="text" name="username" lay-verify="userName" placeholder="请输入商家账号" autocomplete="off" class="layui-input">
+        </div>
+        <div class="register-input register-info">
+            <span>登录密码：</span>
+            <input type="password" id="set_pass" name="password" lay-verify="password" placeholder="请输入密码" autocomplete="off" class="layui-input">
+        </div>
+        <div class="register-input register-info">
+            <span>确认密码：</span>
+            <input type="password" lay-verify="password|repass" placeholder="请确认密码" autocomplete="off" class="layui-input">
+        </div>
+		
+        <div class="register-input register-verification">
+            <input type="text" name="captcha" lay-verify="verificationCode" placeholder="请输入验证码" autocomplete="off" class="layui-input">
+            <div class="register-verify-code-img">
+                <img id='verify_img' src="{$captcha['img']}" alt='captcha' onclick="verificationCode()"/>
+            </div>
+        </div>
+
+        <button type="button" id="reg_btn" class="layui-btn ns-bg-color" lay-submit lay-filter="register_account">点击申请</button>
+        <p class="operation-register">已有账号？<a href="javascript:;" class="ns-text-color" onclick="login()">&nbsp;立即登录</a></p>
+    </div>
+</div>
+{/block}
+{block name="script"}
+<script type="text/javascript">
+var form, register_repeat_flag = false;
+
+	/**
+	 * 验证码
+	 */
+	function verificationCode(){
+		$.ajax({
+			type: "get",
+			url: "{:addon_url('supply://supply/login/captcha')}",
+			dataType: "JSON",
+			async: false,
+			success: function (res) {
+				var data = res.data;
+				$("#verify_img").attr("src",data.img);
+				$("input[name='captcha_id']").val(data.id);
+			}
+		});
+	}
+
+    layui.use('form', function(){
+        form = layui.form;
+		form.render();
+		
+        /* 注册*/
+        form.on('submit(register_account)', function(data) {
+
+            if (register_repeat_flag) return;
+            register_repeat_flag = true;
+
+            $.ajax({
+                type: "POST",
+                dataType: "JSON",
+                url:  ns.url("supply://supply/login/register"),
+                data: data.field,
+                success: function(res) {
+                    if (res.code == 0) {
+                        layer.msg(res.message,{anim: 5,time: 500},function () {
+                            window.location = ns.url('supply://supply/index/index');
+                        });
+                    } else {
+                        layer.msg(res.message);
+
+                        register_repeat_flag = false;
+                        verificationCode();
+                    }
+                }
+            })
+        });
+        
+        /**
+         * 表单验证
+         */
+        form.verify({
+            repass: function(value) {
+                if (value != $("#set_pass").val()) {
+                    return "两次输入密码不一致";
+                }
+            },
+            userName: function(value) {
+                if (!value.trim()) {
+                    return "账号不能为空";
+                }
+            },
+            password: function(value) {
+                if (!value.trim()) {
+                    return "密码不能为空";
+                }
+            },
+            verificationCode: function(value) {
+                if (!value.trim()) {
+                    return "验证码不能为空";
+                }
+            }
+
+        });
+    });
+
+    $("body").on("blur",".login-content .login-input",function(){
+        $(this).removeClass("login-input-select");
+    });
+    $("body").on("focus",".login-content .login-input",function(){
+        $(this).addClass("login-input-select");
+    });
+
+    $(document).keydown(function (event) {
+        if (event.keyCode == 13) {
+			$("#reg_btn").trigger("click");
+        }
+    });
+
+    function login(){
+        location.href = ns.url("supply://supply/login/login");
+    }
+</script>
+{/block}

@@ -1,0 +1,57 @@
+<?php /*a:1:{s:42:"./app/component/view/horz_line/design.html";i:1600314240;}*/ ?>
+<nc-component v-bind:data="data[index]" v-bind:class="['auxiliary-line',nc.padding]">
+
+	<!-- 预览 -->
+	<template slot="preview">
+		<div v-bind:style="{padding : nc.paddingTop + 'px 0'}">
+			<hr v-bind:style="{ borderColor : nc.color,borderStyle : nc.borderStyle}" />
+		</div>
+		
+		
+	</template>
+	
+	<!-- 编辑 -->
+	<template slot="edit">
+		<div @click.stop="">
+		<color v-bind:data="{ field : 'color', label : '颜色' }"></color>
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label sm">边距</label>
+			<div class="layui-input-block">
+				<div class="layui-unselect layui-form-radio" v-bind:class="{ 'layui-form-radioed' : (nc.padding=='no-padding') }" v-on:click="nc.padding='no-padding'">
+					<i class="layui-anim layui-icon">&#xe643;</i>
+					<div>无边距</div>
+				</div>
+				<div class="layui-unselect layui-form-radio" v-bind:class="{ 'layui-form-radioed' : (nc.padding=='have-padding') }" v-on:click="nc.padding='have-padding'">
+					<i class="layui-anim layui-icon">&#xe643;</i>
+					<div>左右留边</div>
+				</div>
+			</div>
+		</div>
+
+		<slide v-bind:data="{ field : 'paddingTop',  'label' : '上下边距' }"></slide>
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label sm">样式</label>
+			<div class="layui-input-block">
+				<div class="layui-unselect layui-form-radio" v-bind:class="{ 'layui-form-radioed' : (nc.borderStyle=='solid') }" v-on:click="nc.borderStyle='solid'">
+					<i class="layui-anim layui-icon">&#xe643;</i>
+					<div>实线</div>
+				</div>
+				<div class="layui-unselect layui-form-radio" v-bind:class="{ 'layui-form-radioed' : (nc.borderStyle=='dashed') }" v-on:click="nc.borderStyle='dashed'">
+					<i class="layui-anim layui-icon">&#xe643;</i>
+					<div>虚线</div>
+				</div>
+			</div>
+		</div>
+		</div>
+	</template>
+	
+	<!-- 资源 -->
+	<template slot="resource">
+		
+		<css src="<?php echo htmlentities($resource_path); ?>/horz_line/css/design.css"></css>
+		
+	</template>
+	
+</nc-component>

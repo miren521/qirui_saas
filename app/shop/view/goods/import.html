@@ -1,0 +1,193 @@
+{extend name="base"/}
+{block name="resources"}
+
+<style>
+	.eis-stepContent{text-align:center;margin:60px auto;width:760px;margin-left: 21%}
+	.upload-template-desc-class{font-size:20px;color:#666;height: 100px;line-height: 100px;width:760px;}
+	.eis-form-steps{margin-left:21%;margin-top:50px;}
+	.eis-stepContents .eis-stepFooter{right:50%;left:50%}
+	.is-finish .eis-step-icon{border-color:#ff8143!important}
+	.eis-horizontal-steps .eis-form-steps .eis-step-progress{background-color:#ff8143!important}
+	.is-finish .eis-step-icon .step-icon-txt{border:1px solid #ff8143!important;background-color:#ff8143!important}
+	.eis-btn{display:none}
+	.upload-template-class{display:inline-block;}
+	.last-btn{width:760px;margin-top: 50px}
+	.step-content{font-size:12px;color:#999!important;margin:20px auto;padding:10px;width:600px;margin-left: 27%;}
+	.step-content dl dt{color:#ff8143;height:25px;line-height:25px}
+	.step-content dl dd{line-height:18px}
+	.import-item{margin-bottom:8px}
+	.import-item-title{display:inline-block;margin-right:20px}
+	.import-item-content{display:inline-block}
+	.import-result-view{height: 100px;padding-top: 1px;}
+	.upload-img-block{margin: auto;}
+</style>
+<link rel="stylesheet" href="SHOP_CSS/step.css">
+<script src="SHOP_JS/step.js"></script>
+{/block}
+{block name="main"}
+
+<!---->
+<!--<h2>下载、填写商品模板</h2></div>-->
+<!--<div class="eis-stepContent"><h2>上传csv文档</h2>-->
+
+<div class="box">
+	<div class="eis-stepContents">
+		<div class="eis-stepContent">
+			<div class="upload-template-desc-class">点此处下载<a class="ns-text-color" href="{:img('upload/default/goods_csv/商品导入模板.csv')}">csv模板</a>，按照模板中的实例填写信息</div>
+			<div class="last-btn">
+				<button class="layui-btn ns-bg-color" onclick="stepnext();">下一步</button>
+			</div>
+		</div>
+		<div class="eis-stepContent">
+			<div class="upload-template-class">
+				<div class="img-upload">
+					<div class="upload-img-block">
+						<div class="upload-img-box" id="csvUpload">
+
+							<div class="ns-upload-default">
+								<img src="SHOP_IMG/upload_img.png"/>
+								<p>上传导入商品的模板</p>
+							</div>
+
+						</div>
+					</div>
+				</div>
+				<div class="last-btn">
+				<button class="layui-btn ns-bg-color" onclick="stepprev();" >上一步</button>
+				</div>
+			</div>
+		</div>
+		<div class="eis-stepContent">
+			<div class="import-result-view">
+				<div class="import-item" style="margin-top: 29px;">
+					<div class="import-item-title">
+						成功导入：
+					</div>
+					<div class="import-item-content success-count ns-text-color" >
+						0
+					</div>
+				</div>
+				<div class="import-item">
+					<div class="import-item-title">
+						导入失败：
+					</div>
+					<div class="import-item-content error-count" style="color:red;">
+						0
+					</div>
+				</div>
+			</div>
+			<div class="last-btn">
+				<button class="layui-btn ns-bg-color" onclick="stepprev();">继续上传</button>
+				<button class="layui-btn ns-bg-color error-records-btn" onclick="exportError();">下载失败记录</button>
+			</div>
+		</div>
+	</div>
+
+
+</div>
+<div class="step-content">
+	<dl>
+		<dt>提醒：</dt>
+		<dd>1.所有上传的商品的处于未上架状态,请在商品列表中调整商品的信息并进行上架状态；</dd>
+		<dd>2.导入商品时,如果导入的csv模板的商品数据与已有的商品数据相同,会另外新创建一条新的数据,不会覆盖原有的商品数据；</dd>
+		<dd>3.导入的csv文件需先删除范例,在进行上传操作</dd>
+	</dl>
+</div>
+<!--<div  class="layui-form">
+
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">导入csv：</label>
+
+			<input type="hidden" name="logo"  value="{$shop_info.logo}"/>
+		</div>
+	</div>
+
+
+
+
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+	</div>
+</div>-->
+{/block}
+{block name="script"}
+<script>
+	var error_key = '';
+	$(function(){
+		$('.box').step({
+			stepDirection:'x',
+			showStepButton:true,
+			stepCount:3,
+			stepTitles:['下载、填写商品模板','上传csv文档','导入完成'],
+		});
+	})
+
+	/**
+	 * 下一步
+	 */
+	function stepnext(){
+		$(".eis-next-btn").click();
+	}
+
+	/**
+	 * 上一步
+	 */
+	function stepprev(){
+		$(".eis-prev-btn").click();
+	}
+	layui.use(['form', 'upload'], function(){
+		var form = layui.form,
+				upload = layui.upload,
+				repeat_flag = false; //防重复标识
+
+
+		//店铺LOGO
+		var uploadInst = upload.render({
+			elem: '#csvUpload',
+			url: ns.url("shop/goods/import"),
+			field:'csv',
+			exts:'csv',
+			before: function(obj){ //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
+				var index = layer.load(1, {
+					shade: [0.1,'#fff'], //0.1透明度的白色背景
+					time:1000
+				});
+			},
+			done: function(res) {
+				layer.closeAll();
+				if (res.code >= 0) {
+					$(".success-count").text(res.data.success_count);
+					$(".error-count").text(res.data.error_count);
+					if(res.data.error_count > 0){
+						error_key = res.data.error_key;
+						$(".error-records-btn").show();
+					}else{
+						$(".error-records-btn").hide();
+					}
+					stepnext();
+
+				}else{
+					layer.msg(res.message);
+				}
+
+			}
+		});
+
+	});
+
+	function exportError(){
+		location.href = ns.url("shop/goods/exportError", {'key':error_key});
+		// $.ajax({
+		// 	type: 'post',
+		// 	url: ns.url("shop/goods/exportError"),
+		// 	dataType: 'JSON',
+		// 	success: function(res) {
+		// 		layer.msg(res.message);
+		// 		location.reload();
+		// 	}
+		// })
+	}
+
+</script>
+{/block}

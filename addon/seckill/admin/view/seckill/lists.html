@@ -1,0 +1,108 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>展示了秒杀时间段列表</li>
+			<li>可对时间段进行新增/编辑/删除/查看详情操作</li>
+		</ul>
+	</div>
+</div>
+
+<div class="ns-single-filter-box">
+	<button class="layui-btn ns-bg-color" onclick="clickAdd()">添加秒杀时间段</button>
+</div>
+
+<table id="seckill_list" lay-filter="seckill_list"></table>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="detail">查看详情</a>
+		<a class="layui-btn" lay-event="edit">编辑</a>
+		<a class="layui-btn" lay-event="delete">删除</a>
+	</div>
+</script>
+{/block}
+{block name="script"}
+<script>
+	layui.use('form', function() {
+		var repeat_flag = false; //防重复标识
+
+		var table = new Table({
+			elem: '#seckill_list',
+			url: ns.url("seckill://admin/seckill/lists"),
+			parseData: function(res) { //res 即为原始返回的数据
+				return {
+					"code": res.code, //解析接口状态
+					"msg": res.message,
+					"data": res.data
+				};
+			},
+			cols: [
+				[{
+					field: 'name',
+					title: '活动名称',
+					unresize: 'false',
+					width: '40%'
+				}, {
+					field: 'seckill_start_time_show',
+					title: '开始时间',
+					unresize: 'false',
+					width: '20%'
+				}, {
+					field: 'seckill_end_time_show',
+					title: '结束时间',
+					unresize: 'false',
+					width: '20%'
+				}, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width: '20%'
+				}]
+			],
+			page: false
+		});
+		
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'detail': //详情
+					location.href = ns.url("seckill://admin/seckill/goods?seckill_id=" + data.seckill_id);
+					break;
+				case 'delete': //删除
+					layer.confirm('确定要删除该秒杀活动吗?', function() {
+						$.ajax({
+							url: ns.url("seckill://admin/seckill/delete?seckill_id=" + data.seckill_id),
+							data: data,
+							dataType: 'JSON',
+							type: 'POST',
+							success: function(res) {
+								layer.msg(res.message);
+								repeat_flag = false;
+								if (res.code == 0) {
+									table.reload();
+								}
+							}
+						});
+					});
+					break;
+				case 'edit': //编辑
+					location.href = ns.url("seckill://admin/seckill/edit?seckill_id=" + data.seckill_id);
+					break;
+			}
+		});
+	});
+
+	function clickAdd() {
+		location.href = ns.url("seckill://admin/seckill/add");
+	}
+</script>
+{/block}

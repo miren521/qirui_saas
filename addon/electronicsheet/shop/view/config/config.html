@@ -1,0 +1,214 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<style>
+    .ns-tips a {
+        color: #fb6638;
+        background: transparent;
+        text-decoration: none;
+        outline: none;
+        cursor: pointer;
+        -webkit-transition: color .2s ease;
+        transition: color .2s ease;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form">
+
+    <div class="layui-card ns-card-common ns-card-brief">
+        <div class="layui-card-header">
+            <span class="ns-card-title">电子面单设置</span>
+        </div>
+
+        <!--使用说明-->
+        <div class="layui-collapse ns-tips kdniao">
+            <div class="layui-colla-item">
+                <h2 class="layui-colla-title">使用说明</h2>
+                <ul class="layui-colla-content layui-show">
+                    <li>1. 注册快递鸟ID。</li>
+                    <li>2. 实名认证。</li>
+                    <li>3. 申请电子面单API：在快递鸟用户管理后台--申请API页面，点击申请电子面单API。</li>
+                    <li>4. 将快递鸟用户ID以及API key填入以下表单。</li>
+                </ul>
+            </div>
+        </div>
+        <div class="layui-collapse ns-tips cainiao">
+            <div class="layui-colla-item">
+                <h2 class="layui-colla-title">使用说明</h2>
+                <ul class="layui-colla-content kdniao layui-show">
+                    <li>1.注册菜鸟账号 <a href="https://lcp.cloud.cainiao.com/permission/index" target="_blank">https://lcp.cloud.cainiao.com/permission/index</a> 在三方授权管理 搜索服务商发布的应用，点击授权，查看授权获取token。</li>
+                    <li>2. 前往<a href="https://dayin.cainiao.com" target="_blank"> https://dayin.cainiao.com </a> 添加订购关系。</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="layui-card-body">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">类型选择：</label>
+                <div class="layui-input-inline">
+                    <input type="radio" name="type" value="kdniao" title="快递鸟" {if $config_info.type == 'kdniao'} checked="" {/if} lay-filter="type">
+                    <!--<input type="radio" name="type" value="cainiao" title="菜鸟"  {if $config_info.type == 'cainiao'} checked="" {/if} lay-filter="type">-->
+                </div>
+            </div>
+
+            <div class="layui-form-item kdniao">
+                <label class="layui-form-label">用户ID：</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="kdniao_user_id" value="{$config_info.kdniao_user_id}" class="layui-input ns-len-long">
+                </div>
+            </div>
+            <div class="layui-form-item kdniao">
+                <label class="layui-form-label">API key：</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="kdniao_api_key" value="{$config_info.kdniao_api_key}" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item cainiao">
+                <label class="layui-form-label">token：</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="cainiao_token" value="{$config_info.cainiao_token}" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="layui-card ns-card-common ns-card-brief">
+        <div class="layui-card-header">
+            <span class="ns-card-title">打印机设置</span>
+        </div>
+        <!--使用说明-->
+        <div class="layui-collapse ns-tips kdniao">
+            <div class="layui-colla-item">
+                <h2 class="layui-colla-title">使用说明</h2>
+                <ul class="layui-colla-content layui-show">
+                    <li>本地打印机名称（供快递鸟电子面单使用）。</li>
+                    <li>1. 请将打印机连接至本机。</li>
+                    <li>2. 在本机上安装打印控件。下载链接：<a href="http://www.kdniao.com/documents-instrument" target="_blank">http://www.kdniao.com/documents-instrument</a>。</li>
+                </ul>
+            </div>
+        </div>
+        <div class="layui-collapse ns-tips cainiao">
+            <div class="layui-colla-item">
+                <h2 class="layui-colla-title">使用说明</h2>
+                <ul class="layui-colla-content layui-show">
+                    <li>1.下载菜鸟组件并安装。下载链接：<a href="http://cloudprint-docs-resource.oss-cn-shanghai.aliyuncs.com/download.html" target="_blank">http://cloudprint-docs-resource.oss-cn-shanghai.aliyuncs.com/download.html</a>。</li>
+                    <li>2. 请将打印机连接至本机。</li>
+                    <li>3.在下面填写菜鸟组件的地址信息（默认本机打印 ws://localhost:13528）。</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="layui-card-body kdniao">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">本地打印机名称：</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="kdniao_port" value="{$config_info.kdniao_port}" class="layui-input ns-len-long">
+                </div>
+            </div>
+            <!--<div class="layui-form-item">-->
+                <!--<label class="layui-form-label">IP端口：</label>-->
+                <!--<div class="layui-input-inline">-->
+                    <!--<input type="text" name="kdniao_port" value="{$config_info.kdniao_port}" class="layui-input ns-len-long">-->
+                <!--</div>-->
+            <!--</div>-->
+        </div>
+
+        <div class="layui-card-body cainiao">
+            <div class="layui-form-item">
+                <label class="layui-form-label">菜鸟组件IP：</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="cainiao_ip" value="{$config_info.cainiao_ip}" class="layui-input ns-len-long">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+	<div class="ns-single-filter-box">
+		<div class="ns-form-row">
+			<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		</div>
+	</div>
+</div>
+
+{/block}
+{block name="script"}
+<script>
+
+    var type = "{$config_info.type}";
+    if(type == 'kdniao'){
+        $('.kdniao').show();
+        $('.cainiao').hide();
+    }else{
+        $('.kdniao').hide();
+        $('.cainiao').show();
+    }
+
+    layui.use(['form'], function() {
+        var form = layui.form,
+            repeat_flag = false; //防重复标识
+        
+        form.render();
+
+        form.verify({
+            rate: function(value){
+                if(value > 100 || value < 0 || value%1 != 0){
+                    return '请填写0-100的整数';
+                }
+            },
+			flo: function (value) {
+				if (value == '') {
+					return;
+				}
+				var reg = /^(0|[1-9]\d*)(\s|$|\.\d{1,2}\b)/;
+				if (!reg.test(value)) {
+					return '价格不能小于0，可保留两位小数！'
+				}
+			},
+            check_num:function(value){
+                if($("input[name='min_withdraw']").val() > value){
+                    return '最小提现金额不能大于最大提现金额！';
+                }
+            }
+        });
+
+        //类型切换
+        form.on('radio(type)', function(data) {
+            var type = data.value;
+            if(type == 'kdniao'){
+                $('.kdniao').show();
+                $('.cainiao').hide();
+            }else{
+                $('.kdniao').hide();
+                $('.cainiao').show();
+            }
+        });
+
+        form.on('submit(save)', function(data) {
+            if (repeat_flag) return;
+            repeat_flag = true;
+
+            field = data.field;
+
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("electronicsheet://shop/config/config"),
+                data: field,
+                success: function(res) {
+                    layer.msg(res.message);
+					repeat_flag = false;
+                    if (res.code == 0) {
+                        location.reload();
+                    }
+                }
+            });
+        });
+    });
+</script>
+{/block}

@@ -1,0 +1,155 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	.ns-screen{margin-bottom: 15px;}
+</style>
+{/block}
+{block name="main"}
+
+<!-- 搜索框 -->
+<div class="ns-screen layui-collapse" lay-filter="selection_panel">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title"></h2>
+		<form class="layui-colla-content layui-form layui-show">
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">核销员名称：</label>
+					<div class="layui-input-inline">
+						<input type="text" name="verifier_name" placeholder="请输入核销员名称" autocomplete="off" class="layui-input">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">核销类型：</label>
+					<div class="layui-input-inline">
+						<select name="verify_type">
+							<option value="">请选择核销类型</option>
+							{foreach $verify_type as $k => $v}
+							<option value="{$k}">{$v.name}</option>
+							{/foreach}
+						</select>
+					</div>
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">核销时间：</label>
+					<div class="layui-input-inline">
+					    <input type="text" class="layui-input" name="start_time" id="start_time" autocomplete="off" placeholder="开始时间" readonly>
+						<i class="ns-calendar"></i>
+					</div>
+					<div class="layui-form-mid">-</div>
+					<div class="layui-input-inline">
+					    <input type="text" class="layui-input" name="end_time" id="end_time" autocomplete="off" placeholder="结束时间" readonly>
+						<i class="ns-calendar"></i>
+					</div>
+				</div>
+				
+				<div class="layui-inline">
+					<label class="layui-form-label">核销码：</label>
+					<div class="layui-input-inline">
+					    <input type="text" name="verify_code" placeholder="请输入核销码" autocomplete="off" class="layui-input">
+					</div>
+				</div>
+			</div>
+
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="search">筛选</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- 列表 -->
+<table id="verify_list" lay-filter="verify_list"></table>
+
+<!-- 工具栏操作 -->
+<script type="text/html" id="action">
+
+</script>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'laydate'], function() {
+		var table,
+			form = layui.form,
+			laydate = layui.laydate;
+		form.render();
+
+		//渲染时间
+		laydate.render({
+			elem: '#start_time',
+			type: 'datetime'
+		});
+		
+		laydate.render({
+			elem: '#end_time',
+			type: 'datetime'
+		});
+
+			/**
+			 * 加载表格
+			 */
+			table = new Table({
+				elem: '#verify_list',
+				url: ns.url("shop/verify/records"), //数据接口
+				cols: [
+					[{
+						field: 'verify_code',
+						title: '核销码',
+						width: '20%'
+					}, {
+						field: 'verify_type_name',
+						title: '核销类型',
+						width: '14%'
+					}, {
+						field: 'verifier_name',
+						title: '核销员',
+						width: '13%'
+					}, {
+						field: 'verify_status',
+						title: '状态',
+						width: '13%',
+						templet: function(data) {
+							var verify_name = "";
+							if (data.is_verify == 1) {
+								verify_name = "已核销";
+							} else {
+								verify_name = "尚未核销";
+							}
+							return verify_name; //创建时间转换方法
+						}
+					}, {
+						field: 'create_time',
+						title: '创建时间',
+						width: '20%',
+						templet: function(data) {
+							return ns.time_to_date(data.create_time); //创建时间转换方法
+						}
+					}, {
+						field: 'verify_time',
+						title: '核销时间',
+						width: '20%',
+						templet: function(data) {
+							return ns.time_to_date(data.verify_time); //创建时间转换方法
+						}
+					}]
+				]
+			});
+
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+			return false;
+		});
+	});
+</script>
+{/block}

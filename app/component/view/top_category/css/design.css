@@ -1,0 +1,22 @@
+@CHARSET "UTF-8";
+
+.draggable-element .top-categorty{
+	display: block;
+}
+.draggable-element .top-category .preview-draggable{padding: 0}
+.topCategorty{
+	width: 100%;
+	height: 35px;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+}
+.topCategorty .top-categorty-item{
+	display: inline-block;
+	padding: 3px 10px;
+	font-size: 12px;
+}
+.topCategorty .top-categorty-item.active{
+	font-size: 14px;
+	color: red;
+}

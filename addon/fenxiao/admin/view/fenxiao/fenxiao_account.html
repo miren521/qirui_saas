@@ -1,0 +1,189 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+    .layui-card-body{display: flex;justify-content: space-around;}
+    .layui-card-body .money{font-size: 20px;color: #666;font-weight: bold;margin-top: 10px;text-align: center;max-width: 250px;}
+    .layui-card-body .subhead{font-size: 12px;margin-left: 3px;cursor: pointer;}
+    .ns-shop-account{display: flex;align-items: center;position: relative;padding: 15px;box-sizing: border-box;}
+    .ns-shop-detail p{display: inline-block;width: 300px;line-height: 30px;}
+    .ns-shop-account>a{position: absolute;right: 15px;bottom: 15px;cursor: pointer;}
+    .ns-item-block-parent{margin-top: 10px;}
+</style>
+{/block}
+{block name="main"}
+
+<div class="ns-form">
+    <div class="layui-card-body ns-item-block-parent ns-shop-account">
+
+        <div class="ns-shop-detail">
+            <p><strong>分销商：</strong><span class="ns-text-color-dark-gray">{$fenxiao_info.fenxiao_name}</span></p>
+            <p><strong>上级分销商：</strong><span class="ns-text-color-dark-gray">{if $fenxiao_info.parent_name == ''} 无 {else /}{$fenxiao_info.parent_name} {/if}</span></p>
+            <p><strong>联系方式：</strong><span class="ns-text-color-dark-gray">{$fenxiao_info.mobile}</span></p>
+            <p><strong>分销等级：</strong><span class="ns-text-color-dark-gray">{$fenxiao_info.level_name}</span></p>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <div>
+            <span class="ns-card-title">账户概况</span>
+        </div>
+    </div>
+    <div class="layui-card-body">
+        <div class="content">
+            <p class="title">当前佣金（元）</p>
+            <p class="money">{$fenxiao_info.account}</p>
+        </div>
+        <div class="content">
+            <p class="title">已提现佣金（元）</p>
+            <p class="money">{$fenxiao_info.account_withdraw}</p>
+        </div>
+        <div class="content">
+            <p class="title">提现中佣金（元）</p>
+            <p class="money">{$fenxiao_info.account_withdraw_apply}</p>
+        </div>
+
+
+    </div>
+</div>
+
+
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <div>
+            <span class="ns-card-title">账户流水记录</span>
+        </div>
+    </div>
+</div>
+
+<!-- 筛选面板 -->
+<div class="ns-single-filter-box">
+    <div class="layui-form">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <input type="text" name="start_time" id="start_time" placeholder="开始时间" class="layui-input" autocomplete="off" readonly>
+                <i class="ns-calendar"></i>
+            </div>
+            <div class="layui-input-inline end-time">
+                <input type="text" name="end_time" id="end_time" placeholder="结束时间" class="layui-input" autocomplete="off" readonly>
+                <i class="ns-calendar"></i>
+            </div>
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="search">搜索</button>
+        </div>
+    </div>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="status">
+    <ul class="layui-tab-title">
+        <li class="layui-this" lay-id="">全部</li>
+        <li lay-id="1">收入</li>
+        <li lay-id="2">支出</li>
+    </ul>
+
+    <div class="layui-tab-content">
+        <!-- 列表 -->
+        <table id="renewal_list" lay-filter="renewal_list"></table>
+    </div>
+</div>
+
+{/block}
+{block name="script"}
+<script>
+
+    var table, form, laytpl, laydate, element, repeat_flag = false;
+    layui.use(['form', 'laytpl', 'laydate', 'upload'], function() {
+        form = layui.form;
+        laytpl = layui.laytpl;
+        laydate = layui.laydate;
+        element = layui.element;
+        form.render();
+
+        //监听Tab切换
+        element.on('tab(status)', function(data) {
+            var status = $(this).attr("lay-id");
+            table.reload( {
+                page: {
+                    curr: 1
+                },
+                where: {
+                    'status': status
+                }
+            });
+        });
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time' //指定元素
+            ,done: function(value, date, endDate){
+                start_time = ns.date_to_time(value);
+
+            }
+        });
+        //结束时间
+        laydate.render({
+            elem: '#end_time' //指定元素
+            ,done: function(value, date, endDate){
+                end_time = ns.date_to_time(value);
+            }
+        });
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function (data) {
+            data.field.start_time = start_time;
+            data.field.end_time = end_time;
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+            return false;
+        });
+
+        /**
+         * 加载表格
+         */
+        table = new Table({
+            elem: '#renewal_list',
+            url: ns.url("fenxiao://admin/fenxiao/account"),
+            where:{'fenxiao_id':{$fenxiao_id}},
+            cols: [
+                [{
+                    field: 'account_no',
+                    title: '账单编号',
+                    unresize: 'false',
+                    width:'25%',
+                }, {
+                    field: 'money',
+                    title: '金额（元）',
+                    unresize: 'false',
+                    width:'25%',
+                }, {
+                    field: 'type_name',
+                    title: '金额类型',
+                    unresize: 'false',
+                    width:'25%',
+                }, {
+                    field: 'create_time',
+                    title: '创建时间',
+                    unresize: 'false',
+                    width:'25%',
+                    templet: function(data) {
+                        if(data.create_time == 0){
+                            return '--';
+                        }else{
+                            return ns.time_to_date(data.create_time)
+                        }
+                    },
+                }]
+            ]
+        });
+
+    });
+
+</script>
+
+{/block}

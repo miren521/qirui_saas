@@ -1,0 +1,193 @@
+@import './common.scss';
+
+.purchase-form-wrap {
+    background-color: #ffffff;
+
+    .ns-card-common:first-child {
+        margin-top: 0;
+    }
+
+    .ns-form-row {
+        margin-left: 220px;
+        padding-bottom: 20px;
+    }
+
+    .ns-table-box {
+        margin-left: 0;
+
+        .layui-table {
+            margin: 0;
+        }
+    }
+
+    .layui-table[lay-size=lg] td, .layui-table[lay-size=lg] th {
+        padding: 10px;
+    }
+
+    .ns-upload-default {
+        width: 70px;
+        height: 30px;
+		text-align: center;
+		line-height: 30px;
+		background-color: $base-color;
+		border: none;
+		border-radius: 3px;
+		cursor: pointer;
+		
+		p {
+			color: #FFFFFF;
+		}
+    }
+	
+	.ns-img-wrap {
+		div {
+			display: inline-block;
+			width: 30px;
+			height: 30px;
+			margin: 3px;
+			position: relative;
+			cursor: pointer;
+			border: 1px solid #E1E1E1;
+		}
+		
+		div:hover {
+			.img-big {
+				display: inline-block;
+			}
+			i {
+				display: inline-block;
+			}
+		}
+		
+		img {
+			width: 30px;
+			height: 30px;
+			object-fit: cover;
+		}
+		.img-big {
+			display: none;
+			width: 300px;
+			height: auto;
+			position: absolute;
+			top: 35px;
+			right: 0;
+			z-index: 9;
+		}
+		i {
+			position: absolute;
+			top: -6px;
+			right: -6px;
+			font-size: 12px;
+			opacity: .7;
+			display: none;
+		}
+	}
+	
+	.layui-table img {
+		max-width: unset;
+	}
+
+    .area-select {
+        width: 150px;
+    }
+
+    .add-goods {
+        width: 100%;
+        text-align: center;
+        border: 1px solid #e6e6e6;
+        border-top: none;
+        box-sizing: border-box;
+
+        span:first-child {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            line-height: 16px;
+            text-align: center;
+            border: 1px solid red;
+            border-radius: 50%;
+            margin-right: 5px;
+
+            i {
+                font-size: 12px;
+            }
+        }
+
+        span {
+            cursor: pointer;
+        }
+    }
+}
+
+.purchase-wrap {
+	width: calc(100% - 200px);
+}
+
+.purchase-list {
+	background-color: #FFFFFF;
+	padding: 20px;
+}
+
+// 详情
+.purchase-detail-list {
+	padding: 20px;
+	background-color: #FFFFFF;
+	margin-bottom: 10px;
+	
+	.goods-list {
+		width: 100%;
+		
+		table {
+			width: 100%;
+			
+			td {
+				padding: 10px;
+			}
+		}
+	}
+	
+	.contraction {
+		cursor: pointer;
+	}
+}
+
+.goods-imgs-list{
+	width: 100%;
+	padding: 0 20px;
+	
+	.goods-img {
+		display: inline-block;
+		width: 100px;
+		height: 100px;
+		margin-right: 10px;
+		margin-bottom: 10px;
+		
+		img {
+			max-width: 100%;
+			max-height: 100%;
+		}
+	}
+}
+
+.purchase-detail-buyer {
+	padding: 20px;
+	background-color: #FFFFFF;
+}
+
+.line-height-25 {
+	line-height: 25px;
+}
+
+// 表格
+.layui-table[lay-skin=line] td {
+	border-right: 1px solid #e6e6e6;
+}
+
+.upload-imgs-box {
+	display: flex;
+	align-items: center;
+}
+
+.ns-upload-default {
+	margin-right: 10px;
+}

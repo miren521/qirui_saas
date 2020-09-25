@@ -1,0 +1,124 @@
+{extend name="base"/}
+{block name="resources"}
+<style type="text/css">
+	.layui-input-block input,
+	.layui-input-block input,
+	.layui-input-block textarea {
+		outline: none;
+		border: none;
+	}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form">
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">申请信息</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">开店套餐：</label>
+				<div class="layui-input-block">
+					<input disabled name="shop_name" type="text" value="{$info.data.site_name}" class="layui-input ns-len-mid">
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<label class="layui-form-label">店铺等级：</label>
+				<div class="layui-input-block ns-len-mid">
+					<input disabled name="group_name" type="text" value="{$info.data.shop_group_name}" class="layui-input ns-len-mid">
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<label class="layui-form-label">续签时长：</label>
+				<div class="layui-input-block">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$info.data.apply_year} 年</p>
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<label class="layui-form-label">支付金额：</label>
+				<div class="layui-input-block">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$info.data.paying_amount} 元</p>
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<label class="layui-form-label img-upload-lable">支付凭证：</label>
+				<div class="layui-input-inline img-upload">
+					<input disabled="" type="hidden" class="layui-input" name="paying_money_certificate">
+					<div class="upload-img-block icon">
+						<div class="upload-img-box">
+							<img layer-src src="{:img($info.data.paying_money_certificate)}" alt="">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">审核状态</span>
+		</div>
+		<div class="layui-card-body">
+			{if condition="$info.data.apply_state == 1"}
+			<div class="layui-form-item">
+				<label class="layui-form-label">审核状态：</label>
+				<div class="layui-input-block">
+					<input disabled name="apply_state" type="text" value="审核中" class="layui-input ns-len-mid">
+				</div>
+			</div>
+
+			<div class="ns-form-row">
+				<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+			</div>
+			{/if}
+
+			{if condition="$info.data.apply_state == -1"}
+			<div class="layui-form-item">
+				<label class="layui-form-label">审核状态：</label>
+				<div class="layui-input-block">
+					<input disabled name="apply_state" type="text" value="审核失败" class="layui-input ns-len-mid">
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<label class="layui-form-label">拒绝理由：</label>
+				<div class="layui-input-block">
+					<input disabled name="apply_message" type="text" value="{$info.data.apply_message}" class="layui-input ns-len-mid">
+				</div>
+			</div>
+
+			<div class="ns-form-row">
+				<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+			</div>
+			{/if}
+
+			{if condition="$info.data.apply_state == 2"}
+			<div class="layui-form-item">
+				<label class="layui-form-label">审核状态：</label>
+				<div class="layui-input-block">
+					<input disabled name="apply_state" type="text" value="财务审核" class="layui-input ns-len-mid">
+				</div>
+			</div>
+
+			<div class="ns-form-row">
+				<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+			</div>
+			{/if}
+		</div>
+	</div>
+
+	<input name="id" type="text" value="{$info.data.id}" class="layui-input layui-hide">
+	<input id="site_id" name="site_id" type="text" value="{$info.data.site_id}" class="layui-input layui-hide">
+</div>
+{/block}
+{block name="script"}
+	<script>
+		function back() {
+			location.href = ns.url("city://city/shopreopen/reopen")
+		}
+	</script>
+{/block}

@@ -1,0 +1,257 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>充值套餐列表</li>
+		</ul>
+	</div>
+</div>
+
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label sm">开启充值：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="is_use" lay-filter="is_use" value="1" lay-skin="switch" {if !empty($config) && $config.is_use==1 }checked{/if}>
+		</div>
+	</div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<button class="layui-btn ns-bg-color" onclick="add()">添加充值套餐</button>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="status">
+	<ul class="layui-tab-title">
+		<li class="layui-this" data-status="">全部</li>
+		<li data-status="1">正常</li>
+		<li data-status="2">关闭</li>
+	</ul>
+	
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="charge_list" lay-filter="charge_list"></table>
+	</div>
+</div>
+
+<!-- 封面 -->
+<script type="text/html" id="cover_img">
+	<div class="ns-table-tuwen-box">
+		<div class="ns-img-box">
+			{{#  if(d.cover_img){  }}
+			<img layer-src src="{{ns.img(d.cover_img.split(',')[0])}}"/>
+			{{#  }  }}
+		</div>
+		<div class='ns-font-box'>
+			<p class="ns-multi-line-hiding">面值：{{d.face_value}}</p>
+			<p class="ns-multi-line-hiding">价格：{{d.buy_price}}</p>
+		</div>
+	</div>
+</script>
+
+<!-- 礼包 -->
+<script type="text/html" id="libao">
+	<div class="ns-table-tuwen-box">
+		<div class='ns-font-box'>
+			<p class="ns-multi-line-hiding">积分：{{d.point}}</p>
+			<p class="ns-multi-line-hiding">成长值：{{d.growth}}</p>
+		</div>
+	</div>
+</script>
+
+<!-- 状态 -->
+<script type="text/html" id="status">
+	{{d.status == 1 ? '正常' : '关闭'}}
+</script>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		{{# if(d.status == 1){ }}
+		<a class="layui-btn" lay-event="detail">详情</a>
+		<a class="layui-btn" lay-event="edit">编辑</a>
+		<a class="layui-btn" lay-event="card">客户列表</a>
+		<a class="layui-btn" lay-event="close">关闭</a>
+		{{# }else if(d.status == 2){ }}
+		<a class="layui-btn" lay-event="detail">详情</a>
+		<a class="layui-btn" lay-event="card">客户列表</a>
+		<a class="layui-btn" lay-event="del">删除</a>
+		{{# } }}
+	</div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+	layui.use(['form', 'element'], function() {
+		var table,
+			form = layui.form,
+			element = layui.element,
+			repeat_flag = false; //防重复标识
+		form.render();
+		
+		form.on('switch(is_use)', function(data) {
+			$.ajax({
+				url: ns.url("memberrecharge://admin/memberrecharge/setConfig"),
+				data: {
+					is_use: (data.elem.checked ? 1 : 0)
+				},
+				dataType: 'JSON',
+				type: 'POST',
+				success: function(res) {
+					layer.msg(res.message);
+				}
+			});
+		});
+
+		table = new Table({
+			elem: '#charge_list',
+			url: ns.url("memberrecharge://admin/memberrecharge/lists"),
+			cols: [
+				[{
+                    field: 'recharge_name',
+                    title: '套餐名称',
+                    unresize: 'false',
+                    width: '10%'
+                },{
+					title: '套餐信息',
+					unresize: 'false',
+					width: '15%',
+					templet: '#cover_img'
+				}, {
+					field: 'point',
+					title: '礼包信息',
+					unresize: 'false',
+					width: '9%',
+                    templet: '#libao'
+				}, {
+				    field: 'sale_num',
+				    title: '购买数量',
+				    unresize: 'false',
+				    width: '9%'
+				}, {
+					title: '创建时间',
+					unresize: 'false',
+					width: '10%',
+					templet: function(data) {
+						return ns.time_to_date(data.create_time);
+					}
+				}, {
+					title: '状态',
+					unresize: 'false',
+					width: '8%',
+					templet: '#status'
+				}, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width: '17%'
+				}]
+			],
+
+		});
+
+		//监听Tab切换
+		element.on('tab(status)', function(data) {
+			var status = $(this).attr("data-status");
+			table.reload( {
+				page: {
+					curr: 1
+				},
+				where: {
+					'status': status
+				}
+			});
+		});
+
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'edit': //编辑
+					location.href = ns.url("memberrecharge://admin/memberrecharge/edit?recharge_id=" + data.recharge_id);
+					break;
+				case 'detail': //详情
+					location.href = ns.url("memberrecharge://admin/memberrecharge/detail?recharge_id=" + data.recharge_id);
+					break;
+				case 'card': //卡片列表
+					location.href = ns.url("memberrecharge://admin/memberrecharge/card_lists?recharge_id=" + data.recharge_id);
+					break;
+				case 'del': //删除
+					deleteMemberRecharge(data.recharge_id);
+					break;
+				case 'close': //关闭
+                    invalidMemberRecharge(data.recharge_id);
+					break;
+			}
+		});
+		
+		/**
+		 * 删除
+		 */
+		function deleteMemberRecharge(recharge_id) {
+			layer.confirm('确定要删除该充值套餐吗?', function() {
+				if (repeat_flag) return;
+				repeat_flag = true;
+
+				$.ajax({
+					url: ns.url("memberrecharge://admin/memberrecharge/delete"),
+					data: {
+						recharge_id: recharge_id
+					},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						layer.msg(res.message);
+						repeat_flag = false;
+						if (res.code == 0) {
+							table.reload();
+						}
+					}
+				});
+			}, function() {
+				layer.close();
+				repeat_flag = false;
+			});
+		}
+
+		//使失效
+		function invalidMemberRecharge(recharge_id) {
+
+			layer.confirm('确定关闭该充值套餐吗?', function() {
+				if (repeat_flag) return;
+				repeat_flag = true;
+
+				$.ajax({
+					url: ns.url("memberrecharge://admin/memberrecharge/invalid"),
+					data: {
+						recharge_id: recharge_id
+					},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						layer.msg(res.message);
+						repeat_flag = false;
+						if (res.code == 0) {
+							table.reload();
+						}
+					}
+				});
+			}, function() {
+				layer.close();
+				repeat_flag = false;
+			});
+		}
+	});
+
+	function add() {
+		location.href = ns.url("memberrecharge://admin/memberrecharge/add");
+	}
+</script>
+{/block}

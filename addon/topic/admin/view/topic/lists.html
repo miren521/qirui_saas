@@ -1,0 +1,138 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<button class="layui-btn ns-bg-color" onclick="clickAdd()">添加专题活动</button>
+	<div class="layui-form">
+		<div class="layui-form">
+			<div class="layui-input-inline">
+				<input type="text" name="topic_name" placeholder="请输入活动名称" class="layui-input">
+				<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+					<i class="layui-icon">&#xe615;</i>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<table id="topic_list" lay-filter="topic_list"></table>
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+        <a class="layui-btn" lay-event="manage" href='{{ns.url("topic://admin/topic/goods?topic_id=")}}{{d.topic_id}}'>商品管理</a>
+		<a class="layui-btn" lay-event="edit">编辑</a>
+		<a class="layui-btn" lay-event="delete">删除</a>
+	</div>
+</script>
+{/block}
+{block name="script"}
+<script>
+    layui.use('form', function() {
+        form = layui.form,
+		repeat_flag = false; //防重复标识
+		form.render();
+
+        table = new Table({
+            elem: '#topic_list',
+            url: ns.url("topic://admin/topic/lists"),
+            cols: [
+                [{
+                    field: 'topic_name',
+                    title: '专题名称',
+                    unresize: 'false',
+                    width: '30%'
+                }, {
+                    field: 'start_time',
+                    title: '开始时间',
+                    unresize: 'false',
+                    width: '20%',
+                    templet: function (data) {
+                        return ns.time_to_date(data.start_time);
+                    }
+                }, {
+                    field: 'end_time',
+                    title: '结束时间',
+                    unresize: 'false',
+                    width: '20%',
+                    templet: function (data) {
+                        return ns.time_to_date(data.end_time);
+                    }
+                },
+				{
+					title: '状态',
+					unresize: 'false',
+					width: '10%',
+					templet: function (data) {
+						if(data.status == 1){
+							return '未开始';
+						}else if(data.status == 2){
+							return '进行中';
+						}else if(data.status == 3){
+							return '已结束';
+						}
+					}
+				},{
+                    title: '操作',
+                    toolbar: '#action',
+                    unresize: 'false',
+                    width: '20%'
+                }]
+            ],
+        });
+	    
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function (obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'detail': //详情
+                    location.href = ns.url("topic://admin/topic/goods?topic_id=" + data.topic_id);
+                    break;
+                case 'delete': //删除
+                    layer.confirm('确定要删除该专题活动吗?', function () {
+                        $.ajax({
+                            url: ns.url("topic://admin/topic/delete"),
+                            data: {topic_id: data.topic_id},
+                            dataType: 'JSON',
+                            type: 'POST',
+                            success: function (res) {
+                                layer.msg(res.message);
+                                repeat_flag = false;
+                                if (res.code == 0) {
+                                    table.reload();
+                                }
+                            }
+                        });
+                    });
+                    break;
+                case 'edit': //编辑
+                    location.href = ns.url("topic://admin/topic/edit?topic_id=" + data.topic_id);
+                    break;
+            }
+        });
+
+        layui.use('form', function () {
+            var form = layui.form;
+			form.render();
+
+			form.on();
+        });
+
+        form.on('submit(search)', function (data) {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+        });
+    });
+	function clickAdd() {
+		location.href = ns.url("topic://admin/topic/add");
+	}
+</script>
+{/block}

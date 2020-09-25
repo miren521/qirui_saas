@@ -1,0 +1,61 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-form">
+    <!-- 基础上传 -->
+    <div class="layui-card ns-card-common ns-card-brief">
+        <div class="layui-card-header">
+            <span class="ns-card-title">结算周期设置</span>
+        </div>
+        <div class="layui-card-body">
+            <div class="layui-form-item">
+                <label class="layui-form-label">结算周期类型：</label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline">
+                        <input type="radio" name="period_type" value="1" lay-filter="period_type" title="按天" {$config_info.value.period_type == 1 ? 'checked' : ''} />
+                        <input type="radio" name="period_type" value="2" lay-filter="period_type" title="按周" {$config_info.value.period_type == 2 ? 'checked' : ''} />
+                        <input type="radio" name="period_type" value="3" lay-filter="period_type" title="按月" {$config_info.value.period_type == 3 ? 'checked' : ''} />
+                    </div>
+                </div>
+                <div class="ns-word-aux">按天是指每天0点开始，按周是指每周一0点开始，按月是指每月一号0点开始</div>
+            </div>
+        </div>
+    </div>
+
+	<div class="ns-single-filter-box">
+		<div class="ns-form-row">
+			<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		</div>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+    layui.use(['form'], function() {
+        var form = layui.form,
+            repeat_flag = false; //防重复标识
+
+        form.on('submit(save)', function(data) {
+            if (repeat_flag) return;
+            repeat_flag = true;
+
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("city://admin/config/config"),
+                data: {
+					'config_json': JSON.stringify(data.field)
+				},
+                success: function(res) {
+                    layer.msg(res.message);
+					repeat_flag = false;
+                    if (res.code == 0) {
+                        location.reload();
+                    }
+                }
+            });
+        });
+    });
+</script>
+{/block}

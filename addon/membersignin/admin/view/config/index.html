@@ -1,0 +1,238 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.ns-noboder-searchbox {margin-right: 0 !important;}
+	.ns-search-noborder {border-width: 1px;width: 42px;border-style: solid;text-align: center;border-color: #e6e6e6;padding: 0px !important;cursor: pointer;}
+	
+	.ns-width {width: 115px;}
+	.layui-block {overflow: hidden; margin-bottom: 20px;}
+	.layui-table+button {margin-top: 15px;}
+	.ns-empty {text-align: center;}
+	.layui-table[lay-size=lg] td, .layui-table[lay-size=lg] th {
+		padding: 15px;
+	}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作说明</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>用户可在签到页每日签到一次，每日签到按设置的每日奖励进行发放，连续签到天数大于设置的天数，按最后一日的奖励进行发放；若签到中断则重新计算；</li>
+			<li>点击 “+” 按钮可以添加更多的推荐奖励规则</li>
+<!--			<li>在连续签到规则中，可以同时设置积分和红包，也可以只设其中一个</li>-->
+			<li>点击删除图标按钮可以删除该条规则</li>
+		</ul>
+	</div>
+</div>
+
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否启用：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="is_use" lay-filter="is_use" value="1" lay-skin="switch" {if !empty($config) && $config.is_use==1 }checked{/if}>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<div class="layui-block">
+			<label class="layui-form-label">首次签到：</label>
+			<label class="layui-form-mid ns-width">首次签到赠送奖励</label>
+			<div class="layui-input-inline ns-len-short">
+				<input type="number" name="point" lay-verify="required|number|int" value="{$config['value'][0]['point']}" autocomplete="off" class="layui-input ">
+			</div>
+			<span class="layui-form-mid">积分</span>
+		</div>
+		
+		<div class="layui-block">
+			<label class="layui-form-label"></label>
+			<label class="layui-form-mid ns-width"></label>
+			<div class="layui-input-inline ns-len-short">
+				<input type="number" name="growth" lay-verify="required|number|flnum" value="{$config['value'][0]['growth'] ?: 0}" autocomplete="off" class="layui-input ">
+			</div>
+			<span class="layui-form-mid">成长值</span>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">连续签到：</label>
+		
+		<div class="layui-input-block">
+			<table class="layui-table" id="sign" lay-skin="line" lay-size="lg">
+				<colgroup>
+					<col width="20%">
+					<col width="20%">
+					<col width="20%">
+					<col width="20%">
+					<col width="20%">
+				</colgroup>
+				<thead>
+					<tr>
+						<th>连续签到天数</th>
+						<th>奖励积分</th>
+<!--						<th>奖励红包（元）</th>-->
+						<th>奖励成长值</th>
+						<th class="operation">操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					{if count($config.value) > 1}
+						{foreach $config.value as $k =>$v}
+						{if $k>0}
+						<tr>
+							<td><input type="number" class="layui-input ns-len-short day" value="{$v.day}" lay-verify="required|number|int" autocomplete="off" /><input type="hidden" value="连续签到天数" /></td>
+							<td><input type="number" class="layui-input ns-len-short point" value="{$v.point}" lay-verify="required|number|int" autocomplete="off" /><input type="hidden" value="连续签到积分" /></td>
+							<td><input type="number" class="layui-input ns-len-short growth" value="{$v.growth}" lay-verify="required|number|int" autocomplete="off" /><input type="hidden" value="连续签到成长值" /></td>
+							<td><div class="ns-table-btn"><a href="javascript:;" class="layui-btn" onclick="deleteSign(this)">删除连续签到</a></div></td>
+						</tr>
+						{/if}
+						{/foreach}
+					{else/}
+					<tr class="ns-empty-box">
+						<td colspan="5">
+							<div class="ns-empty">暂无数据</div>
+						</td>
+					</tr>
+					{/if}
+				</tbody>
+			</table>
+			<button class="layui-btn ns-bg-color" onclick="addSign()">添加连续签到奖励</button>
+		</div>
+	</div>
+	
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use('form', function() {
+		var form = layui.form,
+			repeat_flag = false; //防重复标识
+		form.render();
+
+		form.on('submit(save)', function(data) {
+			var arr = [];
+			arr.push({point: data.field.point, growth:data.field.growth, day: 1});
+			
+			$(".layui-table tbody tr").each(function () {
+				if (!$(this).hasClass("ns-empty-box")) {
+					var point = $(this).find(".point").val(),
+						growth = $(this).find(".growth").val(),
+						day = $(this).find(".day").val();
+					arr.push({point: point, growth: growth, day: day});
+				}
+			});
+			data.field.json = JSON.stringify(arr);
+			
+			if (repeat_flag) return;
+			repeat_flag = true;
+			
+			$.ajax({
+				type: 'POST',
+				url: ns.url("membersignin://admin/config/index"),
+				dataType: 'JSON',
+				data: data.field,
+				success: function (res) {
+					repeat_flag = false;
+					if (res.code == 0) {
+						layer.confirm('编辑成功', {
+							title: '操作提示',
+							btn: ['返回列表', '继续操作'],
+							yes: function () {
+								location.href = ns.url("admin/promotion/member")
+							},
+							btn2: function () {
+								location.reload();
+							}
+						});
+					} else {
+						layer.msg(res.message);
+					}
+				}
+			})
+		});
+		
+		form.verify({
+			number: function (value, item) {
+				var str = $(item).parents(".layui-block").find("span").text();
+				var _str = $(item).siblings().val();
+				if (value < 0) {
+					if (str) {
+						return str + "不能小于0";
+					} else {
+						return _str + "不能小于0";
+					}
+				}
+			},
+			int: function (value, item) {
+				var str = $(item).parents(".layui-block").find("span").text();
+				var _str = $(item).siblings().val();
+				if (value%1 != 0) {
+					if (str) {
+						return str + "必须为整数";
+					} else {
+						return _str + "必须为整数";
+					}
+				}
+			},
+			flnum: function (value, item) {
+				var str = $(item).parents(".layui-block").find("span").text();
+				var _str = $(item).siblings().val();
+				var arrMen = value.split(".");
+				var val = 0;
+				if (arrMen.length == 2) {
+					val = arrMen[1];
+				}
+				if (val.length > 2) {
+					if (str) {
+						return str + "最多可保留两位小数";
+					} else {
+						return _str + "最多可保留两位小数";
+					}
+				}
+			},
+			required: function (value, item) {
+				var str = $(item).parents(".layui-block").find("span").text();
+				var _str = $(item).siblings().val();
+				
+				if (value.trim() == "" || value == undefined || value == null) {
+					if (str) {
+						return str + "不能为空";
+					} else {
+						return _str + "不能为空";
+					}
+				}
+			}
+		});
+	});
+	
+	
+	function addSign() {
+		$("#sign").find("tbody .ns-empty-box").remove();
+		var html = '';
+		html += `<tr>`+
+					`<td><input type="number" class="layui-input ns-len-short day" lay-verify="required|number|int" autocomplete="off" /><input type="hidden" value="连续签到天数" /></td>`+
+					`<td><input type="number" class="layui-input ns-len-short point" lay-verify="required|number|int" autocomplete="off" /><input type="hidden" value="连续签到积分" /></td>`+
+					`<td><input type="number" class="layui-input ns-len-short growth" lay-verify="required|number|int" autocomplete="off" /><input type="hidden" value="连续签到成长值" /></td>`+
+					`<td><div class="ns-table-btn"><a href="javascript:;" class="layui-btn" onclick="deleteSign(this)">删除连续签到</a></div></td>`+
+				`</tr>`;
+				
+		$("#sign").find("tbody").append(html);
+	}
+
+	function deleteSign(e) {
+		$(e).parents("tr").remove();
+		
+		if ($(".layui-table tbody tr").length == 0) {
+			$(".layui-table tbody").html('<tr class="ns-empty-box"><td colspan="5"><div class="ns-empty">暂无数据</div></td></tr>');
+		}
+	}
+	
+	function back(){
+		location.href = ns.url("admin/promotion/member");
+	}
+</script>
+{/block}

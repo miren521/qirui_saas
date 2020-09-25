@@ -1,0 +1,546 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/payment.css">
+{/block}
+{block name="body"}
+<!-- 顶部html文件-->
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-payment layui-form">
+			<div class="ns-shipping-address">
+
+			</div>
+			<div class="ns-order-list"></div>
+			<div class="ns-pay-wrap"></div>
+			<div class="ns-pay-btn"></div>
+
+			<input type="hidden" class="cart-ids" value="{$cart_ids}" name="cart_ids" />
+			<input type="hidden" class="sku-id" value="{$sku_id}" name="sku_id" />
+			<input type="hidden" class="num" value="{$num}" name="num" />
+		</div>
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script type="text/javascript"
+	src="{:get_http_type()}://webapi.amap.com/maps?v=1.4.6&amp;key=2df5711d4e2fd9ecd1622b5a53fc6b1d"></script>
+<script type="text/javascript" src="SHOP_JS/address.js"></script>
+<script type="text/javascript" src="STATIC_JS/map_address.js"></script>
+<script type="text/javascript">
+	var form, laytpl, repeat_flag = false;
+	layui.use(['form', 'laytpl'], function () {
+		form = layui.form;
+		laytpl = layui.laytpl;
+
+		// 数据初始化
+		getAddressList();
+		getPayDate(); 
+
+		form.on('submit(settlement)', function (data) {
+			var message = {};
+			$(".layui-textarea").each(function () {
+				var site_id = $(this).attr("data-site_id");
+				var buyer_message = $(this).val();
+
+				message[site_id] = buyer_message;
+			})
+
+			data.field.buyer_message = JSON.stringify(message);
+
+			if (repeat_flag) return;
+			repeat_flag = true;
+
+			$.ajax({
+				url: ns.url("supply://shop/ordercreate/create"),
+				data: data.field,
+				dataType: 'JSON',
+				type: 'POST',
+				success: function (res) {
+					repeat_flag = false;
+					if(checkLogin(res)) {
+						if (res.code == 0) {
+							location.href = ns.url("supply://shop/pay/pay", {"out_trade_no": res.data});
+						} else {
+							layer.msg(res.message);
+						}
+					}
+				}
+			})
+		})
+
+		form.on('submit(saveAdd)', function (data) {
+			var province_name = $("select[name=province_id] option:selected").text();
+			var city_name = $("select[name=city_id] option:selected").text();
+			var district_name = $("select[name=district_id] option:selected").text();
+
+			//地址id
+			data.field.province = data.field.province_id;
+			data.field.city = data.field.city_id;
+			data.field.district = data.field.district_id;
+
+			//地址name
+			data.field.province_name = province_name;
+			data.field.city_name = city_name;
+			data.field.district_name = district_name;
+
+			data.field.full_address = province_name + city_name + district_name;
+
+			if (repeat_flag) return;
+			repeat_flag = true;
+
+			$.ajax({
+				url: ns.url("shop/siteaddress/add"),
+				data: data.field,
+				type: "POST",
+				dataType: "JSON",
+				success: function (res) {
+					repeat_flag = false;
+					if(checkLogin(res)) {
+						layer.msg(res.message);
+						if (res.code == 0) {
+							location.reload();
+						}
+					}
+				}
+			});
+		});
+
+		form.on('submit(saveEdit)', function (data) {
+			var province_name = $("select[name=province_id] option:selected").text();
+			var city_name = $("select[name=city_id] option:selected").text();
+			var district_name = $("select[name=district_id] option:selected").text();
+
+			//地址id
+			data.field.province = data.field.province_id;
+			data.field.city = data.field.city_id;
+			data.field.district = data.field.district_id;
+
+			//地址name
+			data.field.province_name = province_name;
+			data.field.city_name = city_name;
+			data.field.district_name = district_name;
+
+			data.field.full_address = province_name + city_name + district_name;
+
+			if (repeat_flag) return;
+			repeat_flag = true;
+
+			$.ajax({
+				url: ns.url("shop/siteaddress/edit"),
+				data: data.field,
+				type: "POST",
+				dataType: "JSON",
+				success: function (res) {
+					repeat_flag = false;
+					if(checkLogin(res)) {
+						layer.msg(res.message);
+						if (res.code == 0) {
+							location.reload();
+						}
+					}
+				}
+			});
+		});
+
+		//表单验证
+		form.verify({
+			province_id : function(value, item){
+			    if(value == ''){
+			        return '请选择省份';
+			    }
+			},
+			city_id : function(value, item){
+			    if(value == ''){
+			        return '请选择城市';
+			    }
+			},
+			district_id : function(value, item){
+			    if(value == ''){
+			        return '请选择区/县';
+			    }
+			},
+			address: function(value) {
+				if (value == '') {
+					return '请输入详细地址';
+				}
+			},
+		});
+	})
+
+	function getAddressList() {
+		$.ajax({
+			url: ns.url("shop/siteaddress/getSiteAddressList"),
+			dataType: 'JSON',
+			type: 'POST',
+			success: function (res) {
+				laytpl($("#address").html()).render(res.data, function (html) {
+					$(".ns-shipping-address").html(html);
+				});
+			}
+		})
+	}
+
+	// 获取结算订单数据
+	function getPayDate() {
+		$.ajax({
+			url: ns.url("supply://shop/ordercreate/payment"),
+			data: {
+				"cart_ids": $(".cart-ids").val(),
+				"sku_id": $(".sku-id").val(),
+				"num": $(".num").val()
+			},
+			dataType: 'JSON',
+			type: 'POST',
+			success: function (res) {
+				if(checkLogin(res)) {
+					laytpl($("#payOrder").html()).render(res.data.data.shop_goods_list, function (html) {
+						$(".ns-order-list").html(html);
+						form.render();
+					});
+
+					laytpl($("#payWrap").html()).render(res.data.data, function (html) {
+						$(".ns-pay-wrap").html(html);
+					});
+
+					laytpl($("#payBtn").html()).render(res.data.data, function (html) {
+						$(".ns-pay-btn").html(html);
+					});
+				}
+			}
+		})
+	}
+
+	function goodsDetail(id) {
+		location.href = ns.url("supply://shop/goods/detail", { sku_id: id });
+	}
+
+	// 添加收货地址
+	function addAddress() {
+		laytpl($("#addAddress").html()).render([], function (html) {
+			layer_pass = layer.open({
+				title: '编辑地址',
+				skin: 'layer-tips-class',
+				type: 1,
+				area: ['800px'],
+				content: html,
+			});
+			form.render();
+		});
+
+		//初始化联系地址
+		var initdata = { province_id: '', city_id: '', district_id: '' };
+		initAddress(initdata, "storeform");
+	}
+
+	function editAddress(id) {
+		layui.stope(event);
+		$.ajax({
+			url: ns.url("shop/siteaddress/getSiteAddressInfo"),
+			data: {
+				"id": id
+			},
+			dataType: 'JSON',
+			type: 'POST',
+			success: function (res) {
+				if(checkLogin(res)) {
+					laytpl($("#editAddress").html()).render(res.data, function (html) {
+						layer_pass = layer.open({
+							title: '编辑地址',
+							skin: 'layer-tips-class',
+							type: 1,
+							area: ['800px'],
+							content: html,
+						});
+						form.render();
+					});
+
+					//初始化联系地址
+					var initdata = {
+						province_id: res.data.province_id,
+						city_id: res.data.city_id,
+						district_id: res.data.district_id
+					};
+					initAddress(initdata, "storeform");
+				}
+			}
+		})
+	}
+
+	function delAddress(id) {
+		if (repeat_flag) return;
+		repeat_flag = true;
+
+		$.ajax({
+			url: ns.url("shop/siteaddress/delete"),
+			data: {
+				"id": id
+			},
+			dataType: 'JSON',
+			type: 'POST',
+			success: function (res) {
+				repeat_flag = false;
+				if(checkLogin(res)) {
+					if (res.code == 0) {
+						location.reload();
+					}
+				}
+			}
+		})
+	}
+
+	function setDefault(id) {
+		if (repeat_flag) return;
+		repeat_flag = true;
+
+		$.ajax({
+			url: ns.url("shop/siteaddress/setDefault"),
+			data: {
+				"id": id
+			},
+			dataType: 'JSON',
+			type: 'POST',
+			success: function (res) {
+				repeat_flag = false;
+				if(checkLogin(res)) {
+					if (res.code == 0) {
+						location.reload();
+					}
+				}
+			}
+		})
+	}
+</script>
+
+<script type="text/html" id="address">
+	<div class="address-item">
+		<div class="add-address" onclick="addAddress()">
+			<i class="iconfont iconincrease"></i>
+			添加收货地址
+		</div>
+	</div>
+
+	{{#  layui.each(d, function(index, item) {  }}
+		{{#  if(item.is_default) {  }}
+		<div class="address-item active">
+		{{#  } else {  }}
+		<div class="address-item" onclick="setDefault({{item.id}})">
+		{{#  }  }}
+			<div class="address-info">
+				<div class="options">
+					<div onclick="editAddress({{item.id}})">编辑</div>
+					{{#  if(!item.is_default) {  }}
+					<div onclick="delAddress({{item.id}})">删除</div>
+					{{#  }  }}
+				</div>
+				<div class="address-name">{{item.name}}</div>
+				<div class="address-mobile">{{item.mobile}}</div>
+				<div class="address-desc ns-multi-line-hiding">{{item.full_address}} {{item.address}}</div>
+			</div>
+		</div>
+	{{#  })  }}
+</script>
+
+<script type="text/html" id="addAddress">
+	<div class="layui-form" lay-filter="storeform">
+		<div class="layui-form-item">
+			<label class="layui-form-label"><span class="required">*</span>姓名：</label>
+			<div class="layui-input-block">
+				<input type="text" name="name" lay-verify="required" autocomplete="off" placeholder="收货人姓名" class="layui-input ns-len-mid" value="">
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label"><span class="required">*</span>手机：</label>
+			<div class="layui-input-block">
+				<input type="text" name="mobile" lay-verify="required|phone" autocomplete="off" placeholder="收货人手机号" class="layui-input ns-len-mid" value="">
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">电话：</label>
+			<div class="layui-input-block">
+				<input type="text" name="telephone" autocomplete="off" placeholder="收货人固定电话（选填）" class="layui-input ns-len-mid" value="">
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">邮政编码：</label>
+			<div class="layui-input-block">
+				<input type="text" name="area_code" autocomplete="off" placeholder="邮政编码" class="layui-input ns-len-mid" value="">
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label"><span class="required">*</span>联系地址：</label>
+			<div class="layui-input-inline area-select">
+				<select name="province_id" lay-filter="province_id" lay-verify="province_id">
+					<option value="">请选择省份</option>
+					{foreach $province_list as $k => $v}
+					<option value="{$v.id}">{$v.name}</option>
+					{/foreach}
+				</select>
+			</div>
+			
+			<div class="layui-input-inline area-select">
+				<select name="city_id" lay-filter="city_id" lay-verify="city_id">
+					<option value="">请选择城市</option>
+				</select>
+			</div>
+			
+			<div class="layui-input-inline area-select">
+				<select name="district_id" lay-filter="district_id" lay-verify="district_id">
+					<option value="">请选择区/县</option>
+				</select>
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label"><span class="required">*</span>详细地址：</label>
+			<div class="layui-input-block">
+				<input type="text" name="address" placeholder="请输入详细地址，以方便买家联系（请勿重复填写省市区）" lay-verify="address" autocomplete="off" class="layui-input ns-len-long address-content" value="">
+			</div>
+		</div>
+		
+		<div class="ns-form-row">
+			<button class="layui-btn ns-bg-color" lay-submit lay-filter="saveAdd">保存</button>
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="editAddress">
+	<div class="layui-form" lay-filter="storeform">
+		<div class="layui-form-item">
+			<label class="layui-form-label"><span class="required">*</span>姓名：</label>
+			<div class="layui-input-block">
+				<input type="text" name="name" lay-verify="required" autocomplete="off" placeholder="收货人姓名" class="layui-input ns-len-mid" value="{{d.name}}">
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label"><span class="required">*</span>手机：</label>
+			<div class="layui-input-block">
+				<input type="text" name="mobile" lay-verify="required|phone" autocomplete="off" placeholder="收货人手机号" class="layui-input ns-len-mid" value="{{d.mobile}}">
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">电话：</label>
+			<div class="layui-input-block">
+				<input type="text" name="telephone" autocomplete="off" placeholder="收货人固定电话（选填）" class="layui-input ns-len-mid" value="{{d.telephone}}">
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">邮政编码：</label>
+			<div class="layui-input-block">
+				<input type="text" name="area_code" autocomplete="off" placeholder="邮政编码" class="layui-input ns-len-mid" value="{{d.area_code}}">
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label"><span class="required">*</span>联系地址：</label>
+			<div class="layui-input-inline area-select">
+				<select name="province_id" lay-filter="province_id" lay-verify="province_id">
+					<option value="">请选择省份</option>
+					{foreach $province_list as $k => $v}
+					<option value="{$v.id}">{$v.name}</option>
+					{/foreach}
+				</select>
+			</div>
+			
+			<div class="layui-input-inline area-select">
+				<select name="city_id" lay-filter="city_id" lay-verify="city_id">
+					<option value="">请选择城市</option>
+				</select>
+			</div>
+			
+			<div class="layui-input-inline area-select">
+				<select name="district_id" lay-filter="district_id" lay-verify="district_id">
+					<option value="">请选择区/县</option>
+				</select>
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+			<label class="layui-form-label"><span class="required">*</span>详细地址：</label>
+			<div class="layui-input-block">
+				<input type="text" name="address" placeholder="请输入详细地址，以方便买家联系（请勿重复填写省市区）" lay-verify="address" autocomplete="off" class="layui-input ns-len-long address-content" value="{{d.address}}">
+			</div>
+		</div>
+		
+		<input type="hidden" value="{{d.id}}" name="id" />
+
+		<div class="ns-form-row">
+			<button class="layui-btn ns-bg-color" lay-submit lay-filter="saveEdit">保存</button>
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="payOrder">
+	{{#  layui.each(d, function(siteIndex, siteItem) {  }}
+	<div class="ns-order-li">
+		<div class="ns-order-site">
+			<i class="iconfont iconmendian"></i>
+			<span>{{siteItem.site_name}}</span>
+		</div>
+
+		<div class="ns-order-goods">
+			<ul>
+				<li class="goods-info-wrap">商品信息</li>
+				<li class="goods-price">价格</li>
+				<li class="goods-buy-num">数量</li>
+				<li class="goods-total-price">小计</li>
+			</ul>
+
+			{{#  layui.each(siteItem.goods_list, function(goodsIndex, goodsItem) {  }}
+			<ul class="ns-goods-li">
+				<li class="goods-info-wrap" onclick="goodsDetail({{goodsItem.sku_id}})">
+					<div class="img-wrap"><img class="img-thumbnail" src="{{ns.img(goodsItem.sku_image)}}" onerror="this.src = 'SHOP_SUPPLY_LOCAL_IMG/default_goods.png' " /></div>
+					<div class="info-wrap ns-multi-line-hiding">{{ goodsItem.sku_name }}</div>
+				</li>
+				<li class="goods-price">
+					<span>￥{{ goodsItem.price }}</span>
+				</li>
+				<li class="goods-buy-num">
+					<span>{{goodsItem.num}}</span>
+				</li>
+				<li class="goods-total-price">
+					<strong class="subtotal ns-text-color" data-site="{{siteIndex}}" data-sku="{{goodsIndex}}">￥{{ goodsItem.real_goods_money }}</strong>
+				</li>
+			</ul>
+			{{#  })  }}
+
+			<div class="buyer-message">
+				<div class="layui-form-item layui-form-text">
+					<label class="layui-form-label">给卖家留言：</label>
+					<div class="layui-input-block">
+						  <textarea data-site_id="{{siteItem.site_id}}" placeholder="留言前建议先与商家协商一致" class="layui-textarea"></textarea>
+					</div>
+				</div>
+	
+				<div class="total-info">
+					<p><span class="title">商品总金额：</span><span class="ns-text-color price">￥{{siteItem.goods_money}}</span></p>
+					<p><span class="title">运费：</span><span class="ns-text-color price">￥{{siteItem.delivery_money}}</span></p>
+				</div>
+			</div>
+		</div>
+	</div>
+	{{#  })  }}
+</script>
+
+<script type="text/html" id="payWrap">
+	<div>
+		<div class=""><span class="title">商品总金额：</span>￥{{d.goods_money}}</div>
+		<div class=""><span class="title">运费：</span>￥{{d.delivery_money}}</div>
+		<!-- <div class=""><span class="title">应付金额（含运费）：</span>￥{{d.pay_money}}</div> -->
+	</div>
+</script>
+
+<script type="text/html" id="payBtn">
+	<div class="">共{{d.goods_num}}件，应付金额（含运费）：<span class="ns-text-color">￥{{d.order_money}}</span></div>
+	<button class="layui-btn ns-bg-color" lay-submit lay-filter="settlement">订单结算</button>
+</script>
+{/block}

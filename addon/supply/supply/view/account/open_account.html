@@ -1,0 +1,156 @@
+{extend name="addon/supply/supply/view/base.html"/}
+{block name="resources"}
+<style>
+    .layui-card-body{display:flex;justify-content:space-around}
+    .layui-card-body .money{font-size:20px;color:#666;font-weight:700;margin-top:10px;text-align:center;max-width:250px}
+    .layui-card-body .subhead{font-size:12px;margin-left:3px;cursor:pointer}
+    .ns-shop-account{display:flex;align-items:center;position:relative;padding:15px;box-sizing:border-box}
+    .ns-shop-detail p{display:inline-block;width:300px;line-height:30px}
+    .ns-shop-account>a{position:absolute;right:15px;bottom:15px;cursor:pointer}
+    .ns-item-block-parent{margin-top:10px}
+</style>
+{/block}
+{block name="main"}
+
+<div class="layui-collapse ns-tips">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">操作提示</h2>
+        <ul class="layui-colla-content layui-show">
+            <li>1、供应商到期30日内可以申请续签</li>
+            <li>2、请认准官方收款账户，支付凭据上传之后请联系官方客服人员</li>
+        </ul>
+    </div>
+</div>
+
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <div>
+            <span class="ns-card-title">入驻费用</span>
+        </div>
+    </div>
+    <div class="layui-card-body">
+        <div class="content">
+            <p class="title">入驻费用</p>
+            <p class="money">{$apply_data.open_fee}</p>
+        </div>
+        <div class="content">
+            <p class="title">保证金</p>
+            <p class="money">{$apply_data.bond}</p>
+        </div>
+        <div class="content">
+            <p class="title">
+                到期时间
+                {if condition="isset($apply_data.is_reopen) && $apply_data.is_reopen == 2 && $apply_data['cert_id'] >
+                0"}
+                {if $is_reopen == 1}
+                <span class="subhead ns-text-color reopen_apply">申请续签</span>
+                {else/}
+                <span class="subhead ns-text-color reopen_apply_detail">申请续签</span>
+                {/if}
+                {elseif condition="isset($apply_data.is_reopen) && $apply_data.is_reopen == 2 && $apply_data['cert_id']
+                == 0"}
+                <span class="subhead ns-text-color shop_auth_apply">申请续签</span>
+                {/if}
+                <span class="subhead ns-text-color reopen-list">续签记录</span>
+            </p>
+
+            <p class="money">{$apply_data.expire_time}</p>
+        </div>
+
+    </div>
+</div>
+
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <div>
+            <span class="ns-card-title">入驻费用记录</span>
+        </div>
+    </div>
+    <div class="layui-card-body">
+        <table id="renewal_list" lay-filter="renewal_list"></table>
+    </div>
+</div>
+
+
+<input class="shop-group-id" type="hidden" value="{$apply_data.group_id}" name="group_id"/>  <!-- 分组ID -->
+<input class="shop-category-id" type="hidden" value="{$apply_data.category_id}" name="category_id"/>  <!-- 分类ID -->
+
+{/block}
+{block name="script"}
+<script>
+    // 到期时间
+
+    var table, form, laytpl, laydate, upload, repeat_flag = false;
+    layui.use(['form', 'laytpl', 'laydate', 'upload'], function () {
+        form = layui.form;
+        laytpl = layui.laytpl;
+        laydate = layui.laydate;
+        upload = layui.upload;
+
+        form.render();
+
+        /**
+         * 加载表格
+         */
+        table = new Table({
+            elem: '#renewal_list',
+            url: ns.url("supply://supply/account/fee"),
+            cols: [
+                [{
+                    field: 'account_no',
+                    title: '账单编号',
+                    unresize: 'false',
+                    width: '25%'
+                }, {
+                    field: 'money',
+                    title: '<span style="padding-right: 50px;">缴费金额（元）</span>',
+                    unresize: 'false',
+                    align: 'right',
+                    templet: function (data) {
+                        return '<span style="padding-right: 50px;">' + data.money + '</span>';
+                    },
+                    width: '25%'
+                }, {
+                    field: 'type_name',
+                    title: '费用类型',
+                    unresize: 'false',
+                    width: '25%'
+                }, {
+                    field: 'create_time',
+                    title: '创建时间',
+                    unresize: 'false',
+                    templet: function (data) {
+                        if (data.create_time == 0) {
+                            return '--';
+                        } else {
+                            return ns.time_to_date(data.create_time)
+                        }
+                    },
+                    width: '25%'
+                }]
+            ]
+        });
+    });
+
+    //申请续签
+    $(".reopen_apply").click(function () {
+        location.href = ns.url("supply://supply/cert/reopen");
+    });
+    //认证
+    $(".shop_auth_apply").click(function () {
+        location.href = ns.url("supply://supply/cert/index");
+    });
+
+    //编辑续签
+    $(".reopen_apply_detail").click(function () {
+        location.href = ns.url("supply://supply/cert/editreopeninfo");
+    });
+
+    //续签记录
+    $(".reopen-list").click(function () {
+        location.href = ns.url("supply://supply/account/reopenlist");
+    });
+
+</script>
+
+{/block}

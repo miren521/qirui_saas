@@ -1,0 +1,289 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<style>
+    .good-name, .good-price {
+        line-height: 34px;
+    }
+    .wholesale-inut-len{
+        width:60px !important;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">操作提示</h2>
+        <ul class="layui-colla-content layui-show">
+            <li>管理员可以在此页编辑批发商品</li>
+        </ul>
+    </div>
+</div>
+
+<div class="layui-form ns-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label img-upload-lable ns-short-label"><span class="required">*</span>商品：</label>
+        <div class="layui-input-inline">
+            <div class="upload-img-block square">
+                <div class="upload-img-box goods-img" >
+					<input type="hidden" value="{$info['goods_image']}" />
+                    <!-- <img src="{:img($info['goods_image'])}"/> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">商品名称：</label>
+        <div class="layui-input-inline goods-name">
+            {$info.goods_name}
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">商品原价：</label>
+        <div class="layui-input-inline goods-price">
+            ￥<span>{$info.goods_info.price}</span>
+        </div>
+    </div>
+
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">批发设置：</label>
+        <div class="layui-input-inline" id="sku_list">
+            <table class="layui-table">
+                <colgroup>
+                    <col width="300">
+                    <col width="200">
+                    <col width="100">
+                    <col width="400">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th>商品信息</th>
+                    <th>商品原价</th>
+                    <th>库存</th>
+                    <th>阶梯价格</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                {foreach $info['sku_list'] as $k => $v}
+                <tr>
+                    <td>
+                        <div class="ns-table-title">
+                            <div class="ns-title-pic">
+                                <img layer-src src="{:img($v.sku_image)}"/>
+                            </div>
+                            <div class="ns-title-content">
+                                <a href="javascript:;" class="ns-multi-line-hiding ns-text-color" title="{$v.sku_name}">{$v.sku_name}</a>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        ￥{$v.sku_info.price}
+                    </td>
+                    <td>
+                        {$v.sku_info.stock}
+                    </td>
+                    <td>
+                        <div class="ns-table-btn">
+                            <table class="layui-table sku-block"  sku_id = "{$v.sku_id}" sku_price = "{$v.sku_info.price}">
+								<colgroup>
+								    <col width="10%">
+									{if count($v['price_array']) == 1}
+								    <col width="83%">
+									{/if}
+									{if count($v['price_array']) == 2}
+									<col width="41.5%">
+									<col width="41.5%">
+									{/if}
+									{if count($v['price_array']) == 3}
+									<col width="28%">
+									<col width="28%">
+									<col width="27%">
+									{/if}
+								    <col width="7%">
+								</colgroup>
+								<thead>
+                                <tbody>
+                                <tr>
+                                    <td style="min-width:40px;">数量</td>
+                                    {foreach :array_column($v['price_array'], 'num') as $num_k => $num_item}
+                                        <td><input type="number" name='num[]' class="layui-input wholesale-inut-len num" value="{$num_item}" lay-verify="required|number|int|gtzero" autocomplete="off" /></td>
+                                    {/foreach}
+
+                                    <td rowspan="3"><a href="javascript:void(0);"  class="layui-icon layui-icon-add-circle" style='font-size:20px'onclick="addPricemodel(this);"></a></td>
+                                </tr>
+                                <tr>
+                                    <td style="min-width:40px;">价格</td>
+                                    {foreach :array_column($v['price_array'], 'price') as $price_k => $price_item}
+                                        <td><input type="number" name='price[]' class="layui-input wholesale-inut-len price" value="{$price_item}" lay-verify="required|number|int|price|gtzero" autocomplete="off" /></td>
+                                    {/foreach}
+                                </tr>
+                                <tr>
+                                    <td style="min-width:40px;">操作</td>
+                                    {foreach :array_column($v['price_array'], 'num') as $num_k => $num_item}
+                                    <td><a href="javascript:;" class="layui-btn" onclick="deletePricemodel(this)">删除</a></td>
+                                    {/foreach}
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+
+                {/foreach}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="ns-form-row">
+        <button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+        <button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+    </div>
+    <input type="hidden" name="goods_id" value="{$info.goods_id}"/>
+</div>
+{/block}
+{block name="script"}
+<script>
+    layui.use(['form','laytpl'], function () {
+        var form = layui.form, repeat_flag = false;
+
+        form.render();
+		
+		var img = $(".goods-img input").val().split(",")[0];
+		$(".goods-img").append('<img src="'+ ns.img(img) +'" />')
+
+        /**
+         * 表单验证
+         */
+        form.verify({
+            gtzero: function (value, item) {
+                if (value <= 0) {
+                    return "批发的价格或数量不能小于或等于0";
+                }
+            },
+            price : function (value, item) {
+                var sku_price = $(item).parents('.sku-block').attr('sku_price');
+                if (parseFloat(value) > parseFloat(sku_price)) {
+                    return "阶梯价格不能大于商品原价";
+
+                }
+            },
+        });
+
+        /**
+         * 表单提交
+         */
+        form.on('submit(save)', function (data) {
+            var field = data.field;
+            if (!field.goods_id > 0) {
+                layer.msg('请选择参与活动的商品！', {icon: 5, anim: 6});
+                return;
+            }
+            var item_list = $(".sku-block");
+            var price_array = {};
+            item_list.each(function(){
+                var item_price_list = $(this).find('tr');
+                var sku_id = $(this).attr('sku_id');
+
+
+                if(item_price_list.length == 0){
+                    layer.msg('规格阶梯价格不能为空！', {icon: 5, anim: 6});
+                    return;
+                }
+
+                var first_item = $(this).find('tr:eq(0)');
+                var second_item = $(this).find('tr:eq(1)');
+                var num_item_list = first_item.find('.num');
+                if(num_item_list.length == 0){
+                    layer.msg('规格阶梯价格不能为空！', {icon: 5, anim: 6});
+                    return;
+                }
+                var temp_list = [];
+                num_item_list.each(function(index,element){
+                    var index = $(element).parent().index();
+                    var num = $(element).val();
+                    var price = second_item.find('td:eq('+index+')').find('.price').val();
+                    temp_list.push({num:num,price:price});
+                });
+                price_array[sku_id] = temp_list;
+            });
+            var price_json = JSON.stringify(price_array);
+
+            // if (repeat_flag) return;
+            // repeat_flag = true;
+            data.field.price_json = price_json;
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("wholesale://shop/wholesale/edit"),
+                data: data.field,
+                async: false,
+                success: function (res) {
+                    repeat_flag = false;
+
+                    if (res.code == 0) {
+                        layer.confirm('编辑成功', {
+                            title: '操作提示',
+                            btn: ['返回列表', '继续编辑'],
+                            yes: function () {
+                                location.href = ns.url("wholesale://shop/wholesale/lists");
+                            },
+                            btn2: function () {
+                                location.reload();
+                            }
+                        });
+                    } else {
+                        layer.msg(res.message);
+                    }
+                }
+            })
+        });
+    });
+
+    function back() {
+        location.href = ns.url("wholesale://shop/wholesale/lists");
+    }
+
+
+    /**
+     * 添加阶梯价
+     */
+    function addPricemodel(obj) {
+        var index = $(obj).parent().index();
+        if($(obj).parent().parent().find('td').length == 5){
+            layer.msg('阶梯价格设置不能超过3个！', {icon: 5, anim: 6});
+            return false;
+        }
+
+        $(obj).parent().before('<td><input type="number" class="layui-input wholesale-inut-len num" lay-verify="required|gtzero" autocomplete="off" name="num[]" /></td>');
+        var index = $(obj).parent().index();
+        $(obj).parent().parent().next().append('<td><input type="number" class="layui-input wholesale-inut-len price" lay-verify="required|gtzero|price" autocomplete="off" name="price[]"/></td>');
+        $(obj).parent().parent().next().next().append('<td><a href="javascript:;" class="layui-btn" onclick="deletePricemodel(this)">删除</a></td>');
+    }
+
+    /**
+     * 删除阶梯价
+     * @param e
+     */
+    function deletePricemodel(e) {
+        var index = $(e).parent().index();
+        if($(e).parent().parent().find('td').length == 2){
+            layer.msg('阶梯价格至少要存在一个！', {icon: 5, anim: 6});
+            return false;
+        }
+        $(e).parent().parent().parent().find('tr').each(function(){
+            console.log($(this).find('td'));
+            $(this).find('td:eq('+index+')').remove();
+        });
+
+    }
+
+
+
+</script>
+{/block}

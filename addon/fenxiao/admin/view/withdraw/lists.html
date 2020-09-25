@@ -1,0 +1,550 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+    .ns-card-brief:nth-child(1){
+        margin-top: 0;
+    }
+    .layui-card-body{
+        display: flex;
+        flex-wrap: wrap;
+        padding-bottom: 0 !important;
+        padding-left: 50px !important;
+        padding-right: 50px !important;
+    }
+    .layui-card-body .content{
+        width: 33.3%;
+        margin-bottom: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .layui-card-body .money{
+        font-size: 20px;
+        color: #000;
+        font-weight: bold;
+        margin-top: 10px;
+        max-width: 250px;
+    }
+    .layui-card-body .subhead{
+        font-size: 12px;
+        margin-left: 3px;
+        cursor: pointer;
+    }
+</style>
+{/block}
+{block name="main"}
+
+<div class="ns-screen layui-collapse" lay-filter="selection_panel">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">筛选</h2>
+        <form class="layui-colla-content layui-form layui-show">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">提现流水号：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="withdraw_no" name="withdraw_no" placeholder="请输入提现流水号" class="layui-input">
+                    </div>
+                </div>
+				
+                <div class="layui-inline">
+                    <label class="layui-form-label">分销商店铺名：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="fenxiao_name" name="fenxiao_name" placeholder="请输入分销商店铺名" class="layui-input">
+                    </div>
+                </div>
+				
+                <div class="layui-inline">
+                    <label class="layui-form-label">分销商等级：</label>
+                    <div class="layui-input-inline">
+                        <select name="level_id" lay-filter="status">
+                            <option value="">全部</option>
+                            {if !empty($level)}
+                            {foreach $level as $v}
+                            <option value="{$v.level_id}">{$v.level_name}</option>
+                            {/foreach}
+                            {/if}
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">申请时间：</label>
+
+                    <div class="layui-input-inline">
+                        <input type="text" class="layui-input" name="start_time"  id="start_time" autocomplete="off" placeholder="开始时间" >
+                    </div>
+                    <div class="layui-form-mid">-</div>
+                    <div class="layui-input-inline">
+                        <input type="text" class="layui-input" name="end_time" id="end_time" autocomplete="off" placeholder="结束时间" >
+                    </div>
+                </div>
+            </div>
+
+            <div class="ns-form-row">
+                <button class="layui-btn ns-bg-color" lay-submit lay-filter="search">筛选</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="status">
+	<ul class="layui-tab-title">
+		<li class="layui-this" lay-id="">全部</li>
+		<li lay-id="1">待审核</li>
+		<li lay-id="2">已审核</li>
+        <li lay-id="-1">无效</li>
+	</ul>
+	
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="fenxiao_withdraw_list" lay-filter="fenxiao_withdraw_list"></table>
+	</div>
+</div>
+
+<!--商家信息-->
+<!--<script type="text/html" id="fenxiao_info">-->
+    <!--<div class="layui-elip">分销商：{{d.fenxiao_name}}</div>-->
+    <!--<div class="layui-elip">分销等级：{{d.level_name}}</div>-->
+<!--</script>-->
+
+<!--账户信息-->
+<script type="text/html" id="account">
+    {{# if(d.bank_type == 1){ }}
+    <div class="layui-elip">账户类型：银行卡</div>
+    <div class="layui-elip">账户名称：{{d.settlement_bank_name}}</div>
+    <div class="layui-elip">提现账号：{{d.settlement_bank_account_number}}</div>
+    <div class="layui-elip">开户名：{{d.settlement_bank_account_name}}</div>
+    {{# }else{ }}
+    <div class="layui-elip">账户类型：支付宝</div>
+    <div class="layui-elip" title="支付宝账号：{{d.settlement_bank_account_number}}">
+        支付宝账号：{{d.settlement_bank_account_number}}</div>
+    <div class="layui-elip" title="支付宝用户名：{{d.settlement_bank_account_name}}">
+        支付宝用户名：{{d.settlement_bank_account_name}}</div>
+    {{# } }}
+
+</script>
+
+<!--时间-->
+<script type="text/html" id="times">
+    <div class="layui-elip" title="申请时间：{{ns.time_to_date(d.create_time)}}">
+        申请时间：{{ns.time_to_date(d.create_time)}}</div>
+    <div class="layui-elip" title="到账时间：{{ns.time_to_date(d.payment_time)}}">
+        转账时间：{{ns.time_to_date(d.payment_time)}}</div>
+</script>
+
+<!--状态-->
+<script type="text/html" id="status">
+    {{# if(d.status == 1){ }}
+    <div class="layui-elip" style="color: red">待审核</div>
+    {{# }else if(d.status == 2){ }}
+    <div class="layui-elip" style="color: green">已审核</div>
+    {{# }else if(d.status == -1){ }}
+    <span style="color: gray;">无效</span>
+    {{# } }}
+</script>
+
+<!--操作-->
+<script type="text/html" id="action">
+    <div class="ns-table-btn">
+        <a class="layui-btn" lay-event="detail">查看</a>
+        {{# if(d.status == 1){ }}
+        <a class="layui-btn" lay-event="apply_pass">通过</a>
+        <a class="layui-btn" lay-event="apply_refuse">拒绝</a>
+        {{# } }}
+    </div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+    layui.use(['form', 'laytpl', 'laydate', 'element','upload'], function() {
+        var table,
+            form = layui.form,
+            laydate = layui.laydate,
+			element = layui.element,
+            upload = layui.upload,
+            currentDate = new Date(),
+            repeat_flag = false,
+            laytpl = layui.laytpl;
+        minDate = "";
+        form.render();
+
+        currentDate.setDate(currentDate.getDate() - 7);
+
+        //申请开始时间
+        laydate.render({
+            elem: '#start_time',
+            type: 'datetime'
+        });
+
+        //申请结束时间
+        laydate.render({
+            elem: '#end_time',
+            type: 'datetime'
+        });
+
+        /**
+         * 重新渲染结束时间
+         */
+        function reRender(){
+            $("#end_time").remove();
+            $(".end-time").html('<input type="text" class="layui-input" placeholder="申请结束时间" name="end_date" id="end_time" >');
+            laydate.render({
+                elem: '#end_time',
+                type: 'datetime',
+                min: minDate
+            });
+        }
+		
+		//监听Tab切换
+		element.on('tab(status)', function(data) {
+			var status = $(this).attr("lay-id");
+			table.reload( {
+				page: {
+					curr: 1
+				},
+				where: {
+					'status': status
+				}
+			});
+		});
+        
+        /**
+         * 表格加载
+         */
+        table = new Table({
+            elem: '#fenxiao_withdraw_list',
+            url: ns.url("fenxiao://admin/withdraw/lists"),
+            cols: [
+                [{
+                    width: "3%",
+                    type: 'checkbox',
+                    unresize: 'false'
+                },{
+                    field: 'withdraw_no',
+                    title: '提现流水编号',
+                    unresize: 'false',
+                    width:'15%'
+                },{
+                    field:'fenxiao_name',
+                    title: '分销商',
+                    unresize: 'false',
+                    width:'15%',
+                }, {
+                    field: 'money',
+                    title: '提现佣金',
+                    unresize: 'false',
+                    width:'10%',
+					align: 'right',
+					templet: function(data){
+						return '￥'+ data.money;
+					}
+                }, {
+                    field: 'withdraw_rate_money',
+                    title: '提现手续费',
+                    unresize: 'false',
+                    width:'10%',
+					align: 'right',
+					templet: function(data){
+						return '￥'+ data.withdraw_rate_money;
+					}
+                }, {
+                    field: 'real_money',
+                    title: '实际到账金额',
+                    unresize: 'false',
+                    width:'10%',
+					align: 'right',
+					templet: function(data){
+						return '￥'+ data.real_money;
+					}
+                },{
+                    field: 'status',
+                    title: '状态',
+                    unresize: 'false',
+                    width:'10%',
+                    templet: "#status"
+                },{
+                    title: '时间',
+                    unresize: 'false',
+                    width:'15%',
+                    templet: "#times"
+                }, {
+                    title: '操作',
+                    toolbar: '#action',
+                    unresize: 'false',
+                    width:'12%'
+                }]
+            ],
+            bottomToolbar: "#batchOperation"
+        });
+        
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function(data) {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+             return false;
+        });
+        
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data,
+                event = obj.event;
+
+            switch (event){
+                case 'detail': //查看
+                    withdrawDetail(data);
+                    break;
+                case 'apply_pass': //通过
+                    applyPass(data.id);
+                    break;
+
+                case 'apply_refuse'://拒绝
+
+                    if (repeat_flag) return false;
+                    repeat_flag = true;
+
+                    layer.confirm('确定要拒绝申请吗?', function() {
+                        $.ajax({
+                            url: ns.url("fenxiao://admin/withdraw/withdrawrefuse"),
+                            data: {'id':data.id},
+                            dataType: 'JSON',
+                            type: 'POST',
+                            success: function(res) {
+                                layer.msg(res.message);
+                                repeat_flag = false;
+
+                                if (res.code == 0) {
+                                    table.reload();
+                                }
+                            }
+                        });
+                    }, function () {
+                        layer.close();
+                        repeat_flag = false;
+                    });
+                    break;
+            }
+        });
+
+        /**
+         * 批量操作
+         */
+        table.bottomToolbar(function(obj) {
+
+            if (obj.data.length < 1) {
+                layer.msg('请选择要操作的数据');
+                return;
+            }
+
+            switch (obj.event) {
+                case "apply_pass":
+                    var id_array = new Array();
+                    for (i in obj.data) id_array.push(obj.data[i].id);
+                    applyPass(id_array.toString());
+                    break;
+            }
+        });
+
+
+
+        /**
+         * 通过
+         */
+        function applyPass(id) {
+            if (repeat_flag) return false;
+            repeat_flag = true;
+
+            layer.confirm('确定要通过申请吗?', function() {
+                $.ajax({
+                    url: ns.url("fenxiao://admin/withdraw/withdrawpass"),
+                    data: {'id':id},
+                    dataType: 'JSON',
+                    type: 'POST',
+                    success: function(res) {
+                        layer.msg(res.message);
+                        repeat_flag = false;
+
+                        if (res.code == 0) {
+                            table.reload();
+                        }
+                    }
+                });
+            }, function () {
+                layer.close();
+                repeat_flag = false;
+            });
+        }
+
+        /**
+         * 拒绝
+         */
+        function applyReject(id) {
+
+            if (repeat_flag) return false;
+            repeat_flag = true;
+
+            layer.confirm('确定要拒绝申请吗?', function() {
+                $.ajax({
+                    url: ns.url("admin/shopaccount/applyreject"),
+                    data: {'apply_id':id},
+                    dataType: 'JSON',
+                    type: 'POST',
+                    success: function(res) {
+                        layer.msg(res.message);
+                        repeat_flag = false;
+
+                        if (res.code == 0) {
+                            table.reload();
+                        }
+                    }
+                });
+            }, function () {
+                layer.close();
+                repeat_flag = false;
+            });
+        }
+
+        //提交
+        form.on('submit(repass)', function(data) {
+
+            $.ajax({
+                url: ns.url("admin/shopaccount/applypay"),
+                data: data.field,
+                dataType: 'JSON',
+                type: 'POST',
+                success: function(res) {
+                    layer.msg(res.message);
+                    repeat_flag = false;
+
+                    if (res.code == 0) {
+                        layer.closeAll("page");
+                        table.reload();
+                    }
+                }
+            });
+
+        });
+
+        /**
+         * 备注
+         */
+        function memo(data) {
+            laytpl($("#memo_content").html()).render(data, function(html) {
+                layer_memo = layer.open({
+                    title: '备注',
+                    skin: 'layer-tips-class',
+                    type: 1,
+                    area: ['450px'],
+                    content: html,
+                });
+            });
+        }
+
+        form.on('submit(submit_memo)', function(data) {
+            if (repeat_flag) return false;
+            repeat_flag = true;
+
+            $.ajax({
+                type: "POST",
+                url: ns.url("admin/shopaccount/editshopwithdrawmemo"),
+                data: data.field,
+                dataType: 'JSON',
+                success: function(res) {
+                    layer.msg(res.message);
+                    repeat_flag = false;
+
+                    if (res.code == 0) {
+                        layer.closeAll('page');
+                        table.reload();
+                    }
+                }
+            });
+        });
+
+        //详情
+        function withdrawDetail(data) {
+            var detailHtml = $("#withdrawDetail").html();
+            laytpl(detailHtml).render(data, function(html) {
+                layer.open({
+                    type: 1,
+                    title: '提现详情',
+                    area: ['500px'],
+                    content: html
+
+                });
+            })
+        }
+    });
+</script>
+
+<script type="text/html" id="batchOperation">
+    <button class="layui-btn layui-btn-primary" lay-event="apply_pass">批量通过</button>
+    <!--<button class="layui-btn layui-btn-primary" lay-event="apply_pay">批量转账</button>-->
+</script>
+
+<script type="text/html" id="withdrawDetail">
+    <table class="layui-table">
+        <colgroup>
+            <col width="150">
+            <col width="200">
+        </colgroup>
+        <tbody>
+        <tr>
+            <td>分销商店铺名称</td>
+            <td>{{d.fenxiao_name}}</td>
+        </tr>
+        <tr>
+            <td>提现金额</td>
+            <td>{{d.money}}元</td>
+        </tr>
+        <tr>
+            <td>提现手续费率</td>
+            <td>{{d.withdraw_rate}}%</td>
+        </tr>
+        <tr>
+            <td>提现手续费</td>
+            <td>{{d.withdraw_rate_money}}元</td>
+        </tr>
+        <tr>
+            <td>实际到账金额</td>
+            <td>{{d.real_money}}元</td>
+        </tr>
+        <tr>
+            <td>状态</td>
+            {{# if(d.status == 1){ }}
+            <td>待审核</td>
+            {{# }else if(d.status == 2){ }}
+            <td>已审核</td>
+            {{# }else if(d.status == -1){ }}
+            <td>无效</td>
+            {{# } }}
+        </tr>
+        <tr>
+            <td>申请时间</td>
+            <td>{{ ns.time_to_date(d.create_time) }}</td>
+        </tr>
+        {{# if(d.status == 2){ }}
+		<tr>
+			<td>到账时间</td>
+			<td>{{ ns.time_to_date(d.payment_time) }}</td>
+		</tr>
+		{{# } }}
+        {{# if(d.status == -1){ }}
+        <tr>
+            <td>审核时间</td>
+            <td>{{ ns.time_to_date(d.payment_time) }}</td>
+        </tr>
+        {{# } }}
+        </tbody>
+    </table>
+</script>
+{/block}

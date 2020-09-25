@@ -1,0 +1,106 @@
+{extend name="app/shop/view/base.html"/}
+
+{block name="resources"}
+<style type="text/css">
+.table-wrap {padding: 0 20px;width: 560px;height: 385px;}
+.table-wrap .layui-table-body {overflow-x: hidden;height: 260px;overflow-y: scroll;}
+.goods-info {padding: 5px 0;align-items: center;flex-wrap:unset!important;}
+.goods-info .room-name {padding-left: 5px;line-height: 1}
+.goods-info img {width:50px;height: 50px;}
+.info-wrap{height: 30px;line-height: 30px;background: #f2f2f2;color: #666;padding: 5px 10px;margin-top: 15px;}
+</style>
+{/block}
+
+{block name="body"}
+	<div class="table-wrap">
+		<div class="info-wrap">已选择 <span id="selectNum">0</span> 件 商品</div>
+		<table id="goods_list" lay-filter="goods_list"></table>
+	</div>
+
+	<script type="text/html" id="goodsinfo">
+		<div class="ns-table-btn goods-info">
+			<img src="{{ ns.img(d.cover_img) }}">
+			<span class="room-name" title="{{ d.name }}">{{ d.name }}</span>
+		</div>
+	</script>
+{/block}
+
+{block name="script"}
+	<script type="text/javascript">
+		var sku_id = '{$ids}',
+			selectedData = []
+			selectedIdData = [];
+
+		$(function(){
+			var table = new Table({
+				id: 'goodsTable',
+				elem: '#goods_list',
+				url: ns.url("live://shop/room/getGoodsPageList"),
+				where: {
+					sku_id: sku_id
+				},
+				cols: [
+					[
+						{
+							title: '',
+							type: 'checkbox',
+							unresize: 'false',
+							width: '10%',
+						},
+						{
+							title: '商品信息',
+							unresize: 'false',
+							width: '90%',
+							templet: "#goodsinfo"
+						}
+					]
+				],
+			 	callback: function(res, curr, count){
+					console.log(res);
+					if(res != undefined){
+						if (res.data.length) {
+							var checkedNum = 0;
+							res.data.forEach(function(e,i){
+								if ($.inArray(e.id, selectedIdData) != -1) {
+									checkedNum += 1;
+									res.data[i]["LAY_CHECKED"] = 'true';
+									var index= res.data[i]['LAY_TABLE_INDEX'];
+									$('.table-wrap tr[data-index=' + index + '] input[type="checkbox"]').prop('checked', true);
+									$('.table-wrap tr[data-index=' + index + '] input[type="checkbox"]').next().addClass('layui-form-checked');
+								}
+							})
+							if (res.data.length == checkedNum) {
+								$('.table-wrap .layui-table-header tr input[type="checkbox"]').prop('checked', true);
+								$('.table-wrap .layui-table-header tr input[type="checkbox"]').next().addClass('layui-form-checked');
+							}
+						}
+					}
+
+				}
+			});
+
+			// 监听checkbox选中状态改变事件
+			table.on('checkboxChange', function(obj){
+				if (obj.checked) {
+					if ($.inArray(obj.data.id, selectedIdData) == -1) {
+						selectedIdData.push(obj.data.id);
+						selectedData.push(obj.data)
+					}
+				} else {
+					selectedData.forEach(function(e,i){
+						if (JSON.stringify(e) == JSON.stringify(obj.data)) {
+							selectedData.splice(i, 1);
+						}
+					})
+					selectedIdData.splice($.inArray(obj.data.id, selectedIdData), 1);
+				}
+				$('#selectNum').text(selectedData.length);
+			})
+		})
+
+
+		function callback(fun){	
+			if (typeof fun == 'function') fun(selectedData);
+		}
+	</script>
+{/block}

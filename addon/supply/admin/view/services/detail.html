@@ -1,0 +1,63 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.layui-card {margin-top: 0;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form">
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">服务申请信息</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>站点名称：</label>
+				<div class="layui-input-block">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$info.site_name}</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>申请服务类型：</label>
+				<div class="layui-input-block ns-len-mid">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$info.service_type_name}</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">申请时间：</label>
+				<div class="layui-input-block">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$info.create_time|date='Y-m-d H:i:s'}</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">通过时间：</label>
+				<div class="layui-input-block">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$info.audit_time|date='Y-m-d H:i:s'}</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">审核状态：</label>
+				<div class="layui-input-block">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$info.status_name}</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">备注：</label>
+				<div class="layui-input-block">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$info.remark}</p>
+				</div>
+			</div>
+			<div class="ns-form-row">
+				<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+	function back() {
+		location.href = ns.url("supply://admin/services/lists")
+	}
+</script>
+{/block}

@@ -1,0 +1,147 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/index.css">
+{/block}
+{block name="body"}
+<!-- 顶部html文件-->
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-index">
+			<div class="ns-supply-index-center">
+				<div class="ns-supply-index-category">
+					<ul>
+						<li onclick="toGoodsList()">
+							<span class="ns-text-color">所有类目</span>
+							<div class="ns-cate-bg"></div>
+						</li>
+						{foreach $category_list as $category_k => $category_v}
+						<li onclick="toGoodsList({$category_v.category_id}, {$category_v.level})">
+							<div class="ns-cate-title">
+								<div><span>{$category_v.category_name}</span></div>
+								<div><i class="iconfont iconyoujiantou"></i></div>
+							</div>
+							<div class="na-cate-list">
+							{if !empty($category_v.child_list)}
+								{foreach $category_v.child_list as $second_category_k => $second_category_v}
+								<div class="ns-cate-li">
+									<h4 onclick="toGoodsList({$second_category_v.category_id}, {$second_category_v.level})">{$second_category_v.category_name}</h4>
+									{if !empty($second_category_v.child_list)}
+									<i class="iconfont iconyoujiantou"></i>			
+									<div class="ns-cate-con">
+										{foreach $second_category_v.child_list as $third_category_k => $third_category_v}
+											<span onclick="toGoodsList({$third_category_v.category_id}, {$third_category_v.level})">{$third_category_v.category_name}</span>
+										{/foreach}
+									</div>
+									{/if}
+								</div>
+								{/foreach}
+							{/if}
+							</div>
+						</li>
+						{/foreach}
+					</ul>
+				</div>
+		
+				<div class="ns-supply-index-banner">
+					<div class="layui-carousel" id="test1">
+						<div carousel-item>
+							{foreach $adv.adv_list as $adv_k => $adv_v}
+							{php}
+								$url = json_decode($adv_v['adv_url'], true);
+							{/php}
+							{if $url.url}
+							<a href="{$url.url}" target="_blank">
+							{else/}
+							<a href="#">
+							{/if}
+								<div class="layui-carousel-img"><img src="{:img($adv_v['adv_image'])}" /></div>
+							</a>
+							{/foreach}
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="goods-list-title ns-red-color">优选新品</div>
+		
+			<div class="ns-goods-list">
+		
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/html" id="goodsList">
+	{{#  layui.each(d.list, function(index, item){ }}
+		<div class="ns-goods-li">
+			<a href="{{ns.url('supply://shop/goods/detail?sku_id='+ item.sku_id)}}">
+				<div class="ns-goods-img">
+					<img src="{{ ns.img(item.sku_image.split(',')[0]) }}" onerror="this.src = 'SHOP_SUPPLY_LOCAL_IMG/default_goods.png' " />
+				</div>
+			</a>
+			<a href="{{ns.url('supply://shop/goods/detail?sku_id='+ item.sku_id)}}">
+				<p class="ns-goods-name ns-multi-line-hiding" title="{{ item.sku_name }}">{{ item.sku_name }}</p>
+			</a>
+			<div class="ns-goods-info">
+				<p>
+					<span>供货价：</span>
+					{{#  if(item.max_price == item.min_price) {  }}
+					<span class="ns-goods-profit ns-red-color">￥{{ item.max_price }}</span>
+					{{#  } else if(item.max_price != item.min_price) {  }}
+					<!-- <span class="ns-goods-profit ns-red-color">￥{{ item.min_price }}~￥{{ item.max_price }}</span> -->
+					<span class="ns-goods-profit ns-red-color">￥{{ item.min_price }}</span>
+					{{#  }  }}
+				</p>
+				<p><span>库存：</span><span>{{ item.stock }}</span></p>
+			</div>
+		</div>
+	{{#  }); }}
+</script>
+{/block}
+
+{block name="script"}
+<script type="text/javascript">
+	layui.use(['carousel', 'form', 'laytpl'], function() {
+		var carousel = layui.carousel;
+		var form = layui.form;
+		var laytpl = layui.laytpl;
+		//建造实例
+		carousel.render({
+			elem: '#test1',
+			width: '100%', //设置容器宽度
+			height: '100%',
+			arrow: 'always' //始终显示箭头
+		});
+		
+		form.on('submit(search)', function(data) {
+			location.href = ns.url("supply://shop/goods/goodslist", {"keyword": data.field.keyword})
+		})
+
+		$(".ns-goods-list").empty();
+		$.ajax({
+			url: ns.url("supply://shop/goods/goodslist"),
+			data: {
+				"page": 1,
+				"page_size": 20
+			},
+			async: false,
+			dataType: 'JSON',
+			type: 'POST',
+			success: function(res) {
+				if (res.data.list.length != 0) {
+					laytpl($("#goodsList").html()).render(res.data, function(html) {
+						$(".ns-goods-list").append(html)
+					});
+				}
+			}
+		});
+	});
+	
+	function toGoodsList(id, level) {
+		layui.stope(event);
+		location.href = ns.url("supply://shop/goods/goodslist", {"category_id": id, "category_level": level});
+	}
+</script>
+{/block}

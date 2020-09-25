@@ -1,0 +1,190 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	.layui-colla-content li {
+		line-height: 30px;
+	}
+	
+	.upload-img-box {
+		width: 256px;
+		height: 82px;
+	}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<div class="layui-colla-content layui-show">
+			<ul>
+				<li>可以上传三张图片，建议使用1920px*615px</li>
+				<li>可上传.jpg、.png的图片</li>
+				<li>"置空"会删除图片，提交保存后生效</li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+<div class="layui-form">
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">图片上传</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label img-upload-lable">首页banner1：</label>
+				<div class="layui-input-block img-upload">
+					<div class="upload-img-block icon">
+						<div class="upload-img-box" id="shopImg1">
+							<div class="ns-upload-default">
+								<img src="__STATIC__/img/upload_img.png" />
+								<p>点击上传</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<span class="ns-word-aux">图片展示在商家端前台首页广告位，建议上传图片尺寸为1920px * 615px</span>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label img-upload-lable">首页banner2：</label>
+				<div class="layui-input-block img-upload">
+					<div class="upload-img-block icon">
+						<div class="upload-img-box" id="shopImg2">
+							<div class="ns-upload-default">
+								<img src="__STATIC__/img/upload_img.png" />
+								<p>点击上传</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<span class="ns-word-aux">图片展示在商家端前台首页广告位，建议上传图片尺寸为1920px * 615px</span>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label img-upload-lable">首页banner3：</label>
+				<div class="layui-input-block img-upload">
+					<div class="upload-img-block icon">
+						<div class="upload-img-box" id="shopImg3">
+							<div class="ns-upload-default">
+								<img src="__STATIC__/img/upload_img.png" />
+								<p>点击上传</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<span class="ns-word-aux">图片展示在商家端前台首页广告位，建议上传图片尺寸为1920px * 615px</span>
+			</div>
+			
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+{/block}
+{block name="script"}
+<script>
+	var adv_configStr = '{:json_encode($adv_config, JSON_UNESCAPED_SLASHES)}';
+	var adv_configJson = JSON.parse(adv_configStr);
+	if (!(adv_configJson[0] == null)) {
+		$("#shopImg1").html('<img src="' + ns.img(adv_configJson[0].url) + '" >');
+	}
+	if (!(adv_configJson[1] == null)) {
+		$("#shopImg2").html('<img src="' + ns.img(adv_configJson[1].url) + '" >');
+	}
+	if (!(adv_configJson[2] == null)) {
+		$("#shopImg3").html('<img src="' + ns.img(adv_configJson[2].url) + '" >');
+	}
+	var advArr = [];
+	advArr.push({
+		"url": $("#shopImg1").find("img").attr("src")
+	});
+	advArr.push({
+		"url": $("#shopImg2").find("img").attr("src")
+	});
+	advArr.push({
+		"url": $("#shopImg3").find("img").attr("src")
+	});
+
+	layui.use(['form', 'upload'], function() {
+		var form = layui.form,
+			upload = layui.upload,
+			repeat_flag = false; //防重复标识
+		form.render();
+
+		// 搜索
+		form.on('submit(save)', function(data) {
+			var data = data.field;
+
+			if (advArr.length < 1) {
+				layer.msg('至少上传一张图片');
+				return;
+			}
+			data.config_json = JSON.stringify(advArr);
+
+			if (repeat_flag) return;
+			repeat_flag = true;
+
+			$.ajax({
+				url: ns.url("admin/shopjoin/adv"),
+				data: data,
+				dataType: 'JSON',
+				type: 'POST',
+				success: function(res) {
+					layer.msg(res.message);
+					repeat_flag = false;
+					if (res.code == 0) {
+						location.reload();
+					}
+				}
+			});
+		});
+
+		//普通图片上传
+		var uploadInst = upload.render({
+			elem: '#shopImg1',
+			url: ns.url("admin/upload/upload"),
+			done: function(res) {
+				if (res.code >= 0) {
+					//将图片展示在页面上
+					$("#shopImg1").html("<img src=" + ns.img(res.data.pic_path) + " >");
+					advArr[0] = {
+						"url": res.data.pic_path
+					};
+				}
+				return layer.msg(res.message);
+			}
+		});
+		//普通图片上传
+		var uploadInst = upload.render({
+			elem: '#shopImg2',
+			url: ns.url("admin/upload/upload"),
+			done: function(res) {
+				if (res.code >= 0) {
+					//将图片展示在页面上
+					$("#shopImg2").html("<img src=" + ns.img(res.data.pic_path) + " >");
+					advArr[1] = {
+						"url": res.data.pic_path
+					};
+				}
+				return layer.msg(res.message);
+			}
+		});
+		//普通图片上传
+		var uploadInst = upload.render({
+			elem: '#shopImg3',
+			url: ns.url("admin/upload/upload"),
+			done: function(res) {
+				if (res.code >= 0) {
+					//将图片展示在页面上
+					$("#shopImg3").html("<img src=" + ns.img(res.data.pic_path) + " >");
+					advArr[2] = {
+						"url": res.data.pic_path
+					};
+				}
+				return layer.msg(res.message);
+			}
+		});
+	});
+</script>
+{/block}

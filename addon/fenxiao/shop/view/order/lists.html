@@ -1,0 +1,226 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_CSS/goods_lists.css">
+<style>
+	.layui-table-view {margin-top: 15px;}
+</style>
+{/block}
+{block name="main"}
+<!-- 筛选面板 -->
+<div class="ns-screen layui-collapse" lay-filter="selection_panel">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title"></h2>
+		<form class="layui-colla-content layui-form layui-show">
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">搜索方式：</label>
+					<div class="layui-input-inline">
+						<select name="order_label" >
+							<option value="goods">商品名称</option>
+							<option value="user">会员信息</option>
+							<option value="order">订单编号</option>
+						</select>
+					</div>
+					
+					<div class="layui-input-inline">
+						<input type="text" name="search_text" placeholder="请输入搜索内容" autocomplete="off" class="layui-input"/>
+					</div>
+				</div>
+				
+				<div class="layui-inline">
+					<label class="layui-form-label">结算状态：</label>
+					<div class="layui-input-inline">
+						<select name="is_settlement" lay-filter="is_settlement">
+							<option value="">全部</option>
+							<option value="1">待结算</option>
+							<option value="3">已退款</option>
+							<option value="2">已结算</option>
+						</select>
+					</div>
+				</div>
+			</div>
+				
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">下单时间：</label>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input" name="start_time" placeholder="开始时间" id="start_time" readonly>
+						<i class="ns-calendar"></i>
+					</div>
+					<div class="layui-form-mid">-</div>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input" name="end_time" placeholder="结束时间" id="end_time" readonly>
+						<i class="ns-calendar"></i>
+					</div>
+				</div>
+			</div>
+			
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="search">筛选</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<table id="order_list" lay-filter="order_list"></table>
+
+<!-- 商品信息 -->
+<script type="text/html" id="goods_info">
+	<div class="ns-table-title">
+		<div class="ns-title-pic">
+			<img layer-src src="{{ns.img(d.sku_image.split(',')[0], 'small')}}"/>
+		</div>
+		<div class="ns-title-content">
+			<a href="javascript:;" class="ns-multi-line-hiding ns-text-color"
+			   title="{{d.sku_name}}">{{d.sku_name}}</a>
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="user_info">
+	<div class="ns-table-tuwen-box">
+		<div class="ns-font-box">
+			<p>姓名：{{ d.member_name }}</p>
+			<p>电话：{{ d.member_mobile }}</p>
+		</div>
+	</div>
+</script>
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="detail">查看</a>
+	</div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+	var laytpl, form, element, repeat_flag, table;
+	$(function () {
+		layui.use(['form', 'laytpl', 'element', 'laydate'], function () {
+			form = layui.form;
+			repeat_flag = false; //防重复标识
+			element = layui.element;
+			laytpl = layui.laytpl;
+			laydate = layui.laydate;
+			form.render();
+
+			//渲染时间
+			laydate.render({
+				elem: '#start_time',
+				type: 'datetime'
+			});
+
+			laydate.render({
+				elem: '#end_time',
+				type: 'datetime'
+			});
+
+			refreshTable(0);
+
+			// 监听工具栏操作
+			table.tool(function (obj) {
+				var data = obj.data;
+				switch (obj.event) {
+					case 'detail':
+						//编辑
+						location.href = ns.url("fenxiao://shop/order/detail", {"fenxiao_order_id": data.fenxiao_order_id});
+						break;
+				}
+			});
+
+			// 搜索功能
+			form.on('submit(search)', function (data) {
+				table.reload({
+					page: {
+						curr: 1
+					},
+					where: data.field
+				});
+				return false;
+			});
+		});
+	});
+
+	/**
+	 * 刷新表格列表
+	 * @param status 状态：0 在售，1 审核违规
+	 */
+	function refreshTable(status) {
+		var cols = [
+			[{
+				title: '商品信息',
+				unresize: 'false',
+				width: '22%',
+				templet: '#goods_info'
+			}, {
+				field: 'order_no',
+				title: '订单编号',
+				unresize: 'false',
+
+			},{
+				field: 'price',
+				title: '<span style="padding-right: 15px;">价格(元)/数量</span>',
+				unresize: 'false',
+				align: 'right',
+				templet: function (data) {
+					return '<span style="padding-right: 15px;">￥' + data.price + '/' + data.num + '</span>';
+				}
+			},{
+				field: 'order_status_name',
+				title: '订单状态',
+				unresize: 'false',
+
+			}, {
+				field: 'commission',
+				title: '分佣总金额(元)',
+				unresize: 'false',
+				align: 'right',
+				templet: function(data) {
+					return '￥' + data.commission;
+				}
+			},{
+				title: '下单时间',
+				unresize: 'false',
+
+				templet: function (data) {
+					return ns.time_to_date(data.create_time);
+				}
+			}, {
+				field: 'one_fenxiao_name',
+				title: '分销商',
+				unresize: 'false',
+
+			},{
+                title: '结算状态',
+                unresize: 'false',
+
+                templet: function (data) {
+                	if (data.is_refund == 1) {
+                		return '已退款';
+					} else {
+						if(data.is_settlement == 1) {
+							return '已结算';
+						} else {
+							return '待结算'
+						}
+                	}
+                }
+            },{
+				title: '详情',
+				unresize: 'false',
+				templet: '#action'
+			}]
+		];
+
+		table = new Table({
+			elem: '#order_list',
+			url: ns.url("fenxiao://shop/order/lists"),
+			cols: cols,
+			where: {
+				search_text: $("input[name='search_text']").val(),
+			}
+		});
+	}
+</script>
+{/block}

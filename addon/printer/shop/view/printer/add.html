@@ -1,0 +1,318 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<style>
+
+    .yilianyun {
+        display:none
+    }
+    .feie{
+        display:none
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>管理员可以在此页添加小票打印机</li>
+		</ul>
+	</div>
+</div>
+
+<div class="layui-form ns-form">
+
+	<div class="layui-card ns-card-common ns-card-brief">
+
+		<div class="layui-card-body">
+
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>打印机名称：</label>
+				<div class="layui-input-block">
+					<input type="text"  name="printer_name" lay-verify="required" autocomplete="off" class="layui-input ns-len-long">
+				</div>
+			</div>
+
+			<div class="layui-form-item express_company">
+				<label class="layui-form-label"><span class="required">*</span>打印机品牌：</label>
+				<div class="layui-input-block ns-len-short">
+					<select name="brand" lay-verify="required" lay-filter="brand">
+                        {foreach $brand as $k=>$v}
+                        <option value="{$v.brand}">{$v.name}</option>
+                        {/foreach}
+					</select>
+				</div>
+			</div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>打印机编号：</label>
+                <div class="layui-input-block">
+                    <input type="text"  name="printer_code" lay-verify="required" autocomplete="off" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>打印机秘钥：</label>
+                <div class="layui-input-block">
+                    <input type="text"  name="printer_key" lay-verify="required" autocomplete="off" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <!-- 飞鹅打印机 -->
+            <div class="layui-form-item feie">
+                <label class="layui-form-label"><span class="required">*</span>USER：</label>
+                <div class="layui-input-block">
+                    <input type="text"  name="user" autocomplete="off" class="layui-input ns-len-long">
+                </div>
+                <div class="ns-word-aux">
+                    <p>飞鹅云后台注册用户名</p>
+                </div>
+            </div>
+            <div class="layui-form-item feie">
+                <label class="layui-form-label"><span class="required">*</span>UKEY：</label>
+                <div class="layui-input-block">
+                    <input type="text"  name="ukey" autocomplete="off" class="layui-input ns-len-long">
+                </div>
+                <div class="ns-word-aux">
+                    <p>飞鹅云后台登录生成的UKEY</p>
+                </div>
+            </div>
+
+            <!-- 易联云打印机 -->
+            <div class="layui-form-item yilianyun">
+                <label class="layui-form-label"><span class="required">*</span>应用id：</label>
+                <div class="layui-input-block">
+                    <input type="text"  name="open_id" autocomplete="off" class="layui-input ns-len-long">
+                </div>
+                <div class="ns-word-aux">
+                    <p>应用id（易联云-开发者中心后台应用中心里获取）</p>
+                </div>
+            </div>
+            <div class="layui-form-item yilianyun">
+                <label class="layui-form-label"><span class="required">*</span>apiKey：</label>
+                <div class="layui-input-block">
+                    <input type="text"  name="apikey" autocomplete="off" class="layui-input ns-len-long">
+                </div>
+                <div class="ns-word-aux">
+                    <p>apiKey（易联云-开发者中心后台应用中心里获取）</p>
+                </div>
+            </div>
+
+            <div class="layui-form-item express_company">
+                <label class="layui-form-label"><span class="required">*</span>打印模板：</label>
+                <div class="layui-input-block ns-len-short">
+                    <select name="template_id" lay-verify="" lay-filter="brand">
+                        <option value="">请选择</option>
+                        {foreach $template_list as $k=>$v}
+                        <option value="{$v.template_id}">{$v.template_name}</option>
+                        {/foreach}
+
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>打印联数：</label>
+                <div class="layui-input-block">
+                    <input type="radio"  name="print_num" value="1" lay-verify="required" checked autocomplete="off" title="1" class="layui-input ns-len-long">
+                    <input type="radio"  name="print_num" value="2" lay-verify="required" autocomplete="off" title="2" class="layui-input ns-len-long">
+                    <input type="radio"  name="print_num" value="3" lay-verify="required" autocomplete="off" title="3" class="layui-input ns-len-long">
+                    <input type="radio"  name="print_num" value="4" lay-verify="required" autocomplete="off" title="4" class="layui-input ns-len-long">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>订单类型：</label>
+                <div class="layui-input-block">
+                    {foreach $order_type_list as $v}
+                    <input class="order-type" type="checkbox" value="{$v.type}" lay-verify="required" lay-skin="primary" title="{$v.name}" checked="">
+                    {/foreach}
+
+                </div>
+            </div>
+
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+        <button class="layui-btn layui-btn-primary" onclick="testPrint()">返回</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+
+    var brand = $('select[name="brand"] option:selected').val();
+    if(brand == '365'){
+        $('.feie').hide();
+        $('.yilianyun').hide();
+
+        $("input[name='user']").attr("lay-verify", "");
+        $("input[name='ukey']").attr("lay-verify", "");
+
+        $("input[name='open_id']").attr("lay-verify", "");
+        $("input[name='apikey']").attr("lay-verify", "");
+    }
+
+    if(brand == 'feie'){
+        $('.feie').show();
+        $('.yilianyun').hide();
+
+        $("input[name='user']").attr("lay-verify", "required");
+        $("input[name='ukey']").attr("lay-verify", "required");
+
+        $("input[name='open_id']").attr("lay-verify", "");
+        $("input[name='apikey']").attr("lay-verify", "");
+    }
+
+    if(brand == 'yilianyun'){
+        $('.yilianyun').show();
+        $('.feie').hide();
+
+        $("input[name='open_id']").attr("lay-verify", "required");
+        $("input[name='apikey']").attr("lay-verify", "required");
+
+        $("input[name='user']").attr("lay-verify", "");
+        $("input[name='ukey']").attr("lay-verify", "");
+    }
+    layui.use(['form', 'laydate'], function() {
+        var form = layui.form,
+            laydate = layui.laydate,
+            repeat_flag = false;
+
+		form.render();
+
+        /**
+         * 表单验证
+         */
+        form.verify({
+            time: function(value) {
+                var now_time = (new Date()).getTime();
+                var start_time = (new Date($("#start_time").val())).getTime();
+                var end_time = (new Date(value)).getTime();
+                if (now_time > end_time) {
+                    return '结束时间不能小于当前时间!'
+                }
+                if (start_time > end_time) {
+                    return '结束时间不能小于开始时间!';
+                }
+            },
+            flnum: function(value) {
+                var arrMen = value.split(".");
+                var val = 0;
+                if (arrMen.length == 2) {
+                    val = arrMen[1];
+                }
+                if (val.length > 2) {
+                    return '保留小数点后两位！'
+                }
+            },
+            int: function(value) {
+                if (value <= 1 || value % 1 != 0) {
+                    return '请输入大于1的正整数！'
+                }
+            }
+        });
+
+        form.on('select(brand)', function(data){
+
+            var value = data.value;
+
+            if(value == '365'){
+                $('.feie').hide();
+                $('.yilianyun').hide();
+
+                $("input[name='user']").attr("lay-verify", "");
+                $("input[name='ukey']").attr("lay-verify", "");
+
+                $("input[name='open_id']").attr("lay-verify", "");
+                $("input[name='apikey']").attr("lay-verify", "");
+            }
+
+            if(value == 'feie'){
+                $('.feie').show();
+                $('.yilianyun').hide();
+
+                $("input[name='user']").attr("lay-verify", "required");
+                $("input[name='ukey']").attr("lay-verify", "required");
+
+                $("input[name='open_id']").attr("lay-verify", "");
+                $("input[name='apikey']").attr("lay-verify", "");
+            }
+
+            if(value == 'yilianyun'){
+                $('.yilianyun').show();
+                $('.feie').hide();
+
+                $("input[name='open_id']").attr("lay-verify", "required");
+                $("input[name='apikey']").attr("lay-verify", "required");
+
+                $("input[name='user']").attr("lay-verify", "");
+                $("input[name='ukey']").attr("lay-verify", "");
+            }
+        });
+
+        /**
+         * 表单提交
+         */
+        form.on('submit(save)', function(data){
+
+//            if(repeat_flag) return;
+//            repeat_flag = true;
+
+            var field = data.field;
+            if(field.brand == 'feie'){
+                field.open_id = field.user;
+                field.apikey = field.ukey;
+            }
+
+            var order_type_arr = [];
+            $(".order-type").each(function () {
+                if ($(this).is(":checked")) {
+                    order_type_arr.push($(this).val());
+                }
+            });
+            if(order_type_arr == ""){
+                layer.msg('请选择要打印的订单类型');
+                return false;
+            }
+
+            field.order_type = order_type_arr.toString();
+
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("printer://shop/printer/add"),
+                data: field,
+                async: false,
+                success: function(res){
+//                    repeat_flag = false;
+
+                    if (res.code == 0) {
+                        layer.confirm('添加成功', {
+                            title:'操作提示',
+                            btn: ['返回列表', '继续添加'],
+                            yes: function(){
+                                location.href = ns.url("printer://shop/printer/lists");
+                            },
+                            btn2: function() {
+                                location.href = ns.url("printer://shop/printer/add");
+                            }
+                        });
+                    }else{
+                        layer.msg(res.message);
+                    }
+                }
+            })
+        });
+    });
+
+
+
+    function back() {
+        location.href = ns.url("printer://shop/printer/lists");
+    }
+</script>
+{/block}

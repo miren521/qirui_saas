@@ -1,0 +1,51 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.layui-card-body{width: 100%; box-sizing: border-box; display: flex;}
+	.ns-member {width: 23.5%; height: 180px; margin-right: 1.5%; margin-bottom: 20px; box-sizing: border-box; border: 1px solid #E5E5E5; text-align: center;}
+	.ns-member-num{color: red; font-size: 30px; height: 50px; line-height: 50px; margin-top: 45px;}
+	.ns-member-title{color: #666666; font-size: 16px;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-card ns-card-common ns-card-brief">
+	<div class="layui-card-header">
+		<span class="ns-card-title">佣金概览</span>
+	</div>
+	<div class="layui-card-body">
+		<div class="ns-member">
+			<p class="ns-member-num">{$fenxiao_account}</p>
+			<p class="ns-member-title">累计佣金（元）</p>
+		</div>
+
+		<div class="ns-member">
+			<p class="ns-member-num">{$account_data.account_withdraw_apply}</p>
+			<p class="ns-member-title">提现待审核（元）</p>
+		</div>
+
+		<div class="ns-member">
+			<p class="ns-member-num">{$account_data.account_withdraw}</p>
+			<p class="ns-member-title">提现佣金（元）</p>
+		</div>
+	</div>
+</div>
+	
+<div class="layui-card ns-card-common ns-card-brief">
+	<div class="layui-card-header">
+		<span class="ns-card-title">分销商概览</span>
+	</div>
+	<div class="layui-card-body">
+		<div class="ns-member">
+			<p class="ns-member-num">{$fenxiao_apply_num}</p>
+			<p class="ns-member-title">待审核（人）</p>
+		</div>
+
+		<div class="ns-member">
+			<p class="ns-member-num">{$fenxiao_num}</p>
+			<p class="ns-member-title">分销商（人）</p>
+		</div>
+	</div>
+</div>
+{/block}
+{block name="script"}
+{/block}

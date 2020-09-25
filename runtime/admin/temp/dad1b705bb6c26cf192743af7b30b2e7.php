@@ -1,0 +1,42 @@
+<?php /*a:1:{s:39:"./app/component/view/search/design.html";i:1600314240;}*/ ?>
+<nc-component v-bind:data="data[index]" class="top-search" :style="{backgroundColor: nc.backgroundColor}">
+
+	<!-- 预览 -->
+	<template slot="preview">
+
+		<!--<div class="left-img"><img v-bind:src="nc.left_img_url ? changeImgUrl(nc.left_img_url) : '<?php echo htmlentities($resource_path); ?>/search/img/category.png'" class="self-adaption"/></div>-->
+		<div class="top-search-form">
+			<div class="top-search-box"  v-bind:class="{'border-circle': nc.borderType == 2}" v-bind:style="{background: nc.bgColor}">
+				<input type="text" placeholder="搜索" v-bind:style="{color : nc.textColor,background: nc.bgColor, textAlign: nc.textAlign}"/>
+				<span class="top-search-icon"><img src="<?php echo htmlentities($resource_path); ?>/search/img/icon_search.png" class="self-adaption"/></span>
+			</div>
+		</div>
+		<!--<div class="right-img"><img v-bind:src="nc.right_img_url ? changeImgUrl(nc.right_img_url) : '<?php echo htmlentities($resource_path); ?>/search/img/user.png'" class="self-adaption"/></div>-->
+
+	</template>
+
+	<!-- 编辑 -->
+	<template slot="edit">
+		
+		<template v-if="nc.lazyLoad">
+			<div @click.stop="">
+			<color v-bind:data="{ field : 'backgroundColor', 'label' : '背景颜色' }"></color>
+			<color v-bind:data="{ field : 'textColor', 'label' : '字体颜色' }"></color>
+			<color v-bind:data="{ field : 'bgColor', 'label' : '框体颜色' }"></color>
+			<!-- <top-search></top-search> -->
+			<goods-search></goods-search>
+			<search-border></search-border>
+			</div>
+		</template>
+	
+	</template>
+	
+	<!-- 资源 -->
+	<template slot="resource">
+
+		<css src="<?php echo htmlentities($resource_path); ?>/search/css/design.css"></css>
+		<js src="<?php echo htmlentities($resource_path); ?>/search/js/design.js"></js>
+		
+	</template>
+
+</nc-component>

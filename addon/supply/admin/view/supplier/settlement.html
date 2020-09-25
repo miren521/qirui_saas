@@ -1,0 +1,236 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label">结算账户类型：</label>
+		<div class="layui-input-inline">
+			<input type="radio" name="bank_type" lay-filter="payType" value="1" title="银行卡" {$cert_info.bank_type==1 ? 'checked' : !$cert_info.bank_type ? 'checked' : ''}>
+			<input type="radio" name="bank_type" lay-filter="payType" value="2" title="支付宝" {$cert_info.bank_type==2 ? 'checked' : '' }>
+			{if $cert_info.bank_type==3}
+			<input type="radio" name="bank_type" lay-filter="payType" value="3" title="微信" checked>
+			{/if}
+		</div>
+	</div>
+	<!-- 银行卡 -->
+	{if condition="$cert_info.bank_type == 1"}
+	<div class="ns-pay-bank">
+	{else /}
+	<div class="ns-pay-bank" style="display: none">
+	{/if}
+
+		<div class="layui-form-item">
+			<label class="layui-form-label ns-pay-alipay-name">结算银行开户名：</label>
+			<div class="layui-input-inline">
+				{if condition="$cert_info.bank_type == 1"}
+				<input name="settlement_bank_account_name" id="settlement_bank_account_name" type="text" value="{$cert_info.settlement_bank_account_name}" class="layui-input ns-len-long" autocomplete="off">
+				{else/}
+				<input name="settlement_bank_account_name" id="settlement_bank_account_name" type="text" value="" class="layui-input ns-len-long" autocomplete="off">
+				{/if}
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label ns-pay-alipay-account">结算公司银行账号：</label>
+			<div class="layui-input-inline">
+				{if condition="$cert_info.bank_type == 1"}
+				<input name="settlement_bank_account_number" id="settlement_bank_account_number" type="text" lay-verify="required" value="{$cert_info.settlement_bank_account_number}" class="layui-input ns-len-long" autocomplete="off">
+				{else/}
+				<input name="settlement_bank_account_number" id="settlement_bank_account_number" type="text" value="" class="layui-input ns-len-long" autocomplete="off">
+				{/if}
+
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">结算开户银行支行名称：</label>
+			<div class="layui-input-inline">
+				{if condition="$cert_info.bank_type == 1"}
+				<input name="settlement_bank_name" type="text" lay-verify="required" value="{$cert_info.settlement_bank_name}" class="layui-input ns-len-long" autocomplete="off">
+				{else/}
+				<input name="settlement_bank_name" type="text" value="" class="layui-input ns-len-long" autocomplete="off">
+				{/if}
+			</div>
+		</div>
+
+		<div class="layui-form-item" data-flag="area">
+			<label class="layui-form-label">结算开户银行所在地：</label>
+			<div class="layui-input-inline">
+				{if condition="$cert_info.bank_type == 1"}
+				<input name="settlement_bank_address" type="text" value="{$cert_info.settlement_bank_address}" class="layui-input ns-len-long" autocomplete="off">
+				{else/}
+				<input name="settlement_bank_address" type="text" value="" class="layui-input ns-len-long" autocomplete="off">
+				{/if}
+			</div>
+		</div>
+	</div>
+
+	{if condition="$cert_info.bank_type == 2"}
+	<div class="ns-pay-zfb">
+	{else /}
+	<div class="ns-pay-zfb" style="display: none">
+	{/if}
+		<div class="layui-form-item">
+			<label class="layui-form-label">用户真实姓名：</label>
+			<div class="layui-input-inline">
+				{if condition="$cert_info.bank_type == 2"}
+				<input name="zfb_settlement_bank_account_name" id="settlement_zfb_account_name" lay-verify="required" type="text" value="{$cert_info.settlement_bank_account_name}" class="layui-input ns-len-long" autocomplete="off">
+				{else/}
+				<input name="zfb_settlement_bank_account_name" id="settlement_zfb_account_name" type="text" value="" class="layui-input ns-len-long" autocomplete="off">
+				{/if}
+			</div>
+		</div>
+
+		<div class="layui-form-item" data-flag="area">
+			<label class="layui-form-label">支付宝账号：</label>
+			<div class="layui-input-inline">
+				{if condition="$cert_info.bank_type == 2"}
+				<input name="zfb_settlement_bank_account_number" id="settlement_zfb_account_number" lay-verify="required" type="text" value="{$cert_info.settlement_bank_account_number}" class="layui-input ns-len-long" autocomplete="off">
+				{else/}
+				<input name="zfb_settlement_bank_account_number" id="settlement_zfb_account_number" type="text" value="" class="layui-input ns-len-long" autocomplete="off">
+				{/if}
+
+			</div>
+		</div>
+	</div>
+
+	<!-- 微信 -->
+	{if condition="$cert_info.bank_type == 3"}
+	<div class="ns-pay-win">
+		{else /}
+		<div class="ns-pay-win" style="display: none">
+			{/if}
+
+			<div class="layui-form-item">
+				<label class="layui-form-label ns-pay-alipay-name">用户真实姓名：</label>
+				<div class="layui-input-inline">
+					<input name="weixin_settlement_bank_account_name" disabled type="text" value="{$cert_info.settlement_bank_account_name}" class="ns-dis-input layui-input ns-len-long" autocomplete="off">
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<label class="layui-form-label">微信昵称：</label>
+				<div class="layui-input-inline">
+					<input name="weixin_settlement_bank_address" disabled type="text" value="{$cert_info.settlement_bank_address}" class="ns-dis-input layui-input ns-len-long" autocomplete="off">
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<label class="layui-form-label">微信账号：</label>
+				<div class="layui-input-inline">
+					<input name="weixin_settlement_bank_name" disabled type="text" value="{$cert_info.settlement_bank_name}" class="ns-dis-input layui-input ns-len-long" autocomplete="off">
+				</div>
+			</div>
+		</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+	
+	<input class="ns-bank-type" type="hidden" value="{$cert_info.bank_type}" />
+	<input name="site_id" type="text" lay-verify="" value="{$cert_info.site_id}" class="layui-input layui-hide">
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'laydate'], function() {
+		var form = layui.form,
+			bankType = "{$cert_info.bank_type}",
+			repeat_flag = false; //防重复标识
+		form.render();
+
+		// 监听提交
+		form.on('submit(save)', function(data) {
+			if (repeat_flag) return false;
+			repeat_flag = true;
+			bankType = data.field.bank_type;
+			if(parseInt(bankType) == 2){
+				data.field.settlement_bank_account_name = data.field.zfb_settlement_bank_account_name;
+				data.field.settlement_bank_account_number = data.field.zfb_settlement_bank_account_number;
+			}else if(parseInt(bankType) == 3){
+				data.field.settlement_bank_account_name = data.field.weixin_settlement_bank_account_name;
+				data.field.settlement_bank_address = data.field.weixin_settlement_bank_address;
+				data.field.settlement_bank_name = data.field.weixin_settlement_bank_name;
+			}
+
+			$.ajax({
+				type: 'POST',
+				url: ns.url("supply://admin/supplier/settlement"),
+				data: data.field,
+				dataType: 'JSON',
+				success: function(res) {
+					repeat_flag = false;
+					if (res.code == 0) {
+						layer.confirm('编辑成功', {
+							title:'操作提示',
+							btn: ['返回列表', '继续操作'],
+							yes: function(){
+								location.href = ns.url("supply://admin/supplier/index")
+							},
+							btn2: function() {
+								location.reload();
+							}
+						});
+					} else {
+						layer.msg(res.message);
+					}
+				}
+			});
+		});
+
+		/**
+		 * 表单验证
+		 */
+		form.verify({
+			bankcard: function(value) {
+				var reg = /^([1-9]{1})(\d{14}|\d{18})$/;
+				if (value == '') {
+					return;
+				}
+				if (!reg.test(value)) {
+					return '请输入正确的银行卡号!';
+				}
+			}
+		});
+
+		form.on('radio(payType)', function(data) { //判断支付方式，显示对应的表单
+			var value = data.value;
+
+			$(".ns-pay-zfb").hide();
+			$(".ns-pay-win").hide();
+			$(".ns-pay-bank").hide();
+            if (value == 1) {
+                $(".ns-pay-bank").show();
+
+                $("#settlement_bank_account_name").attr("lay-verify", "required");
+                $("#settlement_bank_account_number").attr("lay-verify", "required");
+
+                $("#settlement_zfb_account_name").attr("lay-verify", "");
+                $("#settlement_zfb_account_number").attr("lay-verify", "");
+
+            } else  if (value == 2) {
+
+                $(".ns-pay-zfb").show();
+
+                $("#settlement_zfb_account_name").attr("lay-verify", "required");
+                $("#settlement_zfb_account_number").attr("lay-verify", "required");
+
+                $("#settlement_bank_account_name").attr("lay-verify", "");
+                $("#settlement_bank_account_number").attr("lay-verify", "");
+            }else  if (value == 3){
+				$(".ns-pay-win").show();
+				$("#settlement_bank_account_name").attr("lay-verify", "");
+				$("#settlement_bank_account_number").attr("lay-verify", "");
+				$("#settlement_zfb_account_name").attr("lay-verify", "");
+				$("#settlement_zfb_account_number").attr("lay-verify", "");
+			}
+		});
+	});
+	
+	function back() {
+		location.href = ns.url("supply://admin/supplier/index");
+	}
+</script>
+{/block}

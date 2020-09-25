@@ -1,0 +1,96 @@
+{extend name="base"/}
+{block name="resources"}
+<style type="text/css">
+	.layui-field-box{display: flex;flex-wrap: wrap;}
+	.block-list{padding: 16px;width: 32.3%;box-sizing: border-box;margin-right: 1%; margin-bottom: 20px;}
+	.block-list .block-title{margin-bottom: 10px;height: 20px;line-height: 20px;font-size: 14px;color: #333;}
+	.block-list .block-content{display: flex;flex-wrap: wrap;}
+	.block-list .block-content a{height: 25px;line-height: 25px;width: 33.3%;display: inline-block;vertical-align: middle;color: #454545; font-size: 12px;}
+	.block-list .block-content a i{display: inline-block; margin-right: 5px;}
+</style>
+{/block}
+{block name="main"}
+<!-- 买家消息 -->
+<div class="layui-card ns-card-common ns-card-brief">
+	<div class="layui-card-header">
+		<span class="ns-card-title">买家消息</span>
+	</div>
+	<div class="layui-card-body layui-field-box">
+		{foreach $member_message_list as $member_message_k => $member_message_v}
+		<div class="block-list ns-bg-color-light-gray">
+			<div class="block-title">
+			  {$member_message_v.title}
+			</div>
+			<div class="block-content">
+				<!--<a><i class="iconfont iconseleted {if condition='$member_message_v.weapp_is_open == 1'}ns-text-color-red{/if}"></i>微信小程序</a>-->
+				<a href="{:addon_url('admin/message/editEmailMessage',['keywords' => $member_message_v.keywords])}"><i class="iconfont iconseleted {if condition='$member_message_v.email_is_open == 1'}ns-text-color-red{/if}"></i>邮箱</a>
+				<a href="{:addon_url('admin/message/editSmsMessage',['keywords' => $member_message_v.keywords])}"><i class="iconfont iconseleted {if condition='$member_message_v.sms_is_open == 1'}ns-text-color-red{/if}"></i>短信</a>
+				<!--<a href="{:addon_url('wechat://admin/message/edit',['keywords' => $member_message_v.keywords])}"><i class="iconfont iconseleted {if condition='$member_message_v.wechat_is_open == 1'}ns-text-color-red{/if}"></i>微信公众号</a>-->
+				<!--<a><i class="iconfont iconseleted {if condition='$member_message_v.aliapp_is_open == 1'}ns-text-color-red{/if}"></i>支付宝小程序</a>-->
+			</div>
+		</div>
+		{/foreach}
+	</div>
+</div>
+<!-- <fieldset class="layui-elem-field layui-field-title">
+	<legend>买家消息</legend>
+	<div class="layui-field-box">
+		{foreach $member_message_list as $member_message_k => $member_message_v}
+		<div class="block-list ns-bg-color-light-gray">
+			<div class="block-title">
+			  {$member_message_v.title}
+			</div>
+			<div class="block-content">
+				<a><i class="iconfont iconseleted {if condition='$member_message_v.weapp_is_open == 1'}ns-text-color-red{/if}"></i>微信小程序</a>
+				<a href="{:addon_url('admin/message/editEmailMessage',['keywords' => $member_message_v.keywords])}"><i class="iconfont iconseleted {if condition='$member_message_v.email_is_open == 1'}ns-text-color-red{/if}"></i>邮箱</a>
+				<a href="{:addon_url('admin/message/editSmsMessage',['keywords' => $member_message_v.keywords])}"><i class="iconfont iconseleted {if condition='$member_message_v.sms_is_open == 1'}ns-text-color-red{/if}"></i>短信</a>
+				<a href="{:addon_url('wechat://admin/message/edit',['keywords' => $member_message_v.keywords])}"><i class="iconfont iconseleted {if condition='$member_message_v.wechat_is_open == 1'}ns-text-color-red{/if}"></i>微信公众号</a>
+				<a><i class="iconfont iconseleted {if condition='$member_message_v.aliapp_is_open == 1'}ns-text-color-red{/if}"></i>支付宝小程序</a>
+			</div>
+		</div>
+		{/foreach}
+	</div>
+</fieldset> -->
+
+<!-- 卖家通知 -->
+<div class="layui-card ns-card-common ns-card-brief">
+	<div class="layui-card-header">
+		<span class="ns-card-title">卖家通知</span>
+	</div>
+	<div class="layui-card-body layui-field-box">
+		{foreach $shop_message_list as $shop_message_k => $shop_message_v}
+		<div class="block-list ns-bg-color-light-gray">
+			<div class="block-title">
+				{$shop_message_v.title}
+			</div>
+			<div class="block-content">
+				<a href="{:addon_url('admin/message/editEmailMessage',['keywords' => $shop_message_v.keywords])}"><i class="iconfont iconseleted {if condition='$shop_message_v.email_is_open == 1'}ns-text-color-red{/if}"></i>邮箱</a>
+				<a href="{:addon_url('admin/message/editSmsMessage',['keywords' => $shop_message_v.keywords])}"><i class="iconfont iconseleted {if condition='$shop_message_v.sms_is_open == 1'}ns-text-color-red{/if}"></i>短信</a>
+			</div>
+		</div>
+		{/foreach}
+	</div>
+</div>
+<!-- <fieldset class="layui-elem-field layui-field-title">
+	<legend>卖家通知</legend>
+	<div class="layui-field-box">
+		{foreach $shop_message_list as $shop_message_k => $shop_message_v}
+		<div class="block-list ns-bg-color-light-gray">
+			<div class="block-title">
+				{$shop_message_v.title}
+			</div>
+			<div class="block-content">
+				<a><i class="iconfont iconseleted {if condition='$shop_message_v.weapp_is_open == 1'}ns-text-color-red{/if}"></i>微信小程序</a>
+				<a href="{:addon_url('admin/message/editEmailMessage',['keywords' => $member_message_v.keywords])}"><i class="iconfont iconseleted {if condition='$shop_message_v.email_is_open == 1'}ns-text-color-red{/if}"></i>邮箱</a>
+				<a href="{:addon_url('admin/message/editSmsMessage',['keywords' => $member_message_v.keywords])}"><i class="iconfont iconseleted {if condition='$shop_message_v.sms_is_open == 1'}ns-text-color-red{/if}"></i>短信</a>
+				<a href="{:addon_url('wechat://admin/message/edit',['keywords' => $member_message_v.keywords])}"><i class="iconfont iconseleted {if condition='$shop_message_v.wechat_is_open == 1'}ns-text-color-red{/if}"></i>微信公众号</a>
+				<a><i class="iconfont iconseleted {if condition='$shop_message_v.aliapp_is_open == 1'}ns-text-color-red{/if}"></i>支付宝小程序</a>
+			</div>
+		</div>
+		{/foreach}
+	</div>
+</fieldset> -->
+
+{/block}
+{block name="script"}
+{/block}

@@ -1,0 +1,113 @@
+{extend name="base"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>PC端友情链接设置</li>
+		</ul>
+	</div>
+</div>
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>链接名称：</label>
+		<div class="layui-input-block">
+			<input name="link_title" type="text" lay-verify="required" class="layui-input ns-len-mid" >
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>链接地址：</label>
+		<div class="layui-input-block">
+			<input name="link_url" type="text" lay-verify="required" class="layui-input ns-len-mid" >
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否显示：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="is_show" value="1" lay-skin="switch"  />
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否新窗口打开：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="is_blank" value="1" lay-skin="switch"  />
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required"></span>排序：</label>
+		<div class="layui-input-block">
+			<input name="link_sort" type="text" value="0" class="layui-input ns-len-short">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">导航图标：</label>
+		<input type="hidden" name="link_pic" >
+		<div class="layui-input-inline">
+			<div class="upload-img-block">
+				<div class="upload-img-box" id="imgUpload">
+					<div class="ns-upload-default">
+						<img src="__STATIC__/img/upload_img.png" />
+						<p>点击上传</p>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+	</div>
+
+</div>
+{/block}
+
+{block name="script"}
+<script>
+	layui.use(['form','upload'], function() {
+		var form = layui.form, upload = layui.upload,repeat_flag=false;
+
+		//普通图片上传
+		var uploadInst = upload.render({
+			elem: '#imgUpload'
+			, url: ns.url("admin/upload/upload")
+			, done: function (res) {
+				if (res.code >= 0) {
+					$("#imgUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+					$("input[name='link_pic']").val(res.data.pic_path);
+				}
+				return layer.msg(res.message);
+			}
+		});
+
+		form.on('submit(save)', function(data) {
+			if(!data.field.link_url){
+				layer.msg("请输入链接地址");
+				return;
+			}
+			if (repeat_flag) return;
+			repeat_flag = true;
+
+			$.ajax({
+				url: ns.url("admin/pc/addLink"),
+				data: data.field,
+				dataType: 'JSON',
+				type: 'POST',
+				success: function(res) {
+					layer.msg(res.message);
+					if (res.code == 0) {
+						location.href = ns.url("admin/pc/linklist");
+					}
+					repeat_flag = false;
+				}
+			});
+		});
+	});
+</script>
+{/block}

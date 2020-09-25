@@ -1,0 +1,119 @@
+{extend name="base"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>当前页面对门店的信息进行管理，可以添加门店，查看门店信息，状态信息等。</li>
+		</ul>
+	</div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<select name="status" lay-filter="status">
+				<option value="">状态</option>
+				<option value="1">正常</option>
+				<option value="0">已锁定</option>
+			</select>
+		</div>
+
+		<div class="layui-input-inline">
+			<input type="text" id="search_text" name="search_text" placeholder="请输入门店名称" class="layui-input">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+				<i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- 列表 -->
+<table id="store_list" lay-filter="store_list"></table>
+
+<!-- 凭证展示 -->
+<script type="text/html" id="store_info">
+	
+	<div class="ns-table-tuwen-box">
+		<div class="ns-img-box">
+			{{#  if(d.store_image){  }}
+			<img layer-src src={{ns.img(d.store_image)}} alt="">
+			{{#  }else{  }}
+			<img layer-src src="__STATIC__/img/default_shop.png" alt="">
+			{{#  }  }}
+		</div>
+		<div class="ns-font-box">
+			<a href="javascript:;" class="ns-multi-line-hiding ns-text-color">{{d.store_name}}</a>
+		</div>
+	</div>
+	
+	
+</script>
+<!-- 状态 -->
+<script type="text/html" id="status">
+	{{ d.status == 1 ? '正常' : '锁定' }}
+</script>
+{/block}
+
+{block name="script"}
+<script>
+	layui.use('form', function() {
+		var table,
+			form = layui.form;
+		form.render();
+
+		table = new Table({
+			elem: '#store_list',
+			url: ns.url("admin/store/lists"),
+			cols: [
+				[{
+					title: '门店名称',
+					width: '20%',
+					unresize: 'false',
+					templet: '#store_info'
+				},{
+					field: 'site_name',
+					title: '商家店铺',
+					width: '15%',
+					unresize: 'false'
+				},{
+					title: '联系地址',
+					width: '25%',
+					unresize: 'false',
+					templet: function(data) {
+						return data.full_address.replace(/,/g," ") + " " + data.address;
+					}
+				},{
+					field: 'open_date',
+					title: '营业时间',
+					width: '15%',
+					unresize: 'false'
+				},{
+					field: 'create_time',
+					title: '创建时间',
+					width: '15%',
+					unresize: 'false',
+					templet: function(data) {
+						return ns.time_to_date(data.create_time);
+					}
+				},]
+			]
+		});
+
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+	});
+</script>
+{/block}

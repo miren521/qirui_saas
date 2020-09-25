@@ -1,0 +1,161 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<style>
+.progress-layer {width:400px;background:#fff;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:1px 1px 50px rgba(0,0,0,.3);padding:20px 20px;z-index:100;display:none;}
+.progress-layer h3 {line-height:1;margin-bottom:15px;text-align:center;font-size:14px;}
+.progress-layer .layui-progress-big,.progress-layer .layui-progress-big .layui-progress-bar {height:14px;line-height:14px;}
+.progress-layer .layui-progress-text {line-height:14px;}
+.goods-info {padding: 5px 0;align-items: center;flex-wrap:unset!important;}
+.goods-info .room-name {padding-left: 5px;line-height: 1}
+.goods-info img {width:50px;height: 50px;}
+.ns-single-filter-box{justify-content: end}
+</style>
+{/block}
+
+{block name="main"}
+<div class="ns-single-filter-box">
+	<button class="layui-btn ns-bg-color" onclick="sync()">同步商品库</button>
+	<a href="{:addon_url('live://shop/goods/add')}" class="layui-btn layui-btn-primary">添加商品</a>
+</div>
+
+<table id="goods_list" lay-filter="goods_list"></table>
+
+<!-- 直播间信息 -->
+<script type="text/html" id="goodsinfo">
+	<div class="ns-table-btn goods-info">
+		<img src="{{ ns.img(d.cover_img) }}">
+		<span class="room-name" title="{{ d.name }}">{{ d.name }}</span>
+	</div>
+</script>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		{{#  if( (d.status == 2 || d.status == 3) && d.third_party_tag != 0 ){ }}
+		<a class="layui-btn" lay-event="del">删除</a>
+		{{#  } }}
+	</div>
+</script>
+
+<div class="progress-layer">
+	<h3>正在同步中...</h3>
+	<div class="layui-progress layui-progress-big" lay-showPercent="true" lay-filter="progress">
+		<div class="layui-progress-bar layui-bg-blue" lay-percent="0%"></div>
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script>
+	var form,table,element,syncClick = false,delete_flag = false;
+	layui.use(['form', 'element'], function() {
+		form = layui.form;
+		element = layui.element;
+		
+		table = new Table({
+			elem: '#goods_list',
+			url: ns.url("live://shop/goods/index"),
+			cols: [
+				[{
+					title: '商品信息',
+					unresize: 'false',
+					width: '30%',
+					templet: "#goodsinfo"
+				}, {
+					title: '价格',
+					unresize: 'false',
+					width: '15%',
+					field: 'price'
+				}, {
+					field: 'url',
+					title: '商品链接',
+					unresize: 'false',
+					width: '30%'
+				}, {
+					field: 'status_name',
+					title: '状态',
+					unresize: 'false',
+					width: '15%',
+				}, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width: '10%'
+				}]
+			]
+		});
+
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'del': //删除
+					layer.confirm('确定要删除该商品吗?', function() {
+						if (delete_flag) return false;
+						delete_flag = true;
+						
+						$.ajax({
+							url: ns.url("live://shop/goods/delete"),
+							data: {
+								id: data.id
+							},
+							dataType: 'JSON',
+							type: 'POST',
+							success: function(res) {
+								layer.msg(res.message);
+								delete_flag = false;
+
+								if (res.code == 0) {
+									table.reload();
+								}
+							}
+						});
+					}, function() {
+						layer.close();
+						delete_flag = false;
+					});
+					break;
+			}
+		})
+	});
+
+	// 同步商品
+	function sync(start){
+		if (syncClick) return;
+		syncClick = true;
+		var start = start == undefined ? 0 : start;
+
+		$.ajax({
+			url: ns.url("live://shop/goods/sync"),
+			data: {
+				start: 0,
+			},
+			dataType: 'JSON',
+			type: 'POST',
+			success: function(res) {
+				syncClick = false;
+				if (res.code == 0) {
+					var data = res.data,
+						next = parseInt(start) + 1;
+
+						if (next < data.total_page) {
+							if (start == 0) {
+								$(".progress-layer").fadeOut();
+							}
+							var progress = (next / data.total_page * 100).toFixed(2);
+							element.progress('progress', progress + '%');
+							// 拉取下一页
+							sync(next);
+						} else {
+							if (!$(".progress-layer").is(':hidden')) $(".progress-layer").fadeOut();
+							layer.closeAll();
+							layer.msg('同步成功');
+							table.reload();
+						}
+				} else {
+					layer.msg(res.message);
+				}
+			}
+		});
+	}
+</script>
+{/block}

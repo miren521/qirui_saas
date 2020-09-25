@@ -1,0 +1,388 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="ADMIN_CSS/index.css">
+{/block}
+{block name="main"}
+{if $need_upgrade == 1}
+<p class="version-upgrade ns-border-color">
+    温馨提示：多商户系统发布了最新版本，请尽快进行升级
+    <span>x</span>
+</p>
+{/if}
+
+<div class="index-box">
+    <div class="index-content">
+        <div class="basic-info">
+            <blockquote class="layui-elem-quote">基础信息 <span class="ns-card-sub"></span></blockquote>
+            <div class="basic-info-box">
+                <div class="basic-list">
+                    <div class="basic-pic">
+                        <img src="ADMIN_IMG/index/order_num.png" alt="">
+                    </div>
+                    <div class="basic-item">
+                        <div class="title layui-elip">今日销售总额（元）</div>
+                        <div class="content layui-elip">{if isset($stat_info.order_total)}{$stat_info.order_total} {else /} 0 {/if}</div>
+                    </div>
+                    <div class="basic-item">
+                        <div class="title layui-elip">今日销售订单数（笔）</div>
+                        <div class="content layui-elip">{if isset($stat_info.order_pay_count)}{$stat_info.order_pay_count}{else /} 0 {/if}</div>
+                    </div>
+                    <div class="basic-item">
+                        <div class="title layui-elip">订单销售总额（元）</div>
+                        <div class="content layui-elip">{if isset($order_money)}{$order_money}{else /} 0.00 {/if}</div>
+                    </div>
+                </div>
+                <div class="basic-list">
+                    <div class="basic-pic">
+                        <img src="ADMIN_IMG/index/good_num.png" alt="">
+                    </div>
+                    <div class="basic-item">
+                        <div class="title layui-elip">今日新增商品数</div>
+                        <div class="content layui-elip">{$stat_info.add_goods_count}</div>
+                    </div>
+                    <div class="basic-item">
+                        <div class="title layui-elip">今日商品购买数</div>
+                        <div class="content layui-elip">{$stat_info.goods_pay_count}</div>
+                    </div>
+                    <div class="basic-item">
+                        <div class="title layui-elip">商品总数</div>
+                        <div class="content layui-elip">{$goods_count}</div>
+                    </div>
+                </div>
+                <div class="basic-list">
+                    <div class="basic-pic">
+                        <img src="ADMIN_IMG/index/member_num.png" alt="">
+                    </div>
+                    <div class="basic-item">
+                        <div class="title layui-elip">今日新增会员数</div>
+                        <div class="content layui-elip">{$stat_info.member_count}</div>
+                    </div>
+                    <div class="basic-item">
+                        <div class="title layui-elip">会员总数</div>
+                        <div class="content layui-elip">{$member_count}</div>
+                    </div>
+                    <div class="basic-item"></div>
+                </div>
+                <div class="basic-list">
+                    <div class="basic-pic">
+                        <img src="ADMIN_IMG/index/shop_num.png" alt="">
+                    </div>
+                    <div class="basic-item">
+                        <div class="title layui-elip">今日申请店铺数</div>
+                        <div class="content layui-elip">{$shop_apply_count}</div>
+                    </div>
+                    <div class="basic-item">
+                        <div class="title layui-elip">今日新增店铺数</div>
+                        <div class="content layui-elip">{$shop_count}</div>
+                    </div>
+                    <div class="basic-item">
+                        <div class="title layui-elip">店铺总数</div>
+                        <div class="content layui-elip">{$shop_total_count}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="common-function">
+            <blockquote class="layui-elem-quote">常用功能</blockquote>
+            <div class="common-function-box layui-row">
+                <a class="layui-col-md2" href="{:url('admin/member/memberlist')}">
+                    <div class="ns-index-img-box">
+                        <img src="ADMIN_IMG/index/member_check.png">
+                    </div>
+                    <div class="ns-text-box">会员查询</div>
+                </a>
+                <a class="layui-col-md2" href="{:url('admin/member/addMember')}">
+                    <div class="ns-index-img-box">
+                        <img src="ADMIN_IMG/index/member_add.png">
+                    </div>
+                    <div class="ns-text-box">会员新增</div>
+                </a>
+                <a class="layui-col-md2" href="{:url('admin/shop/lists')}">
+                    <div class="ns-index-img-box">
+                        <img src="ADMIN_IMG/index/shop_check.png">
+                    </div>
+                    <div class="ns-text-box">店铺查询</div>
+                </a>
+                <a class="layui-col-md2" href="{:url('admin/shop/addshop')}">
+                    <div class="ns-index-img-box">
+                        <img src="ADMIN_IMG/index/shop_add.png">
+                    </div>
+                    <div class="ns-text-box">店铺新增</div>
+                </a>
+                <a class="layui-col-md2" href="{:url('admin/shopreopen/reopen')}">
+                    <div class="ns-index-img-box">
+                        <img src="ADMIN_IMG/index/shop_renewal.png">
+                    </div>
+                    <div class="ns-text-box">店铺续签</div>
+                </a>
+                <a class="layui-col-md2" href="{:url('admin/goods/lists')}">
+                    <div class="ns-index-img-box">
+                        <img src="ADMIN_IMG/index/goods_check.png">
+                    </div>
+                    <div class="ns-text-box">商品查询</div>
+                </a>
+                <a class="layui-col-md2" href="{:url('admin/goodscategory/lists')}">
+                    <div class="ns-index-img-box">
+                        <img src="ADMIN_IMG/index/goods_category.png">
+                    </div>
+                    <div class="ns-text-box">商品分类</div>
+                </a>
+                <a class="layui-col-md2" href="{:url('admin/goodsbrand/lists')}">
+                    <div class="ns-index-img-box">
+                        <img src="ADMIN_IMG/index/goods_brand.png">
+                    </div>
+                    <div class="ns-text-box">商品品牌</div>
+                </a>
+                <a class="layui-col-md2" href="{:url('admin/order/lists')}">
+                    <div class="ns-index-img-box">
+                        <img src="ADMIN_IMG/index/order_check.png">
+                    </div>
+                    <div class="ns-text-box">订单查询</div>
+                </a>
+                <a class="layui-col-md2" href="{:url('admin/refund/lists')}">
+                    <div class="ns-index-img-box">
+                        <img src="ADMIN_IMG/index/refund.png">
+                    </div>
+                    <div class="ns-text-box">退款维权</div>
+                </a>
+                <a class="layui-col-md2" href="{:url('admin/express/expresscompany')}">
+                    <div class="ns-index-img-box">
+                        <img src="ADMIN_IMG/index/express.png">
+                    </div>
+                    <div class="ns-text-box">物流公司</div>
+                </a>
+            </div>
+        </div>
+        <div class="layui-row layui-col-space10">
+            <div class="layui-col-md6">
+                <blockquote class="layui-elem-quote">版本信息</blockquote>
+                <div class="versions-info-box">
+                    <p><span>产品名称：</span>{$sys_product_name}</p>
+                    <p><span>版本号：</span>{$sys_version_no}</p>
+                    <p><span>版本名称：</span>{$sys_version_name}</p>
+                    <p><span>官方网站：</span><a class="ns-text-color" href="https://www.niushop.com" target="_blank">官方网站</a></p>
+                    <p><span>官方论坛：</span><a class="ns-text-color" href="https://bbs.niushop.com/forum.php" target="_blank">交流论坛</a></p>
+                </div>
+            </div>
+            <div class="layui-col-md6">
+                <blockquote class="layui-elem-quote">未处理事项</blockquote>
+                <div class="layui-tab untreated-box layui-tab-card">
+                    <ul class="layui-tab-title">
+                        <li class="layui-this">商品</li>
+                        <li>订单</li>
+                        <li>店铺</li>
+                    </ul>
+                    <div class="layui-tab-content" style="height: 100px;">
+                        <div class="layui-tab-item layui-show">
+                            {if $verify_goods_count == 0 && $inform_count == 0}
+                                <div class="layui-row todo-item">
+                                    <div class="layui-col-md12">
+                                        当前没有需处理的事件
+                                    </div>
+                                </div>
+
+                            {else/}
+                                {if $verify_goods_count > 0}
+                                    <div class="layui-row todo-item">
+                                        <div class="layui-col-md10">
+											<div class="todo-item-box">
+												<img src="ADMIN_IMG/index/message.png" />
+												<p>有{$verify_goods_count}件待审核的商品等待处理</p>
+											</div>
+                                        </div>
+                                        <div class="layui-col-md2">
+                                            <a href="{:addon_url('admin/goods/lists')}" class="ns-line-hiding ns-text-color" target="_blank">立即处理</a>
+                                        </div>
+                                    </div>
+                                {/if}
+                                {if $inform_count > 0}
+                                    <div class="layui-row todo-item">
+                                        <div class="layui-col-md10">
+											<div class="todo-item-box">
+												<img src="ADMIN_IMG/index/message.png" />
+												<p>有{$inform_count}件商品被举报,等待处理</p>
+											</div>
+                                        </div>
+                                        <div class="layui-col-md2">
+                                            <a href="{:addon_url('admin/inform/lists')}" class="ns-line-hiding ns-text-color" target="_blank">立即处理</a>
+                                        </div>
+                                    </div>
+
+                                {/if}
+                            {/if}
+                        </div>
+                        <div class="layui-tab-item">
+                            {if $complain_count_result == 0}
+                                <div class="layui-row todo-item">
+                                    <div class="layui-col-md12">
+                                        当前没有需处理的事件
+                                    </div>
+                                </div>
+                            {else/}
+                                <div class="layui-row todo-item">
+                                    <div class="layui-col-md10">
+										<div class="todo-item-box">
+											<img src="ADMIN_IMG/index/message.png" />
+											<p>有{$complain_count_result}件平台维权等待处理</p>
+										</div>
+                                    </div>
+                                    <div class="layui-col-md2">
+                                        <a href="{:addon_url('admin/complain/lists')}" class="ns-line-hiding ns-text-color" target="_blank">立即处理</a>
+                                    </div>
+                                </div>
+                            {/if}
+                        </div>
+                        <div class="layui-tab-item">
+                            {if $shop_apply_count == 0 && $shop_reopen_count == 0}
+                            <div class="layui-row todo-item">
+                                <div class="layui-col-md12">
+                                    当前没有需处理的事件
+                                </div>
+                            </div>
+
+                            {else/}
+                                {if $shop_apply_count > 0}
+                                <div class="layui-row todo-item">
+                                    <div class="layui-col-md10">
+										<div class="todo-item-box">
+											<img src="ADMIN_IMG/index/message.png" />
+											<p>有{$shop_apply_count}件待处理的开店申请</p>
+										</div>
+                                    </div>
+                                    <div class="layui-col-md2">
+                                        <a href="{:addon_url('admin/shopapply/apply')}" class="ns-line-hiding ns-text-color" target="_blank">立即处理</a>
+                                    </div>
+                                </div>
+                                {/if}
+                                {if $shop_reopen_count > 0}
+                                <div class="layui-row todo-item">
+                                    <div class="layui-col-md10">
+										<div class="todo-item-box">
+											<img src="ADMIN_IMG/index/message.png" />
+											<p>有{$shop_reopen_count}件待处理的店铺续签申请</p>
+										</div>
+                                    </div>
+                                    <div class="layui-col-md2">
+                                        <a href="{:addon_url('admin/shopreopen/reopen')}" class="ns-line-hiding ns-text-color" target="_blank">立即处理</a>
+                                    </div>
+                                </div>
+                                {/if}
+                            {/if}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="system-function">
+            <blockquote class="layui-elem-quote">系统信息</blockquote>
+            <table class="layui-table">
+                <colgroup>
+                    <col width="20%">
+                    <col width="30%">
+                    <col width="20%">
+                    <col width="30%">
+                </colgroup>
+                <tbody>
+                <tr>
+                    <td class="ns-bg-color-light-gray">服务器操作系统</td>
+                    <td>{$system_config['os']}</td>
+                    <td class="ns-bg-color-light-gray">服务器域名</td>
+                    <td>{$system_config['dns']}:{$system_config['port']}</td>
+                </tr>
+                <tr>
+                    <td class="ns-bg-color-light-gray">服务器环境</td>
+                    <td>{$system_config['server_software']}</td>
+                    <td class="ns-bg-color-light-gray">PHP版本</td>
+                    <td>{$system_config['php_version']}</td>
+                </tr>
+                <tr>
+                    <td class="ns-bg-color-light-gray">文件上传限制</td>
+                    <td>{$system_config['upload_max_filesize']}</td>
+                    <td class="ns-bg-color-light-gray">GD版本</td>
+                    <td>{$system_config['gd_version']}</td>
+                </tr>
+                <tr>
+                    <td class="ns-bg-color-light-gray">sockets开启</td>
+                    <td>{if condition="$system_config['sockets'] eq true"}已开启{else/}<span style="color:red;">未开启，邮箱功能将无法正常使用</span>{/if}</td>
+                    <td class="ns-bg-color-light-gray">curl支持</td>
+                    <td>{if condition="$system_config['curl'] eq true"}支持{else/}<span style="color:red;">不支持，微信和支付宝等功能将无法正常使用</span>{/if}</td>
+                </tr>
+                <tr>
+                    <td class="ns-bg-color-light-gray">openssl开启</td>
+                    <td>{if condition="$system_config['openssl'] eq true"}已开启{else/}<span style="color:red;">未开启，不支持https</span>{/if}</td>
+                    <td class="ns-bg-color-light-gray">fileinfo开启</td>
+                    <td>{if condition="$system_config['fileinfo'] eq true"}已开启{else/}<span style="color:red;">未开启，将无法获取上传文件类型，导致上传图片失败</span>{/if}</td>
+                </tr>
+                <tr>
+                    <td class="ns-bg-color-light-gray">upload目录权限</td>
+                    <td>{if $system_config['upload_dir_jurisdiction'] == 1}可读可写{else/}<span style="color:red;">不可读不可写，会造成图片无法上传和访问</span>{/if}</td>
+                    <td class="ns-bg-color-light-gray">runtime目录权限</td>
+                    <td>{if $system_config['runtime_dir_jurisdiction'] == 1}可读可写{else/}<span style="color:red;">不可读不可写，会造成编译文件缓存文件无法生成读取，是网站访问出错</span>{/if}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="index-info">
+        <div class="layui-card ns-card-common">
+            <div class="layui-card-header">
+                <span class="">客户服务</span>
+            </div>
+            <div class="layui-card-body">
+                <p class="ns-text-color-dark-gray">客服电话：400-886-7993</p>
+                <p class="ns-text-color-dark-gray">官网：https://www.niushop.com</p>
+                <p class="ns-text-color-dark-gray">交流群：29507902</p>
+            </div>
+        </div>
+        <div class="layui-card ns-card-common">
+            <div class="layui-card-header">
+                <span class="">最新动态</span>
+            </div>
+            <div class="layui-card-body news-list">
+                <!--<p class="ns-text-color-dark-gray"><span class="ns-bg-color">1</span>Niushop多商户V4上线啦！</p>-->
+                <!--<p class="ns-text-color-dark-gray"><span class="ns-bg-color">2</span>Niushop多商户V4上线啦！</p>-->
+                <!--<p class="ns-text-color-dark-gray"><span class="ns-bg-color">3</span>Niushop多商户V4上线啦！</p>-->
+                <!--<p class="ns-text-color-dark-gray"><span class="ns-bg-color-gray">4</span>Niushop多商户V4上线啦！</p>-->
+                <!--<p class="ns-text-color-dark-gray"><span class="ns-bg-color-gray">5</span>Niushop多商户V4上线啦！</p>-->
+                <!--<p class="ns-text-color-dark-gray"><span class="ns-bg-color-gray">6</span>Niushop多商户V4上线啦！</p>-->
+                <!--<p class="ns-text-color-dark-gray"><span class="ns-bg-color-gray">7</span>Niushop多商户V4上线啦！</p>-->
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{/block}
+{block name="script"}
+<script>
+	var time = (new Date()).getTime();
+	var date = ns.time_to_date(time / 1000);
+	$(".ns-card-sub").text("更新时间：" + date);
+
+	/* 版本更新 */
+    $("body").on("click",".version-upgrade",function () {
+        $(this).addClass("layui-hide");
+    });
+    news();
+    //官网新闻
+
+    function news(){
+        $.ajax({
+            url: "{:addon_url('admin/index/news')}",
+            type: "POST",
+            dataType: "JSON",
+            success: function(res) {
+
+                if(res.code < 0 || res.data.list.length == 0){
+                    $(".news-list").append('<p class="ns-text-color-dark-gray"><span class="ns-bg-color">1</span>暂时没有官网资讯！</p>');
+                }else{
+                    $.each(res.data.list, function(key, value) {
+                        var sort = key + 1;
+                        $(".news-list").append('<p class="ns-text-color-dark-gray"><span class="ns-bg-color">'+sort+'</span><a href="'+ value.url +'" target="_blank" >'+value.title+'！</a></p>');
+                    });
+                }
+            }
+        });
+    }
+</script>
+{/block}

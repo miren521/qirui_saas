@@ -1,0 +1,449 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<style>
+	.ns-len-input {
+		width: 100%;
+		max-width: 120px;
+	}
+	
+	.layui-table-view {
+		margin-top: 0;
+	}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>管理员可以在此页添加砍价活动</li>
+		</ul>
+	</div>
+</div>
+
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>活动名称：</label>
+		<div class="layui-input-block">
+			<input type="text" name="bargain_name" lay-verify="required" value="{$bargain_info.bargain_name}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+		<div class="ns-word-aux">
+			<p>活动名称将显示在活动列表中，方便商家管理</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>开始时间：</label>
+		<div class="layui-input-block ns-len-mid">
+			<input type="text" id="start_time" name="start_time" {if condition="$bargain_info.status == 1" }disabled {/if} value="{:date('Y-m-d H:i:s', $bargain_info.start_time)}" lay-verify="required" class="layui-input" autocomplete="off" readonly>
+			<i class="ns-calendar"></i>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>结束时间：</label>
+		<div class="layui-input-block ns-len-mid end-time">
+			<input type="text" id="end_time" name="end_time" {if condition="$bargain_info.status == 1" }disabled {/if} value="{:date('Y-m-d H:i:s', $bargain_info.end_time)}" lay-verify="required|time" class="layui-input" autocomplete="off" readonly>
+			<i class="ns-calendar"></i>
+		</div>
+		<div class="ns-word-aux">
+			<p>结束时间不能小于开始时间，也不能小于当前时间</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">购买方式：</label>
+		<div class="layui-input-block">
+			<input type="radio" name="buy_type" value="0" title="任意金额可购买" {if condition="$bargain_info.buy_type == 0"}checked{/if} >
+			<input type="radio" name="buy_type" value="1" title="砍到指定价格才可购买" {if condition="$bargain_info.buy_type == 1"}checked{/if} >
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">帮砍金额：</label>
+		<div class="layui-input-block">
+			<input type="radio" name="bargain_type" value="1" title="随机金额" {if condition="$bargain_info.bargain_type == 1"}checked{/if} >
+			<input type="radio" name="bargain_type" value="0" title="固定金额" {if condition="$bargain_info.bargain_type == 0"}checked{/if} >
+		</div>
+		<div class="ns-word-aux">
+			<p>设置每位帮砍用户的砍价金额规则</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否允许自己砍价：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="is_own" lay-filter="" {if condition="$bargain_info.is_own == 1"}checked{/if} value="1" lay-skin="switch" />
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>帮砍人数：</label>
+		<div class="layui-input-block">
+			<input type="number" name="bargain_num" value="{$bargain_info.bargain_num}" lay-verify="required|int" data-min="2" data-max="100" data-unit="人" placeholder="2-100人" autocomplete="off" class="layui-input ns-len-short">
+		</div>
+		<div class="ns-word-aux">
+			<p>每个用户同一件商品只可砍一刀</p>
+			<p>每个砍价订单的帮砍人数，达到该人数才可砍到底价</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>砍价有效期：</label>
+		<div class="layui-input-block">
+			<div class="layui-input-inline ns-len-short">
+				<input type="number" name="bargain_time" value="{$bargain_info.bargain_time}" lay-verify="required|int" data-min="4" data-max="48" data-unit="小时" placeholder="4-48小时" autocomplete="off" class="layui-input ns-len-short">
+			</div>
+			<div class="layui-form-mid">小时</div>
+		</div>
+		<div class="ns-word-aux">
+			<p>自用户发起砍价到砍价截止的时间</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item goods_list">
+		<label class="layui-form-label">活动商品：</label>
+		<div class="layui-input-block">
+			<table id="selected_goods_list">
+			</table>
+			<button class="layui-btn ns-bg-color" onclick="addGoods()">选择商品</button>
+		</div>
+	</div>
+
+	<div class="layui-form-item layui-form-text">
+		<label class="layui-form-label">活动规则说明：</label>
+		<div class="layui-input-inline">
+			<textarea name="remark" class="layui-textarea ns-len-long">{$bargain_info.remark}</textarea>
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+	
+	<input type="hidden" name="bargain_id" value="{$bargain_info.bargain_id}" />
+</div>
+{/block}
+{block name="script"}
+<script>
+    var selectedGoodsId = [], sku_list = [];
+	
+	sku_list = {:json_encode($bargain_info.goods_list, JSON_UNESCAPED_UNICODE)};
+	
+	$.each(sku_list, function(index, item) {
+		var id = item.sku_id;
+		selectedGoodsId.push(id);
+	})
+	
+    layui.use(['form', 'laydate'], function() {
+        var form = layui.form,
+            laydate = layui.laydate,
+            repeat_flag = false,
+            startDate = {$bargain_info.start_time},
+			endDate = {$bargain_info.end_time},
+            minDate = "";
+        form.render();
+
+        renderTable(sku_list); // 初始化表格
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time', //指定元素
+            type: 'datetime',
+            value: ns.time_to_date(startDate),
+            done: function(value) {
+                minDate = value;
+                reRender();
+            }
+        });
+
+        //结束时间
+        laydate.render({
+            elem: '#end_time', //指定元素
+            type: 'datetime',
+            value: ns.time_to_date(endDate)
+        });
+
+        /**
+         * 重新渲染结束时间
+         * */
+        function reRender() {
+            $("#end_time").remove();
+            $(".end-time").html('<input type="text" id="end_time" name="end_time" placeholder="请输入结束时间" lay-verify="required|time" class = "layui-input ns-len-mid" autocomplete="off"> ');
+            laydate.render({
+                elem: '#end_time',
+                type: 'datetime',
+                min: minDate
+            });
+        }
+
+        /**
+         * 表单验证
+         */
+        form.verify({
+			int: function(value, item) {
+				var str = $(item).parents(".layui-form-item").find("label").text().split("*").join("");
+				str = str.substring(0, str.length - 1);
+				
+				var min = $(item).attr("data-min");
+				var max = $(item).attr("data-max");
+				var unit = $(item).attr("data-unit");
+				
+				if (value < Number(min)) {
+					return str + '不能小于' + min + unit;
+				}
+				if (value > Number(max)) {
+					return str + '不能大于' + max + unit;
+				}
+				if (value % 1 != 0) {
+					return str + '必须为整数';
+				}
+			},
+            time: function(value) {
+                var now_time = (new Date()).getTime();
+                var start_time = (new Date($("#start_time").val())).getTime();
+                var end_time = (new Date(value)).getTime();
+                if (now_time > end_time) {
+                    return '结束时间不能小于当前时间!'
+                }
+                if (start_time > end_time) {
+                    return '结束时间不能小于开始时间!';
+                }
+            },
+            num: function(value) {
+                if (value < 1 || value % 1 != 0) {
+                    return '请输入大于0的正整数！';
+                }
+            },
+            sum: function(value) {
+                if (value < 2 || value % 1 != 0) {
+                    return '参团人数不能小于2，且必须是整数！';
+                }
+            },
+			bargain_first: function(value, item) {
+				var price = $(item).parents("tr").find(".bargain-price").text();
+				var min_price = $(item).parents("tr").find("input[lay-verify='min_price']").val();
+				
+				if (value == "" || value == 0) {
+					return;
+				}
+				if (value < 0) {
+					return '首刀金额不能小于0';
+				}
+				if (Number(value) >= Number(price)) {
+					return '首刀金额必须小于商品价格';
+				}
+				if ((Number(value) + Number(min_price)) >= Number(price)) {
+					return '首刀金额与底价之和必须小于商品价格';
+				}
+				
+				var arrMen = value.split(".");
+				var val = 0;
+				if (arrMen.length == 2) {
+				    val = arrMen[1];
+				}
+				if (val.length > 2) {
+				    return '首刀金额最多保留两位小数';
+				}
+			},
+            bargain_stock: function(value, item) {
+                var stock = $(item).parents("tr").find(".stock").text();
+				if (value == "" || value == 0) {
+					return;
+				}
+                if (Number(value) < 0) {
+                    return '砍价库存不能小于0';
+                }
+                if (Number(value) > Number(stock)) {
+                    return '砍价库存不能大于商品总库存';
+                }
+                if (value % 1 != 0) {
+                    return '砍价库存必须为整数';
+                }
+            },
+            min_price: function(value, item) {
+                var price = $(item).parents("tr").find(".bargain-price").text();
+				
+				if (value == "" || value == 0) {
+					return;
+				}
+                if (Number(value) < 0) {
+                    return '商品底价不能小于0';
+                }
+                if (Number(value) > Number(price)) {
+                    return '商品底价不能大于商品价格';
+                }
+
+                var arrMen = value.split(".");
+                var val = 0;
+                if (arrMen.length == 2) {
+                    val = arrMen[1];
+                }
+                if (val.length > 2) {
+                    return '商品底价最多保留两位小数';
+                }
+            }
+        });
+
+        /**
+         * 监听提交
+         */
+        form.on('submit(save)', function(data){
+
+			var item_sku_ids = [];
+			var item_sku_list = [];
+            $("tbody tr").each(function(i) {
+                var sku_detail = {};
+                sku_detail.sku_id = $(this).find(".good-info").attr("data-sku_id");
+                sku_detail.first_bargain_price = $(this).find(".bargain-first").val();
+                sku_detail.bargain_stock = $(this).find(".bargain-stock").val();
+                sku_detail.floor_price = $(this).find(".min-price").val();
+				item_sku_list.push(sku_detail);
+				item_sku_ids.push(sku_detail.sku_id);
+            });
+			if(item_sku_list.length == 0){
+				layer.msg("请选择活动商品！", {icon: 5, anim: 6});
+				return;
+			}
+            data.field.sku_list = item_sku_list;
+			data.field.sku_ids = item_sku_ids.toString();
+
+            if(repeat_flag) return;
+            repeat_flag = true;
+
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("bargain://shop/bargain/edit"),
+                data: data.field,
+                async: false,
+                success: function(res){
+                    repeat_flag = false;
+
+                    if (res.code == 0) {
+                        layer.confirm('编辑成功', {
+                            title:'操作提示',
+                            btn: ['返回列表', '继续编辑'],
+                            yes: function(){
+                                location.href = ns.url("bargain://shop/bargain/lists");
+                            },
+                            btn2: function() {
+                                location.reload();
+                            }
+                        });
+                    }else{
+                        layer.msg(res.message);
+                    }
+                }
+            })
+        });
+    });
+	
+	// 表格渲染
+	function renderTable(sku_list) {
+	    //展示已知数据
+	    table = new Table({
+	        elem: '#selected_goods_list',
+	        cols: [
+	            [{
+	                field: 'sku_name',
+	                title: '商品名称',
+					width: '26%',
+	                unresize: 'false',
+					templet: function(data) {
+						return '<p class="ns-line-hiding good-info" data-sku_id="'+ data.sku_id +'" title="'+ data.sku_name +'">'+ data.sku_name +'</p>';
+					}
+	            }, {
+	                field: 'price',
+	                title: '商品价格',
+	                unresize: 'false',
+	                align: 'right',
+					width: '15%',
+	                templet: function(data) {
+	                    return '<p class="ns-line-hiding" title="'+ data.price +'">￥<span class="bargain-price">' + data.price +'</span></p>';
+	                }
+	            }, {
+	                field: 'stock',
+	                title: '库存',
+	                unresize: 'false',
+					width: '10%',
+					templet: function(data) {
+						return '<p class="stock">' + data.stock +'</p>';
+					}
+	            }, {
+	                title: '<span title="首刀金额自定义">首刀金额自定义<span>',
+	                unresize: 'false',
+					width: '13%',
+					templet: '#bargainFirst'
+	            }, {
+	                title: '砍价库存',
+	                unresize: 'false',
+					width: '13%',
+					templet: '#bargainStock'
+	            }, {
+	                title: '底价',
+	                unresize: 'false',
+					width: '13%',
+					templet: '#minPrice'
+	            }, {
+	                title: '操作',
+	                toolbar: '#action',
+					width: '10%',
+	                unresize: 'false'
+	            }]
+	        ],
+	        data: sku_list
+	    });
+	}
+
+    /**
+     * 添加商品
+     */
+    function addGoods(){
+
+        goodsSelect(function (res) {
+			var temp_sku_id = [];
+			var temp_sku_list = [];
+            for(var i=0;i<res.length;i++) {
+                for (var k = 0; k < res[i].selected_sku_list.length; k++) {
+                    var item = res[i].selected_sku_list[k];
+					temp_sku_id.push(item.sku_id);
+					temp_sku_list.push(item);
+                }
+            }
+            renderTable(temp_sku_list);
+			selectedGoodsId = temp_sku_id;
+
+        }, selectedGoodsId, {mode: "sku"});
+    }
+	
+	function delRow(obj,id) {
+		$(obj).parents("tr").remove();
+		// //删除选中的id
+		selectedGoodsId.splice(selectedGoodsId.indexOf(id),1);
+	}
+
+    function back() {
+        location.href = ns.url("bargain://shop/bargain/lists");
+    }
+</script>
+
+<script type="text/html" id="bargainFirst">
+	<input type="number" class="layui-input ns-len-input bargain-first" value="{{d.first_bargain_price}}" lay-verify="bargain_first" />
+</script>
+
+<script type="text/html" id="bargainStock">
+	<input type="number" class="layui-input ns-len-input bargain-stock" value="{{d.bargain_stock}}" lay-verify="bargain_stock" />
+</script>
+
+<script type="text/html" id="minPrice">
+	<input type="number" class="layui-input ns-len-input min-price" value="{{d.floor_price}}" lay-verify="min_price" />
+</script>
+
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" onclick="delRow(this,{{d.sku_id}})">删除</a>
+	</div>
+</script>
+{/block}

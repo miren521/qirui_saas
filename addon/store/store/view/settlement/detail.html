@@ -1,0 +1,101 @@
+{extend name="addon/store/store/view/base.html"/}
+{block name="resources"}
+<style>
+	#detail_list {
+		margin-top: 15px;
+	}
+</style>
+{/block}
+{block name='main'}
+<div class="layui-collapse ns-tips">
+    <div class="layui-colla-item">
+        <ul class="layui-colla-content layui-show">
+            <li>账期时间：{if $info.start_time > 0}{:date('Y-m-d H:i:s', $info.start_time)} {else/} {:date('Y-m-d H:i:s', $store_info.create_time)} {/if} 至 {:date('Y-m-d H:i:s', $info.end_time)}</li>
+            <li>结算总金额(<span style="color: red">￥{$info.shop_money}</span>) -
+                退款金额(<span style="color: red">￥{$info.refund_shop_money}</span>) -
+                佣金金额(<span style="color: red">￥{$info.commission}</span>)</li>
+            <li>平台抽成金额(<span style="color: red">￥{$info.platform_money - $info.refund_platform_money}</span>) = 平台结算总抽成(<span style="color: red">￥{$info.platform_money}</span>) -
+                平台退款抽成(<span style="color: red">￥{$info.refund_platform_money}</span>)</li>
+            <li>线下付款金额<span style="color: red">￥{$info.offline_order_money}</span></li>
+            <li>线下退款金额<span style="color: red">￥{$info.offline_refund_money}</span></li>
+        </ul>
+    </div>
+</div>
+<table id="detail_list" lay-filter="detail_list"></table>
+{/block}
+{block name="script"}
+<script>
+    layui.use(['laydate','form'], function () {
+        var form = layui.form;
+		form.render();
+
+        var table = new Table({
+            elem: '#detail_list',
+            url: ns.url("store://store/settlement/detail", {'settlement_id': {$info.id}}),
+            where:{id:"{$info.id}"},
+            cols: [
+                [{
+                    field: 'order_no',
+                    title: '订单编号',
+                    unresize: 'false',
+					width: '20%'
+                }, {
+                    field: 'pay_type_name',
+                    title: '支付方式',
+                    unresize: 'false',
+                    width: '10%'
+                }, {
+                    field:'order_money',
+                    title: '订单销售额（元）',
+                    unresize: 'false',
+					align: 'right',
+					templet: function (res){
+					    return '￥'+res.order_money;
+					},
+					width: '10%'
+                }, {
+                    field:'refund_money',
+                    title: '订单退款（元）',
+                    unresize: 'false',
+					align: 'right',
+					templet: function (res){
+					    return '￥'+res.refund_money;
+					},
+					width: '10%'
+                }, {
+                    field:'shop_money',
+                    title: '门店收入（元）',
+                    unresize: 'false',
+					align: 'right',
+					templet: function (res){
+					    return '￥'+res.shop_money;
+					},
+					width: '15%'
+                }, {
+                    field:'platform_money',
+                    title: '平台抽成（元）',
+                    unresize: 'false',
+					align: 'right',
+					templet: function (res){
+					    return '￥'+res.platform_money;
+					},
+					width: '15%'
+                }, {
+                    field: 'finish_time',
+                    title: '订单完成时间',
+                    unresize: 'false',
+                    templet: function (res){
+                        if(res.finish_time == 0){
+                            return '--';
+                        }else{return ns.time_to_date(res.finish_time)
+
+                        }
+                    },
+					width: '20%'
+                }]
+            ]
+        });
+        
+    });
+</script>
+{/block}

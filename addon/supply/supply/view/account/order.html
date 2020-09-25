@@ -1,0 +1,192 @@
+{extend name="addon/supply/supply/view/base.html"/}
+{block name="resources"}
+<style>
+    .ns-card-brief:first-of-type{margin-top: 0;}
+    .layui-card-body{display: flex;justify-content: space-around;}
+    .layui-card-body .money{font-size: 20px;color: #000;font-weight: bold;margin-top: 10px;text-align: center;max-width: 250px;}
+    .layui-card-body .subhead{font-size: 12px;margin-left: 3px;cursor: pointer;}
+	.ns-single-filter-box {background-color: transparent;}
+	.ns-card-body {display: block;}
+</style>
+
+{/block}
+{block name='main'}
+
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <div>
+            <span class="ns-card-title">交易金额</span>
+        </div>
+    </div>
+    <div class="layui-card-body">
+        <div class="content">
+            <p class="title">待结算(元) <span class="subhead ns-text-color" onclick="statusSwitching(2)">查看</span></p>
+            <p class="money">{$wait_settlement}</p>
+        </div>
+        <div class="content">
+            <p class="title">进行中(元) <span class="subhead ns-text-color" onclick="statusSwitching(1)">查看</span></p>
+            <p class="money">{$settlement}</p>
+        </div>
+        <div class="content">
+            <p class="title">已结算(元) <span class="subhead ns-text-color" onclick="statusSwitching(3)">查看</span></p>
+            <p class="money">{$finish_settlement}</p>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+		<span class="ns-card-title account-card-title">待结算订单</span>
+    </div>
+	
+	<div class="layui-card-body ns-card-body">
+		<!-- 筛选面板 -->
+		<div class="ns-single-filter-box">
+		    <div class="layui-form">
+		        <div class="layui-inline">
+		            <div class="layui-input-inline">
+		                <input type="text" name="start_time" id="start_time" placeholder="开始时间" class="layui-input" autocomplete="off" readonly>
+                        <i class="ns-calendar"></i>
+		            </div>
+		            <div class="layui-input-inline end-time">
+		                <input type="text" name="end_time" id="end_time" placeholder="结束时间" class="layui-input" autocomplete="off" readonly>
+                        <i class="ns-calendar"></i>
+		            </div>
+		            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="search">搜索</button>
+		        </div>
+		    </div>
+		</div>
+		
+		<table id="account_list" lay-filter="account_list"></table>
+	</div>
+</div>
+
+{/block}
+{block name="script"}
+<script>
+    var start_time,end_time;
+    layui.use(['laydate','form'], function () {
+        var laydate = layui.laydate,
+            form = layui.form;
+        
+		form.render();
+		
+        //开始时间
+        laydate.render({
+            elem: '#start_time' //指定元素
+            ,done: function(value, date, endDate){
+                start_time = ns.date_to_time(value);
+
+            }
+        });
+        //结束时间
+        laydate.render({
+            elem: '#end_time' //指定元素
+            ,done: function(value, date, endDate){
+                end_time = ns.date_to_time(value);
+            }
+        });
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function (data) {
+            data.field.start_time = start_time;
+            data.field.end_time = end_time;
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+            return false;
+        });
+    });
+
+    var table = new Table({
+        elem: '#account_list',
+        url: ns.url("supply://supply/account/orderlist"),
+        where: {
+            'order_status': 2
+        },
+        cols: [
+            [{
+                field: 'order_no',
+                title: '订单编号',
+                unresize: 'false',
+                width:'17%',
+            }, {
+                field:'order_money',
+                title: '订单金额（元）',
+                unresize: 'false',
+                width:'13%',
+            }, {
+                field:'refund_supply_money',
+                title: '供应商退款金额（元）',
+                unresize: 'false',
+                width:'13%',
+            }, {
+                field:'platform_money',
+                title: '平台抽成（元）',
+                unresize: 'false',
+                width:'13%',
+            }, {
+                field:'supply_money',
+                title: '供应商金额（元）',
+                unresize: 'false',
+                width:'13%',
+                templet: function (data){
+                    return ns.int_to_float(data.order_money-data.refund_supply_money-data.platform_money)
+                }
+            }, {
+                field:'order_status_name',
+                title: '订单状态',
+                unresize: 'false',
+                width:'10%',
+            }, {
+                field: 'finish_time',
+                title: '完成时间',
+                unresize: 'false',
+                width:'17%',
+                templet: function (res){
+                    if(res.finish_time == 0){
+                        return '--';
+                    }else{
+                        return ns.time_to_date(res.finish_time)
+                    }
+
+                }
+            }]
+        ]
+    });
+
+    $(".layui-card-body .subhead").click(function () {
+       
+    });
+
+    function statusSwitching(index){
+        if (index == 1) {
+            $(".account-card-title").text("进行中订单");
+        }else if(index == 2){
+            $(".account-card-title").text("待结算订单");
+        }else if(index == 3 ){
+            $(".account-card-title").text("已结算订单");
+        }
+        table.reload({
+            page: {
+                curr: 1
+            },
+            where: {
+                'order_status': index
+            }
+        });
+    }
+
+    $(".withdrawal-record").click(function () {
+        location.href = ns.url("supply://supply/supplywithdraw/lists");
+    });
+
+</script>
+{/block}

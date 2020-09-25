@@ -1,0 +1,186 @@
+<style>
+    .refund-view-list{margin-top:20px;font-size:14px;line-height:20px;color:#323233;color:var(--theme-stroke-1,#323233)}
+	.refund-view-item {margin-bottom: 10px;}
+    /*!*display: -ms-flexbox;*!*//*!*display: flex;*!*/.refund-view-item-label{width:75px; vertical-align: top;}
+    .refund-view-item-content{display:inline-block}
+</style>
+<!-- 售后申请同意 -->
+<script type="text/html" id="complain_agree_html">
+    <div style="padding:10px;">
+        <div class="layui-form refund-agree-html" id='complain_agree'lay-filter="complain_agree">
+            <div style="color: #666;">注意 : 该笔订单通过在线付款，商家同意后，退款将自动原路退回买家付款账户。</div>
+            <div class="refund-view-list">
+                <div class="refund-view-item">
+                    <label class="refund-view-item-label">退款金额：</label>
+                    <div class="refund-view-item-content">
+                        <span class="refund-money">￥{$detail.complain_apply_money}</span>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" name="order_goods_id" value="{$detail.order_goods_id}"/>
+            <button class="layui-btn"  lay-submit id="submit_agree" lay-filter="submit_agree" style="display:none;">保存</button>
+        </div>
+    </div>
+</script>
+<!-- 售后申请拒绝 -->
+<script type="text/html" id="complain_refuse_html">
+    <div style="padding:10px;">
+        <div class="layui-form refund-refuse-html" id='complain_refuse'lay-filter="complain_refuse">
+            <div style="color: #666;">注意 : 建议你与买家协商后，再确定是否拒绝维权。如你拒绝维权后，买家可撤销维权申请重新发起退款。</div>
+            <div class="refund-view-list">
+                <div class="refund-view-item">
+                    <label class="refund-view-item-label">退款金额：</label>
+                    <div class="refund-view-item-content">
+                        <span class="refund-money">￥{$detail.complain_apply_money}</span>
+                    </div>
+                </div>
+                <div class="refund-view-item">
+                    <label class="refund-view-item-label">拒绝理由：</label>
+                    <div class="refund-view-item-content">
+                        <textarea name="complain_refuse_reason" placeholder="请填写您的拒绝理由!" class="layui-textarea" style="overflow: hidden;word-wrap: break-word;resize: horizontal;height: 54px;"></textarea>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" name="order_goods_id" value="{$detail.order_goods_id}"/>
+            <button class="layui-btn"  lay-submit id="submit_refuse" lay-filter="submit_refuse" style="display:none;">保存</button>
+        </div>
+    </div>
+</script>
+
+
+<script>
+    var laytpl;
+    var form;
+    //渲染模板引擎
+    layui.use(['laytpl','form'], function(){
+        laytpl = layui.laytpl;
+        form = layui.form;
+    });
+    /**
+     * 同意
+     */
+    function complainAgree(order_goods_id) {
+
+        //获取模板
+        var getTpl = $("#complain_agree_html").html();
+        var data = [];
+        //渲染模板
+        laytpl(getTpl).render(data, function(html) {
+            layer.open({
+                type: 1,
+                shadeClose: true,
+                shade: 0.3,
+                offset: 'auto',
+                scrollbar: true,
+                fixed: false,
+                title: "售后维权处理",
+                area: ['700px', 'auto'],
+                btn: ['确认退款', '取消'],
+                yes: function(index, layero){
+                    $("#submit_agree").click();
+                },
+                btn2: function(index, layero){
+                    layer.close(index);
+                },
+                content:  html,
+                cancel: function(){
+                    //右上角关闭回调
+                    //return false 开启该代码可禁止点击该按钮关闭
+                },
+                success: function(layero, index){
+                    var repeat_flag = false;//防重复标识
+                    form.render();
+
+                    form.on('submit(submit_agree)', function(data){
+                        if(repeat_flag)return;
+                        repeat_flag = true;
+                        $.ajax({
+                            url: ns.url("city://city/complain/agree"),
+                            type: "POST",
+                            dataType: "JSON",
+                            async: false,
+                            data: data.field,
+                            success: function (res) {
+                                layer.msg(res.message);
+                                if(res.code == 0){
+                                    layer.closeAll();
+                                    location.reload();
+                                }else{
+                                    repeat_flag = false;
+                                }
+
+                            }
+                        })
+                        return false;
+                    });
+                }
+            });
+            form.render();
+        });
+
+    }
+    /**
+     * 售后拒绝
+     */
+    function complainRefuse(order_goods_id) {
+
+        //获取模板
+        var getTpl = $("#complain_refuse_html").html();
+        var data = [];
+        //渲染模板
+        laytpl(getTpl).render(data, function(html) {
+            layer.open({
+                type: 1,
+                shadeClose: true,
+                shade: 0.3,
+                offset: 'auto',
+                scrollbar: true,
+                fixed: false,
+                title: "售后维权处理",
+                area: ['700px', 'auto'],
+                btn: ['确认拒绝', '取消'],
+                yes: function(index, layero){
+                    $("#submit_refuse").click();
+                },
+                btn2: function(index, layero){
+                    layer.close(index);
+                },
+                content:  html,
+                cancel: function(){
+                    //右上角关闭回调
+                    //return false 开启该代码可禁止点击该按钮关闭
+                },
+                success: function(layero, index){
+                    var repeat_flag = false;//防重复标识
+                    form.render();
+
+                    form.on('submit(submit_refuse)', function(data){
+                        if(repeat_flag)return;
+                        repeat_flag = true;
+                        $.ajax({
+                            url: ns.url("city://city/complain/refuse"),
+                            type: "POST",
+                            dataType: "JSON",
+                            async: false,
+                            data: data.field,
+                            success: function (res) {
+                                layer.msg(res.message);
+                                if(res.code == 0){
+                                    layer.closeAll();
+                                    location.reload();
+                                }else{
+                                    repeat_flag = false;
+                                }
+
+                            }
+                        })
+                        return false;
+                    });
+                }
+            });
+            form.render();
+        });
+
+    }
+
+</script>

@@ -1,0 +1,11 @@
+@CHARSET "UTF-8";
+.component-seckill .seckill-head {width: 100%;display: -webkit-box;display: -webkit-flex;display: flex;-webkit-box-pack: justify;-webkit-justify-content: space-between;justify-content: space-between;-webkit-box-align: center;-webkit-align-items: center;align-items: center;margin-bottom: 10px;}
+.component-seckill .seckill-head .title-wrap {display: -webkit-box;display: -webkit-flex;display: flex;-webkit-box-align: center;-webkit-align-items: center;align-items: center;}
+.component-seckill .seckill-head .title-wrap .name {font-weight: bold;margin-right: 8px;}
+.component-seckill .seckill-head .title-wrap .time {font-size: 12px;}
+.component-seckill .seckill-head .more {font-size: 12px;}
+.component-seckill .list-wrap .item {width: 64px;height: 100%;display: inline-block;background: #ffffff;margin-right: 7px;}
+.component-seckill .list-wrap .item .img-wrap {height: 59px;}
+.component-seckill .list-wrap .item .img-wrap img {width: 55px;height: 55px;padding: 0;margin: 0;}
+.component-seckill .list-wrap .item .new-price {font-size: 14px;text-align: center;display: block;}
+.component-seckill .list-wrap .item .old-price {font-size: 12px;text-align: center;color: #898989;text-decoration: line-through;}

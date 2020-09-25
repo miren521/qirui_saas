@@ -1,0 +1,324 @@
+{extend name="app/shop/view/base.html"/}
+
+{block name="resources"}
+{/block}
+
+{block name="main"}
+<div class="layui-form ns-form">
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">基础设置</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>直播类型：</label>
+				<div class="layui-input-block">
+					<input type="radio" name="type" value="0" title="手机直播" checked>
+				</div>
+				<div class="ns-word-aux">
+					<p>通过“小程序直播主播端小程序”发起直播</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label"><span class="required">*</span>直播标题：</label>
+					<div class="layui-input-inline">
+						<input type="text" name="name" id="live_title" lay-verify="required|name" class="layui-input ns-len-mid" onkeyup="checkAizeInput(this, 17)" autocomplete="off">
+					</div>
+					<div class="layui-form-mid"><span id="live_title_size">0</span>/17</div>
+				</div>
+				<div class="ns-word-aux">
+					<p>直播标题必须为3-17个字符</p>
+				</div>
+				
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>开播时间：</label>
+				<div class="layui-input-block ns-len-mid">
+					<input type="text" class="layui-input" name="startTime" lay-verify="required|start_time" id="startTime" autocomplete="off" readonly>
+					<i class="ns-calendar"></i>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>结束时间：</label>
+				<div class="layui-input-block ns-len-mid end_time">
+					<input type="text" class="layui-input" name="endTime" lay-verify="required|time" id="endTime" autocomplete="off" readonly>
+					<i class="ns-calendar"></i>
+				</div>
+				<div class="ns-word-aux">
+					<p>开播时间至少需在10分钟后</p>
+					<p>开播时间段仅供参考，不是实际直播间可以开播的时间。</p>
+					<p>直播间在开始时间前也可以开播，并且到结束时间后不会强制结束。</p>
+					<p>若到结束时间仍未开播，则直播间无法再开播。</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label"><span class="required">*</span>主播昵称：</label>
+					<div class="layui-input-inline ns-len-mid">
+						<input type="text" class="layui-input" name="anchorName" id='anchor_name'lay-verify="required|anchorName"  autocomplete="off" onkeyup="checkAizeInput(this, 15)">
+					</div>
+					<div class="layui-form-mid"><span id="anchor_name_size">0</span>/15</div>
+				</div>
+				<div class="ns-word-aux">
+					<p>主播昵称必须为2-15个字符</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>主播微信账号：</label>
+				<div class="layui-input-block ns-len-mid">
+					<input type="text" class="layui-input" name="anchorWechat" lay-verify="required"  autocomplete="off">
+				</div>
+				<div class="ns-word-aux">
+					<p>每个直播间需要绑定一个用作核实主播身份</p>
+					<p>主播微信号，需通过实名认证</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">分享卡片样式配置</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>分享卡片封面：</label>
+				<div class="layui-input-block">
+					<input type="hidden" name="shareImg" value="" lay-verify="shareImg"/>
+					<div class="upload-img-block icon">
+						<div class="upload-img-box" id="shareImgUpload">
+							<div class="ns-upload-default">
+								<img src="SHOP_IMG/upload_img.png" />
+								<p>点击上传</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="ns-word-aux">
+					<p>观众在微信对话框内分享的直播间将以分享卡片的形式呈现。建议尺寸：800像素 * 640像素，图片大小不得超过1M。</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">直播间样式配置</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>直播间背景墙：</label>
+				<div class="layui-input-block">
+					<input type="hidden" name="coverImg" value="" lay-verify="coverImg"/>
+					<div class="upload-img-block icon">
+						<div class="upload-img-box" id="coverImgUpload">
+							<div class="ns-upload-default">
+								<img src="SHOP_IMG/upload_img.png" />
+								<p>点击上传</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="ns-word-aux">
+					<p>直播间背景墙是每个直播间的默认背景。建议尺寸：1080像素 * 1920像素，图片大小不得超过2M。</p>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">直播间功能：</label>
+				<div class="layui-input-block">
+					<input type="checkbox" name="closeLike" value="0" title="开启点赞" lay-skin="primary" checked><br>
+					<input type="checkbox" name="closeGoods" value="0" title="开启货架" lay-skin="primary" checked><br>
+					<input type="checkbox" name="closeComment" value="0" title="开启评论" lay-skin="primary" checked>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">添加</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script type="text/javascript">
+	var form, laydate, upload, repeat_flag = false, //防重复标识
+		minDate = "";
+
+	layui.use(['form', 'laydate', 'upload'], function() {
+		form = layui.form,
+		laydate = layui.laydate;
+		upload = layui.upload;
+
+		form.render();
+
+		// 开始时间
+		laydate.render({
+		  	elem: '#startTime' ,//指定元素
+		  	type: 'datetime',
+			value: new Date(Date.parse(new Date()) + 3600000),
+			done: function(value){
+				minDate = value;
+				// reRender();
+			}
+		});
+		
+		//结束时间
+		laydate.render({
+		  	elem: '#endTime' ,//指定元素
+		  	type: 'datetime',
+			value: ''
+		});
+
+		/**
+		 * 重新渲染结束时间
+		 * */
+		function reRender(){
+			$("#endTime").remove();
+			$(".end_time").html('<input type="text" id="endTime" name="endTime" placeholder="请输入结束时间" lay-verify="required|time" class="layui-input ns-len-mid" autocomplete="off">');
+			laydate.render({
+				elem: '#endTime',
+				type: 'datetime',
+				min: minDate
+			});
+		}
+
+		/**
+		 * 表单验证
+		 */
+		form.verify({
+			name: function(value){
+				// if (value.length < 3 || value.length > 17) {
+				// 	return '直播标题必须为3-17个字符';
+				// }
+				if (getStringLen(value) < 3 || getStringLen(value) > 17) {
+					return '直播标题必须为3-17个字符';
+				}
+
+			},
+			anchorName: function(value){
+				// if (value.length < 2 || value.length > 15) {
+				// 	return '主播昵称必须为2-15个字符';
+				// }
+				if (getStringLen(value) < 2 || getStringLen(value) > 15) {
+					return '主播昵称必须为2-15个字符';
+				}
+			},
+			time: function(value) {
+				var now_time = (new Date()).getTime();
+				var start_time = (new Date($("#start_time").val())).getTime();
+				var end_time = (new Date(value)).getTime();
+				if (now_time > end_time) {
+					return '结束时间不能小于当前时间!'
+				}
+				if (start_time > end_time) {
+					return '结束时间不能小于开始时间!';
+				}
+			},
+			start_time:function(value){
+				var now_time = (new Date()).getTime();
+				var start_time = (new Date(value)).getTime();
+				console.log(now_time);
+				console.log(start_time);
+				// console.log();
+				// console.log((start_time < now_time)/1000/60);
+				if((start_time - now_time)/1000/60  < 10){
+					return '开播时间至少需在10分钟后';
+				}
+
+			},
+			shareImg: function(value){
+				var patt  = /[\S]+/;
+				if (!patt.test(value)) {
+					return '请上传分享卡片封面!';
+				}
+			},
+			coverImg: function(value){
+				var patt  = /[\S]+/;
+				if (!patt.test(value)) {
+					return '请上传直播间背景墙!';
+				}
+			}
+		});
+
+
+		// 添加
+		form.on('submit(save)', function(data){
+			if (repeat_flag) return;
+			repeat_flag = true;
+
+			$.ajax({
+				type: 'POST',
+				url: ns.url("live://shop/room/add"),
+				data: data.field,
+				dataType: 'JSON',
+				success: function(res) {
+					layer.msg(res.message);
+					repeat_flag = false;
+					if (res.code == 0) {
+						location.href = ns.url("live://shop/room/index");
+					}
+				}
+			});
+		});
+
+		upload.render({
+			elem: '#shareImgUpload',
+			url: ns.url("live://shop/room/addimagemedia"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='shareImg']").val(res.data.pic_path);
+					$("#shareImgUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+
+		upload.render({
+			elem: '#coverImgUpload',
+			url: ns.url("live://shop/room/addimagemedia"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='coverImg']").val(res.data.pic_path);
+					$("#coverImgUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+
+	})
+
+
+	function checkAizeInput(obj, max_len){
+		var item_id = $(obj).attr('id');
+		$("#"+item_id+"_size").text(getStringLen($(obj).val()));
+		if(getStringLen($(obj).val()) > max_len){
+			// $(obj).val($(obj).val().substring(0, max_len));
+			$("#"+item_id+"_size").css('color', 'red');
+		}
+	}
+
+	/**
+	 * 计算文本框字符
+	 * @param Str
+	 * @returns {*}
+	 */
+	function  getStringLen(Str){
+		var   i,len,code;
+		if(Str==null || Str == "")   return   0;
+		len   =   Str.length;
+		for   (i   =   0;i   <   Str.length;i++)
+		{
+			code   =   Str.charCodeAt(i);
+			if   (code   >   255) {len ++;}
+		}
+
+		return Math.ceil(len/2);
+	}
+	function back() {
+		location.href = ns.url("live://shop/room/index");
+	}
+</script>
+{/block}

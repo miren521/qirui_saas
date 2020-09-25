@@ -1,0 +1,149 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SERVICER_CSS/login.css">
+{/block}
+{block name="body"}
+<div class="layui-layout layui-layout-admin">
+	<div class="apply-header">
+		<div class="apply-header-box">
+			<div class="apply-header-title">
+				{notempty name="$website_info.logo"}
+				<img src="{:img($website_info.logo)}">
+				{else/}
+				<img src="SERVICER_IMG/login/login_logo.png" alt="">
+				{/notempty}
+				<span class="ns-text-color">B2B2C多商户客服中心</span>
+			</div>
+			<span class="phone">联系电话：{$website_info['web_phone']} </span>
+		</div>
+	</div>
+</div>
+<div class="login-body">
+	<div class="login-content">
+		<h2>客服中心</h2>
+		<div class="layui-form">
+			<div class="login-input login-info">
+				<div class="login-icon">
+					<img src="SERVICER_IMG/login/login_username.png" alt="">
+				</div>
+				<input type="text" name="username" lay-verify="userName" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+			</div>
+			<div class="login-input login-info">
+				<div class="login-icon">
+					<img src="SERVICER_IMG/login/login_password.png" alt="">
+				</div>
+				<input type="password" name="password" lay-verify="password" placeholder="请输入密码" autocomplete="off" class="layui-input">
+			</div>
+			{if $shop_login == 1}
+			<div class="login-input login-verification">
+				<input type="text" name="captcha" lay-verify="verificationCode" placeholder="请输入验证码" autocomplete="off" class="layui-input">
+				<div class="login-verify-code-img">
+					<img id='verify_img' src="{$captcha['img']}" alt='captcha' onclick="verificationCode()" />
+				</div>
+			</div>
+			{/if}
+			<button id="login_btn" type="button" class="layui-btn ns-bg-color ns-login-btn" lay-submit lay-filter="login">登录</button>
+
+		</div>
+	</div>
+
+	<div class="ns-login-bottom">
+		<a class="ns-footer-img" href="#"><img src="{if !empty($copyright.logo)} {:img($copyright.logo)} {else /}__STATIC__/img/copyright_logo.png{/if}" /></a>
+		<p>{notempty name="$copyright.company_name"}{$copyright.company_name}{else/}上海牛之云网络科技有限公司{/notempty} {notempty name="$copyright.icp"}<a href={$copyright.copyright_link}>&nbsp;&nbsp;备案号{$copyright.icp}</a>{/notempty}</p>
+		{notempty name="$copyright.gov_record"}<a class="gov-box" href={$copyright.gov_url}><img src="SHOP_IMG/gov_record.png" alt="">公安备案{$copyright.gov_record}</a>{/notempty}
+	</div>
+</div>
+
+
+{/block}
+{block name="script"}
+<script type="text/javascript">
+
+	var form,
+		login_repeat_flag = false;
+	function verificationCode() {
+		$.ajax({
+			type: "get",
+			url: "{:addon_url('servicer://servicer/login/captcha')}",
+			dataType: "JSON",
+			async: false,
+			success: function (res) {
+				var data = res.data;
+				$("#verify_img").attr("src", data.img);
+				$("input[name='captcha_id']").val(data.id);
+			}
+		});
+	}
+
+
+	layui.use('form', function () {
+		form = layui.form;
+
+		/* 登录 */
+		form.on('submit(login)', function (data) {
+
+			if (login_repeat_flag) return;
+			login_repeat_flag = true;
+
+			$.ajax({
+				type: "POST",
+				dataType: "JSON",
+				url: '{:addon_url("servicer://servicer/login/login")}',
+				data: data.field,
+				success: function (res) {
+
+					if (res.code == 0) {
+						layer.msg('登录成功', { anim: 5, time: 1000 }, function () {
+							window.location = ns.url('servicer://servicer/index/index');
+						});
+					} else {
+						layer.msg(res.message);
+						login_repeat_flag = false;
+						verificationCode()
+					}
+
+				}
+			})
+		});
+
+
+
+
+
+		/**
+		 * 表单验证
+		 */
+		form.verify({
+			userName: function (value) {
+				if (!value.trim()) {
+					return "账号不能为空";
+				}
+			},
+			password: function (value) {
+				if (!value.trim()) {
+					return "密码不能为空";
+				}
+			},
+			verificationCode: function (value) {
+				if (!value.trim()) {
+					return "验证码不能为空";
+				}
+			}
+
+		});
+	});
+
+	$("body").on("blur", ".login-content .login-input", function () {
+		$(this).removeClass("ns-border-color");
+	});
+	$("body").on("focus", ".login-content .login-input", function () {
+		$(this).addClass("ns-border-color");
+	});
+
+	$(document).keydown(function (event) {
+		if (event.keyCode == 13) {
+			$(".ns-login-btn").trigger("click");
+		}
+	});
+</script>
+{/block}

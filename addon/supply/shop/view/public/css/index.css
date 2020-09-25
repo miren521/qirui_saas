@@ -1,0 +1,193 @@
+@charset "UTF-8";
+body {
+  color: #333333; }
+
+/* 首页 */
+.ns-supply-index {
+  margin-top: 10px; }
+
+/* 分类/banner */
+.ns-supply-index-center {
+  width: 100%;
+  display: flex;
+  justify-content: space-between; }
+
+.ns-supply-index-category {
+  width: 190px;
+  background-color: #FFFFFF;
+  height: 358px;
+  padding: 5px 0;
+  box-sizing: border-box; }
+  .ns-supply-index-category ul {
+    width: 100%;
+    position: relative; }
+  .ns-supply-index-category li {
+    padding: 5px 16px;
+    cursor: pointer; }
+    .ns-supply-index-category li .ns-cate-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center; }
+    .ns-supply-index-category li span {
+      max-width: 130px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap; }
+    .ns-supply-index-category li i {
+      font-size: 12px;
+      color: #969799; }
+  .ns-supply-index-category .na-cate-list {
+    display: none;
+    width: 500px;
+    min-height: 358px;
+    background-color: #fff;
+    padding: 16px;
+    box-shadow: 4px 4px 4px rgba(125, 126, 128, 0.16), 4px -4px 4px rgba(125, 126, 128, 0.16);
+    border-left: 1px solid #fff;
+    box-sizing: border-box;
+    z-index: 100;
+    position: absolute;
+    left: 190px;
+    top: -5px; }
+  .ns-supply-index-category .ns-cate-li {
+    margin-bottom: 10px; }
+    .ns-supply-index-category .ns-cate-li h4 {
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 8px;
+      display: inline-block;
+      width: 80px;
+      text-align: right; }
+  .ns-supply-index-category .ns-cate-con {
+    display: inline-block;
+    vertical-align: top;
+    width: 360px; }
+    .ns-supply-index-category .ns-cate-con span {
+      display: inline-block;
+      font-size: 12px;
+      color: #646566;
+      margin-right: 12px;
+      line-height: 22px; }
+    .ns-supply-index-category .ns-cate-con span:hover {
+      color: #ff8143; }
+  .ns-supply-index-category li:hover {
+    background-color: rgba(255, 129, 67, 0.1); }
+    .ns-supply-index-category li:hover .ns-cate-title span, .ns-supply-index-category li:hover .ns-cate-title i {
+      color: #ff8143; }
+    .ns-supply-index-category li:hover .ns-cate-bg {
+      background-color: #ff8143;
+      opacity: .1; }
+    .ns-supply-index-category li:hover .na-cate-list {
+      display: block; }
+
+.ns-supply-index-banner {
+  width: 800px;
+  height: 358px; }
+  .ns-supply-index-banner .layui-carousel .layui-carousel-img {
+    width: 100%;
+    height: 100%; }
+    .ns-supply-index-banner .layui-carousel .layui-carousel-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; }
+  .ns-supply-index-banner .layui-carousel .layui-carousel-ind ul {
+    background-color: transparent; }
+
+.ns-goods-list {
+  width: 100%;
+  padding: 0 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 30px; }
+
+.ns-goods-li {
+  width: 180px;
+  overflow: hidden;
+  margin-right: 20px;
+  margin-bottom: 30px;
+  background-color: #fff;
+  padding: 5px;
+  box-sizing: border-box; }
+  .ns-goods-li:nth-child(5n) {
+    margin-right: 0; }
+  .ns-goods-li .ns-goods-img {
+    width: 100%;
+    height: 170px;
+    box-sizing: border-box;
+    overflow: hidden;
+    position: relative; }
+    .ns-goods-li .ns-goods-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: all 1s ease-out; }
+    .ns-goods-li .ns-goods-img .ns-goods-sale {
+      font-size: 12px;
+      position: absolute;
+      bottom: 0;
+      padding-left: 10px;
+      width: 100%;
+      height: 30px;
+      line-height: 30px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #c8c9cc;
+      box-sizing: border-box; }
+      .ns-goods-li .ns-goods-img .ns-goods-sale .sale-label {
+        opacity: .66; }
+      .ns-goods-li .ns-goods-img .ns-goods-sale .sale-num {
+        display: inline-block;
+        margin-left: 10px;
+        color: #fff; }
+    .ns-goods-li .ns-goods-img .hover-content {
+      display: none;
+      font-size: 12px;
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 30px;
+      line-height: 30px;
+      text-align: center;
+      background-color: #ff8143;
+      color: #fff;
+      font-weight: bolder; }
+  .ns-goods-li .ns-goods-img:hover {
+    border: 2px solid #ff8143; }
+    .ns-goods-li .ns-goods-img:hover img {
+      transform: scale(1.2); }
+    .ns-goods-li .ns-goods-img:hover .hover-content {
+      display: block; }
+  .ns-goods-li .ns-goods-name {
+    font-size: 12px;
+    color: #323233;
+    margin: 5px 0;
+    height: 42px;
+    padding: 0 5px; }
+    .ns-goods-li .ns-goods-name:hover {
+      color: #ff8143; }
+  .ns-goods-li .ns-goods-info {
+    position: relative;
+    padding: 0 5px; }
+    .ns-goods-li .ns-goods-info p {
+      font-size: 12px; }
+      .ns-goods-li .ns-goods-info p span:first-child {
+        color: #969799;
+        display: inline-block; }
+    .ns-goods-li .ns-goods-info .ns-goods-profit {
+      font-size: 15px; }
+    .ns-goods-li .ns-goods-info p:nth-child(2) {
+      margin-top: 5px; }
+    .ns-goods-li .ns-goods-info p:nth-child(3) {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      cursor: pointer; }
+
+.goods-list-title {
+  text-align: left;
+  font-size: 25px;
+  margin-top: 40px;
+  border-left: 6px solid red;
+  padding-left: 20px; }

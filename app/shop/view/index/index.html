@@ -1,0 +1,385 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_CSS/index.css">
+{/block}
+{block name="main"}
+{if condition="isset($shop['is_reopen']) && $shop['is_reopen']  == 3"}
+<div class="expire-hint">
+	<div class="expire-logo">
+		<img src="SHOP_IMG/warning.png" >
+	</div>
+	<div class="expire-center">
+		<h3>店铺已暂停服务，无法正常营业
+			{if $shop['cert_id'] == 0}
+			<a class="ns-text-color shop_auth_apply layui-btn-radius">立即认证</a>
+			{else /}
+				{if $is_reopen == 1}
+				<a class="ns-text-color reopen_apply layui-btn-radius">立即续费</a>
+				{else/}
+				<a class="ns-text-color reopen_apply_detail layui-btn-radius">立即续费</a>
+				{/if}
+			{/if}
+		</h3>
+		<p><span class="ns-red-color">剩余0天</span>（已到期）<span> 咨询电话：{$website_info.web_phone}</span></p>
+	</div>
+</div>
+{elseif condition="isset($shop['is_reopen']) && $shop['is_reopen'] == 2"}
+<div class="expire-hint">
+	<div class="expire-logo">
+		<img src="SHOP_IMG/warning.png" >
+	</div>
+	<div class="expire-center">
+		<h3>店铺即将到期，请尽快续费
+			{if $shop['cert_id'] == 0}
+			<a class="ns-text-color shop_auth_apply layui-btn-radius">立即认证</a>
+			{else /}
+				{if $is_reopen == 1}
+				<a class="ns-text-color reopen_apply layui-btn-radius">立即续费</a>
+				{else/}
+				<a class="ns-text-color reopen_apply_detail layui-btn-radius">立即续费</a>
+				{/if}
+			{/if}
+		</h3>
+		<p><span class="ns-red-color">剩余{$shop.expires_date}天</span> <span> 咨询电话：{$website_info.web_phone}</span></p>
+	</div>
+</div>
+{/if}
+<div class="ns-survey">
+	<div class="ns-survey-left">
+		<div class="ns-survey-item">
+			<!-- 商家信息 -->
+			<div class="ns-survey-shop">
+				<div class="ns-item-pic">
+					<img layer-src src="{:img($shop['logo'])}" onerror=src="SHOP_IMG/default_shop.png" />
+				</div>
+
+				<div class="ns-surver-shop-detail">
+					<p class="ns-survey-shop-name">{$shop.site_name}</p>
+					<p>最后登录：<span class="ns-text-color-dark-gray">{php} echo date("Y-m-d H:i:s", $shop_user_info['login_time']);{/php}</span></p>
+					<!--<p>用户名：<span class="ns-text-color-dark-gray">{$shop_user_info.username}</span></p>-->
+					<p class="ns-shop-detail-label"><span>{$shop.group_name}</span><span>{$shop_user_info.group_name}</span></p>
+					<p>
+						{if $shop['cert_id'] == 0}
+						<a href="{:url('shop/cert/index')}" class="ns-text-color-dark-gray ns-red-color">未认证</a>
+						{else/}
+						<span class="ns-text-color-dark-gray">已认证</span>
+						{/if}
+					</p>
+					<!-- <p>开店套餐：<span class="ns-text-color-dark-gray">{$shop.group_name}</span></p> -->
+					<p>主营行业：<span class="ns-text-color-dark-gray">{$shop.category_name}</span></p>
+					<!-- <p>管理权限：<span class="ns-text-color-dark-gray">{$shop_user_info.group_name}</span></p> -->
+					<p>店铺状态：
+						<span class="ns-text-color-dark-gray">
+						{if $shop.shop_status == 1}
+							<span class="ns-text-color-dark-gray">正常</span>
+						{else /}
+							<span class="ns-text-color-dark-gray ns-red-color">关闭</span>
+						{/if}
+						</span>
+					</p>
+					<p>到期时间：<span class="ns-text-color-dark-gray">
+						{if condition="$shop['expire_time'] eq 0"}
+						永久
+						{else/}
+						{php} echo date("Y-m-d", $shop['expire_time']);{/php}
+						{/if}
+						</span>
+					</p>
+				</div>
+			</div>
+
+			<!-- 概况 -->
+			<div class="layui-card ns-survey-info ns-card-common">
+				<div class="layui-card-header">
+					<div>
+						<span class="ns-card-title">实时概况</span>
+						<span class="ns-card-sub">更新时间：{$today}</span>
+					</div>
+				</div>
+				<div class="layui-card-body">
+					<div class="ns-survey-detail-con">
+						<div class="ns-survey-detail-aco">
+							今日订单数
+							<div class="ns-prompt-block">
+								<i class="iconfont iconwenhao1"></i>
+								<div class="ns-prompt-box">
+									<div class="ns-prompt-con">
+										只有经过支付的订单才会参与统计,支付后关闭的订单也参与统计
+									</div>
+								</div>
+							</div>
+						</div>
+						<p class="ns-survey-detail-num">{$stat_day.order_pay_count}</p>
+						<p class="ns-survey-detail-yesterday">昨日：{$stat_yesterday.order_pay_count}</p>
+					</div>
+					<div class="ns-survey-detail-con">
+						<p class="ns-survey-detail-aco">今日销售金额(元)</p>
+						<p class="ns-survey-detail-num">{if isset($stat_day.order_total)}{$stat_day.order_total}{else /} 0.00 {/if}</p>
+						<p class="ns-survey-detail-yesterday">昨日：{if isset($stat_yesterday.order_total)}{$stat_yesterday.order_total}{else /} 0.00 {/if}</p>
+					</div>
+					<div class="ns-survey-detail-con">
+						<div class="ns-survey-detail-aco">
+							订单总数
+							<div class="ns-prompt-block">
+								<i class="iconfont iconwenhao1"></i>
+								<div class="ns-prompt-box">
+									<div class="ns-prompt-con">
+										只有经过支付的订单才会参与统计,支付后关闭的订单也参与统计
+									</div>
+								</div>
+							</div>
+						</div>
+						<p class="ns-survey-detail-num">{$shop_stat_sum.order_pay_count}</p>
+					</div>
+					<div class="ns-survey-detail-con">
+						<p class="ns-survey-detail-aco">订单销售额(元)</p>
+						<p class="ns-survey-detail-num">{$shop_stat_sum.order_total}</p>
+					</div>
+					<div class="ns-survey-detail-con">
+						<p class="ns-survey-detail-aco">今日店铺收藏</p>
+						<p class="ns-survey-detail-num">{$stat_day.collect_shop}</p>
+						<p class="ns-survey-detail-yesterday">昨日：{$stat_yesterday.collect_shop}</p>
+					</div>
+					<div class="ns-survey-detail-con">
+						<p class="ns-survey-detail-aco">店铺收藏总数</p>
+						<p class="ns-survey-detail-num">{$shop_stat_sum.collect_shop}</p>
+					</div>
+					<div class="ns-survey-detail-con">
+						<p class="ns-survey-detail-aco">商品收藏总数</p>
+						<p class="ns-survey-detail-num">{$shop_stat_sum.collect_goods}</p>
+					</div>
+					<div class="ns-survey-detail-con">
+						<p class="ns-survey-detail-aco">商品总数</p>
+						<p class="ns-survey-detail-num">{$shop_stat_sum.goods_count}</p>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+        <!-- 常用功能 -->
+        <div class="layui-card ns-card-common">
+            <div class="layui-card-header">
+                <div>
+                    <span class="ns-card-title"><strong>常用功能</strong></span>
+                    <span class="ns-card-sub">更新时间：{$today}</span>
+                </div>
+            </div>
+
+			<div class="layui-card-body">
+				<div class="ns-item-block-parent">
+					<a class="ns-item-block ns-item-block-hover-a" href="{:url('shop/goods/addgoods')}">
+						<div class="ns-item-block-wrap">
+							<div class="ns-item-pic">
+								<img src="SHOP_IMG/menu_icon/issue_good.png">
+							</div>
+							<div class="ns-item-con">
+								<div class="ns-item-content-title">发布商品</div>
+								<p class="ns-item-content-desc">发布实物商品</p>
+							</div>
+						</div>
+					</a>
+					<a class="ns-item-block ns-item-block-hover-a" href="{:url('shop/order/lists')}">
+						<div class="ns-item-block-wrap">
+							<div class="ns-item-pic">
+								<img src="SHOP_IMG/menu_icon/order_select.png">
+							</div>
+							<div class="ns-item-con">
+								<div class="ns-item-content-title">订单查询</div>
+								<p class="ns-item-content-desc">查询系统普通订单</p>
+							</div>
+						</div>
+					</a>
+					<a class="ns-item-block ns-item-block-hover-a" href="{:url('shop/diy/index')}">
+						<div class="ns-item-block-wrap">
+							<div class="ns-item-pic">
+								<img src="SHOP_IMG/menu_icon/page_decoration.png">
+							</div>
+							<div class="ns-item-con">
+								<div class="ns-item-content-title">页面装修</div>
+								<p class="ns-item-content-desc">主页面进行装修</p>
+							</div>
+						</div>
+					</a>
+					<a class="ns-item-block ns-item-block-hover-a" href="{:url('shop/account/reopenlist')}">
+						<div class="ns-item-block-wrap">
+							<div class="ns-item-pic">
+								<img src="SHOP_IMG/menu_icon/shop_apply.png">
+							</div>
+							<div class="ns-item-con">
+								<div class="ns-item-content-title">店铺续签</div>
+								<p class="ns-item-content-desc">店铺续签管理</p>
+							</div>
+						</div>
+					</a>
+				</div>
+			</div>
+        </div>
+
+		<!-- 插件 -->
+		<div class="layui-card ns-card-common">
+			<div class="layui-card-header">
+				<div>
+					<span class="ns-card-title"><strong>营销插件</strong></span>
+					<span class="ns-card-sub">更新时间：{$today}</span>
+				</div>
+			</div>
+			
+			<div class="layui-card-body">
+				<div class="ns-item-block-parent">
+					{foreach $promotion as $list_k => $list_v}
+					<a class="ns-item-block ns-item-block-hover-a" {empty name="$list_v['is_developing']"} href="{:addon_url($list_v['url'])}" {/empty}>
+						<div class="ns-item-block-wrap">
+							<div class="ns-item-pic">
+								<img src="{:img($list_v.icon)}">
+							</div>
+							<div class="ns-item-con">
+								<div class="ns-item-content-title">{$list_v.title}</div>
+								<p class="ns-item-content-desc ns-one-line-hiding" title="{$list_v.description}">{$list_v.description}</p>
+							</div>
+							{notempty name="$list_v['is_developing']"}
+								<div class="ns-item-poa-pic">
+									敬请期待
+								</div>
+							{/notempty}
+						</div>
+					</a>
+					{/foreach}
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="ns-survey-right">
+		<!-- 客服 -->
+		<div class="layui-card ns-survey-customer-service">
+			<div class="ns-item-block-parent">
+				<a href="">
+					<div class="ns-item-block-wrap">
+						<div class="ns-item-pic">
+							{if condition="$website_info.web_qrcode"}
+							<img src="{:img($website_info.web_qrcode)}">
+							{else/}
+							<img src="__STATIC__/img/wxewm.png">
+							{/if}
+						</div>
+						<div class="ns-item-con">
+							<div class="ns-item-content-title">公众号管理</div>
+							<p class="ns-item-content-desc">电话：{$website_info.web_phone}</p>
+						</div>
+					</div>
+				</a>
+			</div>
+		</div>
+
+		<!-- 店铺评分 -->
+		<div class="layui-card ns-survey-guide">
+			<div class="layui-card-header"><span><i></i>店铺评分</span></div>
+			<div class="layui-card-body">
+				<a class="layui-elip" href="JavaScript:;">描述相符：{$shop.shop_desccredit} 分</a>
+				<a class="layui-elip" href="JavaScript:;">服务态度：{$shop.shop_servicecredit} 分</a>
+				<a class="layui-elip" href="JavaScript:;">配送服务：{$shop.shop_deliverycredit} 分</a>
+			</div>
+		</div>
+		
+		<!-- 入驻指南 -->
+		<div class="layui-card ns-survey-guide">
+			<div class="layui-card-header"><span><i></i>入驻指南</span><a class="ns-text-color" href="{:url('shop/shopjoin/guide')}">更多</a></div>
+			<div class="layui-card-body">
+                {foreach $shop_join_guide_list as $list_k => $list_v}
+			    <a class="layui-elip" href="{:url('shop/shopjoin/guidedetail')}?guide_index={$list_v.guide_index}">
+			    	<span class="date">{$list_v.create_time|date='m/d'}</span><span>{$list_v.title}</span>
+			    </a>
+                {/foreach}
+			</div>
+		</div>
+		
+		<!-- 入驻帮助 -->
+		<div class="layui-card ns-survey-help">
+			<div class="layui-card-header"><span><i></i>商家帮助</span><a class="ns-text-color" href="{:url('shop/shophelp/helplist')}">更多</a></div>
+			<div class="layui-card-body">
+                {foreach $help_list as $list_k => $list_v}
+			    <a class="layui-elip" href="{:url('shop/shophelp/helpDetail')}?help_id={$list_v.id}">
+			    	<span class="type">[{$list_v.class_name}]</span><span>{$list_v.title}</span>
+			    </a>
+                {/foreach}
+			</div>
+		</div>
+
+		<!-- 网站公告 -->
+		<div class="layui-card ns-survey-help">
+			<div class="layui-card-header"><span><i></i>网站公告</span><a class="ns-text-color" href="{:url('shop/notice/lists')}">更多</a></div>
+			<div class="layui-card-body">
+				{foreach $notice_list as $list_k => $list_v}
+				<a class="layui-elip" href="{:url('shop/notice/detail')}?id={$list_v.id}">
+					<span class="adorn ns-bg-color">{$list_k+1}</span><span>{$list_v.title}</span>
+				</a>
+				{/foreach}
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+
+
+{block name="script"}
+
+<script>
+    var table, form, laytpl, laydate, upload, addRenewal, repeat_flag = false;
+    layui.use(['form', 'laytpl', 'laydate', 'upload'], function() {
+        form = layui.form;
+        laytpl = layui.laytpl;
+        laydate = layui.laydate;
+        upload = layui.upload;
+		form.render();
+
+        /**
+         * 监听开店套餐下拉选(添加)
+         */
+        form.on('select(shop_group)', function (data) {        //对应lay-filter
+            obj.group_id = data.value;
+            moneyChange(obj);
+        });
+
+        /**
+         * 监听续签年限(添加)
+         */
+        form.on('select(apply_year)', function (data) {        //对应lay-filter
+            obj.apply_year = data.value;
+            moneyChange(obj);
+        });
+
+        function moneyChange(data) {
+            $.ajax({
+                type: "POST",
+                url: ns.url("shop/Apply/getApplyMoney"),
+                data: data,
+                dataType: 'JSON',
+                success: function(res) {
+                    repeat_flag = false;
+
+                    $(".paying-amount").text(res.code.paying_amount + '元');
+                    $(".pay-amount").val(res.code.paying_amount);
+                    if (res.code == 0) {
+                        layer.closeAll('page');
+                    }
+                }
+            });
+        }
+
+        //申请续签
+        $(".reopen_apply").click(function () {
+            location.href = ns.url("shop/cert/reopen");
+        });
+        //编辑续签
+        $(".reopen_apply_detail").click(function () {
+            location.href = ns.url("shop/cert/editreopeninfo");
+        });
+        //认证
+        $(".shop_auth_apply").click(function () {
+            location.href = ns.url("shop/cert/index");
+        });
+
+    })
+</script>
+{/block}

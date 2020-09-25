@@ -1,0 +1,131 @@
+{extend name="base"/}
+
+{block name="resources"}
+{/block}
+
+{block name="main"}
+{if condition="!is_null($auth_info) && $auth_info['code'] == 0"}
+<div class="layui-form ns-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label">授权状态：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text ns-len-mid">已授权</p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">授权产品：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text ns-len-mid">{$auth_info['data']['product_name'] ?: '--'}</p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">授权版本：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text ns-len-mid">{$auth_info['data']['devolution_version_name'] ?: '--'}</p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">授权域名：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text ns-len-mid">{$auth_info['data']['devolution_url'] ?: '--'}</p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">授权时间：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text ns-len-mid">{:date('Y-m-d H:i:s', $auth_info['data']['devolution_date'])}</p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">服务到期时间：</label>
+        <div class="layui-input-inline">
+            <p class="ns-input-text">
+                {:date('Y-m-d H:i:s', $auth_info['data']['devolution_expire_date'])}
+                {if condition="$auth_info['data']['devolution_expire_date'] > time()"}
+                <span style="color:red;">可更新</span>
+                {else/}
+                {/if}
+            </p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">当前版本：</label>
+        <div class="layui-input-inline">
+            <p class="ns-input-text">V{$app_info['version']  ?: '--'}</p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">最新版本：</label>
+        <div class="layui-input-inline">
+            <p class="ns-input-text">V{$auth_info['data']['newest_version'] ?: '--'}</p>
+        </div>
+    </div>
+</div>
+{else/}
+<div class="layui-form ns-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label">授权状态：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text ns-len-mid">未授权</p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">授权产品：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text ns-len-mid">--</p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">授权版本：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text ns-len-mid">--</p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">授权域名：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text ns-len-mid">--</p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">授权时间：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text ns-len-mid">--</p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">服务到期时间：</label>
+        <div class="layui-input-inline">
+            <p class="ns-input-text">
+            </p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">当前版本：</label>
+        <div class="layui-input-inline">
+            <p class="ns-input-text">V{$app_info['version']  ?: '--'}</p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">最新版本：</label>
+        <div class="layui-input-inline">
+            <p class="ns-input-text">--</p>
+        </div>
+    </div>
+</div>
+{/if}
+{/block}

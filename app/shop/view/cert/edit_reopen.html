@@ -1,0 +1,218 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+    .ns-body-content{padding: 0;margin: 10px;background-color: #fff;}
+    /* 公共*/
+    h2.apply-h2-title{margin-top: 80px;margin-bottom: 80px;font-size:34px;font-weight:400;color:rgba(93,93,93,1);text-align: center;}
+    .apply-btn-box{margin-top: 50px;margin-bottom: 30px;text-align: center;}
+    .ns-dis-input{background-color: #f7f7f7; cursor: no-drop;}
+    .ns-dis-input:hover{border-color: #e6e6e6 !important;}
+    /* 申请续签 */
+    .payment-voucher{width: 760px;margin: auto;}
+</style>
+{/block}
+{block name="main"}
+
+<!-- 提交支付凭证 -->
+<div class="payment-voucher layui-form">
+    <h2 class="apply-h2-title">填写申请续签信息</h2>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label"><span class="required">*</span>店铺名称：</label>
+        <div class="layui-input-inline">
+            <input type="text" name="shop_name" disabled class="layui-input ns-dis-input ns-len-long" value="{$shop['site_name']}">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label"><span class="required">*</span>开店套餐：</label>
+        <div class="layui-input-inline">
+            <input type="text" disabled class="layui-input ns-dis-input ns-len-long" name="shop_group_name" value="{$shop['group_name']}">
+        </div>
+    </div>
+    <!-- 开店套餐id隐藏域 -->
+    <input type="hidden" class="layui-input" name="shop_group_id" value="{$shop['group_id']}">
+
+    <div class="layui-form-item">
+        <label class="layui-form-label"><span class="required">*</span>主营行业：</label>
+        <div class="layui-input-inline">
+            <input type="text" disabled class="layui-input ns-dis-input ns-len-long" name="category_name" value="{$shop['category_name']}">
+        </div>
+    </div>
+    <!-- 主营行业id隐藏域 -->
+    <input type="hidden" class="layui-input" name="category_id" value="{$shop['category_id']}">
+
+
+    <div class="layui-form-item">
+        <label class="layui-form-label"><span class="required">*</span>入驻时长：</label>
+        <div class="layui-input-inline">
+            <input type="text" disabled class="layui-input ns-dis-input ns-len-mid" name="apply_year" value="{$reopen_info['apply_year']}">
+        </div>
+        <div class="layui-word-aux">年</div>
+    </div>
+
+<!--    <div class="layui-form-item">
+        <label class="layui-form-label"><span cla56ss="required">*</span>保证金：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text color-red payment-cash-deposit">0.00 元</p>
+        </div>
+    </div> -->
+
+    <div class="layui-form-item">
+        <label class="layui-form-label"><span class="required">*</span>服务费：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text color-red payment-service">0.00 元</p>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label"><span class="required">*</span>总计：</label>
+        <div class="layui-input-block">
+            <p class="ns-input-text color-red payment-store-charges">0.00 元</p>
+        </div>
+        <div class="ns-word-aux">
+            说明： 店铺费用 = 服务费 * 入驻年限 + 保证金；
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label img-upload-lable"><span class="required">*</span>付款凭证：</label>
+        <div class="layui-input-inline img-upload">
+            <input type="hidden" class="layui-input" name="paying_money_certificate" value="{$reopen_info.paying_money_certificate}" lay-verify="required"/>
+            <div class="upload-img-block icon"  data-upload data-id="voucher" data-name="paying_money_certificate">
+                <div class="upload-img-box" id="voucher">
+                    <img src="{:img($reopen_info.paying_money_certificate)}" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">付款凭证说明：</label>
+        <div class="layui-input-inline">
+            <textarea name="paying_money_certificate_explain" class="layui-textarea ns-len-long" placeholder="请输入付款凭证说明">{$reopen_info.paying_money_certificate_explain}</textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">收款账户信息：</label>
+        <div class="layui-input-block">
+            <!-- 结算信息 -->
+            <table class="layui-table">
+                <colgroup>
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                    <col width="25%">
+                </colgroup>
+                <tbody>
+                <tr>
+                    <td align="right">银行开户名：</td>
+                    <td>{$receivable_config.value.bank_account_name}</td>
+                    <td align="right">银行账户：</td>
+                    <td>{$receivable_config.value.bank_account_no}</td>
+                </tr>
+                <tr>
+                    <td align="right">开户名称：</td>
+                    <td>{$receivable_config.value.bank_name}</td>
+                    <td align="right">开户所在地：</td>
+                    <td>{$receivable_config.value.bank_address}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <input type="hidden" name="id" value="{$reopen_info.id}" class="layui-input">
+
+    <div class="apply-btn-box">
+        {if $reopen_info.apply_state == -1}
+        <button class="ns-bg-color layui-btn" lay-submit lay-filter="payment-voucher-complete" >点击提交</button>
+        {/if}
+        <button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+    </div>
+
+</div>
+{/block}
+{block name="script"}
+<script>
+    /* 资质审核 - 计算缴费金额 */
+    paymentAmount();
+    function paymentAmount() {
+        var categoryId = "{$shop['category_id']}",
+            groupId = "{$reopen_info['shop_group_id']}",
+            applyYear = $("input[name='apply_year']").val();
+
+        if (categoryId && groupId && applyYear) {
+            $.ajax({
+                url: ns.url("shop/apply/getApplyMoney"),
+                data: {
+                    "apply_year": applyYear,
+                    "category_id": categoryId,
+                    "group_id": groupId
+                },
+                dataType: 'JSON',
+                type: 'POST',
+                success: function (data) {
+					console.log(data);
+                    $(".payment-cash-deposit").text(data.code.paying_deposit + "元");
+                    $(".payment-store-charges").text(data.code.paying_apply + ' 元');
+                    $(".payment-service").text(data.code.paying_apply + "元");
+                }
+            })
+        }
+    };
+
+    layui.use("form",function () {
+        var form = layui.form;
+		form.render();
+		
+        /* 支付凭证 */
+        form.on('submit(payment-voucher-complete)', function (data) {
+            $.ajax({
+                url: ns.url("shop/cert/editReopenInfo"),
+                dataType: 'JSON',
+                type: 'POST',
+                data: data.field,
+                success: function (data) {
+                    if (data.code == 0) {
+                        layer.msg("申请续签成功" ,{anim: 5},function(){
+                            location.href = ns.url("shop/account/reopenlist");
+                        })
+                    }else{
+                        layer.msg(data.message);
+                    }
+                }
+            })
+        });
+    });
+
+    /* 图片上传 */
+    $("[data-upload]").each(function () {
+
+        var id = $(this).attr("data-id");
+        var name = $(this).attr("data-name");
+
+        layui.use("upload", function () {
+            upload = layui.upload;
+
+            upload.render({
+                elem: "#" + id,
+                url: ns.url("shop/upload/image"),
+                done: function (res) {
+
+                    if (res.code >= 0) {
+                        $("input[name=" + name + " ]").val(res.data.pic_path);
+                        $("#" + id).html("<img src=" + ns.img(res.data.pic_path) + " >");
+                    }
+                    return layer.msg(res.message);
+                }
+            });
+        });
+    });
+
+    function back() {
+        window.history.go(-1);
+    }
+</script>
+{/block}

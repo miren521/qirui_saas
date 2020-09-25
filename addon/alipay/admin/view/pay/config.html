@@ -1,0 +1,121 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.ns-input-text span{margin-left: 15px;}
+	.ns-form {margin-top: 0;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label">支付宝应用ID：</label>
+		<div class="layui-input-block">
+			<input name="app_id" type="text" value="{$info.value.app_id ?? ''}" class="layui-input ns-len-long">
+		</div>
+		<div class="ns-word-aux"><span class="ns-text-color-red">[API_ID]</span>支付宝分配给开发者的应用ID</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">应用私钥：</label>
+		<div class="layui-input-block">
+			<textarea name="private_key" class="layui-textarea ns-len-long" placeholder="请输入应用私钥">{$info.value.private_key ?? ''}</textarea>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">应用公钥：</label>
+		<div class="layui-input-block">
+			<textarea name="public_key" class="layui-textarea ns-len-long" placeholder="请输入应用公钥">{$info.value.public_key ?? ''}</textarea>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">支付宝公钥：</label>
+		<div class="layui-input-block">
+			<textarea name="alipay_public_key" class="layui-textarea ns-len-long" placeholder="请输入支付宝公钥">{$info.value.alipay_public_key ?? ''}</textarea>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">支持端口：</label>
+		<div class="ns-input-text">
+			{foreach $app_type as $app_type_k => $app_type_v}
+				{if condition="$app_type_v['name'] !='微信小程序' && $app_type_v['name'] !='微信公众号'"}
+				<span>{$app_type_v['name']}</span>
+				{/if}
+			{/foreach}
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否启用支付：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="pay_status" value="1" lay-skin="switch" {if condition="$info.value && $info.value.pay_status == 1"} checked {/if} />
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否启用退款：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="refund_status" value="1" lay-skin="switch" {if condition="$info.value && $info.value.refund_status == 1"} checked {/if} />
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否启用转账：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="transfer_status" value="1" lay-skin="switch" {if condition="$info.value && $info.value.transfer_status == 1"} checked {/if} />
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+</div>
+
+{/block}
+{block name="script"}
+<script>
+	layui.use('form', function() {
+		var form = layui.form;
+		var repeat_flag = false; //防重复标识
+		form.render();
+		/**
+		 * 监听提交
+		 */
+		form.on('submit(save)', function(data) {
+			if (repeat_flag) return false;
+			repeat_flag = true;
+			
+			$.ajax({
+				url: ns.url("alipay://admin/pay/config"),
+				data: data.field,
+				dataType: 'JSON',
+				type: 'POST',
+				success: function(res){
+					repeat_flag = false;
+					if (res.code == 0) {
+						layer.confirm('编辑成功', {
+							title:'操作提示',
+							btn: ['返回列表', '继续操作'],
+							yes: function(){
+								location.href = ns.url("admin/config/pay")
+							},
+							btn2: function() {
+								location.reload();
+							}
+						});
+					}else{
+						layer.msg(res.message);
+					}
+				}
+			});
+		});
+	});
+	
+	function back(){
+		location.href = ns.url("admin/config/pay");
+	}
+</script>
+{/block}

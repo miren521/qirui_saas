@@ -1,0 +1,222 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.layui-input {display: inline-block;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>分站名称：</label>
+		<div class="layui-input-block">
+			<input name="title" type="text" lay-verify="required" placeholder="请输入城市分站名称" value="{$city_info.data.title}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">分站图标：</label>
+		<div class="layui-input-block">
+			<input name="logo" type="hidden" value="{$city_info.data.logo}">
+			<div class="upload-img-block square">
+				<div class="upload-img-box" id="logo">
+					{if condition="$city_info.data.logo"}
+					<img src="{:img($city_info.data.logo)}">
+					{else/}
+					<div class="ns-upload-default">
+						<img src="__STATIC__/img/upload_img.png" />
+						<p>点击上传</p>
+					</div>
+					{/if}
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">分站关键字：</label>
+		<div class="layui-input-block">
+			<input name="keywords" type="text" placeholder="请输入城市分站关键字" value="{$city_info.data.keywords}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">分站描述：</label>
+		<div class="layui-input-block">
+			<textarea class="layui-textarea ns-len-long" name="desc">{$city_info.data.desc}</textarea>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>分站联系方式：</label>
+		<div class="layui-input-block">
+			<input type="text" name="web_phone" lay-verify="required" value="{$city_info.data.web_phone}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">分站邮箱：</label>
+		<div class="layui-input-block">
+			<input type="text" name="web_email" lay-verify="isemail" value="{$city_info.data.web_email}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">分站QQ：</label>
+		<div class="layui-input-block">
+			<input type="text" name="web_qq" value="{$city_info.data.web_qq}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">分站微信：</label>
+		<div class="layui-input-block">
+			<input type="text" name="web_weixin" value="{$city_info.data.web_weixin}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>分站所在城市：</label>
+		<div class="layui-input-block">
+			<p class="ns-input-text">{$city_info.data.site_area_name}</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>分站开店分佣比率：</label>
+		<div class="layui-input-block">
+			<input type="number" name="shop_rate" min="0" max="100" value="{$city_info.data.shop_rate}" lay-verify="required|fl" autocomplete="off" class="layui-input ns-len-short"> %
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>分站订单分佣比率：</label>
+		<div class="layui-input-block">
+			<input type="number" name="order_rate" min="0" max="100" value="{$city_info.data.order_rate}" lay-verify="required|fl" autocomplete="off" class="layui-input ns-len-short"> %
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">银行开户名：</label>
+		<div class="layui-input-block">
+			<input type="text" name="settlement_bank_account_name" value="{$city_info.data.settlement_bank_account_name}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">公司银行账号：</label>
+		<div class="layui-input-block">
+			<input type="text" name="settlement_bank_account_number" value="{$city_info.data.settlement_bank_account_number}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">开户银行名称：</label>
+		<div class="layui-input-block">
+			<input type="text" name="settlement_bank_name" value="{$city_info.data.settlement_bank_name}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">开户银行所在地：</label>
+		<div class="layui-input-block">
+			<input type="text" name="settlement_bank_address" value="{$city_info.data.settlement_bank_address}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+	
+	<input type="hidden" name="website_id" value="{$city_info.data.site_id}"> <!-- 当前分站ID -->
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'upload'], function() {
+		var form = layui.form,
+			upload = layui.upload,
+			repeat_flag = false;
+		
+		// 申请人身份证正面
+		var uploadInst = upload.render({
+			elem: '#logo',
+			url: ns.url("admin/upload/upload"),
+			done: function(res) {
+				layer.msg(res.message);
+				if (res.code >= 0) {
+					$("input[name='logo']").val(res.data.pic_path);
+					$("#logo").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+			}
+		});
+		
+		/**
+		 * 监听提交
+		 */
+		form.on('submit(save)', function(data) {
+		    if (repeat_flag) return;
+		    repeat_flag = true;
+
+			$.ajax({
+				dataType: 'JSON',
+				type: 'POST',
+				url: ns.url("city://admin/website/edit"),
+				data: data.field,
+				success: function(res){
+					repeat_flag = false;
+					if (res.code == 0) {
+						layer.confirm('编辑城市分站已成功', {
+							title:'操作提示',
+							btn: ['返回列表', '继续编辑'],
+							yes: function(){
+								location.href = ns.url("city://admin/website/lists")
+							},
+							btn2: function() {
+                                location.reload();
+							}
+						})
+					}else{
+						layer.msg(res.message);
+					}
+				}
+			});
+		});
+		
+		//表单验证
+		form.verify({
+			fl: function(value, item) {
+				var str = $(item).parents(".layui-form-item").find("label").text().split("*").join("");
+				str = str.substring(0, str.length - 1);
+				
+				if (value < 0) {
+					return str + "不能小于0";
+				}
+				
+				if (value > 100) {
+					return str + "不能大于100";
+				}
+				
+				var arrMen = value.split(".");
+				var val = 0;
+				if (arrMen.length == 2) {
+					val = arrMen[1];
+				}
+				if (val.length > 2) {
+					return str + "最多可保留两位小数";
+				}
+			},
+			isemail: function(value) {
+				var reg = /^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$/;
+				if (value == '') {
+					return;
+				}
+				if (!reg.test(value)) {
+					return '请输入正确的邮箱!';
+				}
+			}
+		});
+	});
+	
+	function back() {
+		location.href = ns.url("city://admin/website/lists")
+	}
+</script>
+{/block}

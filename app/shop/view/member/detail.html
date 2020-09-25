@@ -1,0 +1,159 @@
+{extend name="base"/}
+
+{block name="resources"}
+<style>
+	.layui-input-inline input, .layui-input-block input, .layui-input-block textarea {outline: none; border: none;}
+	.upload-img-block {border: none; width: 100%;}
+	.upload-img-block .upload-img-box {display: inline-block; width: 80px; height: 80px;}
+	.ns-detail-form {display: inline-block; width: 49%; vertical-align: top;}
+	.ns-detail-form:first-child {border-right: 1px solid #EEEEEE;}
+	
+	.ns-title-content {color: #454545; display: flex; flex-wrap: wrap;}
+	.ns-title-content .layui-form-item {margin-bottom: 0; height: 30px; line-height: 30px;}
+	
+	.layui-card:first-child {margin-top: 0;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-card ns-card-common">
+	<div class="layui-card-header">
+		<span class="ns-card-title">基础信息</span>
+	</div>
+	<div class="layui-card-body">
+		<div class="ns-table-title">
+			<div class="ns-title-pic">
+				<img layer-src src="{:img($info.headimg)}" onerror="this.src = 'ADMIN_IMG/default_headimg.png'" />
+			</div>
+			<div class="ns-title-content">
+				<div class="layui-form-item">
+					<label class="layui-form-label sm">会员昵称：</label>
+					<div class="layui-input-block">
+						<input class="layui-input ns-len-mid" value="{$info.nickname}" />
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label sm">手机电话：</label>
+					<div class="layui-input-block">
+						<input class="layui-input ns-len-mid" value="{notempty name='$info.mobile'}{$info.mobile}{else/}--{/notempty}" />
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label sm">会员邮箱：</label>
+					<div class="layui-input-block">
+						<input class="layui-input ns-len-mid" value="{notempty name='$info.email'}{$info.email}{else/}--{/notempty}" />
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label sm">关注状态：</label>
+					<div class="layui-input-block">
+						<input class="layui-input ns-len-mid" value="{eq name='$info.is_subscribe' value='1'}已关注{else/}未关注{/eq}" />
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label sm">关注时间：</label>
+					<div class="layui-input-block">
+						<input class="layui-input ns-len-mid" value="{:time_to_date($info.subscribe_time)}" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="layui-card ns-card-common">
+	<div class="layui-card-header">
+		<span class="ns-card-title">交易信息</span>
+	</div>
+	<div class="layui-card-body">
+		<table id="order_list" lay-filter="order_list"></table>
+
+		<!-- 工具栏操作 -->
+		<script type="text/html" id="action">
+		    <div class="ns-table-btn">
+		        <a class="layui-btn" lay-event="detail">详情</a>
+		    </div>
+		</script>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use('form', function() {
+		var table,
+			form = layui.form;
+		form.render();
+			
+		table = new Table({
+			elem: '#order_list',
+			url: ns.url("shop/member/orderList"),
+			where: {
+				member_id: {$info.member_id}
+			},
+			cols: [
+				[{
+                    field: 'order_no',
+                    title: '订单编号',
+                    width: '15%',
+                    unresize: 'false'
+                }, {
+                    field: 'order_name',
+                    title: '商品信息',
+					width: '18%',
+                    unresize: 'false'
+                }, {
+                    field: 'order_money',
+                    title: '订单金额',
+					width: '10%',
+                    unresize: 'false',
+					templet: function(data) {
+						return '￥' + data.order_money;
+					}
+                }, {
+                    field: 'pay_money',
+                    title: '实际支付金额',
+					width: '12%',
+                    unresize: 'false',
+					templet: function(data) {
+						return '￥' + data.pay_money;
+					}
+                }, {
+                    field: 'order_type_name',
+                    title: '订单类型',
+					width: '10%',
+                    unresize: 'false'
+                },{
+                    field: 'order_status_name',
+                    title: '订单状态',
+					width: '10%',
+                    unresize: 'false'
+                },{
+                    field: 'create_time',
+                    title: '下单时间',
+                    width: '17%',
+                    templet: function(data) {
+                        return ns.time_to_date(data.create_time)
+                    }
+                }, {
+                    title: '操作',
+                    width: '8%',
+                    unresize: 'false',
+                    toolbar: '#action'
+                }]
+			]
+		});
+		
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'detail': //订单详情
+					window.open(ns.url("shop/order/detail?order_id=" + data.order_id));
+					break;
+			}
+		});
+		
+	});
+</script>
+{/block}

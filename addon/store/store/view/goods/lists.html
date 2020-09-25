@@ -1,0 +1,172 @@
+{extend name="addon/store/store/view/base.html"/}
+{block name="resources"}
+<link rel="stylesheet" href="STORE_CSS/goods_lists.css">
+<style>
+	.layui-table[lay-skin=line] {border-width: 0;}
+	.ns-screen {margin-top: 15px;}
+</style>
+{/block}
+{block name="main"}
+<div class="ns-tips layui-collapse">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>当前显示的是已经审核通过的商品</li>
+			<li>如果商家的商品操作违规，平台可以操作违规下架，违规下架的商品需要商家编辑审核之后才能重新上架</li>
+		</ul>
+	</div>
+</div>
+
+<!-- 筛选面板 -->
+<div class="ns-screen layui-collapse" lay-filter="selection_panel">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title"></h2>
+		<form class="layui-colla-content layui-form layui-show">
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">商品名称：</label>
+					<div class="layui-input-inline">
+						<input type="text" name="search_text" placeholder="请输入商品名称" autocomplete="off" class="layui-input">
+					</div>
+				</div>
+
+				<div class="layui-inline">
+					<label class="layui-form-label">店内分类：</label>
+					<div class="layui-input-inline">
+						<select name="goods_shop_category_ids" lay-filter="goods_shop_category_ids">
+							<option value="0" data-level="0">顶级分类</option>
+							{foreach name="$goods_shop_category_list" item="vo"}
+							<option value="{$vo['category_id']}" data-level="{$vo['level']}">{$vo['category_name']}</option>
+								{notempty name="$vo['child_list']"}
+								{foreach name="$vo['child_list']" item="vo_child"}
+								<option value="{$vo_child['category_id']}" data-level="{$vo_child['level']}">&nbsp;&nbsp;&nbsp;&nbsp;{$vo_child['category_name']}</option>
+								{/foreach}
+								{/notempty}
+							{/foreach}
+						</select>
+					</div>
+				</div>
+
+			</div>
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">销量：</label>
+					<div class="layui-input-inline">
+						<input type="number" name="start_sale" id="start_sale" lay-verify="int" placeholder="最低销量" class="layui-input" autocomplete="off">
+					</div>
+					<div class="layui-form-mid">-</div>
+					<div class="layui-input-inline">
+						<input type="number" name="end_sale" id="end_sale" lay-verify="int" placeholder="最高销量" class="layui-input" autocomplete="off">
+					</div>
+				</div>
+			</div>
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="search">筛选</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- 列表 -->
+<table id="goods_list" lay-filter="goods_list"></table>
+
+<!-- 商品信息 -->
+<script type="text/html" id="goods_info">
+	<div class="ns-table-title">
+		<div class="ns-title-pic" id="goods_img_{{d.goods_id}}">
+			<img layer-src src="{{ns.img(d.goods_image.split(',')[0], 'small')}}"/>
+		</div>
+		<p class="goods-name">{{d.goods_name}}{{d.goods_name}}</p>
+		<div class="ns-title-content">
+			<a href="javascript:;" class="ns-multi-line-hiding ns-text-color"
+			   title="{{d.goods_name}}" lay-event="preview">{{d.goods_name}}{{d.goods_name}}</a>
+			<span class="layui-hide ns-text-color">...</span>
+		</div>
+	</div>
+</script>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="operation-wrap" data-goods-id="{{d.goods_id}}">
+		<div class="ns-table-btn">
+			<a class="layui-btn" lay-event="stock">库存</a>
+		</div>
+	</div>
+</script>
+
+
+{/block}
+
+{block name="script"}
+<!-- SKU商品列表 -->
+<script type="text/html" id="skuList">
+	<div class="layui-form">
+		<table class="layui-table" lay-skin="line">
+			<colgroup>
+				<col width="40%">
+				<col width="20%">
+				<col width="20%">
+				<col width="20%">
+			</colgroup>
+			<thead>
+			<tr>
+				<th>门店商品</th>
+				<th>当前库存</th>
+				<th>增加/删减</th>
+				<th>实际库存</th>
+			</tr>
+			</thead>
+			<tbody>
+			{{# layui.each(d, function(index, item){ }}
+			<tr>
+				<td>
+					<div class="ns-table-title">
+						<div class="ns-title-pic" id="img{{index}}">
+							<img layer-src src="{{ns.img(item.sku_image.split(',')[0], 'small')}}"/>
+						</div>
+						<div class="ns-title-content">
+							<a href="javascript:;" class="ns-line-hiding ns-text-color" title="{{item.sku_name}}" lay-event="preview">{{item.sku_name}}</a>
+							<a>价格：￥{{item.price}}</a>
+						</div>
+					</div>
+				</td>
+				<td> <span class="current-inventory">{{item.store_stock != null ? item.store_stock : 0 }}</span></td>
+				<td>
+					<input type="number" lay-verify="stock" now_stock="{{item.store_stock != null ? item.store_stock : 0 }}" name="stock[]" class="layui-input" value="0" />
+					<input type="hidden" name="goods_id[]" value="{{item.goods_id}}" />
+					<input type="hidden" name="sku_id[]" value="{{item.sku_id}}" />
+				</td>
+				<td>
+					<input type="number" disabled class="layui-input ns-dis-input practical-inventory" value="{{item.store_stock != null ? item.store_stock : 0 }}" />
+				</td>
+			</tr>
+			{{# }) }}
+			</tbody>
+		</table>
+
+		<div class="ns-form-row">
+			<a class="layui-btn ns-bg-color" lay-filter="save_stock" lay-submit>确定</a>
+			<a class="layui-btn layui-btn-primary" onclick="cancelLayer()">取消</a>
+		</div>
+	</div>
+</script>
+<script src="STORE_JS/goods_list.js"></script>
+<script>
+	window.onload = function() {
+		var ie = IEVersion();
+		if (ie == 1) {
+			$(".ns-table-title p").css({"display":"block","visibility":"hidden"});
+			var w = $(".layui-collapse").height();
+			var pWidth = $(".ns-table-title p").width();
+			$(".ns-table-title p").removeAttr("style")
+			var divWidth = $(".ns-title-content").width();
+
+			if (divWidth * 2 < (pWidth - 10)) {
+				$(".ns-table-title span").removeClass("layui-hide");
+			}
+		}
+	}
+	
+</script>
+{/block}

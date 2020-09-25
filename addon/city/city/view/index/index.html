@@ -1,0 +1,164 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="CITY_CSS/index.css">
+{/block}
+{block name="main"}
+<div class="index-box">
+    <!-- 内容部分 -->
+    <div class="index-content">
+        <!-- 基本信息 -->
+        <div class="basic-info">
+            <blockquote class="layui-elem-quote">基本信息 <span class="ns-card-sub"></span></blockquote>
+            <div class="basic-info-box">
+                <!-- 介绍 -->
+                <div class="synopsis">
+                    <div class="synopsis-img">
+                        <img src="{:img($city_info.logo)}"  onerror="this.src = '__STATIC__/img/default_shop.png'" alt="">
+                    </div>
+                    <div class="synopsis-content">
+                        <div class="title">{$city_info.title}</div>
+                        <div class="end-time">最后登录时间：{php} echo date("Y-m-d H:i:s", $user_info['login_time']);{/php}</div>
+                        <div class="tab">
+                            <span class="ns-border-color ns-text-color">{$city_info.site_area_name}</span>
+                        </div>
+                        <p class="state">分站状态：<span class="ns-text-color-red">{if $city_info.status == 1} 正常 {else /} 冻结 {/if}</span></p>
+                    </div>
+                </div>
+
+                <!-- 收入 -->
+                <div class="income">
+                    <div class="general-income">
+                        <span>总收入（元）</span>
+                        <span>{$total_account}</span>
+                    </div>
+                    <div class="other-income">
+                        <div class="shop-income">
+                            <span>店铺入驻抽成（元）</span>
+                            <span>{$website_info.account_shop}</span>
+                        </div>
+                        <div class="shop-income">
+                            <span>店铺结算抽成（元）</span>
+                            <span>{$website_info.account_order}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 提现 -->
+                <div class="withdraw-deposit">
+                    <div class="withdraw-item">
+                        <div class="item-img-box">
+                            <img src="CITY_IMG/index/index_order.png" alt="">
+                        </div>
+                        <div class="item-content">
+                            <span>可提现（元）</span>
+                            <span>{$website_info.account}</span>
+                        </div>
+                    </div>
+                    <div class="withdraw-item">
+                        <div class="item-img-box">
+                            <img src="CITY_IMG/index/index_order.png" alt="">
+                        </div>
+                        <div class="item-content">
+                            <span>已提现（元）</span>
+                            <span>{$website_info.account_withdraw}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 常用功能 -->
+        <div class="common-function">
+            <blockquote class="layui-elem-quote">常用功能</blockquote>
+            <div class="common-function-box layui-row">
+
+                <a class="layui-col-md2" href="{:addon_url('city://city/shop/lists')}">
+                    <div class="ns-index-img-box">
+                        <img src="CITY_IMG/index/shop_check.png">
+                    </div>
+                    <div class="ns-text-box">店铺查询</div>
+                </a>
+
+                <a class="layui-col-md2" href="{:addon_url('city://city/shopreopen/reopen')}">
+                    <div class="ns-index-img-box">
+                        <img src="CITY_IMG/index/shop_renewal.png">
+                    </div>
+                    <div class="ns-text-box">店铺续签</div>
+                </a>
+
+                <a class="layui-col-md2" href="{:addon_url('city://city/goods/lists')}">
+                    <div class="ns-index-img-box">
+                        <img src="CITY_IMG/index/shop_renewal.png">
+                    </div>
+                    <div class="ns-text-box">商品审核</div>
+                </a>
+
+                <a class="layui-col-md2" href="{:addon_url('city://city/diy/index')}">
+                    <div class="ns-index-img-box">
+                        <img src="CITY_IMG/index/shop_renewal.png">
+                    </div>
+                    <div class="ns-text-box">分站装修</div>
+                </a>
+
+                <a class="layui-col-md2" href="{:addon_url('city://city/withdraw/lists')}">
+                    <div class="ns-index-img-box">
+                        <img src="CITY_IMG/index/shop_renewal.png">
+                    </div>
+                    <div class="ns-text-box">转账记录</div>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 信息部分 -->
+    <div class="index-info">
+        <!-- 联系方式 -->
+        <ul class="contact-information">
+            <li>
+                <div class="information-img-box">
+                    {if condition="$website.web_qrcode"}
+                    <img src="{:img($website.web_qrcode)}">
+                    {else/}
+                    <img src="__STATIC__/img/wxewm.png">
+                    {/if}
+                </div>
+                <div class="information-content">
+                    <span>公众号管理</span>
+                    <span class="ns-item-content-desc">电话：{$website.web_phone}</span>
+                </div>
+            </li>
+        </ul>
+
+        <!-- 最新公告 -->
+        <div class="layui-card ns-card-common announcement">
+            <div class="layui-card-header">
+                <span class="">
+                    <i></i>
+                    最新公告
+                </span>
+                <a class="ns-text-color" href="{:addon_url('city://city/notice/lists')}">更多</a>
+            </div>
+            <div class="layui-card-body">
+                {foreach $notice_list as $list_k => $list_v}
+                <a class="layui-elip" href="{:addon_url('city://city/notice/detail')}?id={$list_v.id}">
+                    <span class="type ns-bg-color">{$list_k+1}</span><span>{$list_v.title}</span>
+                </a>
+                {/foreach}
+            </div>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="script"}
+<script>
+	var time = (new Date()).getTime();
+	var date = ns.time_to_date(time / 1000);
+	$(".ns-card-sub").text("更新时间：" + date);
+
+	/* 版本更新 */
+    $("body").on("click",".version-upgrade",function () {
+        $(this).addClass("layui-hide");
+    });
+</script>
+{/block}

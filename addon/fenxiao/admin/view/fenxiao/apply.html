@@ -1,0 +1,292 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>当分销商符合条件时，可以点击审核通过按钮使其成为分销商。</li>
+		</ul>
+	</div>
+</div>
+
+<div class="ns-screen layui-collapse" lay-filter="selection_panel">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">筛选</h2>
+		<form class="layui-colla-content layui-form layui-show">
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">分销商店铺名：</label>
+					<div class="layui-input-inline">
+						<input type="text" name="fenxiao_name" placeholder="请输入分销商店铺名" class="layui-input">
+					</div>
+				</div>
+				
+				<div class="layui-inline">
+					<label class="layui-form-label">手机号：</label>
+					<div class="layui-input-inline">
+						<input type="text" name="mobile" placeholder="请输入分销商手机号" class="layui-input">
+					</div>
+				</div>
+				
+				<div class="layui-inline">
+					<label class="layui-form-label">申请等级：</label>
+					<div class="layui-input-inline">
+						<select name="level_id" lay-filter="level_id">
+							<option value="">全部</option>
+							{volist name="$level_list" id="level"}
+							<option value="{$level.level_id}">{$level.level_name}</option>
+							{/volist}
+						</select>
+					</div>
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">注册时间：</label>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input" name="rg_start_time"  id="rg_start_time" autocomplete="off" placeholder="开始时间" >
+						<i class="ns-calendar"></i>
+					</div>
+					<div class="layui-form-mid">-</div>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input" name="rg_end_time" id="rg_end_time" autocomplete="off" placeholder="结束时间" >
+						<i class="ns-calendar"></i>
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">申请时间：</label>
+					<!-- <div class="layui-input-inline">
+						<input type="text" class="layui-input" name="expire_time" id="expire_time" autocomplete="off" >
+					</div> -->
+					<div class="layui-input-inline">
+					    <input type="text" class="layui-input" name="create_start_time"  id="create_start_time" autocomplete="off" placeholder="开始时间" >
+						<i class="ns-calendar"></i>
+					</div>
+					<div class="layui-form-mid">-</div>
+					<div class="layui-input-inline">
+					    <input type="text" class="layui-input" name="create_end_time" id="create_end_time" autocomplete="off" placeholder="结束时间" >
+						<i class="ns-calendar"></i>
+					</div>
+				</div>
+
+			</div>
+
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="search">筛选</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="status">
+
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="fenxiao_list" lay-filter="fenxiao_list"></table>
+	</div>
+</div>
+
+
+<!-- 用户信息 -->
+<script type="text/html" id="member_info">
+	<div class='ns-table-tuwen-box'>
+		<div class='ns-img-box'>
+			<img layer-src src="{{ns.img(d.headimg)}}" onerror="this.src = 'ADMIN_IMG/default_headimg.png' ">
+		</div>
+		<div class='ns-font-box'>
+			<p class="layui-elip">{{d.nickname}}</p>
+		</div>
+	</div>
+</script>
+
+<!-- 状态 -->
+<script type="text/html" id="status">
+	{{# if(d.status == 1){ }}
+		<span style="color: red;">待审核</span>
+	{{# }else if(d.status == 2){ }}
+		<span style="color: green;">审核通过</span>
+	{{# }else if(d.status == -1){ }}
+		<span style="color: gray;">审核拒绝</span>
+	{{# } }}
+</script>
+
+<!-- 工具栏操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="detail">会员信息</a>
+		{{# if(d.status == 1){ }}
+		<a class="layui-btn" lay-event="pass">审核通过</a>
+		<a class="layui-btn" lay-event="refuse">审核拒绝</a>
+		{{# } }}
+	</div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+	layui.use(['form', 'laydate', 'element', 'laytpl',], function() {
+		var table,
+			form = layui.form,
+            element = layui.element,
+            laytpl = layui.laytpl,
+			laydate = layui.laydate;
+		form.render();
+
+		//渲染时间
+		laydate.render({
+			elem: '#create_start_time',
+			type: 'datetime'
+		});
+
+		laydate.render({
+			elem: '#create_end_time',
+			type: 'datetime'
+		});
+
+        //渲染时间
+        laydate.render({
+            elem: '#rg_start_time',
+            type: 'datetime'
+        });
+
+        laydate.render({
+            elem: '#rg_end_time',
+            type: 'datetime'
+        });
+
+        //监听Tab切换
+        element.on('tab(status)', function(data) {
+            var status = $(this).attr("lay-id");
+            table.reload( {
+                page: {
+                    curr: 1
+                },
+                where: {
+                    'status': status
+                }
+            });
+        });
+		table = new Table({
+			elem: '#fenxiao_list',
+			url: ns.url("fenxiao://admin/fenxiao/apply"),
+			cols: [
+				[{
+                    field: 'member_name',
+                    title: '会员信息',
+                    unresize: 'false',
+                    templet:'#member_info'
+                }, {
+                    field: 'mobile',
+                    title: '联系方式',
+                    unresize: 'false',
+                },{
+                    field: 'fenxiao_name',
+                    title: '申请分销商名称',
+                    unresize: 'false'
+                }, {
+					field: 'level_name',
+					title: '申请分销等级',
+					unresize: 'false',
+				}, {
+					field: 'child',
+					title: '会员消费（次数/金额）',
+					unresize: 'false',
+                    templet: function(data) {
+                        return data.order_complete_num+' / '+data.order_complete_money;
+                    }
+				}, {
+                    field: 'create_time',
+                    title: '申请时间',
+                    unresize: 'false',
+                    templet: function(data) {
+                        return ns.time_to_date(data.create_time);
+                    }
+                }, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false'
+				}]
+			]
+		});
+
+
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+			return false;
+		});
+
+
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data,
+					event = obj.event;
+			switch (event) {
+				case 'detail': //查看
+
+					location.href = ns.url('admin/member/editmember','member_id='+data.member_id);
+					break;
+				case 'pass': //通过
+					layer.confirm('确定要通过吗?', function () {
+						if (repeat_flag) return;
+						repeat_flag = true;
+						$.ajax({
+							url: ns.url("fenxiao://admin/fenxiao/applypass"),
+                            data: {apply_id:data.apply_id},
+							dataType: 'JSON',
+							type: 'POST',
+							success: function(res) {
+								layer.msg(res.message);
+								repeat_flag = false;
+
+								if (res.code == 0) {
+									table.reload();
+								}
+							}
+						});
+					})
+					break;
+				case 'refuse': //拒绝
+					layer.confirm('确定要拒绝吗?', function () {
+						if (repeat_flag) return;
+						repeat_flag = true;
+						$.ajax({
+							url: ns.url("fenxiao://admin/fenxiao/applyrefuse"),
+							data: {apply_id:data.apply_id},
+							dataType: 'JSON',
+							type: 'POST',
+							success: function(res) {
+								layer.msg(res.message);
+								repeat_flag = false;
+
+								if (res.code == 0) {
+									table.reload();
+								}
+							}
+						});
+					})
+					break;
+			}
+		});
+
+	});
+
+</script>
+
+{/block}

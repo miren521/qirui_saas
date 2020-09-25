@@ -1,0 +1,140 @@
+{extend name="base"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<!-- 搜索框 -->
+<div class="ns-function-search">
+    <div class="layui-form">
+        <div class="layui-input-inline">
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" placeholder="开始时间" name="start_date" id="start_time" autocomplete="off" readonly>
+            </div>
+            <div class="layui-input-inline end-time">
+                <input type="text" class="layui-input" placeholder="结束时间" name="end_date" id="end_time" autocomplete="off" readonly>
+            </div>
+        </div>
+
+        <div class="layui-input-inline ns-len-mid">
+            <input type="text" id="search_text" name="search_text" placeholder="请输入店铺名" class="layui-input">
+            <button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+                <i class="layui-icon">&#xe615;</i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 列表 -->
+<table id="member_account_list" lay-filter="member_account_list"></table>
+
+<!--操作-->
+<script type="text/html" id="action">
+    <a href="javascript:;" class="layui-btn" lay-event="basic">查看</a>
+</script>
+
+<!--时间-->
+<script type="text/html" id="times">
+    <div class="layui-elip">{{ns.time_to_date(d.create_time)}}</div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+    layui.use(['form', 'laydate'], function() {
+        var table,
+            form = layui.form,
+            laydate = layui.laydate,
+            currentDate = new Date(),
+            minDate = "";
+        form.render();
+
+        currentDate.setDate(currentDate.getDate() - 7);
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time',
+			type: 'datetime'
+        });
+
+        //结束时间
+        laydate.render({
+            elem: '#end_time',
+			type: 'datetime'
+        });
+        
+        /**
+         * 重新渲染结束时间
+         */
+        function reRender(){
+            $("#end_time").remove();
+            $(".end-time").html('<input type="text" class="layui-input" placeholder="结束时间" name="end_date" id="end_time" >');
+            laydate.render({
+                elem: '#end_time',
+                type: 'datetime',
+                min: minDate
+            });
+        }
+        
+        /**
+         * 表格加载
+         */
+        table = new Table({
+            elem: '#member_account_list',
+            url: ns.url("admin/shopaccount/lists"),
+            cols: [
+                [{
+					field: 'site_name',
+					title: '店铺',
+					width: '21%',
+					unresize: 'false',
+				}, {
+					field: 'type_name',
+					title: '类型',
+					width: '12%',
+					unresize: 'false'
+				}, {
+					field: 'account_data',
+					title: '金额',
+					width: '12%',
+					unresize: 'false',
+				}, {
+					field: 'remark',
+					title: '说明',
+					width: '25%',
+					unresize: 'false'
+				}, {
+					title: '创建时间',
+					width: '20%',
+					unresize: 'false',
+					templet: '#times'
+				}, {
+					title: '操作',
+					width: '10%',
+					toolbar: '#action',
+					align: 'right',
+					unresize: 'false'
+				}]
+            ]
+        });
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function(data) {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+        });
+        
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data,
+                event = obj.event;
+        })
+    });
+</script>
+{/block}

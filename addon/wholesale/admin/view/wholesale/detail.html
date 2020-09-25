@@ -1,0 +1,129 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+    .good-name, .good-price {
+        line-height: 34px;
+    }
+    .wholesale-inut-len{
+        width:60px !important;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">操作提示</h2>
+        <ul class="layui-colla-content layui-show">
+            <li>管理员可以在此页编辑批发商品</li>
+        </ul>
+    </div>
+</div>
+
+<div class="layui-form ns-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label img-upload-lable ns-short-label"><span class="required">*</span>商品：</label>
+        <div class="layui-input-inline">
+            <div class="upload-img-block square">
+                <div class="upload-img-box goods-img" >
+                    <img src="{:img($info['goods_image'])}"/>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">商品名称：</label>
+        <div class="layui-input-inline goods-name">
+            {$info.goods_name}
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">商品原价：</label>
+        <div class="layui-input-inline goods-price">
+            ￥<span>{$info.goods_info.price}</span>
+        </div>
+    </div>
+
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">批发设置：</label>
+        <div class="layui-input-inline" id="sku_list">
+            <table class="layui-table">
+                <colgroup>
+                    <col width="300">
+                    <col width="200">
+                    <col width="100">
+                    <col width="400">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th>商品信息</th>
+                    <th>商品原价</th>
+                    <th>库存</th>
+                    <th>阶梯价格</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                {foreach $info['sku_list'] as $k => $v}
+                <tr>
+                    <td>
+                        <div class="ns-table-title">
+                            <div class="ns-title-pic">
+                                <img layer-src src="{:img($v.sku_image)}"/>
+                            </div>
+                            <div class="ns-title-content">
+                                <a href="javascript:;" class="ns-multi-line-hiding ns-text-color" title="{$v.sku_name}">{$v.sku_name}</a>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        ￥{$v.sku_info.price}
+                    </td>
+                    <td>
+                        {$v.sku_info.stock}
+                    </td>
+                    <td>
+                        <div class="ns-table-btn">
+                            <table class="layui-table sku-block"  sku_id = "{$v.sku_id}" >
+                                <tbody>
+                                <tr>
+                                    <td style="min-width:40px;max-width:50px;">数量</td>
+                                    {foreach :array_column($v['price_array'], 'num') as $num_k => $num_item}
+                                        <td>{$num_item}</td>
+                                    {/foreach}
+
+                                </tr>
+                                <tr>
+                                    <td style="min-width:40px;max-width:50px;">价格</td>
+                                    {foreach :array_column($v['price_array'], 'price') as $price_k => $price_item}
+                                        <td>{$price_item}</td>
+                                    {/foreach}
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+
+                {/foreach}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <input type="hidden" name="goods_id" value="{$info.goods_id}"/>
+</div>
+
+
+<
+
+
+{/block}
+{block name="script"}
+<script>
+
+</script>
+{/block}

@@ -1,0 +1,219 @@
+{extend name="base"/}
+{block name="resources"}
+
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>站点设置包括网站的基本信息设置，SEO设置以及网站官方联系方式等</li>
+			<li>可根据SEO设置优化网站排名</li>
+		</ul>
+	</div>
+</div>
+
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>网站标题：</label>
+		<div class="layui-input-block">
+			<input type="text" name="title" lay-verify="required" value="{$website_info.data.title}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+		<div class="ns-word-aux">网站名称，将显示在前台顶部欢迎信息等位置</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">网站logo：</label>
+		<div class="layui-input-block img-upload">
+			<input type="hidden" name="logo" value="{$website_info.data.logo}" />
+			<div class="upload-img-block icon">
+				<div class="upload-img-box" id="webLogoUpload">
+					{if empty($website_info.data.logo)}
+					<div class="ns-upload-default">
+						<img src="__STATIC__/img/upload_img.png" />
+						<p>点击上传</p>
+					</div>
+					{else/}
+					<img src="{:img($website_info.data.logo)}" alt="">
+					{/if}
+				</div>
+			</div>
+		</div>
+		<div class="ns-word-aux">默认网站LOGO，通用头部显示，最佳显示尺寸为200px*60px</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">网站描述：</label>
+		<div class="layui-input-block">
+			<textarea name="desc" class="layui-textarea ns-len-long">{$website_info.data.desc}</textarea>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">网站关键字：</label>
+		<div class="layui-input-block">
+			<input type="text" name="keywords" value="{$website_info.data.keywords}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+		<div class="ns-word-aux">用于网站搜索引擎的优化，关键字之间请用英文逗号分隔</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">网站地址：</label>
+		<div class="layui-input-block">
+			<input type="text" name="web_address" value="{$website_info.data.web_address}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">网站公众号二维码：</label>
+		<div class="layui-input-inline img-upload">
+			<div class="upload-img-block icon">
+				<input type="hidden" name="web_qrcode" value="{$website_info.data.web_qrcode}" />
+				<div class="upload-img-box" id="webQrcodeUpload">
+					{if empty($website_info.data.web_qrcode)}
+					<div class="ns-upload-default">
+						<img src="__STATIC__/img/upload_img.png" />
+						<p>点击上传</p>
+					</div>
+					{else/}
+					<img src="{:img($website_info.data.web_qrcode)}" alt="">
+					{/if}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">网站邮箱：</label>
+		<div class="layui-input-block">
+			<input type="text" name="web_email" value="{$website_info.data.web_email}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">网站联系方式：</label>
+		<div class="layui-input-block">
+			<input type="text" name="web_phone" value="{$website_info.data.web_phone}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">网站QQ：</label>
+		<div class="layui-input-block">
+			<input type="text" name="web_qq" value="{$website_info.data.web_qq}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">网站微信：</label>
+		<div class="layui-input-block">
+			<input type="text" name="web_weixin" value="{$website_info.data.web_weixin}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">手机端域名：</label>
+		<div class="layui-input-block">
+			<input type="text" name="wap_domain" value="{$website_info.data.wap_domain}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">电脑端域名：</label>
+		<div class="layui-input-block">
+			<input type="text" name="web_domain" value="{$website_info.data.web_domain}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">pc端是否启用：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="web_status" value="1" lay-skin="switch" {if condition="$website_info.data.web_status == 1"} checked {/if} />
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">手机端是否启用：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="wap_status" value="1" lay-skin="switch" {if condition="$website_info.data.wap_status == 1"} checked {/if} />
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">网站关闭原因：</label>
+		<div class="layui-input-block">
+			<textarea name="close_reason" class="layui-textarea ns-len-long">{$website_info.data.close_reason}</textarea>
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'upload'], function() {
+		var form = layui.form,
+			upload = layui.upload,
+			repeat_flag = false; //防重复标识
+		form.render();
+		form.on('submit(save)', function(data) {
+			if (data.field.web_status == undefined) {
+				data.field.web_status = 0;
+			}
+
+			if (data.field.wap_status == undefined) {
+				data.field.wap_status = 0;
+			}
+
+			if (repeat_flag) return;
+			repeat_flag = true;
+
+			$.ajax({
+				type: 'POST',
+				dataType: 'JSON',
+				url: ns.url("admin/config/webConfig"),
+				data: data.field,
+				success: function(res) {
+					layer.msg(res.message);
+					if (res.code == 0) {
+						location.reload();
+					}else{
+						repeat_flag = false;
+					}
+				}
+			});
+		});
+
+		//上传logo
+		var uploadInst = upload.render({
+			elem: '#webLogoUpload',
+			url: ns.url("admin/upload/upload"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='logo']").val(res.data.pic_path);
+					$("#webLogoUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+
+		//二维码
+		var uploadInst = upload.render({
+			elem: '#webQrcodeUpload',
+			url: ns.url("admin/upload/upload"),
+			done: function(res) {
+				if (res.code >= 0) {
+					$("input[name='web_qrcode']").val(res.data.pic_path);
+					$("#webQrcodeUpload").html("<img src=" + ns.img(res.data.pic_path) + " >");
+				}
+				return layer.msg(res.message);
+			}
+		});
+
+	});
+
+
+</script>
+{/block}

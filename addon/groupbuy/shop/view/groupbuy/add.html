@@ -1,0 +1,249 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<style>
+	.good-name, .good-price {
+		line-height: 34px;
+	}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>管理员可以在此页添加团购活动</li>
+		</ul>
+	</div>
+</div>
+
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable ns-short-label"><span class="required">*</span>选择商品：</label>
+		<div class="layui-input-inline">
+			<div class="upload-img-block square">
+				<div class="upload-img-box" id="goodImg" lay-verify="select" onclick="addGoods()">
+					<div class="ns-upload-default">
+						<img src="SHOP_IMG/upload_img.png" />
+						<p>选择商品</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">商品名称：</label>
+		<div class="layui-input-inline good-name">
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">商品原价：</label>
+		<div class="layui-input-inline good-price">
+			￥<span>0.00</span>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>团购价：</label>
+		<div class="layui-input-block">
+			<div class="layui-input-inline">
+				<input type="number" name="groupbuy_price" lay-verify="required|flnum" autocomplete="off" class="layui-input ns-len-short groupbuy_price">
+			</div>
+			<div class="layui-form-mid">元</div>
+		</div>
+		<div class="ns-word-aux">
+			<p>如商品存在多规格，则所有规格均是此价售卖，请谨慎设置</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>最低购买数量：</label>
+		<div class="layui-input-block">
+			<input type="number" value="2" name="buy_num" lay-verify="required|int" autocomplete="off" class="layui-input ns-len-short">
+		</div>
+		<div class="ns-word-aux">
+			<p>最低购买数量不能小于2，默认为2</p>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>开始时间：</label>
+		<div class="layui-input-block ns-len-mid">
+			<input type="text" id="start_time" name="start_time" lay-verify="required" class="layui-input" autocomplete="off">
+			<i class="ns-calendar"></i>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>结束时间：</label>
+		<div class="layui-input-block end-time ns-len-mid">
+			<input type="text" id="end_time" name="end_time" lay-verify="required|time" class="layui-input" autocomplete="off">
+			<i class="ns-calendar"></i>
+		</div>
+		<div class="ns-word-aux">
+			<p>结束时间不能小于开始时间，也不能小于当前时间</p>
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+
+	<input type="hidden" name="goods_id" value="" />
+	<input type="hidden" name="sku_id" value="" />
+</div>
+{/block}
+{block name="script"}
+<script>
+    var goods_id = "";
+    layui.use(['form', 'laydate'], function() {
+        var form = layui.form,
+            laydate = layui.laydate,
+            repeat_flag = false,
+            currentDate = new Date(),
+            minDate = "";
+        currentDate.setDate(currentDate.getDate() + 30);
+		form.render();
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time', //指定元素
+            type: 'datetime',
+            value: new Date(),
+            done: function(value) {
+                minDate = value;
+                reRender();
+            }
+        });
+
+        //结束时间
+        laydate.render({
+            elem: '#end_time', //指定元素
+            type: 'datetime',
+            value: new Date(currentDate)
+        });
+
+        /**
+         * 重新渲染结束时间
+         * */
+        function reRender() {
+            $("#end_time").remove();
+            $(".end-time").html('<input type="text" id="end_time" name="end_time" placeholder="请输入结束时间" lay-verify="required|time" class="layui-input ns-len-mid" autocomplete="off"> ');
+            laydate.render({
+                elem: '#end_time',
+                type: 'datetime',
+                min: minDate
+            });
+        }
+
+        /**
+         * 表单验证
+         */
+        form.verify({
+            time: function(value) {
+                var now_time = (new Date()).getTime();
+                var start_time = (new Date($("#start_time").val())).getTime();
+                var end_time = (new Date(value)).getTime();
+                if (now_time > end_time) {
+                    return '结束时间不能小于当前时间!'
+                }
+                if (start_time > end_time) {
+                    return '结束时间不能小于开始时间!';
+                }
+            },
+            flnum: function(value) {
+                var arrMen = value.split(".");
+                var val = 0;
+                if (arrMen.length == 2) {
+                    val = arrMen[1];
+                }
+                if (val.length > 2) {
+                    return '保留小数点后两位！'
+                }
+            },
+            int: function(value) {
+                if (value <= 1 || value % 1 != 0) {
+                    return '请输入大于1的正整数！'
+                }
+            }
+        });
+
+        /**
+         * 表单提交
+         */
+        form.on('submit(save)', function(data){
+            if (goods_id.length == 0) {
+                layer.msg('请选择参与活动的商品！', {icon: 5, anim: 6});
+                return;
+            }
+
+            var groupbuy_price = $(".groupbuy_price").val();
+            var primary_price = $(".good-price span").text();
+            if (Number(primary_price) < Number(groupbuy_price)) {
+                layer.msg('团购价不能大于原价！', {icon: 5, anim: 6});
+				return false;
+            }
+
+            if(repeat_flag) return;
+            repeat_flag = true;
+
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("groupbuy://shop/groupbuy/add"),
+                data: data.field,
+                async: false,
+                success: function(res){
+                    repeat_flag = false;
+
+                    if (res.code == 0) {
+                        layer.confirm('添加成功', {
+                            title:'操作提示',
+                            btn: ['返回列表', '继续添加'],
+                            yes: function(){
+                                location.href = ns.url("groupbuy://shop/groupbuy/lists");
+                            },
+                            btn2: function() {
+                                location.href = ns.url("groupbuy://shop/groupbuy/add");
+                            }
+                        });
+                    }else{
+                        layer.msg(res.message);
+                    }
+                }
+            })
+        });
+    });
+
+    /**
+     * 添加商品
+     */
+    var selectedGoodsId = [];
+    function addGoods() {
+		goodsSelect(function (res) {
+			selectedGoodsId = [];
+			var sku_ids = [];
+			for (var i = 0; i < res.length; i++) {
+				goods_id = res[i].goods_id;
+				$("input[name=goods_id]").val(goods_id);
+				var image_path = res[i].goods_image.split(",");
+				$("#goodImg").html("<img src=" + ns.img(image_path[0]) + " >");
+				$(".good-img").val(res[i].goods_image);
+				$(".good-name").text(res[i].goods_name);
+				$(".good-price span").text(res[i].price);
+				for (var k = 0; k < res[i].sku_list.length; k++) {
+					sku_ids.push(res[i].sku_list[k].sku_id);
+				}
+			}
+			selectedGoodsId.push(goods_id);
+			$("input[name=sku_id]").val(sku_ids.toString());
+		}, selectedGoodsId, {mode: "spu", max_num: 1, min_num: 1});
+	}
+
+    function back() {
+        location.href = ns.url("groupbuy://shop/groupbuy/lists");
+    }
+</script>
+{/block}

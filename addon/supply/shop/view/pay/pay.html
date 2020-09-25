@@ -1,0 +1,264 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/pay.css">
+{/block}
+{block name="body"}
+<!-- 顶部html文件-->
+<div class="ns-supply-wrap">
+    <div class="ns-supply-wrap-con">
+        {include file="addon/supply/shop/view/market_head.html"/}
+
+        <div class="ns-supply-pay">
+            <div class="item-block">
+                <div class="payment-detail">
+                    <div class="payment-media">
+                        <div class="layui-row">
+                            <div class="layui-col-md2">
+                                <div class="media-left"><span><i class="iconfont iconduihao ns-text-color"></i></span></div>
+                            </div>
+                            <div class="layui-col-md8">
+                                <div class="media-body">
+                                    <div class="payment-text">您的订单已提交成功，正在等待处理！</div>
+                                    <div>
+                                        <span>应付金额：</span>
+                                        <span
+                                            class="payment-money ns-text-color">￥{$info.data.pay_money}元</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-col-md2">
+                                <div class="media-right">
+                                    <div class="ns-text-color">
+                                        订单信息
+                                        <i class="iconfont iconunfold"></i>
+                                        <i class="iconfont iconfold layui-hide"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-info layui-hide">
+                        <div class="layui-row">
+                            <div class="layui-col-md2 order-info-left"></div>
+                            <div class="layui-col-md10">
+                                <div class="line"></div>
+                                <div class="order-item">
+                                    <div class="item-label">交易单号：</div>
+                                    <div class="item-value">{$info.data.out_trade_no}</div>
+                                </div>
+                                <div class="order-item">
+                                    <div class="item-label">订单内容：</div>
+                                    <div class="item-value ns-line-hiding" title="{$info.data.pay_detail}">{$info.data.pay_detail}</div>
+                                </div>
+                                <div class="order-item">
+                                    <div class="item-label">订单金额：</div>
+                                    <div class="item-value">￥{$info.data.pay_money}</div>
+                                </div>
+                                <div class="order-item">
+                                    <div class="item-label">创建时间：</div>
+                                    <div class="item-value">{:time_to_date($info.data.create_time)}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="item-block">
+                <div class="block-text">支付方式</div>
+                <div class="pay-type-list">
+                    {foreach $pay_type as $pay_k => $pay_v}
+                    <div class="pay-type-item">
+                        {$pay_v.pay_type_name}
+                        <input type="hidden" value="{$pay_v.pay_type}" class="selected-pay" />
+                    </div>
+                    {/foreach}
+
+                    <div class="clear"></div>
+                </div>
+            </div>
+
+            <div class="item-block layui-form">
+                <input type="hidden" value="{$info.data.out_trade_no}" name="out_trade_no">
+                <input type="hidden" value="" name="pay_type" lay-verify="required">
+
+                <div class="order-submit">
+                    <button class="layui-btn ns-bg-color" lay-submit lay-filter="pay">立即支付</button>
+                </div>
+                <div class="clear"></div>
+            </div>
+
+            <!-- <el-dialog title="请确认支付是否完成" :visible.sync="dialogVisible" width="23%" top="30vh" class="confirm-pay-wrap">
+                <div class="info-wrap">
+                    <i class="el-message-box__status el-icon-warning"></i>
+                    <span>完成支付前请根据您的情况点击下面的按钮</span>
+                </div>
+                <span slot="footer" class="dialog-footer">
+                    <el-button @click="goIndex" size="small">返回首页</el-button>
+                    <el-button type="primary" @click="goOrderList" size="small">已完成支付</el-button>
+                </span>
+            </el-dialog> -->
+
+            <!-- 微信支付弹框 -->
+            <!-- <el-dialog title="请用微信扫码支付" :visible.sync="openQrcode" width="300px" center>
+                <div class="wechatpay-box"><img :src="payQrcode" /></div>
+            </el-dialog> -->
+        </div>
+    </div>
+</div>
+{/block}
+
+{block name="script"}
+<script src="__STATIC__/js/qrcode.min.js"></script>
+<script>
+	var obj = {}, repeat_flag = false;
+    layui.use(['form', 'laytpl'], function() {
+        var form = layui.form, laytpl = layui.laytpl;
+
+        $(".media-right").click(function() {
+            if ($(this).find(".iconunfold").hasClass("layui-hide")) {
+                $(this).find(".iconunfold").removeClass("layui-hide");
+                $(this).find(".iconfold").addClass("layui-hide");
+                $(".order-info").addClass("layui-hide");
+            } else {
+                $(this).find(".iconunfold").addClass("layui-hide");
+                $(this).find(".iconfold").removeClass("layui-hide");
+                $(".order-info").removeClass("layui-hide");
+            }
+        })
+
+        $(".pay-type-item").click(function() {
+            if (!$(this).hasClass("active")) {
+                $(this).addClass("active");
+                $(this).siblings().removeClass("active");
+                $("input[name='pay_type'").val($(this).find(".selected-pay").val());
+            }
+        })
+
+        form.on('submit(pay)', function(data) {
+            var out_trade_no = data.field.out_trade_no;
+			
+			payAjax(out_trade_no, data.field.pay_type);
+			console.log(obj);
+			
+			if (obj.type == "url") {
+			    window.open(obj.data);
+			    laytpl($("#alipay").html()).render([], function(html) {
+			        layer_pass = layer.open({
+			            title: '支付宝支付',
+			            skin: 'layer-tips-class',
+			            type: 1,
+			            area: ['500px'],
+			            content: html,
+			        });
+			    });
+			} else if (obj.type == "qrcode") {
+			    laytpl($("#wechat").html()).render(obj, function(html) {
+			        layer_pass = layer.open({
+			            title: '微信支付',
+			            skin: 'layer-tips-class',
+			            type: 1,
+			            area: ['500px', '325px'],
+			            content: html,
+			        });
+			    });
+			}
+        })
+
+        form.verify({
+            required: function(val) {
+                if (val == "") {
+                    return "请选择支付方式";
+                }
+            }
+        })
+    });
+	
+	function payAjax(out_trade_no, pay_type) {
+		if (repeat_flag) return;
+		repeat_flag = true;
+		
+		$.ajax({
+			url: ns.url("supply://shop/pay/pay"),
+			data: {
+				"out_trade_no": out_trade_no,
+				"pay_type": pay_type
+			},
+			dataType: 'JSON',
+			type: 'POST',
+			async: false,
+			success: function (res) {
+				repeat_flag = false;
+				if (res.code == 0) {
+					obj = res.data;
+				}
+			}
+		})
+	}
+	
+	function payStatus() {
+		$.ajax({
+		    url: ns.url("supply://shop/pay/status"),
+			data: {"out_trade_no": $("input[name='out_trade_no']").val()},
+			dataType: 'JSON',
+			type: 'POST',
+		    success: function(res) {
+		        console.log(res);
+				if (res.code == 0) {
+					if(res.data.pay_status == 0) {
+						layer.msg("支付失败，请重新支付！")
+					} else {
+						location.href = ns.url("supply://shop/order/lists");
+					}
+				}
+		    }
+		})
+	}
+	
+	function successPay() {
+		payStatus();
+	}
+	
+	function repay() {
+		var out_trade_no = $("input[name='out_trade_no']").val();
+		payAjax(out_trade_no, "alipay");
+		window.open(obj.data);
+	}
+	
+	function wechatRepay() {
+		$(".wx-ewm").html('<img class="popup-qrcode-loadimg" src="__STATIC__/loading/loading.gif" />');
+		var out_trade_no = $("input[name='out_trade_no']").val();
+		payAjax(out_trade_no, "wechatpay");
+		setTimeout(function() {
+			$(".wx-ewm").html('<img src="'+ ns.img(obj.qrcode) +'" />')
+		}, 1000);
+	}
+</script>
+
+<!-- 支付宝支付 -->
+<script type="text/html" id="alipay">
+	<div class="ns-pay-success">
+		<div class="ns-success">
+			<div class="wx-ewm">
+				<i class="iconfont iconzhifubaozhifu-"></i>
+			</div>
+			<button class="layui-btn ns-bg-color" onclick="successPay()">我已支付</button>
+			<button class="layui-btn layui-btn-primary" onclick="repay()">重新支付</button>
+		</div>
+	</div>
+</script>
+
+<!-- 微信支付 -->
+<script type="text/html" id="wechat">
+	<div class="ns-pay-success">
+		<div class="ns-success">
+			<div class="wx-ewm" id="qrcode">
+				<img src="{{d.qrcode}}" />
+			</div>
+			<button class="layui-btn ns-bg-color" onclick="successPay()">我已支付</button>
+			<button class="layui-btn layui-btn-primary" onclick="wechatRepay()">重新支付</button>
+		</div>
+	</div>
+</script>
+{/block}

@@ -1,0 +1,158 @@
+html, body {
+	width: 100%;
+	height: 100%;
+}
+
+body {
+	background: url(../img/login/login_bg.png) no-repeat;
+	background-size: 100% 100%;
+}
+
+.layui-container {
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	min-width: 500px;
+	min-height: 500px;
+	padding: 0;
+}
+
+.ns-login-bottom {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	height: 80px;
+	line-height: 80px;
+	color: #666;
+}
+
+.login-form {
+	display: inline-block;
+	width: 420px;
+	/* height: 420px; */
+	padding-bottom: 40px;
+	box-sizing: border-box;
+	background-color: rgba(255, 255, 255, .15);
+	position: relative;
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.ns-login-logo {
+	position: absolute;
+	top: -16px;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+.layui-form-title h1 {
+	color: #FFFFFF;
+	font-size: 25px;
+	padding: 35px 0;
+}
+
+.layui-form-item {
+	margin: 0 auto;
+	width: 360px;
+	height: 48px;
+	margin-bottom: 24px;
+	position: relative;
+}
+
+.ns-login-btn {
+	margin-top: 35px;
+	margin-bottom: 0;
+}
+
+.layui-form-item>input {
+	width: 100%;
+	height: 48px;
+	border-radius: 3px;
+	padding-left: 50px;
+	box-sizing: border-box;
+	background-color: rgba(255, 255, 255, .2);
+	border-width: 0;
+	color: #FFFFFF;
+}
+
+input::-webkit-input-placeholder {
+	color: rgba(255, 255, 255, .6);
+}
+
+input:-moz-placeholder {
+	color: rgba(255, 255, 255, .6);
+}
+
+input::-moz-placeholder {
+	color: rgba(255, 255, 255, .6);
+}
+
+input:-ms-input-placeholder {
+	color: rgba(255, 255, 255, .6);
+}
+
+.layui-input:focus{
+	border-width: 1px !important;
+	border-color: rgba(255, 255, 255) !important;
+	box-shadow: 0 0 6px 3px rgba(255, 255, 255, .1);
+}
+
+
+input:-webkit-autofill {
+	/*box-shadow: 0 0 0px 1000px rgba(255, 255, 0, 0.5) inset !important;*/
+    /*-webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.5) inset !important;*/
+	/*text-fill-color: rgba(255,255,255,1);*/
+	/*-webkit-text-fill-color: rgba(255,255,255,1);*/
+
+	-webkit-text-fill-color: #fff !important;
+	transition: background-color 9999s ease-in-out 0s;
+	-webkit-transition-delay: 9999s;
+}
+
+.ns-input-icon {
+	position: absolute;
+	top: 10px;
+	left: 11px;
+}
+
+.layui-form-forget {
+	display: block;
+	margin: 0 auto;
+	width: 80%;
+	text-align: right;
+	font-size: 13px;
+	color: #C2C2C2;
+	margin-top: 10px;
+}
+
+.layui-btn {
+	height: 50px;
+	border-radius: 3px;
+	font-size: 16px;
+	box-shadow: 0 0 10px 3px rgba(255, 255, 255, .15);
+}
+
+/* 验证码 */
+.verify-code-box input {
+	padding-left: 20px;
+}
+
+.verify-code-img {
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 120px;
+	height: 48px;
+	overflow: hidden;
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+}
+
+.verify-code-box .verify-code-img {
+	text-align: right;
+}
+
+.verify-code-img img {
+	height: 100%;
+	opacity: 0.3;
+}

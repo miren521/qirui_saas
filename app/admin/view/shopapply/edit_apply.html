@@ -1,0 +1,143 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	.ns-form {margin-top: 0;}
+	.layui-input-block {height: auto; word-break: break-all;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label">店铺名称：</label>
+		<div class="layui-input-block ns-len-mid ns-input-text">
+			{$apply_info.shop_name}
+		</div>
+	</div>
+
+	<div class="layui-form-item ns-shop-time">
+		<label class="layui-form-label">入驻时长：</label>
+		<div class="layui-input-block ns-len-mid ns-input-text">
+			{$apply_info.apply_year} 年
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">主营行业：</label>
+		<div class="layui-input-block ns-len-mid ns-input-text">
+			{$apply_info.category_name}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">开店套餐：</label>
+		<div class="layui-input-block ns-len-mid ns-input-text">
+			{$apply_info.group_name}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">付款凭证：</label>
+		<div class="layui-input-inline img-upload">
+			<input disabled="" type="hidden" class="layui-input" name="paying_money_certificate">
+			<div class="upload-img-block icon">
+				<div class="upload-img-box">
+					<img layer-src src="{:img($apply_info.paying_money_certificate)}" />
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">付款凭证说明：</label>
+		<div class="layui-input-block ns-input-text ns-len-long">
+			{$apply_info.paying_money_certificate_explain}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">付款金额：</label>
+		<div class="layui-input-inline">
+			{$apply_info.paying_amount}
+		</div>
+		<span class="layui-form-mid">元</span>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>审核意见：</label>
+		<div class="layui-input-block ns-input-text">
+			{if in_array($apply_info['apply_state'], [2])}
+			<textarea  name="apply_message" lay-verify="required" class="layui-textarea ns-len-long"></textarea>
+			{else /}
+			{$apply_info.apply_message}
+			{/if}
+		</div>
+	</div>
+	{if in_array($apply_info['apply_state'], [2]) && $apply_info['paying_money_certificate']}
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color-red" lay-submit lay-filter="refuse">拒绝</button>
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">通过</button>
+		<button type="reset" class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+	{/if}
+	<input type="hidden" value="{$apply_info.apply_id}" name="apply_id" >
+	<input type="hidden" value="{$apply_info.paying_money_certificate}" name="paying_money_certificate" >
+</div>
+
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form','upload'], function() {
+		var form = layui.form,
+			upload = layui.upload,
+			layer = layui.layer;
+			var repeat_flag = false;//防重复标识
+		form.render();
+
+			// 表单提交监听
+			form.on('submit(save)', function (data) {
+			    if (repeat_flag) return;
+			    repeat_flag = true;
+				data.field.apply_state = 3;
+			    $.ajax({
+			        url: ns.url("admin/shopapply/editApply"),
+			        data: data.field,
+			        type: "post",
+			        dataType: "JSON",
+			        success: function (res) {
+						repeat_flag = false;
+			            if (res.code == 0) {
+							layer.msg('操作成功');
+							location.href = ns.url("admin/shopapply/apply");
+			            }else{
+			            	layer.msg(res.message);
+			            }
+			        }
+			    });
+			});
+
+			form.on('submit(refuse)', function (data) {
+				if (repeat_flag) return;
+				repeat_flag = true;
+				data.field.apply_state = -2;
+				$.ajax({
+					url: ns.url("admin/shopapply/editApply"),
+					data: data.field,
+					type: "post",
+					dataType: "JSON",
+					success: function (res) {
+						repeat_flag = false;
+						if (res.code == 0) {
+							layer.msg('操作成功');
+							location.href = ns.url("admin/shopapply/apply");
+						}else{
+							layer.msg(res.message);
+						}
+					}
+				});
+			})
+
+	});
+	function back(){
+		location.href = ns.url('admin/shopapply/apply');
+	}
+</script>
+{/block}

@@ -1,0 +1,34 @@
+<nc-component v-bind:data="data[index]" class="shop-search">
+
+	<!-- 预览 -->
+	<template slot="preview">
+
+		<!--<div class="left-img"><img v-bind:src="nc.left_img_url ? changeImgUrl(nc.left_img_url) : '{$resource_path}/search/img/category.png'" class="self-adaption"/></div>-->
+		<div class="shop-search-form">
+			<div class="shop-search-box">
+				<input type="text" placeholder="搜索"/>
+				<span class="shop-search-icon"><img src="{$resource_path}/search/img/icon_search.png" class="self-adaption"/></span>
+			</div>
+		</div>
+		<!--<div class="right-img"><img v-bind:src="nc.right_img_url ? changeImgUrl(nc.right_img_url) : '{$resource_path}/search/img/user.png'" class="self-adaption"/></div>-->
+
+	</template>
+
+	<!-- 编辑 -->
+	<template slot="edit">
+		
+		<!--<template v-if="nc.lazyLoad">-->
+			<!--<shop-search></shop-search>-->
+		<!--</template>-->
+	
+	</template>
+	
+	<!-- 资源 -->
+	<template slot="resource">
+
+		<css src="{$resource_path}/shop_search/css/design.css"></css>
+		<js src="{$resource_path}/shop_search/js/design.js"></js>
+		
+	</template>
+
+</nc-component>

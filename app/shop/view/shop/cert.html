@@ -1,0 +1,248 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	.layui-table{margin-top: 0;}
+</style>
+{/block}
+{block name="main"}
+<!--认证类型-->
+<table class="layui-table">
+	<colgroup>
+		<col width="25%">
+		<col width="25%">
+		<col width="25%">
+		<col width="25%">
+	</colgroup>
+	<thead>
+	<tr>
+		<th colspan="4">认证类型</th>
+	</tr>
+	</thead>
+	<tbody>
+
+	<tr>
+		<td align="right">认证类型：</td>
+		<td colspan="3">{if $cert_info.cert_type == 2}公司认证{else/}个人认证{/if}</td>
+	</tr>
+
+	</tbody>
+</table>
+
+<!-- 公司及联系人信息 -->
+<table class="layui-table">
+	<colgroup>
+		<col width="25%">
+		<col width="25%">
+		<col width="25%">
+		<col width="25%">
+	</colgroup>
+	<thead>
+	<tr>
+		<th colspan="4">{if $cert_info.cert_type == 2}公司信息{else/}联系人信息{/if}</th>
+	</tr>
+	</thead>
+	<tbody>
+	{if $cert_info.cert_type == 2}
+	<tr>
+		<td align="right">公司名称：</td>
+		<td colspan="3">{$cert_info.company_name}</td>
+	</tr>
+	<tr>
+		<td align="right">公司所在地：</td>
+		<td colspan="3">{$cert_info.company_full_address}</td>
+	</tr>
+	{/if}
+	<tr>
+		<td align="right">{if $cert_info.cert_type == 2}法人姓名{else/}联系人姓名{/if}：</td>
+		<td colspan="3">{$cert_info.contacts_name}</td>
+	</tr>
+	<tr>
+		<td align="right">{if $cert_info.cert_type == 2}法人手机号{else/}联系人手机号{/if}：</td>
+		<td colspan="3">{$cert_info.contacts_mobile}</td>
+	</tr>
+	<tr>
+		<td align="right">{if $cert_info.cert_type == 2}法人身份证号{else/}联系人身份证号{/if}：</td>
+		<td colspan="3">{$cert_info.contacts_card_no}</td>
+	</tr>
+	<tr>
+		<td align="right">{if $cert_info.cert_type == 2}法人身份证正面{else/}联系人身份证正面{/if}：</td>
+		<td>
+			{if condition="$cert_info.contacts_card_electronic_2"}
+			<div class="ns-img-box"><img layer-src src="{:img($cert_info.contacts_card_electronic_2)}" alt=""></div>
+			{/if}
+		</td>
+		<td align="right">{if $cert_info.cert_type == 2}法人身份证反面{else/}联系人身份证反面{/if}：</td>
+		<td>
+			{if condition="$cert_info.contacts_card_electronic_3"}
+			<div class="ns-img-box"><img layer-src src="{:img($cert_info.contacts_card_electronic_3)}" alt=""></div>
+			{/if}
+		</td>
+	</tr>
+	</tbody>
+</table>
+
+<!-- 营业执照信息 -->
+{if $cert_info.cert_type == 2}
+<table class="layui-table">
+	<colgroup>
+		<col width="25%">
+		<col width="25%">
+		<col width="25%">
+		<col width="25%">
+	</colgroup>
+	<thead>
+	<tr>
+		<th colspan="4">营业执照信息</th>
+	</tr>
+	</thead>
+	<tbody>
+	<!-- {notempty name="$cert_info.tax_registration_certificate"}
+	<tr>
+		<td align="right">税务登记证号：</td>
+		<td colspan="3">{$cert_info.tax_registration_certificate}</td>
+	</tr>
+	{/notempty} -->
+	<!-- {notempty name="$cert_info.taxpayer_id"}
+	<tr>
+		<td align="right">纳税人识别号：</td>
+		<td colspan="3">{$cert_info.taxpayer_id}</td>
+	</tr>
+	{/notempty} -->
+	<tr>
+		<td align="right">统一社会信用码：</td>
+		<td colspan="3">{$cert_info.business_licence_number}</td>
+	</tr>
+	{notempty name="$cert_info.business_sphere"}
+	<tr>
+		<td align="right">法定经营范围：</td>
+		<td colspan="3">{$cert_info.business_sphere}</td>
+	</tr>
+	{/notempty}
+	<tr>
+		<td align="right">营业执照电子版：</td>
+		<td colspan="3">
+			{if condition="$cert_info.business_licence_number_electronic"}
+			<div class="ns-img-box"><img layer-src src="{:img($cert_info.business_licence_number_electronic)}" alt=""></div>
+			{/if}
+		</td>
+	</tr>
+	<!-- {notempty name="$cert_info.tax_registration_certificate_electronic"}
+	<tr>
+		<td align="right">税务登记证号电子版：</td>
+		<td colspan="3">
+			{if condition="$cert_info.tax_registration_certificate_electronic"}
+			<div class="ns-img-box"><img layer-src src="{:img($cert_info.tax_registration_certificate_electronic)}" alt=""></div>
+			{/if}
+		</td>
+	</tr>
+	{/notempty} -->
+	</tbody>
+</table>
+{/if}
+
+<table class="layui-table">
+	<colgroup>
+		<col width="25%">
+		<col width="25%">
+		<col width="25%">
+		<col width="25%">
+	</colgroup>
+	<thead>
+	<tr>
+		<th colspan="4">银行信息</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td align="right">银行开户名：</td>
+		<td colspan="3">{$cert_info.bank_account_name}</td>
+	</tr>
+	<tr>
+		<td align="right">开户银行账号：</td>
+		<td colspan="3">{$cert_info.bank_account_number}</td>
+	</tr>
+	<tr>
+		<td align="right">开户银行支行名称：</td>
+		<td colspan="3">{$cert_info.bank_name}</td>
+	</tr>
+	{notempty name="$cert_info.bank_address"}
+	<tr>
+		<td align="right">开户银行支行所在地：</td>
+		<td colspan="3">{$cert_info.bank_address}</td>
+	</tr>
+	{/notempty}
+	{notempty name="$cert_info.bank_code"}
+	<tr>
+		<td align="right">支行联行号：</td>
+		<td colspan="3">{$cert_info.bank_code}</td>
+	</tr>
+	{/notempty}
+	</tbody>
+</table>
+
+<table class="layui-table">
+	<colgroup>
+		<col width="25%">
+		<col width="25%">
+		<col width="25%">
+		<col width="25%">
+	</colgroup>
+	<thead>
+	<tr>
+		<th colspan="4">结算账户信息</th>
+	</tr>
+	</thead>
+	<tbody>
+	{if condition="$cert_info.bank_type == 2"}
+	<tr>
+		<td align="right">用户真实姓名：</td>
+		<td colspan="3">{$cert_info.settlement_bank_account_name}</td>
+	</tr>
+	<tr>
+		<td align="right">支付宝账号：</td>
+		<td colspan="3">{$cert_info.settlement_bank_account_number}</td>
+	</tr>
+	{elseif condition="$cert_info.bank_type == 1"}
+	<tr>
+		<td align="right">结算银行开户名：</td>
+		<td colspan="3">{$cert_info.settlement_bank_account_name}</td>
+	</tr>
+	<tr>
+		<td align="right">结算公司银行账号：</td>
+		<td  colspan="3">{$cert_info.settlement_bank_account_number}</td>
+	</tr>
+	<tr>
+		<td align="right">结算开户银行支行名称：</td>
+		<td colspan="3">{$cert_info.settlement_bank_name}</td>
+	</tr>
+	<tr>
+		<td align="right">结算开户银行所在地：</td>
+		<td colspan="3">{$cert_info.settlement_bank_address}</td>
+	</tr>
+	{elseif condition="$cert_info.bank_type == 3"}
+	<tr>
+		<td align="right">用户真实姓名：</td>
+		<td colspan="3">{$cert_info.settlement_bank_account_name}</td>
+	</tr>
+	<tr>
+		<td align="right">微信昵称：</td>
+		<td colspan="3">{$cert_info.settlement_bank_address}</td>
+	</tr>
+	<tr>
+		<td align="right">微信账号：</td>
+		<td colspan="3">{$cert_info.settlement_bank_name}</td>
+	</tr>
+	{/if}
+	</tbody>
+</table>
+{/block}
+{block name="script"}
+<script src="ADMIN_JS/address.js"></script>
+<script>
+	layui.use('form', function() {
+		var form = layui.form;
+		form.render();
+		initArea(form); //初始化三级联动
+	});
+</script>
+{/block}

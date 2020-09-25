@@ -1,0 +1,181 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+    .ns-exchange-type {
+        display: inline-block;
+        width: 142px;
+        height: 68px;
+        border: 1px solid #ededed;
+        border-radius: 4px;
+        margin-right: 10px;
+        line-height: 68px;
+        position: relative;
+        box-shadow: 4px 4px 6px #f5f5f5;
+    }
+    .ns-exchange-type:hover {border: 1px solid #4685FD;}
+    .ns-exchange-selected {border: 1px solid #4685FD;}
+    .ns-exchange-selected:after {
+        content: "";
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background-image: url(__STATIC__/img/selected.png);
+        position: absolute;
+        bottom: 0;
+        right: 0;
+    }
+    .style{
+        display: flex;
+        -webkit-box-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        justify-content: center;
+        padding: 0 20px;
+    }
+    .style div {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+    }
+    .style p {
+        margin-left: 24px;
+        font-size: 12px;
+        color: #333;
+    }
+    .style.style-red div {
+        background: -webkit-gradient(linear,left top,left bottom,from(#ff3883),to(#ff2d2d));
+        background: linear-gradient(#ff3883,#ff2d2d);
+    }
+    .style.style-green div {
+        background: -webkit-gradient(linear,left top,left bottom,from(#0fd3b0),to(#04e382));
+        background: linear-gradient(#0fd3b0,#04e382);
+    }
+    .style.style-blue div {
+        background: -webkit-gradient(linear,left top,left bottom,from(#0da0fe),to(#2072f4));
+        background: linear-gradient(#0da0fe,#2072f4);
+    }
+
+    .style_theme{
+        margin-top: 58px;
+    }
+    .style_theme img {
+        margin-right: 64px;
+        height: 534px;
+        width: 300px;
+        -webkit-box-shadow: 5px 5px 20px #f5f5f5;
+        box-shadow: 5px 5px 20px #f5f5f5;
+    }
+</style>
+{/block}
+{block name="main"}
+
+<div class="layui-form ns-form">
+
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+
+                <div class="ns-exchange-type ns-exchange-selected exchange_default"  data-status="default">
+                    <div class="style style-red"><div></div><p>热情红</p></div>
+                </div>
+
+                <div class="ns-exchange-type exchange_blue" data-status="blue">
+                    <div class="style style-blue"><div></div><p>商务蓝</p></div>
+                </div>
+
+                <div class="ns-exchange-type exchange_green" data-status="green">
+                    <div class="style style-green"><div></div><p>纯净绿</p></div>
+                </div>
+
+                <input type="hidden" name="style_theme" {if isset($style_theme['style_theme'])} value="{$style_theme.style_theme}" {/if}>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+
+                <div class="style_theme style_theme_default">
+                    <img src="ADMIN_IMG/style/decorate-default-1.png" alt="">
+                    <img src="ADMIN_IMG/style/decorate-default-2.png" alt="">
+                    <img src="ADMIN_IMG/style/decorate-default-3.png" alt="">
+                </div>
+
+                <div class="style_theme style_theme_blue">
+                    <img src="ADMIN_IMG/style/decorate-blue-1.png" alt="">
+                    <img src="ADMIN_IMG/style/decorate-blue-2.png" alt="">
+                    <img src="ADMIN_IMG/style/decorate-blue-3.png" alt="">
+                </div>
+
+                <div class="style_theme style_theme_green">
+                    <img src="ADMIN_IMG/style/decorate-green-1.png" alt="">
+                    <img src="ADMIN_IMG/style/decorate-green-2.png" alt="">
+                    <img src="ADMIN_IMG/style/decorate-green-3.png" alt="">
+                </div>
+
+            </div>
+        </div>
+
+        <div class="ns-form-row style_theme" >
+            <button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+        </div>
+
+
+    </div>
+</div>
+
+{/block}
+{block name="script"}
+<script>
+    var style_theme = $("input[name='style_theme']").val();
+    style_theme = style_theme == '' ? 'default' : style_theme;
+
+    $("input[name='style_theme']").val(style_theme);
+
+    $('.exchange_'+style_theme).addClass("ns-exchange-selected");
+    $('.exchange_'+style_theme).siblings("div").removeClass("ns-exchange-selected");
+
+    $('.style_theme_'+style_theme).show();
+    $('.style_theme_'+style_theme).siblings(".style_theme").hide();
+
+
+    $(".ns-exchange-type").click(function() {
+        $(this).addClass("ns-exchange-selected");
+        $(this).siblings("div").removeClass("ns-exchange-selected");
+
+        var style_theme = $(this).attr('data-status');
+        $("input[name='style_theme']").val(style_theme);
+
+        $('.style_theme_'+style_theme).show();
+        $('.style_theme_'+style_theme).siblings(".style_theme").hide();
+    });
+
+    layui.use('form', function() {
+        var form = layui.form,
+            repeat_flag = false; //防重复标识
+
+        /**
+         * 监听提交
+         */
+        form.on('submit(save)', function(data) {
+
+            if (repeat_flag) return;
+            repeat_flag = true;
+
+            $.ajax({
+                url: ns.url("admin/diy/style"),
+                data: data.field,
+                dataType: 'JSON',
+                type: 'POST',
+                success: function(res) {
+
+                    repeat_flag = false;
+                    layer.msg(res.message);
+                }
+            });
+
+        });
+    });
+
+</script>
+
+{/block}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="renderer" content="webkit" />
+	<meta http-equiv="X-UA-COMPATIBLE" content="IE=edge,chrome=1" />
+	<title>{$menu_info['title']|default=""}</title>
+	<meta name="keywords" content="$shop_info['seo_keywords']}">
+	<meta name="description" content="$shop_info['seo_description']}">
+	<link rel="icon" type="image/x-icon" href="__STATIC__/img/shop_bitbug_favicon.ico" />
+	<link rel="stylesheet" type="text/css" href="STATIC_CSS/iconfont.css" />
+	<link rel="stylesheet" type="text/css" href="__STATIC__/ext/layui/css/layui.css" />
+	<link rel="stylesheet" type="text/css" href="SHOP_CSS/common.css" />
+	<script src="__STATIC__/js/jquery-3.1.1.js"></script>
+	<script src="__STATIC__/ext/layui/layui.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+	<script>
+		layui.use(['layer', 'upload', 'element'], function() {});
+		
+		window.ns_url = {
+			baseUrl: "ROOT_URL/",
+			route: ['{:request()->module()}', '{:request()->controller()}', '{:request()->action()}'],
+		};
+
+
+	</script>
+	<script src="__STATIC__/js/common.js"></script>
+	<script src="SHOP_JS/common.js"></script>
+
+	<script>
+		/**
+		 * 通过ajax请求 验证是否登录
+		 */
+		function checkLogin(data) {
+			if (data != undefined) {
+				if (data.error_code == 'NOT_LOGIN') {
+					layer.msg(data.message);
+					setTimeout(function(){
+						location.href = ns.url('shop/login/login');
+					},1000);
+				}else{
+					return true;
+				}
+			}else{
+				return true;
+			}
+
+
+		}
+	</script>
+	<style>
+		.ns-calendar{background: url("__STATIC__/img/ns_calendar.png") no-repeat center / 16px 16px;}
+		.layui-logo{height: 100%;display: flex;align-items: center;}
+		.layui-logo a{display: flex;justify-content: center;align-items: center;width: 200px;height: 50px;}
+		.layui-logo a img{max-height: 100%;max-width: 100%;}
+	</style>
+	{block name="resources"}{/block}
+</head>
+
+<body>
+<div class="layui-layout layui-layout-admin">
+{block name="body"}
+
+
+
+{/block}
+
+
+	<!-- 版权信息 -->
+	<div class="ns-footer">
+		{block name="footer"}
+		<a class="ns-footer-img" href="#"><img src="{if !empty($copyright.logo)} {:img($copyright.logo)} {else /}__STATIC__/img/copyright_logo.png{/if}" /></a>
+		<p>{notempty name="$copyright.company_name"}{$copyright.company_name}{else/}上海牛之云网络科技有限公司{/notempty} {notempty name="$copyright.icp"}<a href={$copyright.copyright_link}>&nbsp;&nbsp;备案号{$copyright.icp}</a>{/notempty}</p>
+		{notempty name="$copyright.gov_record"}<a class="gov-box" href={$copyright.gov_url}><img src="SHOP_IMG/gov_record.png" alt="">公安备案{$copyright.gov_record}</a>{/notempty}
+		{/block}
+	</div>
+</div>
+{block name="script"}
+<script>
+
+
+
+</script>
+{/block}
+</body>
+
+</html>

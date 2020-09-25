@@ -1,0 +1,542 @@
+{extend name="base"/}
+{block name="resources"}
+<style type="text/css">
+	.layui-input-block input,
+	.layui-input-block input,
+	.layui-input-block textarea {outline: none;border: none;}
+	.ns-form-row{margin-top: 0;}
+	.ns-store-company{margin-top: 10px;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form">
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">店铺信息</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>店铺名称：</label>
+				<div class="layui-input-block">
+					<input disabled name="shop_name" type="text" value="{$apply_detail.shop_name}" class="layui-input ns-len-mid">
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>主营行业：</label>
+				<div class="layui-input-block ns-len-mid">
+					<input disabled name="category_name" type="text" value="{$apply_detail.category_name}" class="layui-input ns-len-mid">
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>开店套餐：</label>
+				<div class="layui-input-block ns-len-mid">
+					<input disabled name="group_name" type="text" value="{$apply_detail.group_name}" class="layui-input ns-len-mid">
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<label class="layui-form-label">入驻时长：</label>
+				<div class="layui-input-block">
+					<p class="ns-input-text">&nbsp;&nbsp;&nbsp;{$apply_detail.apply_year} 年</p>
+				</div>
+			</div>
+
+			<div class="layui-form-item ns-check-member-box">
+				<label class="layui-form-label">申请会员：</label>
+				<div class="layui-input-block ns-len-mid">
+					<input disabled name="member_name" type="text" value="{$apply_detail.username}" class="layui-input ns-len-mid">
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">认证类型</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label">认证类型：</label>
+				<div class="layui-input-block ns-len-mid">
+					{if condition="$apply_detail.cert_type == 1"}
+					<input disabled type="text" name="cert_type" value="个人店铺" autocomplete="off" class="layui-input ns-len-small">
+					{/if}
+					{if condition="$apply_detail.cert_type == 2"}
+					<input disabled type="text" name="cert_type" value="企业店铺" autocomplete="off" class="layui-input ns-len-small">
+					{/if}
+			
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 联系人手机号身份证 -->
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">法人信息</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label ns-company-name">联系人姓名：</label>
+				<div class="layui-input-block">
+					<input disabled name="contacts_name" type="text" value="{$apply_detail.contacts_name}" class="layui-input ns-len-mid">
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<label class="layui-form-label ns-company-phone">联系人电话：</label>
+				<div class="layui-input-block">
+					<input disabled name="contacts_mobile" type="text" value="{$apply_detail.contacts_mobile}" class="layui-input ns-len-mid">
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<label class="layui-form-label ns-company-ident">联系人身份证号：</label>
+				<div class="layui-input-block">
+					<input disabled name="contacts_card_no" type="text" value="{$apply_detail.contacts_card_no}" class="layui-input ns-len-mid">
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<label class="layui-form-label img-upload-lable ns-company-pic-front">申请人身份证正面：</label>
+				<div class="layui-input-block img-upload">
+					<div class="upload-img-block icon">
+						<div class="upload-img-box" id="idCardPicFront">
+							<img layer-src src="{:img($apply_detail.contacts_card_electronic_2)}" alt="">
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<label class="layui-form-label img-upload-lable ns-company-pic-back">申请人身份证反面：</label>
+				<div class="layui-input-block img-upload">
+					<div class="upload-img-block icon">
+						<div class="upload-img-box" id="idCardPicBack">
+							<img layer-src src="{:img($apply_detail.contacts_card_electronic_3)}" alt="">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 企业店铺独有 -->
+	{if condition="$apply_detail.cert_type == 2"}
+	<div class="ns-store-company">
+		<!-- 公司信息 -->
+		<div class="layui-card ns-card-common ns-card-brief">
+			<div class="layui-card-header">
+				<span class="ns-card-title">企业信息</span>
+			</div>
+			<div class="layui-card-body">
+				<div class="layui-form-item">
+					<label class="layui-form-label">公司名称：</label>
+					<div class="layui-input-block">
+						<input disabled name="company_name" type="text" value="{$apply_detail.company_name}" class="layui-input ns-len-mid">
+					</div>
+				</div>
+				<div class="layui-form-item" data-flag="area">
+					<label class="layui-form-label">公司地址：</label>
+					<div class="layui-input-block ns-len-small">
+						<input disabled name="company_address" type="text" value="{$apply_detail.company_full_address}" class="layui-input ns-len-mid">
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- 营业执照 税务 -->
+		<div class="layui-card ns-card-common ns-card-brief">
+			<div class="layui-card-header">
+				<span class="ns-card-title">企业资质</span>
+			</div>
+			<div class="layui-card-body">
+				<div class="layui-form-item">
+					<label class="layui-form-label">统一社会信用码：</label>
+					<div class="layui-input-block">
+						<input disabled name="business_licence_number" type="text" value="{$apply_detail.business_licence_number}" class="layui-input ns-len-mid">
+					</div>
+				</div>
+				
+				<div class="layui-form-item">
+					<label class="layui-form-label img-upload-lable">营业执照电子版：</label>
+					<div class="layui-input-block img-upload">
+						<div class="upload-img-block icon">
+							<div class="upload-img-box" id="license">
+								<img layer-src src="{:img($apply_detail.business_licence_number_electronic)}" alt="">
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="layui-form-item">
+					<label class="layui-form-label">法定经营范围：</label>
+					<div class="layui-input-block ns-len-mid">
+						<p name="business_sphere" class="ns-input-text" disabled>{$apply_detail.business_sphere}</p>
+					</div>
+				</div>
+				
+				<!-- <div class="layui-form-item">
+					<label class="layui-form-label">税务登记证号：</label>
+					<div class="layui-input-block">
+						<input disabled name="tax_registration_certificate" type="text" value="{$apply_detail.tax_registration_certificate}"
+						 class="layui-input ns-len-mid">
+					</div>
+				</div>
+				
+				<div class="layui-form-item">
+					<label class="layui-form-label img-upload-lable">税务登记证号电子版：</label>
+					<div class="layui-input-block img-upload">
+						<input disabled type="hidden" class="layui-input" name="tax_registration_certificate_electronic" />
+						<div class="upload-img-block icon">
+							<div class="upload-img-box" id="taxlicense">
+								<img layer-src src="{:img($apply_detail.tax_registration_certificate_electronic)}" alt="">
+							</div>
+						</div>
+					</div>
+				</div> -->
+			</div>
+		</div>
+		
+		<!-- 对公账户信息 -->
+		<div class="layui-card ns-card-common ns-card-brief">
+			<div class="layui-card-header">
+				<span class="ns-card-title">对公账户</span>
+			</div>
+			<div class="layui-card-body">
+				<div class="layui-form-item">
+					<label class="layui-form-label">银行开户名：</label>
+					<div class="layui-input-block">
+						<input disabled name="bank_account_name" type="text" value="{$apply_detail.bank_account_name}" class="layui-input ns-len-mid">
+					</div>
+				</div>
+				
+				<div class="layui-form-item">
+					<label class="layui-form-label">公司银行账号：</label>
+					<div class="layui-input-block">
+						<input disabled name="bank_account_number" type="text" value="{$apply_detail.bank_account_number}"
+						 class="layui-input ns-len-mid">
+					</div>
+				</div>
+				
+				<div class="layui-form-item">
+					<label class="layui-form-label">开户银行支行名称：</label>
+					<div class="layui-input-block">
+						<input disabled name="bank_name" type="text" value="{$apply_detail.bank_name}" class="layui-input ns-len-mid">
+					</div>
+				</div>
+				
+				<div class="layui-form-item" data-flag="area">
+					<label class="layui-form-label">开户银行所在地：</label>
+					<div class="layui-input-block ns-len-small">
+						<input disabled name="bank_address" type="text" value="{$apply_detail.bank_address}" class="layui-input ns-len-mid">
+					</div>
+				</div>
+			</div>
+		</div>
+		{/if}
+		
+		<!-- 结算信息 -->
+		<div class="layui-card ns-card-common ns-card-brief">
+			<div class="layui-card-header">
+				<span class="ns-card-title">结算信息</span>
+			</div>
+			<div class="layui-card-body">
+				<div class="layui-form-item">
+					<label class="layui-form-label">结算账户类型：</label>
+					<div class="layui-input-block ns-len-mid">
+						{if condition="$apply_detail.bank_type == 1"}
+						<input disabled name="bank_type" type="text" value="银行卡" class="layui-input ns-len-mid">
+						{elseif condition="$apply_detail.bank_type == 2"}
+						<input disabled name="bank_type" type="text" value="支付宝" class="layui-input ns-len-mid">
+						{elseif condition="$apply_detail.bank_type == 3"}
+						<input disabled name="bank_type" type="text" value="微信" class="layui-input ns-len-mid">
+						{/if}
+					</div>
+				</div>
+				
+				{if condition="$apply_detail.bank_type == 1"}
+				<!-- 银行卡 -->
+				<div class="ns-pay-bank">
+					<div class="layui-form-item">
+						<label class="layui-form-label">结算银行开户名：</label>
+						<div class="layui-input-block">
+							<input disabled name="settlement_bank_account_name" type="text" value="{$apply_detail.settlement_bank_account_name}"
+							 class="layui-input ns-len-mid">
+						</div>
+					</div>
+				
+					<div class="layui-form-item">
+						<label class="layui-form-label">结算公司银行账号：</label>
+						<div class="layui-input-block">
+							<input disabled name="settlement_bank_account_number" type="text" value="{$apply_detail.settlement_bank_account_number}"
+							 class="layui-input ns-len-mid">
+						</div>
+					</div>
+				
+					<div class="layui-form-item">
+						<label class="layui-form-label">结算开户银行支行名称：</label>
+						<div class="layui-input-block">
+							<input disabled name="settlement_bank_name" type="text" value="{$apply_detail.settlement_bank_name}" class="layui-input ns-len-mid">
+						</div>
+					</div>
+				
+					<div class="layui-form-item" data-flag="area">
+						<label class="layui-form-label">结算开户银行所在地：</label>
+						<div class="layui-input-block ns-len-small">
+							<input disabled name="settlement_bank_address" type="text" value="{$apply_detail.settlement_bank_address}" class="layui-input ns-len-mid">
+						</div>
+					</div>
+				</div>
+				{elseif condition="$apply_detail.bank_type == 2"}
+				<!-- 支付宝 -->
+				<div class="ns-pay-alipay">
+					<div class="layui-form-item">
+						<label class="layui-form-label">用户真实姓名：</label>
+						<div class="layui-input-block">
+							<input disabled name="settlement_bank_account_name" type="text" value="{$apply_detail.settlement_bank_account_name}"
+							 class="layui-input ns-len-mid">
+						</div>
+					</div>
+				
+					<div class="layui-form-item">
+						<label class="layui-form-label">支付宝账号：</label>
+						<div class="layui-input-block">
+							<input disabled name="settlement_bank_account_number" type="text" value="{$apply_detail.settlement_bank_account_number}"
+							 class="layui-input ns-len-mid">
+						</div>
+					</div>
+				</div>
+				{elseif condition="$apply_detail.bank_type == 3"}
+				<!-- 微信 -->
+				<div class="ns-pay-bank">
+					<div class="layui-form-item">
+						<label class="layui-form-label">用户真实姓名：</label>
+						<div class="layui-input-block">
+							<input disabled name="settlement_bank_account_name" type="text" value="{$apply_detail.settlement_bank_account_name}"
+								   class="layui-input ns-len-mid">
+						</div>
+					</div>
+
+					<div class="layui-form-item" data-flag="area">
+						<label class="layui-form-label">微信昵称：</label>
+						<div class="layui-input-block ns-len-small">
+							<input disabled name="settlement_bank_address" type="text" value="{$apply_detail.settlement_bank_address}" class="layui-input ns-len-mid">
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">微信账户：</label>
+						<div class="layui-input-block">
+							<input disabled name="settlement_bank_name" type="text" value="{$apply_detail.settlement_bank_name}" class="layui-input ns-len-mid">
+						</div>
+					</div>
+				</div>
+				{/if}
+			</div>
+		</div>
+		
+		<div class="layui-card ns-card-common ns-card-brief">
+			<div class="layui-card-header">
+				<span class="ns-card-title">审核状态</span>
+			</div>
+			<div class="layui-card-body">
+				{if condition="$apply_detail.apply_state == 1"}
+				<div class="layui-form-item">
+					<label class="layui-form-label">审核状态：</label>
+					<div class="layui-input-block">
+						<input disabled name="apply_state" type="text" value="认证信息审核中" class="layui-input ns-len-mid">
+					</div>
+				</div>
+				
+				<div class="ns-form-row">
+					<button class="layui-btn ns-bg-color" lay-submit lay-filter="apply_pass">同意申请</button>
+					<button class="layui-btn ns-bg-color" lay-submit lay-filter="apply_message">拒绝申请</button>
+					<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+				</div>
+				{/if}
+				
+				{if condition="$apply_detail.apply_state == -1"}
+				<div class="layui-form-item">
+					<label class="layui-form-label">审核状态：</label>
+					<div class="layui-input-block">
+						<input disabled name="apply_state" type="text" value="认证信息审核失败" class="layui-input ns-len-mid">
+					</div>
+				</div>
+				
+				<div class="layui-form-item">
+					<label class="layui-form-label">拒绝理由：</label>
+					<div class="layui-input-block">
+						<input disabled name="apply_message" type="text" value="{$apply_detail.apply_message}" class="layui-input ns-len-mid">
+					</div>
+				</div>
+				
+				<div class="ns-form-row">
+					<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+				</div>
+				{/if}
+				
+				{if condition="$apply_detail.apply_state == 2"}
+				<div class="layui-form-item">
+					<label class="layui-form-label">审核状态：</label>
+					<div class="layui-input-block">
+						<input disabled name="apply_state" type="text" value="财务审核" class="layui-input ns-len-mid">
+					</div>
+				</div>
+				
+				<div class="ns-form-row">
+					<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+				</div>
+				{/if}
+				
+				{if condition="$apply_detail.apply_state == -2"}
+				<div class="layui-form-item">
+					<label class="layui-form-label">审核状态：</label>
+					<div class="layui-input-block">
+						<input disabled name="apply_state" type="text" value="财务审核失败" class="layui-input ns-len-mid">
+					</div>
+				</div>
+				
+				<div class="layui-form-item">
+					<label class="layui-form-label">拒绝理由：</label>
+					<div class="layui-input-block">
+						<input disabled name="apply_message" type="text" value="{$apply_detail.apply_message}" class="layui-input ns-len-mid">
+					</div>
+				</div>
+				
+				<div class="ns-form-row">
+					<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+				</div>
+				{/if}
+
+				{if condition="$apply_detail.apply_state == 3"}
+				<div class="layui-form-item">
+					<label class="layui-form-label">审核状态：</label>
+					<div class="layui-input-block">
+						<input disabled name="apply_state" type="text" value="入驻通过" class="layui-input ns-len-mid">
+					</div>
+				</div>
+
+				<div class="ns-form-row">
+					<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+				</div>
+				{/if}
+			</div>
+		</div>
+
+			{if condition="$apply_detail.apply_state == 2"}
+		<!-- <div class="ns-single-filter-box">
+
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="open_shop">入驻通过</button>
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="edit_apply">修改资料</button>
+				<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+			</div>
+		</div> -->
+			{/if}
+
+		<input name="apply_id" type="text" value="{$apply_detail.apply_id}" class="layui-input layui-hide">
+		<input id="cert_type" type="text" value="{$apply_detail.cert_type}" class="layui-input layui-hide">
+	</div>
+{/block}
+{block name="script"}
+	<script>
+		layui.use(['form'], function() {
+			var form = layui.form;
+
+			// 同意申请
+			form.on('submit(apply_pass)', function(data) {
+				layer.confirm('确定要通过审核吗?', function() {
+
+					$.ajax({
+						url: ns.url("admin/shopapply/applyPass"),
+						data: {
+							"apply_id": data.field.apply_id,
+						},
+						dataType: 'JSON', //服务器返回json格式数据
+						type: 'POST', //HTTP请求类型
+						success: function(res) {
+							layer.msg(res.message);
+							if (res.code == 0) {
+								location.reload();
+							}
+						}
+					});
+				});
+			});
+			
+			// 拒绝申请
+			form.on('submit(apply_message)', function(data) {
+				/**
+				 * 拒绝理由弹窗
+				 */
+				layer.prompt({
+					formType: 2,
+					value: '',
+					title: '请输入拒绝理由',
+					area: ['300px', '100px'], //自定义文本域宽高
+					yes: function(index, layero) {
+						// 获取文本框输入的值
+						var value = layero.find(".layui-layer-input").val();
+						
+						if (value) {
+							$.ajax({
+								url: ns.url("admin/shopapply/applyReject"),
+								data: {
+									"apply_id": data.field.apply_id,
+									"reason": value
+								},
+								dataType: 'JSON', //服务器返回json格式数据
+								type: 'POST', //HTTP请求类型
+								success: function(res) {
+									layer.msg(res.message);
+									if (res.code == 0) {
+										location.reload();
+									}
+								}
+							});
+							layer.close(index);
+						} else {
+							layer.msg('请输入拒绝原因!', {icon: 5, anim: 6});
+							return;
+						}
+					}
+				});
+			});
+		});
+	
+	
+		$(function() {
+			if ($('#cert_type').val() == 1) {
+				$(".ns-company-person").text("联系人信息：");
+				$(".ns-company-name").text("联系人姓名：");
+				$(".ns-company-phone").text("联系人电话：");
+				$(".ns-company-identity").text("联系人身份证件：");
+				$(".ns-company-ident").text("联系人身份证号：");
+				$(".ns-company-pic-front").text("申请人身份证正面：");
+				$(".ns-company-pic-back").text("申请人身份证反面：");
+			} else {
+				$(".ns-company-person").text("法人代表信息：");
+				$(".ns-company-name").text("法人姓名：");
+				$(".ns-company-phone").text("法人联系电话：");
+				$(".ns-company-identity").text("法人身份证件：");
+				$(".ns-company-ident").text("法人身份证号：");
+				$(".ns-company-pic-front").text("法人身份证正面：");
+				$(".ns-company-pic-back").text("法人身份证反面：");
+			}
+		});
+
+		function back() {
+			location.href = ns.url("admin/shopapply/apply")
+		}
+
+		//初始化地址
+		var company_province_id = "{$apply_detail['company_province_id']}",
+			company_city_id = "{$apply_detail['company_city_id']}",
+			company_district_id = "{$apply_detail['company_district_id']}",
+			company_address = "{$apply_detail.company_address}",
+			address = "";
+	</script>
+{/block}

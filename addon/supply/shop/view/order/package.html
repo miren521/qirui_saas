@@ -1,0 +1,105 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/order.css">
+{/block}
+{block name="body"}
+<!-- 顶部html文件-->
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-order">
+			<div class="order-menu">
+				<ul class="layui-nav layui-nav-tree" lay-filter="test">
+					<li class="layui-nav-item layui-nav-itemed">
+						<a href="javascript:;">交易中心</a>
+						<dl class="layui-nav-child">
+							<dd class="layui-this"><a href="{:addon_url('supply://shop/order/lists')}">我的订单</a></dd>
+							<dd><a href="{:addon_url('supply://shop/orderrefund/lists')}">退款/售后</a></dd>
+							<dd><a href="{:addon_url('supply://shop/purchase/purchase')}">我的求购单</a></dd>
+						</dl>
+					</li>
+				</ul>
+			</div>
+			<div class="order-list">
+				<div class="order-list-title">
+					<span><a href="{:addon_url('supply://shop/order/lists')}">订单列表</a></span>
+					/
+					<span>物流详情</span></div>
+
+				<div class="order-list-wrap layui-tab">
+					<ul class="layui-tab-title">
+						{foreach $package as $package_k => $package_v}
+						<li {if $package_k == 0}class="layui-this"{/if}>{$package_v.package_name}</li>
+						{/foreach}
+					</ul>
+					<div class="layui-tab-content">
+						{foreach $package as $package_k => $package_v}
+						<div class="layui-tab-item{if $package_k == 0} layui-show{/if}">
+							{if $package_v.trace.success}
+								{if $package_v.trace.list}
+								<div class="package-inner-express-box">
+									<ul class="layui-timeline">
+										{foreach $package_v.trace.list as $trace_k => $trace_v}
+										<li class="layui-timeline-item">
+											<span class="time-circle layui-timeline-axis" style="background-color: #f38421;"></span>
+											<div class="layui-timeline-content layui-text">
+												<div class="express-timeline-title">{$trace_v.datetime}</div>
+												<p>
+													{$trace_v.remark}
+												</p>
+											</div>
+										</li>
+										{/foreach}
+									</ul>
+								</div>
+								{else/}
+								<div class="trace">
+									<p class="empty-wrap">{$package_v.trace.reason}</p>
+								</div>
+								{/if}
+							{/if}
+							
+							{if $package_v.package_name != '无需物流'}
+							<ul class="info-wrap">
+								<li>
+									<label>运单号码：</label>
+									<span>{$package_v.delivery_no}</span>
+								</li>
+								<li>
+									<label>物流公司：</label>
+									<span>{$package_v.express_company_name}</span>
+								</li>
+							</ul>
+							{/if}
+							
+							<ul class="goods-wrap">
+								{foreach $package_v.goods_list as $goods_k => $goods_v}
+								<li onclick="toDetail({$goods_v.sku_id})">
+									<div class="img-wrap"><img src="{:img($goods_v.sku_image)}" onerror="this.src='SHOP_SUPPLY_LOCAL_IMG/default_goods.png'" /></div>
+									<p class="sku-name" title="{$goods_v.sku_name} x {$goods_v.num}">{$goods_v.sku_name} x {$goods_v.num}</p>
+								</li>
+								{/foreach}
+							</ul>
+						</div>
+						{/foreach}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script src="SHOP_SUPPLY_LOCAL_JS/order_list.js"></script>
+<script>
+	layui.use('element', function() {
+		var element = layui.element;
+	})
+	
+	function toDetail(id) {
+		location.href = ns.url("supply://shop/goods/detail", {"sku_id": id});
+	}
+</script>
+{/block}

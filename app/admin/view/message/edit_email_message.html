@@ -1,0 +1,108 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	.ns-form {margin-top: 0;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否开启：</label>
+        <div class="layui-input-block">
+            <input type="checkbox" name="email_is_open" value="1" {if $email_is_open == 1}checked{/if} lay-skin="switch">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">数据值：</label>
+        <div class="layui-input-block">
+            {foreach $message_variable_list as $message_variable_k => $message_variable_v}
+            <button class="layui-btn layui-btn-primary number-con" onclick="clickBtn('{$message_variable_v}')">{$message_variable_v}</button>
+            {/foreach}
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">邮件标题：</label>
+        <div class="layui-input-block">
+            <input type="text" name="email_title" placeholder="请输入协议标题" value="{$email_title}" autocomplete="off" class="layui-input ns-len-long">
+        </div>
+        <div class="ns-word-aux">标题支持标签请从编辑器中复制</div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">邮件内容：</label>
+        <div class="layui-input-block">
+            <script id="editor" type="text/plain" class="ns-special-length" style="height:300px;"></script>
+        </div>
+    </div>
+    <div class="ns-form-row">
+        <button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+        <button type="reset" class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+    </div>
+
+    <input type="hidden" name="keywords" value="{$keywords}"/>
+    <input type="hidden" id="mailContent" value="{$email_content}"/>
+</div>
+{/block}
+{block name="script"}
+<script type="text/javascript" charset="utf-8" src="STATIC_EXT/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" charset="utf-8" src="STATIC_EXT/ueditor/ueditor.all.js"></script>
+<script type="text/javascript" charset="utf-8" src="STATIC_EXT/ueditor/lang/zh-cn/zh-cn.js"></script>
+<script>
+    //实例化富文本
+    var ue = UE.getEditor('editor');
+
+    if ($("#mailContent").val()){
+        ue.ready(function() {
+            ue.setContent($("#mailContent").val());
+        });
+    }
+
+    layui.use('form', function() {
+        var form = layui.form,
+            repeat_flag = false; //防重复标识
+        form.render();
+
+        //表单提交
+        form.on('submit(save)', function(data) {
+
+            data.field.email_content = ue.getContent();
+
+            if(repeat_flag) return false;
+            repeat_flag = true;
+
+            $.ajax({
+                url: ns.url("admin/message/editEmailMessage"),
+                data: data.field,
+                dataType: 'JSON',
+                type: 'POST',
+                success: function(res) {
+					repeat_flag = false;
+					
+					if (res.code == 0) {
+						layer.confirm('编辑成功', {
+							title:'操作提示',
+							btn: ['返回列表', '继续操作'],
+							yes: function(){
+								location.href = ns.url("admin/message/lists")
+							},
+							btn2: function() {
+								location.reload();
+							}
+						});
+					}else{
+						layer.msg(res.message);
+					}
+                }
+            });
+        });
+    });
+
+    function back(){
+        location.href = ns.url("admin/message/lists")
+    }
+
+    function clickBtn(con) {
+        UE.getEditor('editor').focus();
+        UE.getEditor('editor').execCommand('inserthtml','{'+con+'}');
+    }
+</script>
+{/block}

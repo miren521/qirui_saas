@@ -1,0 +1,182 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_CSS/game.css">
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">操作提示</h2>
+        <ul class="layui-colla-content layui-show">
+            <li>管理员可以在此页查看幸运抽奖活动具体信息</li>
+        </ul>
+    </div>
+</div>
+
+<div class="layui-form">
+
+    <div class="layui-card ns-card-common ns-card-brief">
+        <div class="layui-card-header">
+            <span class="ns-card-title">活动设置</span>
+        </div>
+
+        <div class="layui-card-body">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>活动名称：</label>
+                <div class="layui-input-inline">{$info.game_name}</div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>开始时间：</label>
+                <div class="layui-input-inline" id="start_time">{$info.game_name}</div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>结束时间：</label>
+                <div class="layui-input-inline" id="end_time">{$info.game_name}</div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">活动说明：</label>
+                <div class="layui-input-inline">{$info.remark}</div>
+            </div>
+
+            <div class="layui-form-item participation-condtion">
+                <label class="layui-form-label">参与条件：</label>
+                <div class="layui-input-inline">{if $info.level_id == 0} 全部会员 {else/} {$info.level_name} {/if}</div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>消耗积分：</label>
+                <div class="layui-input-inline">{$info.points}</div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>参与次数：</label>
+                <div class="layui-input-inline">{if $info.join_type == 1} 每天{$info.join_frequency}次{else/} 一人{$info.join_frequency}次{/if}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-card ns-card-common ns-card-brief">
+        <div class="layui-card-header">
+            <span class="ns-card-title">中奖设置</span>
+        </div>
+
+        <div class="layui-card-body">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="required">*</span>整体中奖概率：</label>
+                <div class="layui-input-inline">{$info.winning_rate}%</div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">未中奖提示语：</label>
+                <div class="layui-input-inline">{$info.no_winning_desc}</div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">中奖名单：</label>
+                <div class="layui-input-inline">{if $info.is_show_winner == 0} 不显示{else/}显示{/if}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-card ns-card-common ns-card-brief">
+        <div class="layui-card-header">
+            <span class="ns-card-title">奖品设置</span>
+        </div>
+
+        <div class="layui-card-body">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">奖品明细：</label>
+                <div class="layui-input-block">
+                    <table id="award_list"></table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="ns-form-row">
+        <button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+    </div>
+</div>
+{/block}
+{block name="script"}
+<script>
+    var form,tableData = {:json_encode($info.game_award)};
+
+
+    layui.use('form',function() {
+
+        form = layui.form;
+        laydate = layui.laydate;
+        laytpl = layui.laytpl;
+
+        form.render();
+
+        //开始时间
+        $("#start_time").text(ns.time_to_date("{$info.start_time}"));
+
+        //结束时间
+        $("#end_time").text(ns.time_to_date("{$info.end_time}"));
+
+    });
+
+    /*
+    * 渲染表格
+    * */
+    renderTable(tableData);
+    function renderTable(data){
+		var data = data || [];
+        var table = new Table({
+            elem: "#award_list",
+            cols: [
+                [{
+                    field: 'award_name',
+                    title: '名称',
+                    width: '35%',
+                    unresize: 'false'
+                },{
+                    field: 'award_type',
+                    title: '奖品',
+                    unresize: 'false',
+                    width: '25%',
+                    templet: function(data) {
+                        var type = data.award_type == 1 ? '积分' : data.award_type == 2 ? '红包' : '优惠券';
+                        return type;
+                    }
+                }, {
+                    field: 'award_num',
+                    title: '奖品数量',
+                    unresize: 'false',
+                    width: '20%',
+                }, {
+                    field: 'award_winning_rate',
+                    title: '奖项权重',
+                    unresize: 'false',
+                    width: '20%',
+                    templet: '#bargainStock'
+                }]
+            ],
+            data: data
+        });
+    }
+
+    //初始化数据
+    initTableData();
+    function initTableData(){
+        for (var i = 0; i < tableData.length; i++){
+            tableData[i].ident = i;
+        }
+    }
+
+
+    function back() {
+        location.href = ns.url("electronicsheet://shop/electronicsheet/lists");
+    }
+</script>
+
+{/block}

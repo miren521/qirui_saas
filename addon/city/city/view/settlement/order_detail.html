@@ -1,0 +1,83 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	#detail_list {
+		margin-top: 15px;
+	}
+</style>
+{/block}
+{block name='main'}
+
+<table id="detail_list" lay-filter="detail_list"></table>
+{/block}
+{block name="script"}
+<script>
+    layui.use(['laydate','form'], function () {
+        var form = layui.form;
+		form.render();
+
+        var table = new Table({
+            elem: '#detail_list',
+            url: ns.url("city://city/settlement/orderdetail"),
+            where:{
+                settlement_id:"{$settlement_id}"
+            },
+            cols: [
+                [{
+                    field:'settlement_no',
+                    title: '账单编号',
+                    unresize: 'false',
+                    width:'17%',
+                },{
+                    field:'site_name',
+                    title: '店铺名称',
+                    unresize: 'false',
+                },{
+                    title: '订单总额',
+                    unresize: 'false',
+                    align: 'right',
+                    templet: function (res){
+                        return '￥'+res.order_money;
+                    }
+                },{
+                    title: '平台抽成',
+                    unresize: 'false',
+                    align: 'right',
+                    templet: function (res){
+                        return '￥'+res.platform_money;
+                    }
+                }, {
+                    title: '分站抽成',
+                    unresize: 'false',
+                    align: 'right',
+                    templet: function (res){
+                        return '￥'+res.website_commission;
+                    }
+                }, {
+                    title: '账期开始时间',
+                    unresize: 'false',
+                    templet: function (res){
+                        if(res.period_start_time == 0){
+                            return '--';
+                        }else{
+                            return ns.time_to_date(res.period_start_time)
+                        }
+                    }
+                }, {
+                    title: '账期结束时间',
+                    unresize: 'false',
+                    templet: function (res){
+                        if(res.period_end_time == 0){
+                            return '--';
+                        }else{
+                            return ns.time_to_date(res.period_end_time)
+                        }
+
+                    }
+                }]
+            ]
+        });
+        
+    });
+</script>
+{/block}

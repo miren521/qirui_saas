@@ -1,0 +1,195 @@
+{extend name="base"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>商家品牌列表，商家可以添加自己店铺的品牌</li>
+			<li>商家添加商品时可以选择对应的品牌，品牌可以是平台的品牌也可以是商家品牌</li>
+		</ul>
+	</div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<button class="layui-btn ns-bg-color" onclick="addBrand()">添加品牌</button>
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<input type="text" name="search_keys" placeholder="请输入品牌名称" autocomplete="off" class="layui-input">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+				<i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- 列表 -->
+<table id="brand_list" lay-filter="brand_list"></table>
+
+<script type="text/html" id="image_url">
+	{{# if(d.image_url){ }}
+	<div class="ns-img-box">
+		<img layer-src src={{ns.img(d.image_url)}} >
+	</div>
+	{{# } }}
+</script>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		{{#  if(d.site_id == 0){ }}
+<!--		<span class="ns-cursor ns-text-color-dark-gray">不可编辑</span>-->
+		{{#  }else{ }}
+		<a class="layui-btn" lay-event="edit">编辑</a>
+		<a class="layui-btn" lay-event="delete">删除</a>
+		{{# } }}
+	</div>
+</script>
+
+<!-- 编辑排序 -->
+<script type="text/html" id="editSort">
+
+	{{#  if(d.site_id == 0){ }}
+		{{ d.sort }}
+	{{#  }else{ }}
+		<input name="sort" type="number" onchange="editSort({{d.brand_id}}, this)" value="{{d.sort}}" class="layui-input edit-sort ns-len-short">
+	{{# } }}
+</script>
+{/block}
+{block name="script"}
+<script>
+	var form, table;
+	layui.use(['table', 'form'], function() {
+		form = layui.form;
+		form.render();
+		
+		table = new Table({
+			elem: '#brand_list',
+			url: ns.url("shop/goodsbrand/lists"),
+			cols: [
+				[
+					/* {
+					width: "3%",
+					type: 'checkbox',
+					unresize: 'false'
+				}, */
+				{
+					field: 'brand_name',
+					title: '品牌名称',
+					width: '25%',
+					unresize: 'false'
+				}, {
+					field: 'group_name',
+					title: '品牌LOGO',
+					width: '15%',
+					unresize: 'false',
+					templet: "#image_url"
+				}, {
+					field: 'brand_initial',
+					title: '品牌首字母',
+					width: '15%',
+					unresize: 'false'
+				}, {
+					title: '类型',
+					width: '15%',
+					unresize: 'false',
+					templet: function (data) {
+						return data.site_id==0?'平台':'商家';
+					}
+				}, {
+					unresize: 'false',
+					title: '排序',
+					width: '15%',
+					templet: '#editSort'
+				}, {
+					title: '操作',
+					width: '15%',
+					toolbar: '#action',
+					unresize: 'false'
+				}]
+			]
+		});
+		
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'edit':
+					location.href = ns.url("shop/goodsbrand/editbrand",{"brand_id":data.brand_id});
+					break;
+				case 'delete':
+					deleteBrand(data.brand_id);
+					break;
+			}
+		});
+		
+		/**
+		 * 删除
+		 */
+		function deleteBrand(brand_id) {
+			layer.confirm('确定要删除该品牌吗？', function() {
+				$.ajax({
+					url: ns.url("shop/goodsbrand/deleteBrand"),
+					data: {brand_id: brand_id},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function (res) {
+						layer.msg(res.message);
+						if (res.code == 0) {
+							table.reload();
+						}
+					}
+				});
+			});
+		}
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data){
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+	});
+	
+	// 监听单元格编辑
+	function editSort(id, event){
+		var data = $(event).val();
+		
+		if(!new RegExp("^-?[0-9]\\d*$").test(data)){
+			layer.msg("排序号只能是整数");
+			return ;
+		}
+		if(data<0){
+			layer.msg("排序号必须大于0");
+			return ;
+		}
+		$.ajax({
+			type: 'POST',
+			url: ns.url("shop/goodsbrand/modifySort"),
+			data: {
+				sort: data,
+				brand_id: id
+			},
+			dataType: 'JSON',
+			success: function(res) {
+				layer.msg(res.message);
+				if(res.code==0){
+					table.reload();
+				}
+			}
+		});
+	}
+	
+	function addBrand() {
+		location.href = ns.url("shop/goodsbrand/addBrand");
+	}
+</script>
+{/block}

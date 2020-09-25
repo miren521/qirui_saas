@@ -1,0 +1,80 @@
+{extend name="base"/}
+{block name="resources"}
+
+{/block}
+{block name="main"}
+
+<div class="layui-form">
+	<div class="layui-card ns-card-common">
+		<div class="layui-card-header">
+			<span class="ns-card-title">结算账户信息</span>
+		</div>
+		<div class="layui-card-body">
+
+			<div class="layui-form-item">
+				<label class="layui-form-label">结算账户类型：</label>
+				<div class="layui-input-inline">
+					{if $cert_info.bank_type == 1} 银行卡 {else /} 支付宝 {/if}
+				</div>
+			</div>
+
+			{if $cert_info.bank_type == 1}
+			<div class="layui-form-item">
+				<label class="layui-form-label">结算银行开户名：</label>
+				<div class="layui-input-inline">
+					{$cert_info.settlement_bank_account_name}
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">结算银行账号：</label>
+				<div class="layui-input-inline">
+					{$cert_info.settlement_bank_account_number}
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">结算开户银行支行名称：</label>
+				<div class="layui-input-inline">
+					{$cert_info.settlement_bank_name}
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">结算开户银行所在地：</label>
+				<div class="layui-input-inline">
+					{$cert_info.settlement_bank_address}
+				</div>
+			</div>
+			{else /}
+			<div class="layui-form-item">
+				<label class="layui-form-label">支付宝用户名：</label>
+				<div class="layui-input-inline">
+					{$cert_info.settlement_bank_account_number}
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">支付宝账号：</label>
+				<div class="layui-input-inline">
+					{$cert_info.settlement_bank_name}
+				</div>
+			</div>
+
+			{/if}
+
+		</div>
+	</div>
+
+</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+
+</div>
+{/block}
+{block name="script"}
+<script>
+	
+	function back() {
+		location.href = ns.url("city://city/shop/lists");
+	}
+</script>
+{/block}

@@ -1,0 +1,161 @@
+*{
+    box-sizing: border-box;
+}
+ .eis-horizontal-steps .eis-form-steps{
+    /*overflow: hidden;*/
+    padding:0;
+    font-size:0;
+    position: relative;
+    width:1100px;
+}
+.eis-vertical-steps .eis-form-steps{
+    overflow: hidden;
+    padding:0;
+    font-size:0;
+    position: relative;
+    width: 150px;
+    float:left;
+}
+.eis-horizontal-steps .eis-form-steps .eis-form-step{
+    display: inline-block;
+    vertical-align: middle;
+    width:33.33333%;
+    text-align: center;
+}
+.eis-vertical-steps .eis-form-steps .eis-form-step{
+    text-align: left;
+    height: 80px;
+}
+.eis-horizontal-steps .eis-form-steps .eis-step-progress {
+    height: 2px;
+    background: #4995FA;
+    width: 0;
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    -webkit-transition: all .4s;
+    -moz-transition: all .4s;
+    -ms-transition: all .4s;
+    -o-transition: all .4s;
+    transition: all .4s;
+}
+
+.eis-vertical-steps .eis-form-steps .eis-step-progress{
+    width:2px;
+    background:#4995FA;
+    height:0;
+    position: absolute;
+    top:15px;
+    left:15px;
+    -webkit-transition: all .4s;
+    -moz-transition: all .4s;
+    -ms-transition: all .4s;
+    -o-transition: all .4s;
+    transition: all .4s;
+
+}
+.eis-horizontal-steps .eis-form-steps .eis-step-head{
+    width:100%;
+    position: relative;
+}
+.eis-vertical-steps .eis-form-steps .eis-step-head{
+    float: left;
+    height: 100%;
+    position: relative;
+}
+.eis-step-head .eis-step-icon{
+    width:30px;
+    height:30px;
+    font-size:16px;
+    border-radius:50%;
+    position:relative;
+    z-index: 1;
+    cursor: pointer;
+}
+.is-finish .eis-step-icon{
+    border:1px solid #4995FA;
+}
+.eis-step-head .eis-step-icon .step-icon-txt{
+    width:26px;
+    height:26px;
+    background:#DDDDDD;
+    border:1px solid #DDDDDD;
+    -webkit-border-radius:50%;
+    -moz-border-radius:50%;
+    border-radius:50%;
+    text-align: center;
+    line-height: 26px;
+    color:#fff;
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    margin: auto;
+}
+.is-finish .eis-step-icon .step-icon-txt{
+    background:#4995FA;
+    border:1px solid #4995FA;
+}
+.eis-horizontal-steps .eis-step-head .eis-step-line{
+    position: absolute;
+    background-color: #F1F1F1;
+    height: 2px;
+    top: 15px;
+    left: 28px;
+    right: -4px;
+}
+.eis-vertical-steps .eis-step-head .eis-step-line{
+    position: absolute;
+    background-color: #F1F1F1;
+    width: 2px;
+    height: 100%;
+    top: 15px;
+    left:15px;
+}
+.eis-horizontal-steps .eis-form-step .eis-step-main{
+    position: relative;
+    left:-22%;
+    width:50%;
+    font-size:14px;
+    padding:6px 0 0 0;
+    color:#666;
+    text-align: center;
+}
+.eis-vertical-steps .eis-form-step .eis-step-main{
+    overflow: hidden;
+    padding:5px 10px;
+    font-size:14px;
+    color:#666;
+    text-align: left;
+}
+.is-finish .eis-step-main{
+    color:#3197FD
+}
+.eis-stepContents{
+    position: relative;
+    min-height: 200px;
+    overflow: hidden;
+}
+.eis-stepContents .eis-stepFooter{
+    position: absolute;
+    bottom:10px;
+    right:10px;
+}
+.eis-btn {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline:0;
+    cursor: pointer;
+    font-size: 12px;
+    min-width: 64px;
+    height: 25px;
+    line-height: 25px;
+    background: #fff;
+    text-align: center;
+    border: 1px solid #3197FD;
+    color: #3197FD;
+    margin-right: 14px;
+    border-radius: 2px;
+}

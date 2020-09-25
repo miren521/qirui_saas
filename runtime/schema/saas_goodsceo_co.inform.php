@@ -1,0 +1,22 @@
+<?php 
+return array (
+  'inform_id' => 'int',
+  'member_id' => 'int',
+  'member_name' => 'string',
+  'sku_id' => 'int',
+  'sku_name' => 'string',
+  'subject_id' => 'int',
+  'subject_name' => 'string',
+  'content' => 'string',
+  'inform_pic' => 'string',
+  'site_id' => 'int',
+  'site_name' => 'string',
+  'create_time' => 'int',
+  'state' => 'int',
+  'deal_type' => 'int',
+  'deal_type_name' => 'string',
+  'deal_content' => 'string',
+  'deal_time' => 'int',
+  '_pk' => 'inform_id',
+  '_autoinc' => 'inform_id',
+);

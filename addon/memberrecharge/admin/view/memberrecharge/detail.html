@@ -1,0 +1,91 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.layui-colla-content li { line-height: 30px; }
+</style>
+{/block}
+{block name="main"}
+
+<div class="layui-card ns-card-common ns-card-brief">
+	<div class="layui-card-header">
+		<span class="ns-card-title">套餐详情</span>
+	</div>
+
+	<div class="layui-card-body">
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">套餐名称：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{$recharge.data.recharge_name}</p>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">封面：</label>
+			<div class="layui-input-block ns-len-mid">
+				<!-- <p class="ns-input-text ns-len-mid"><img layer-src class="cover_img" src="" alt="" width="40px"></p> -->
+				<div class="upload-img-block icon">
+					<div class="upload-img-box" id="img">
+					{if condition="$recharge.data.cover_img"}
+					<img layer-src src="{:img($recharge.data.cover_img)}" />
+					{/if}
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">面值：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{$recharge.data.face_value}</p>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">价格：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{$recharge.data.buy_price}</p>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">积分：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{$recharge.data.point}</p>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">成长中：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{$recharge.data.growth}</p>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">状态：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{$recharge.data.status == 1 ? '正常' : '关闭'}</p>
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">创建时间：</label>
+			<div class="layui-input-block ns-len-mid">
+				<p class="ns-input-text ns-len-mid">{:date('Y-m-d H:i:s', $recharge.data.create_time)}</p>
+			</div>
+		</div>
+		
+		<div class="ns-form-row">
+			<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+		</div>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+	function back() {
+		location.href = ns.url("memberrecharge://admin/memberrecharge/lists");
+	}
+</script>
+{/block}

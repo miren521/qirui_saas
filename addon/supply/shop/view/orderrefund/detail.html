@@ -1,0 +1,225 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/order.css">
+{/block}
+{block name="body"}
+<!-- 顶部html文件-->
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-order">
+			<div class="order-menu">
+				<ul class="layui-nav layui-nav-tree" lay-filter="test">
+					<li class="layui-nav-item layui-nav-itemed">
+						<a href="javascript:;">交易中心</a>
+						<dl class="layui-nav-child">
+							<dd><a href="{:addon_url('supply://shop/order/lists')}">我的订单</a></dd>
+							<dd class="layui-this"><a href="{:addon_url('supply://shop/orderrefund/lists')}">退款/售后</a>
+							</dd>
+							<dd><a href="{:addon_url('supply://shop/purchase/purchase')}">我的求购单</a></dd>
+						</dl>
+					</li>
+				</ul>
+			</div>
+			<div class="order-list">
+				<div class="order-list-title">
+					<span><a href="{:addon_url('supply://shop/orderrefund/lists')}">退款/售后</a></span>
+					/
+					<span>退款详情</span>
+				</div>
+
+				<div class="refund-wrap">
+					<div class="refund-tip">
+						<div class="block-text">{$detail.refund_status_name}</div>
+
+						<div class="status-wrap">
+							{if $detail.refund_status == 1}
+							<div class="refund-explain">
+								<div>如果商家拒绝，你可重新发起申请</div>
+								<div>如果商家同意，将通过申请并退款给你</div>
+								<div>如果商家逾期未处理，平台将自动通过申请并退款给你</div>
+							</div>
+							{/if}
+							{if $detail.refund_status == 5}
+							<div class="refund-explain">
+								<div>如果商家确认收货将会退款给你</div>
+								<div>如果商家拒绝收货，该次退款将会关闭，你可以重新发起退款</div>
+							</div>
+							{/if}
+						</div>
+					</div>
+
+					<!--协商记录-->
+					<div class="item-block">
+						<div class="action-box">
+							<span class="media-left">协商记录</span>
+							<div class="media-right">
+								<div class="ns-text-color refunf-log-icon" onclick="">
+									协商记录
+									<i class="iconfont iconunfold"></i>
+									<i class="iconfont iconfold layui-hide"></i>
+								</div>
+							</div>
+						</div>
+
+						<div class="refund-log-list layui-hide">
+							<ul class="layui-timeline">
+								{foreach $detail.refund_log_list as $log_k => $log_v}
+								<li class="layui-timeline-item {$log_v.action_way == 1 ? 'buyer' : 'seller'}">
+									<i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+									<div class="layui-timeline-content layui-text">
+										<span class="layui-timeline-title">{:time_to_date($log_v.action_time)}</span>										
+										<h4>{$log_v.action_way == 1 ? '买家' : '卖家'}</h4>
+										<p>{$log_v.action}</p>										
+									</div>
+								</li>
+								{/foreach}
+							</ul>
+						</div>
+					</div>
+
+					<!-- 退货地址 -->
+					{if $detail.refund_status == 4}
+					<div class="item-block">
+						<div class="block-text">退货地址：{$detail.address}</div>
+					</div>
+					{/if}
+
+					<!--退款详情-->
+					<div class="item-block">
+						<div class="goods-list">
+							<table>
+								<tr>
+									<td width="62.5%">商品</td>
+									<td width="12.5%">数量</td>
+									<td width="12.5%">退款金额</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+
+					<div class="item-block">
+						<div class="goods-list">
+							<table>
+								<tr>
+									<td width="62.5%">
+										<div class="ns-table-title">
+											<div class="ns-title-pic">
+												<a href="{:addon_url('supply://shop/goods/detail')}?sku_id={$detail.sku_id}" target="_blank">
+													<img src="{:img($detail.sku_image)}" onerror="this.src = 'SHOP_IMG/default_shop.png' "  />
+												</a>
+											</div>
+											<div class="ns-title-content">
+												<a href="{:addon_url('supply://shop/goods/detail')}?sku_id={$detail.sku_id}" target="_blank">
+													<div class="goods-name">{$detail.sku_name}</div>
+												</a>
+											</div>
+										</div>
+									</td>
+									<td width="12.5%" class="goods-num">{$detail.num}</td>
+									<td width="12.5%" class="goods-money">￥{$detail.refund_apply_money}</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+
+					<div class="item-block">
+						<div class="order-statistics">
+							<table>
+								<tr>
+									<td align="right">退款方式：</td>
+									<td align="left">{$detail.refund_type == 1 ? '仅退款' : '退款退货'}</td>
+								</tr>
+								<tr>
+									<td align="right">退款原因：</td>
+									<td align="left">{$detail.refund_reason}</td>
+								</tr>
+								<tr>
+									<td align="right">退款金额：</td>
+									<td align="left">￥{$detail.refund_apply_money}</td>
+								</tr>
+								<tr>
+									<td align="right">退款编号：</td>
+									<td align="left">{$detail.refund_no}</td>
+								</tr>
+								<tr>
+									<td align="right">申请时间：</td>
+									<td align="left">{:time_to_date($detail.refund_action_time)}</td>
+								</tr>
+								{if $detail.refund_time}
+								<tr>
+									<td align="right">退款时间：</td>
+									<td align="left">{:time_to_date($detail.refund_time)}</td>
+								</tr>
+								{/if}
+							</table>
+						</div>
+						<div class="clear"></div>
+					</div>
+
+					{if !empty($detail.refund_action)}
+					<div class="item-block">
+						{foreach $detail.refund_action as $action_k => $action_v}
+						<div class="order-submit">
+							<button class="layui-btn ns-bg-color" onclick="refundAction('{$action_v.event}')">{$action_v.title}</button>
+						</div>
+						{/foreach}
+
+						<!-- {if $detail.complain_action}
+						<div class="order-submit">
+							<button class="layui-btn ns-bg-color" onclick="refundAction('complain')">平台维权</button>
+						</div>
+						{/if} -->
+
+						<div class="clear"></div>
+					</div>
+					{/if}
+
+					<input type="hidden" class="order-goods-id" value="{$detail.order_goods_id}">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script src="SHOP_SUPPLY_LOCAL_JS/refund_list.js"></script>
+<script>
+	var id = $(".order-goods-id").val();
+
+	layui.use('form', function() {
+		var form = layui.form;
+
+		$(".refunf-log-icon").click(function() {
+			if($(this).find("i.iconunfold").hasClass("layui-hide")) {
+				$(this).find("i.iconunfold").removeClass("layui-hide");
+				$(this).find("i.iconfold").addClass("layui-hide");
+				$(".refund-log-list").addClass("layui-hide");
+			} else {
+				$(this).find("i.iconunfold").addClass("layui-hide");
+				$(this).find("i.iconfold").removeClass("layui-hide");
+				$(".refund-log-list").removeClass("layui-hide");
+			}
+		})
+	})
+
+	function refundAction(event) {
+		switch (event) {
+			case 'orderRefundCancel':
+				orderRefundCancel(id);
+				break;
+			case 'orderRefundDelivery':
+				location.href = ns.url("supply://shop/orderrefund/delivery", {"order_goods_id": id})
+				break;
+			case 'orderRefundAsk':
+				location.href = ns.url("supply://shop/orderrefund/refund", {"order_goods_id": id})
+				break;
+			case 'complain':
+				location.href = ns.url("supply://shop/orderrefund/complain", {"order_goods_id": id})
+				break;
+		}
+	}
+</script>
+{/block}

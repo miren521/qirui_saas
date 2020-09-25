@@ -1,0 +1,424 @@
+{extend name="base"/}
+{block name="resources"}
+<!-- <link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/order.css"> -->
+{/block}
+{block name="body"}
+
+<style>
+	.evaluate{width: 100%;background: #ffffff;padding: 0 20px;box-sizing: border-box;}
+	.goods-list{
+		width: 100%;
+		height: 100%;
+		display: flex;
+		border-bottom: 1px solid #eeeeee;
+		padding: 20px 0;
+	}
+	.goods-list .goods-image-content{
+		width: 200px;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding-top: 11px;
+	}
+	.goods-list .goods-image{
+		width: 125px;
+		height: 125px;
+	}
+	.goods-list .goods-name{
+		width: 125px;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
+		line-height: 25px;
+		margin: 10px 0 0;
+	}
+	.goods-list .goods-price{
+		width: 125px;
+		text-align: center;
+	}
+	
+	.goods-evaluate-box{
+		flex: 1;
+		height: 100%;
+	}
+	.goods-evaluate-scores{
+		display: flex;
+		align-items: center;
+	}
+	.explain_type{
+		margin-left: 30px;
+	}
+	.explain_type .good{
+		color: #ff547b;
+	}
+	.evaluate-text{
+		margin-top: 10px;
+		width: 100%;
+		height: 140px;
+		border-radius: 5px;
+		background: #ffffff;
+		padding: 10px;
+		box-sizing: border-box;
+		border: 1px solid #DCDFE6;
+		
+	}
+	.upload-image-list{
+		width: 100%;
+		margin-top: 10px;
+		display: flex;
+		flex-wrap: wrap;
+	}
+	.upload-image-li{
+		width: 80px;
+		height: 80px;
+		border: 1px dashed #c0ccda;
+		margin-right: 10px;
+		border-radius: 5px;
+		cursor: pointer;
+		margin-bottom: 10px;
+	}
+	.upload-image-li.add{
+		text-align: center;
+		line-height: 80px;
+		font-size: 40px;
+		color: #8c939d;
+	}
+	.upload-image-li-box{
+		width: 80px;
+		height: 80px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: relative;
+	}
+	.upload-image-li-box .delete{
+		font-size: 20px;
+		position: absolute;
+		right: -10px;
+		top: -10px;
+		color: #CCCCCC;
+	}
+	.upload-image-li img{
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	.shop-rate{
+		width: 100%;
+		padding: 20px 0;
+		padding-left: 220px;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		background: #ffffff;
+	}
+	.shop-name{
+		font-size: 16px;
+		font-weight: 600;
+	}
+	.shop-service{
+		display: flex;
+		align-items: center;
+	}
+	.shop-desc{
+		display: flex;
+		align-items: center;
+	}
+	.shop-attitude{
+		display: flex;
+		align-items: center;
+	}
+	.save-box{
+		width: 100%;
+		padding-left: 200px;
+	}
+	.save{
+		width: 70px;
+		height: 35px;
+		border-radius: 8px;
+		background: #ff547b;
+		text-align: center;
+		line-height: 35px;
+		color: #ffffff;
+		cursor: pointer;
+	}
+</style>
+<!-- 顶部html文件-->
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-order">
+			<div class="order-menu">
+				<ul class="layui-nav layui-nav-tree" lay-filter="test">
+					<li class="layui-nav-item layui-nav-itemed">
+						<a href="javascript:;">交易中心</a>
+						<dl class="layui-nav-child">
+							<dd class="layui-this"><a href="{:addon_url('supply://shop/order/lists')}">我的订单</a></dd>
+							<dd><a href="{:addon_url('supply://shop/orderrefund/lists')}">退款/售后</a></dd>
+							<dd><a href="{:addon_url('supply://shop/purchase/purchase')}">我的求购单</a></dd>
+						</dl>
+					</li>
+				</ul>
+			</div>
+			<div class="order-list" id="evaluate">
+				<div class="order-list-title">订单评价</div>
+
+				<div class="evaluate">
+					{foreach $detail.list as $key=>$v}
+					<div class="goods-list">
+						<div class="goods-image-content">
+							<img src={:img($v.sku_image)} onerror="this.src='SHOP_SUPPLY_LOCAL_IMG/default_goods.png'" class="goods-image">
+							<div class="goods-name" title="{$v.sku_name}">
+								{$v.sku_name}
+							</div>
+							<div class="goods-price">
+								￥{$v.price}
+							</div>
+						</div>
+						<div class="goods-evaluate-box">
+							<div class="goods-evaluate-scores">
+								<span>
+									描述相符：
+								</span>
+								<div id="score{$key}"></div>
+								<div class="explain_type">
+									<i class="iconfont iconhaoping1 good"></i>
+									<span class="good">好评</span>
+								</div>
+							</div>
+							<div class="evaluate-text-box">
+								<textarea class="evaluate-text" autocomplete="off" onchange="change({$key})" rows="5" placeholder="请在此处输入您的评价"
+								 maxlength="200" class="el-textarea__inner" style="min-height: 33px;"></textarea>
+							</div>
+							<div class="upload-image-list">
+								<div class="upload-image-li add ns-upload-default uploadImage" data-num="{$key}">
+									<div class="upload-image-li-box">
+										+
+									</div>
+								</div>
+							</div>
+							<div class="picture-number">
+								总共6张，还可以上传6张
+							</div>
+						</div>
+					</div>
+					{/foreach}
+				</div>
+
+
+				<div class="shop-rate">
+					<div class="shop-name">
+						{$detail.site_name}
+					</div>
+					<div class="shop-service">
+						配送服务： <div id="rate1"></div>
+					</div>
+					<div class="shop-desc">
+						描述相符： <div id="rate2"></div>
+					</div>
+					<div class="shop-attitude">
+						服务态度： <div id="rate3"></div>
+					</div>
+					<div class="ispublic">
+						<div class="mui-input-row mui-checkbox ">
+							<input name="Checkbox" type="checkbox" checked>
+							<label>匿名</label>
+						</div>
+					</div>
+					<div class="save-box">
+						<div class="save" onclick="save()">
+							提交
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+
+
+{block name="script"}
+<script src="__STATIC__/js/vue.js"></script>
+<script>
+	/*
+		explain_type:
+	*/
+	let data = JSON.parse('{:json_encode($detail, JSON_UNESCAPED_UNICODE)}');
+	data.list.forEach(function(v){
+		if(v.scores==undefined){
+			v.scores=5;
+		}
+		if(v.explain_type==undefined){
+			v.explain_type=1;
+		}
+	})
+	let rateInfo={
+		supply_deliverycredit: 5,
+		supply_desccredit: 5,
+		supply_servicecredit: 5,
+	}
+
+	function change(e){
+		data.list[e].content=$("textarea")[e].value.trim()
+	};
+
+	//绑定评分
+	layui.use(['upload','rate'], function(){
+	    var rate = layui.rate;
+		var upload = layui.upload;
+		
+		for(let i=0;i<data.list.length;i++){
+			let id="#score"+i;
+			rate.render({
+			  elem: id,
+			  value: 5,
+			  choose: function(value){
+				data.list[i].scores=value;
+				if(value>=4){
+					data.list[i].explain_type=1
+				}else if(value>1 && value<4){
+					data.list[i].explain_type=2
+				}else{
+					data.list[i].explain_type=3
+				}
+				
+				$($('.explain_type')[i]).find('i').removeClass()
+				$($('.explain_type')[i]).find('span').removeClass()
+				if(data.list[i].explain_type==3){
+					$($('.explain_type')[i]).find('i').addClass("iconfont iconzhongchaping")
+					$($('.explain_type')[i]).find('span').text("差评")
+				}else if(data.list[i].explain_type==2){
+					$($('.explain_type')[i]).find('i').addClass("iconfont iconzhongchaping good")
+					$($('.explain_type')[i]).find('span').addClass("good")
+					$($('.explain_type')[i]).find('span').text("中评")
+				}else if(data.list[i].explain_type==1){
+					$($('.explain_type')[i]).find('i').addClass("iconfont iconhaoping1 good")
+					$($('.explain_type')[i]).find('span').addClass("good")
+					$($('.explain_type')[i]).find('span').text("好评")
+				}
+			  }
+			});
+		}
+		
+		
+	    //渲染
+	    rate.render({
+	      elem: '#rate1'  ,//绑定元素
+		  value: rateInfo.supply_deliverycredit,
+		  choose: function(value){
+				rateInfo.supply_deliverycredit=value;
+		    }
+	    });
+		rate.render({
+		  elem: '#rate2'  ,//绑定元素
+		  value: rateInfo.supply_desccredit,
+		  choose: function(value){
+			   rateInfo.supply_desccredit=value;
+		    }
+		});
+		rate.render({
+		  elem: '#rate3'  ,//绑定元素
+		  value: rateInfo.supply_servicecredit,
+		  choose: function(value){
+			  rateInfo.supply_servicecredit=value;
+		    }
+		});	
+		
+		upload.render({
+			elem: '.uploadImage',
+			url: '{:addon_url("shop/upload/image")}', //必填项
+			number: 6,
+			multiple:true,
+			done: function(res, index, upload){
+		    //获取当前触发上传的元素，一般用于 elem 绑定 class 的情况，注意：此乃 layui 2.1.0 新增
+				let key=Number(this.item.attr("data-num"));
+				if(data.list[key].goodsImgs&&data.list[key].goodsImgs.length>=6) return;
+				if(data.list[key].goodsImgs){
+					data.list[key].goodsImgs.push(res.data.pic_path)
+				}else{
+					let arr=[];
+					arr.push(res.data.pic_path);
+					data.list[key].goodsImgs=arr;
+				}
+				showImage(key)
+			}
+		})
+	});
+	//图片被修改过之后，刷新图片
+	function showImage(index){
+		console.log(data)
+		$($('.upload-image-list')[index]).find(".add-img").remove();
+		let list=data.list[index].goodsImgs;
+		console.log(list)
+		if(list){
+			let html="";
+			for (var i = 0; i < list.length; i++) {
+				console.log(ns.img(list[i]))
+				html+="<div class='upload-image-li add-img'><div class='upload-image-li-box'>"
+				html+="<img src='" + ns.img(list[i]) + "'>"	
+				html+="<i class='delete iconfont iconcuo' onclick='deleteImage("+ index +',' + i +")'></i>"
+				html+="</div></div>"
+			}
+			$('.upload-image-list').eq(index).append(html);
+			let text="总共6张，还可以上传"+ (6-list.length) +"张"
+			$('.picture-number').eq(index).text(text);
+		}
+	}
+	//删除图片
+	function deleteImage(e,f){
+		let arr=data.list[e].goodsImgs;
+		arr.splice(f,1)
+		data.list[e].goodsImgs=arr;
+		showImage(e);
+	}
+	//保存
+	function save(){
+		for(let i=0;i<data.list.length;i++){
+			if(!data.list[i].content||!data.list[i].content.trim()){
+				layer.msg('评价不能为空');
+				return;
+			}
+			if(data.list[i].images){
+				data.list[i].images=data.list[i].goodsImgs.toString()
+			}else{
+				data.list[i].images=""
+			}
+		}
+		
+		let newData={
+			order_id: data.list[0].order_id,
+			order_no: data.list[0].order_no,
+			is_anonymous:$('input[name="Checkbox"]')[0].checked?1:0,
+			goods_evaluate:JSON.stringify(data.list)
+		}
+		Object.assign(newData,rateInfo)
+		$.ajax({
+			type: "POST",
+			url: "{:addon_url('supply://shop/Goodsevaluate/evaluate')}",
+			data: newData,
+			dataType: "JSON",
+			success: function(res) {
+				if(checkLogin(res)) {
+					if (res.code == 0) {
+						layer.msg('评价成功', {
+							anim: 5,
+							time: 1000
+						}, function () {
+							location.href = ns.url("supply://shop/order/lists")
+						})
+					} else {
+						layer.msg(res.message);
+					}
+				}
+			}
+		});
+		
+	}
+</script>
+{/block}

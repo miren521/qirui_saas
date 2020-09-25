@@ -1,0 +1,138 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+<style>
+	.ns-discount { display: flex; justify-content: space-between; height: 34px; line-height: 34px; padding: 5px 15px; background-color: #F6FBFD; border: 1px dashed #BCE8F1; }
+	.layui-table-view {
+		margin-top: 0;
+	}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label">活动名称：</label>
+		<div class="layui-input-inline">{$bargain_info.bargain_name}</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">开始时间：</label>
+		<div class="layui-input-inline">
+			{:date('Y-m-d H:i:s',$bargain_info.start_time)}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">结束时间：</label>
+		<div class="layui-input-inline">
+			{:date('Y-m-d H:i:s',$bargain_info.end_time)}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">购买方式：</label>
+		<div class="layui-input-inline">{if $bargain_info.buy_type == 1} 砍到指定价格 {else/} 任意金额可购买 {/if}</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">帮砍金额：</label>
+		<div class="layui-input-inline">{if $bargain_info.bargain_type == 1} 随机金额 {else/} 固定金额 {/if}</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否允许自己砍价：</label>
+		<div class="layui-input-inline">{if $bargain_info.is_own == 1} 是 {else/} 否 {/if}</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">帮砍人数：</label>
+		<div class="layui-input-inline">
+			{$bargain_info.bargain_num}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">砍价有效期：</label>
+		<div class="layui-input-inline">
+			{$bargain_info.bargain_time} 小时
+		</div>
+	</div>
+
+	<div class="layui-form-item goods_list">
+		<label class="layui-form-label">活动商品：</label>
+		<div class="layui-input-block">
+
+			<table id="selected_sku_list"></table>
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">活动规则说明：</label>
+		<div class="layui-input-block ns-input-text">{$bargain_info.remark}</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+
+</div>
+{/block}
+{block name="script"}
+<script>
+
+	var goods_list = {:json_encode($bargain_info.goods_list, JSON_UNESCAPED_UNICODE)};
+
+	layui.use('form', function() {
+		var table,
+			form = layui.form;
+		
+		table = new Table({
+			elem: '#selected_sku_list',
+			cols: [
+                [{
+                    field: 'sku_name',
+                    title: '商品名称',
+                    width: '26%',
+                    unresize: 'false',
+                    templet: function(data) {
+                        return '<p class="ns-line-hiding good-info" data-sku_id="'+ data.sku_id +'" title="'+ data.sku_name +'">'+ data.sku_name +'</p>';
+                    }
+                }, {
+                    field: 'price',
+                    title: '商品价格',
+                    unresize: 'false',
+                    align: 'right',
+                    width: '15%',
+                    templet: function(data) {
+                        return '<p class="ns-line-hiding" title="'+ data.price +'">￥<span class="bargain-price">' + data.price +'</span></p>';
+                    }
+                }, {
+                    field: 'stock',
+                    title: '库存',
+                    unresize: 'false',
+                    width: '10%',
+                    templet: function(data) {
+                        return '<p class="bargain-stock">' + data.stock +'</p>';
+                    }
+                }, {
+                    field: 'first_bargain_price',
+                    title: '<span title="首刀金额自定义">首刀金额自定义<span>',
+                    unresize: 'false'
+                }, {
+                    field: 'bargain_stock',
+                    title: '砍价库存',
+                    unresize: 'false'
+                }, {
+                    field: 'floor_price',
+                    title: '底价',
+                    unresize: 'false'
+                }]
+			],
+			data: goods_list
+		});
+	});
+	
+	function back() {
+		location.href = ns.url("bargain://shop/bargain/lists");
+	}
+</script>
+{/block}

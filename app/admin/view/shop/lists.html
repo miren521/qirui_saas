@@ -1,0 +1,504 @@
+{extend name="base"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>当前页面对店铺的信息进行管理，可以添加店铺，查看店铺账户信息，认证信息等。</li>
+		</ul>
+	</div>
+</div>
+
+<div class="ns-single-filter-box">
+   <button class="layui-btn ns-bg-color" onclick="clickAdd()">添加店铺</button>
+</div>
+
+<div class="ns-screen layui-collapse" lay-filter="selection_panel">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">筛选</h2>
+
+		{if $is_addon_city == 1}
+		<form class="layui-colla-content layui-form layui-show">
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">店铺名称：</label>
+					<div class="layui-input-inline">
+						<input type="text" id="search_text" name="search_text" placeholder="请输入店铺名称" class="layui-input">
+					</div>
+				</div>
+
+				<div class="layui-inline">
+					<label class="layui-form-label">主营行业：</label>
+					<div class="layui-input-inline">
+						<select name="category_id" lay-filter="category_id">
+							<option value="">全部</option>
+							{volist name="$shop_category_list" id="category"}
+							<option value="{$category.category_id}">{$category.category_name}</option>
+							{/volist}
+						</select>
+					</div>
+				</div>
+
+				<div class="layui-inline">
+					<label class="layui-form-label">开店套餐：</label>
+					<div class="layui-input-inline">
+						<select name="group_id" lay-filter="group_id">
+							<option value="">全部</option>
+							{volist name="$shop_group_list" id="group"}
+							<option value="{$group.group_id}">{$group.group_name}</option>
+							{/volist}
+						</select>
+					</div>
+				</div>
+			</div>
+			<div class="layui-form-item">
+
+				<div class="layui-inline">
+					<label class="layui-form-label">店铺状态：</label>
+					<div class="layui-input-inline">
+						<select name="shop_status" lay-filter="status">
+							<option value="">全部</option>
+							<option value="1">正常</option>
+							<option value="0">已关闭</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="layui-inline">
+					<label class="layui-form-label">是否认证：</label>
+					<div class="layui-input-inline">
+						<select name="cert_id" lay-filter="">
+							<option value="">全部</option>
+							<option value="2">是</option>
+							<option value="1">否</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="layui-inline">
+					<label class="layui-form-label">是否自营：</label>
+					<div class="layui-input-inline">
+						<select name="is_own" lay-filter="status">
+							<option value="">全部</option>
+							<option value="1">是</option>
+							<option value="0">否</option>
+						</select>
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">到期时间：</label>
+					<!-- <div class="layui-input-inline">
+						<input type="text" class="layui-input" name="expire_time" id="expire_time" autocomplete="off" >
+					</div> -->
+					<div class="layui-input-inline">
+					    <input type="text" class="layui-input" name="start_time"  id="start_time" autocomplete="off" placeholder="开始时间" readonly>
+						<i class="ns-calendar"></i>
+					</div>
+					<div class="layui-form-mid">-</div>
+					<div class="layui-input-inline">
+					    <input type="text" class="layui-input" name="end_time" id="end_time" autocomplete="off" placeholder="结束时间" readonly>
+						<i class="ns-calendar"></i>
+					</div>
+				</div>
+
+				<div class="layui-inline">
+					<label class="layui-form-label">城市分站：</label>
+					<div class="layui-input-inline">
+						<select name="website_id" lay-filter="" lay-search="">
+							<option value="">请选择城市分站</option>
+							{foreach $website_list as $website_k => $website_v}
+							{if $website_v.site_id == 0}
+							<option value="-1">无</option>
+							{else /}
+							<option value="{$website_v.site_id}">{$website_v.site_area_name}</option>
+							{/if}
+							{/foreach}
+						</select>
+					</div>
+				</div>
+			</div>
+
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="search_website">筛选</button>
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="export">导出</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</form>
+		{else/}
+		<form class="layui-colla-content layui-form layui-show">
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">店铺名称：</label>
+					<div class="layui-input-inline">
+						<input type="text" id="search_text" name="search_text" placeholder="请输入店铺名称" class="layui-input">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">开店套餐：</label>
+					<div class="layui-input-inline">
+						<select name="group_id" lay-filter="group_id">
+							<option value="">全部</option>
+							{volist name="$shop_group_list" id="group"}
+							<option value="{$group.group_id}">{$group.group_name}</option>
+							{/volist}
+						</select>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">店铺状态：</label>
+					<div class="layui-input-inline">
+						<select name="shop_status" lay-filter="status">
+							<option value="">全部</option>
+							<option value="1">正常</option>
+							<option value="0">已关闭</option>
+						</select>
+					</div>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">主营行业：</label>
+					<div class="layui-input-inline">
+						<select name="category_id" lay-filter="category_id">
+							<option value="">全部</option>
+							{volist name="$shop_category_list" id="category"}
+							<option value="{$category.category_id}">{$category.category_name}</option>
+							{/volist}
+						</select>
+					</div>
+				</div>
+
+				<div class="layui-inline">
+					<label class="layui-form-label">是否认证：</label>
+					<div class="layui-input-inline">
+						<select name="cert_id" lay-filter="">
+							<option value="">全部</option>
+							<option value="2">是</option>
+							<option value="1">否</option>
+						</select>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">是否自营：</label>
+					<div class="layui-input-inline">
+						<select name="is_own" lay-filter="status">
+							<option value="">全部</option>
+							<option value="1">是</option>
+							<option value="0">否</option>
+						</select>
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">到期时间：</label>
+					<!-- <div class="layui-input-inline">
+						<input type="text" class="layui-input" name="expire_time" id="expire_time" autocomplete="off" >
+					</div> -->
+					<div class="layui-input-inline">
+					    <input type="text" class="layui-input" name="start_time"  id="start_time" autocomplete="off" placeholder="开始时间" readonly>
+						<i class="ns-calendar"></i>
+					</div>
+					<div class="layui-form-mid">-</div>
+					<div class="layui-input-inline">
+					    <input type="text" class="layui-input" name="end_time" id="end_time" autocomplete="off" placeholder="结束时间" readonly>
+						<i class="ns-calendar"></i>
+					</div>
+				</div>
+			</div>
+
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="search">筛选</button>
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="export">导出</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</form>
+		{/if}
+	</div>
+</div>
+
+<!-- 列表 -->
+{if $is_addon_city == 1}
+<table id="shop_website_list" lay-filter="shop_website_list"></table>
+{else/}
+<table id="shop_list" lay-filter="shop_list"></table>
+{/if}
+
+<!-- 是否自营 -->
+<script type="text/html" id="is_own">
+	{{ d.is_own == 1 ? '是' : '否' }}
+</script>
+
+<!-- 状态 -->
+<script type="text/html" id="status">
+	{{ d.shop_status == 1 ? '正常' : '关闭' }}
+</script>
+
+<!-- 工具栏操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="basic">店铺管理</a>
+		<!-- <a class="layui-btn" lay-event="basic">基本信息</a> -->
+		<a class="layui-btn" lay-event="identify">认证信息</a>
+		<!-- <a class="layui-btn" lay-event="settlement">银行账户</a> -->
+		<!-- <a class="layui-btn" lay-event="account">账户信息</a> -->
+	</div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+	layui.use(['form', 'laydate'], function() {
+		var table, table_website,
+			form = layui.form,
+			laydate = layui.laydate;
+		form.render();
+
+		//渲染时间
+		laydate.render({
+			elem: '#start_time',
+			type: 'datetime'
+		});
+		
+		laydate.render({
+			elem: '#end_time',
+			type: 'datetime'
+		});
+		
+		/**
+		 * 渲染表格
+		 */
+		table = new Table({
+			elem: '#shop_list',
+			url: ns.url("admin/shop/lists"),
+			cols: [
+				[{
+					field: 'site_name',
+					title: '店铺名称',
+					width: '12%',
+					unresize: 'false',
+					// templet: '<div><div class="layui-elip">店铺名称：{{d.site_name}}<div class="layui-elip">卖家账号：{{d.username}}</div>'
+				}, {
+					field: 'username',
+					title: '商家账号',
+					width: '8%',
+					unresize: 'false'
+				}, {
+					field: 'group_name',
+					title: '开店套餐',
+					width: '10%',
+					unresize: 'false'
+				}, {
+					field: 'category_name',
+					title: '主营行业',
+					width: '8%',
+					unresize: 'false'
+				}, {
+					field: 'is_own',
+					title: '是否自营',
+					width: '8%',
+					unresize: 'false',
+					templet: '#is_own'
+				}, {
+					field: 'cert_id',
+					title: '店铺认证',
+					width: '8%',
+					unresize: 'false',
+					templet: function(data) {
+						return data.cert_id == 0 ? '<span style="color: red">未认证</span>' : '<span style="color: green">已认证</span>';
+					}
+				}, {
+					field: 'shop_status',
+					title: '店铺状态',
+					width: '8%',
+					templet: '#status',
+					unresize: 'false'
+				}, {
+					field: 'create_time',
+					title: '入驻时间',
+					width: '12%',
+					unresize: 'false',
+					templet: function(data) {
+						return ns.time_to_date(data.create_time);
+					}
+				}, {
+					field: 'expire_time',
+					title: '到期时间',
+					width: '12%',
+					unresize: 'false',
+					templet: function(data) {
+						return ns.time_to_date(data.expire_time);
+					}
+				}, {
+					title: '操作',
+					width: '12%',
+					toolbar: '#action',
+					unresize: 'false'
+				}]
+			]
+		});
+		
+		// 有城市分站
+		table_website = new Table({
+			elem: '#shop_website_list',
+			url: ns.url("city://admin/shop/lists"),
+			cols: [
+				[{
+					field: 'site_name',
+					title: '店铺名称',
+					width: '12%',
+					unresize: 'false',
+				}, {
+					field: 'username',
+					title: '商家账号',
+					width: '8%',
+					unresize: 'false'
+				}, {
+					field: 'group_name',
+					title: '开店套餐',
+					width: '10%',
+					unresize: 'false'
+				}, {
+					field: 'category_name',
+					title: '主营行业',
+					width: '8%',
+					unresize: 'false'
+				}, {
+					field: 'is_own',
+					title: '是否自营',
+					width: '8%',
+					unresize: 'false',
+					templet: '#is_own'
+				}, {
+					field: 'site_area_name',
+					title: '城市分站',
+					width: '8%',
+					unresize: 'false',
+					templet: function(data) {
+						return data.site_area_name == '全国' ? '--' : data.site_area_name;
+					}
+				}, {
+					field: 'cert_id',
+					title: '店铺认证',
+					width: '7%',
+					unresize: 'false',
+					templet: function(data) {
+						return data.cert_id == 0 ? '<span style="color: red">未认证</span>' : '<span style="color: green">已认证</span>';
+					}
+				}, {
+					field: 'shop_status',
+					title: '店铺状态',
+					width: '7%',
+					templet: '#status',
+					unresize: 'false'
+				}, {
+					field: 'create_time',
+					title: '入驻时间',
+					width: '10%',
+					unresize: 'false',
+					templet: function(data) {
+						return ns.time_to_date(data.create_time);
+					}
+				}, {
+					field: 'expire_time',
+					title: '到期时间',
+					width: '10%',
+					unresize: 'false',
+					templet: function(data) {
+						return ns.time_to_date(data.expire_time);
+					}
+				}, {
+					title: '操作',
+					width: '10%',
+					toolbar: '#action',
+					unresize: 'false'
+				}]
+			]
+		});
+		
+		
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+			return false;
+		});
+		
+		// 城市分站
+		form.on('submit(search_website)', function(data) {
+			table_website.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+			return false;
+		});
+
+
+        //批量导出
+        form.on('submit(export)', function(data){
+            data.field.order_type = 1;
+            location.href = ns.url("admin/shop/exportShop",data.field);
+            return false;
+        });
+
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data,
+					event = obj.event;
+			switch (event) {
+				case 'basic': //基本信息
+					location.href = ns.url("admin/shop/basicInfo" + "?site_id=" + data.site_id);
+					break;
+				case 'identify': //认证信息
+					location.href = ns.url("admin/shop/certInfo" + "?site_id=" + data.site_id)
+					break;
+				// case 'settlement': //结算信息
+				// 	location.href = ns.url("admin/shop/settlementInfo" + "?site_id=" + data.site_id)
+				// 	break;
+				// case 'account': //账户信息
+				// 	location.href = ns.url("admin/shop/accountInfo" + "?site_id=" + data.site_id)
+				// 	break;
+			}
+		});
+		
+		table_website.tool(function(obj) {
+			var data = obj.data,
+					event = obj.event;
+			switch (event) {
+				case 'basic': //基本信息
+					location.href = ns.url("admin/shop/basicInfo" + "?site_id=" + data.site_id);
+					break;
+				case 'identify': //认证信息
+					location.href = ns.url("admin/shop/certInfo" + "?site_id=" + data.site_id)
+					break;
+				// case 'settlement': //结算信息
+				// 	location.href = ns.url("admin/shop/settlementInfo" + "?site_id=" + data.site_id)
+				// 	break;
+				// case 'account': //账户信息
+				// 	location.href = ns.url("admin/shop/accountInfo" + "?site_id=" + data.site_id)
+				// 	break;
+			}
+		});
+	});
+
+	function clickAdd() {
+		location.href = ns.url("admin/shop/addShop");
+	}
+</script>
+{/block}

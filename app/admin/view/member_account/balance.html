@@ -1,0 +1,199 @@
+{extend name="base"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<!-- 搜索框 -->
+<div class="ns-screen layui-collapse" lay-filter="selection_panel">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">筛选</h2>
+		<form class="layui-colla-content layui-form layui-show">
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">搜索方式：</label>
+					<div class="layui-input-inline">
+						<select name="status" lay-filter="status">
+							<option value="">搜索类型</option>
+							<option value="username">会员名</option>
+							<option value="mobile">手机</option>
+							<option value="email">邮箱</option>
+						</select>
+					</div>
+					<div class="layui-inline">
+						<input type="text" id="search_text" name="search_text" placeholder="输入用户名/手机号/邮箱" class="layui-input" autocomplete="off">
+					</div>
+				</div>
+			</div>
+			
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">开始-结束时间：</label>
+					<div class="layui-input-inline">
+						<div class="layui-input-inline">
+							<input type="text" class="layui-input ns-len-short" placeholder="开始时间" autocomplete="off" name="start_date" id="start_time" readonly>
+						</div>
+						<div class="layui-form-mid">-</div>
+						<div class="layui-input-inline end-time">
+							<input type="text" class="layui-input ns-len-short" placeholder="结束时间" autocomplete="off" name="end_date" id="end_time" readonly>
+						</div>
+					</div>
+				</div>
+
+				<div class="layui-inline">
+					<label class="layui-form-label">来源类型：</label>
+					<div class="layui-input-inline">
+						<select name="from_type">
+							<option value="">请选择</option>
+							{foreach $from_type_arr as $from_type_arr_k => $from_type_arr_v}
+							<option value="{$from_type_arr_k}">{$from_type_arr_v.type_name}</option>
+							{/foreach}
+						</select>
+					</div>
+				</div>
+			</div>
+			
+			<input type="hidden" name="balance_type" />
+			
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="search">筛选</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="member_account_list_tab">
+	<ul class="layui-tab-title">
+		<li class="layui-this" lay-id="balance">余额（不可提现）</li>
+		<li lay-id="balance_money">余额（可提现）</li>
+	</ul>
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="member_account_list" lay-filter="member_account_list"></table>
+	</div>
+</div>
+
+<!--会员信息-->
+<script type="text/html" id="userInfo">
+	<div class='ns-font-box'>
+		<p class="layui-elip">会员名：{{d.username}}</p>
+		<p class="layui-elip">手机号：{{d.mobile}}</p>
+		<p class="layui-elip">邮箱：{{d.email}}</p>
+	</div>
+</script>
+
+<!--操作-->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="basic">查看</a>
+	</div>
+</script>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'laydate','element'], function() {
+		var table,
+			form = layui.form,
+			laydate = layui.laydate,
+			currentDate = new Date(),
+			element = layui.element;
+			minDate = "";
+		form.render();
+
+		currentDate.setDate(currentDate.getDate() - 7);
+		
+		//开始时间
+		laydate.render({
+			elem: '#start_time',
+			type: 'datetime'
+		});
+
+		//结束时间
+		laydate.render({
+			elem: '#end_time',
+			type: 'datetime'
+		});
+		
+		//监听Tab切换，以改变地址hash值
+		element.on('tab(member_account_list_tab)', function () {
+			$("input[name='balance_type']").val(this.getAttribute('lay-id'));
+			$("button[lay-filter='search']").click()
+		});
+
+		/**
+		 * 重新渲染结束时间
+		 */
+		function reRender(){
+		    $("#end_time").remove();
+		    $(".end-time").html('<input type="text" class="layui-input" placeholder="结束时间" name="end_date" id="end_time" >');
+		    laydate.render({
+		        elem: '#end_time',
+		        type: 'datetime',
+		        min: minDate
+		    });
+		}
+
+		/**
+		 * 表格加载
+		 */
+		table = new Table({
+			elem: '#member_account_list',
+			url: ns.url("admin/memberaccount/balance"),
+			cols: [
+				[{
+					width: '1%',
+					unresize: 'false'
+				}, {
+					title: '会员信息',
+					width: '25%',
+					unresize: 'false',
+					templet: '#userInfo'
+				}, {
+					field: 'type_name',
+					title: '来源',
+					width: '15%',
+					unresize: 'false'
+				}, {
+					field: 'account_data',
+					title: '金额',
+					width: '15%',
+					unresize: 'false'
+				}, {
+					field: 'create_time',
+					title: '产生时间',
+					width: '23%',
+					unresize: 'false',
+					templet: function(data) {
+						return ns.time_to_date(data.create_time);
+					}
+				}, {
+					field: 'remark',
+					title: '备注',
+					width: '20%',
+					unresize: 'false'
+				}]
+			]
+		});
+		
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+			return false;
+		});
+
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data,
+				event = obj.event;
+		})
+	});
+</script>
+{/block}

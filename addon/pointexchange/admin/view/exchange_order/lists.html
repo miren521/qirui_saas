@@ -1,0 +1,177 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+    <div class="layui-colla-item">
+        <h2 class="layui-colla-title">操作提示</h2>
+        <ul class="layui-colla-content layui-show">
+            <li>展示了兑换订单相关信息列表</li>
+            <li>可搜索礼品名称、关键字搜索出具体订单信息</li>
+        </ul>
+    </div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+    <div class="layui-form">
+        <div class="layui-input-inline">
+            <input type="text" name="search_text" placeholder="请输入礼品名称/关键字" class="layui-input">
+            <button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+                <i class="layui-icon">&#xe615;</i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="type_name">
+    <ul class="layui-tab-title">
+        <li class="layui-this" lay-id="">全部</li>
+        <li lay-id="1">礼品</li>
+        <li lay-id="2">优惠券</li>
+        <li lay-id="3">红包</li>
+    </ul>
+
+    <div class="layui-tab-content">
+        <!-- 列表 -->
+        <table id="exchange_list" lay-filter="exchange_list"></table>
+    </div>
+</div>
+
+<!-- 礼品信息 -->
+<script type="text/html" id="exchange_info">
+    <div class='ns-table-tuwen-box'>
+        <div class='ns-img-box'>
+			{{#  if(d.exchange_image){  }}
+            <img layer-src src="{{ns.img(d.exchange_image.split(',')[0])}}">
+			{{#  }  }}
+        </div>
+        <div class='ns-font-box'>
+            <p class="ns-multi-line-hiding" title="{{d.exchange_name}}">{{d.exchange_name}}</p>
+            <p class="ns-multi-line-hiding">数量:{{d.num}}</p>
+        </div>
+    </div>
+</script>
+<!-- 时间 -->
+<script id="pay_time" type="text/html">
+    <div class="layui-elip">{{ns.time_to_date(d.pay_time)}}</div>
+</script>
+<!-- 编辑删除操作 -->
+<script type="text/html" id="action">
+    <div class="ns-table-btn">
+        <a class="layui-btn" lay-event="detail">查看</a>
+    </div>
+</script>
+{/block}
+{block name="script"}
+<script>
+        layui.use(['form', 'element'], function() {
+        var table,
+            form = layui.form,
+            element = layui.element;
+            form.render();
+
+        //监听Tab切换
+        element.on('tab(type_name)', function(data) {
+            var type = $(this).attr("lay-id");
+            table.reload( {
+                page: {
+                    curr: 1
+                },
+                where: {
+                    'type': type
+                }
+            });
+        });
+        
+        table = new Table({
+            elem: '#exchange_list',
+            url: ns.url("pointexchange://admin/pointexchange/lists"),
+            where:{exchange_id:"{$exchange_id}"},
+            cols: [
+                [{
+                    field: 'order_no',
+                    title: '订单号',
+                    unresize: 'false',
+                    width: '10%',
+                },{
+                    field: 'exchange_name,num',
+                    title: '礼品名称',
+                    unresize: 'false',
+                    width: '15%',
+                    templet: '#exchange_info'
+                },{
+                    field: 'type_name',
+                    title: '兑换类型',
+                    unresize: 'false',
+                    width: '8%'
+                }, {
+                    field: 'point',
+                    title: '积分数',
+                    unresize: 'false',
+                    width: '7%'
+                }, {
+                    field: 'price',
+                    title: '金额数',
+                    unresize: 'false',
+                    width: '7%'
+                }, {
+                    field: 'gift_price',
+                    title: '会员',
+                    unresize: 'false',
+                    width: '12%',
+                    templet: '<div>会员名称：{{d.name}}<br>会员电话：{{d.mobile}}<br>会员地址：{{d.full_address}}{{d.address}}</div>',
+                },{
+                    title: '兑换时间',
+                    unresize: 'false',
+                    width: '15%',
+                    templet: '#pay_time'
+                },{
+                    title: '订单状态',
+                    unresize: 'false',
+                    width: '10%',
+                    templet: function(data){
+                        switch (data.order_status){
+                            case 0:
+                                return '待支付';
+                            case 1:
+                                return '已完成';
+                            case -1:
+                                return '已关闭';
+                        }
+                    }
+                }, {
+                    title: '操作',
+                    toolbar: '#action',
+                    unresize: 'false',
+                    width: '10%'
+                }]
+            ]
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'detail': //查看
+                    location.href = ns.url("pointexchange://admin/pointexchange/detail?order_id=" + data.order_id);
+                    break;
+            }
+        });
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function(data) {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+        });
+    });
+</script>
+{/block}

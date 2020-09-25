@@ -1,0 +1,249 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>团购活动列表展示商品的团购相关信息</li>
+		</ul>
+	</div>
+</div>
+
+<!-- 筛选面板 -->
+<div class="ns-screen layui-collapse" lay-filter="selection_panel">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">筛选</h2>
+		<form class="layui-colla-content layui-form layui-show">
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">活动名称：</label>
+					<div class="layui-input-inline">
+						<input type="text" name="pintuan_name" placeholder="请输入活动名称" autocomplete="off" class="layui-input">
+					</div>
+				</div>
+				
+				<div class="layui-inline">
+					<label class="layui-form-label">店铺名称：</label>
+					<div class="layui-input-inline">
+						<input type="text" name="site_name" placeholder="请输入店铺名称" autocomplete="off" class="layui-input">
+					</div>
+				</div>
+
+				<div class="layui-inline">
+					<label class="layui-form-label">商品名称：</label>
+					<div class="layui-input-inline">
+						<input type="text" name="goods_name" placeholder="请输入商品名称" autocomplete="off" class="layui-input">
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">活动时间：</label>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input" name="start_time"  id="start_time" autocomplete="off" placeholder="开始时间" >
+						<i class="ns-calendar"></i>
+					</div>
+					<div class="layui-form-mid">-</div>
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input" name="end_time" id="end_time" autocomplete="off" placeholder="结束时间" >
+						<i class="ns-calendar"></i>
+					</div>
+				</div>
+
+			</div>
+			
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="search">筛选</button>
+				<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="status">
+	<ul class="layui-tab-title">
+		<li class="layui-this" data-status="">全部</li>
+		<li data-status="6">未开始</li>
+		<li data-status="1">进行中</li>
+		<li data-status="2">已结束</li>
+		<li data-status="3">已失效</li>
+	</ul>
+	
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="pintuan_list" lay-filter="pintuan_list"></table>
+	</div>
+</div>
+
+<!-- 商品 -->
+<script type="text/html" id="goods">
+	<div class="ns-table-tuwen-box">
+		<div class="ns-img-box">
+			<img layer-src src="{{ns.img(d.goods_image.split(',')[0])}}"/>
+		</div>
+		<div class="ns-font-box">
+			<a href="javascript:;" class="ns-multi-line-hiding ns-text-color"
+			   title="{{d.goods_name}}">{{d.goods_name}}</a>
+		</div>
+	</div>
+</script>
+<!-- 活动名 -->
+<script type="text/html" id="pintuan_name">
+	<span title="{{d.pintuan_name}}">{{d.pintuan_name}}</span>
+</script>
+<!-- 店铺 -->
+<script type="text/html" id="site_name">
+	<span title="{{d.site_name}}">{{d.site_name}}</span>
+</script>
+
+<!-- 时间 -->
+<script id="time" type="text/html">
+	<div class="layui-elip" title="{{ns.time_to_date(d.start_time)}}">开始：{{ns.time_to_date(d.start_time)}}</div>
+	<div class="layui-elip" title="{{ns.time_to_date(d.end_time)}}">结束：{{ns.time_to_date(d.end_time)}}</div>
+</script>
+
+<!-- 状态 -->
+<script type="text/html" id="status">
+	{{#  if(d.status == 0){  }}
+	<span style="color: red">未开始</span>
+	{{#  }else if(d.status == 1){  }}
+	<span style="color: green">进行中</span>
+	{{#  }else if(d.status == 2){  }}
+	<span style="color: gray">已结束</span>
+	{{#  }else if(d.status == 3){  }}
+	<span style="color: gray">已失效</span>
+	{{#  }  }}
+</script>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="team">开团列表</a>
+	</div>
+</script>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'laydate', 'element'], function() {
+		var table,
+			form = layui.form,
+			element = layui.element,
+            laydate = layui.laydate;
+		form.render();
+
+        //渲染时间
+        laydate.render({
+            elem: '#start_time',
+            type: 'datetime'
+        });
+
+        laydate.render({
+            elem: '#end_time',
+            type: 'datetime'
+        });
+
+		table = new Table({
+			elem: '#pintuan_list',
+			url: ns.url("pintuan://admin/pintuan/lists"),
+			cols: [
+				[{
+					title: '活动名称',
+					unresize: 'false',
+					width: '8%',
+					templet: '#pintuan_name'
+				}, {
+                    title: '拼团商品',
+                    unresize: 'false',
+                    width: '18%',
+                    templet: '#goods'
+                }, {
+					title: '店铺名称',
+					unresize: 'false',
+					width: '12%',
+					templet: '#site_name'
+				},  {
+					field: 'pintuan_num',
+					title: '参团数',
+					unresize: 'false',
+					width: '7%'
+				}, {
+					field: 'group_num',
+					title: '开团数',
+					unresize: 'false',
+					width: '7%'
+				}, {
+					field: 'order_num',
+					title: '购买人数',
+					unresize: 'false',
+					width: '8%'
+				}, {
+					title: '活动时间',
+					unresize: 'false',
+					width: '19%',
+					templet: '#time'
+				}, {
+					title: '状态',
+					unresize: 'false',
+					width: '8%',
+					templet: '#status'
+				}, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width: '8%'
+				}]
+			],
+		
+		});
+		
+		//监听Tab切换
+		element.on('tab(status)', function(data) {
+			var status = $(this).attr("data-status");
+			table.reload( {
+				page: {
+					curr: 1
+				},
+				where: {
+					'status': status
+				}
+			});
+		});
+		
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'team': //开团团队
+					location.href = ns.url("pintuan://admin/pintuan/group?pintuan_id=" + data.pintuan_id);
+					break;
+			}
+		});
+		
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			var field = data.field;
+
+			if(field.start_time != '' && field.end_time != ''){
+				 if(field.end_time <= field.start_time){
+                     $("input[name=end_time]").focus();
+				     return false;
+				 }
+			}
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+			return false;
+		});
+	})
+</script>
+{/block}

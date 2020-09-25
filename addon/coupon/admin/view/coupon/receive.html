@@ -1,0 +1,156 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+	.layui-layer-page .layui-layer-content {
+	    padding: 20px 30px;
+	}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>查看优惠券领取详情</li>
+		</ul>
+	</div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<input type="text" name="coupon_name" placeholder="请输入优惠券名称" autocomplete="off" class="layui-input">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+				<i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+<input type="hidden" name="coupon_type_id" value="{$coupon_type_id}" id="coupon_type_id" />
+<div class="layui-tab ns-table-tab" lay-filter="coupon_tab">
+	<ul class="layui-tab-title">
+		<li class="layui-this" lay-id="">全部</li>
+		<li lay-id="1">未使用</li>
+		<li lay-id="2">已使用</li>
+		<li lay-id="3">已过期</li>
+	</ul>
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="coupon_list" lay-filter="coupon_list"></table>
+	</div>
+</div>
+
+<!--领取时间-->
+<script type="text/html" id="fetch_time">
+	<span title="{{ ns.time_to_date(d.fetch_time) }}">{{ ns.time_to_date(d.fetch_time) }}</span>
+</script>
+
+<!--使用时间-->
+<script type="text/html" id="use_time">
+	<span title="{{ ns.time_to_date(d.use_time) }}">{{ ns.time_to_date(d.use_time) }}</span>
+</script>
+
+<!--获取方式-->
+<script type="text/html" id="get_type">
+    {{# if(d.get_type == 1){ }}
+    <div class="layui-elip">订单领取</div>
+    {{# }else if(d.get_type == 2){ }}
+    <div class="layui-elip">直接领取</div>
+    {{# }else if(d.get_type == 3){ }}
+    <div class="layui-elip">获取领取</div>
+    {{# } }}
+</script>
+
+<!--状态-->
+<script type="text/html" id="state">
+    {{# if(d.state == 1){ }}
+    <div class="layui-elip" style="color: red">未使用</div>
+    {{# }else if(d.state == 2){ }}
+    <div class="layui-elip" style="color: green">已使用</div>
+    {{# }else if(d.state == 3){ }}
+    <div class="layui-elip" style="color: gray">已过期</div>
+    {{# } }}
+</script>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form', 'laytpl', 'element'], function() {
+		var table,
+			form = layui.form,
+			laytpl = layui.laytpl,
+			element = layui.element,
+			coupon_type_id = $('#coupon_type_id').val(),
+			repeat_flag = false; //防重复标识
+		form.render();
+		
+		//监听Tab切换，以改变地址hash值
+		element.on('tab(coupon_tab)', function(){
+		
+			table.reload({
+		        page: {curr: 1},
+		        where: {'state': this.getAttribute('lay-id'),"coupon_type_id": $("#coupon_type_id").val()},
+		    })
+		});
+
+		table = new Table({
+			elem: '#coupon_list',
+			url: ns.url("coupon://admin/coupon/receive"),
+			where: {'coupon_type_id': coupon_type_id},
+			cols: [
+				[{
+					field: 'coupon_name',
+					title: '优惠券名称',
+					unresize: 'false',
+					width: '12%'
+				}, {
+					field: 'site_name',
+					title: '商家名称',
+					unresize: 'false',
+					width: '12%'
+				}, {
+					field: 'username',
+					title: '领取人',
+					unresize: 'false',
+					width: '10%'
+				}, {
+					field: 'coupon_code',
+					title: '优惠券编码',
+					unresize: 'false',
+					width: '10%'
+				}, {
+					field: 'money',
+					title: '<span style="padding-right: 15px;">面额</span>',
+					unresize: 'false',
+					width: '12%',
+					align: 'right',
+					templet: function(data) {
+						return '<span style="padding-right: 15px;">￥'+ data.money +'</span>';
+					}
+				}, {
+					title: '获取方式',
+					unresize: 'false',
+					templet: '#get_type',
+					width: '10%'
+				}, {
+					title: '状态',
+					unresize: 'false',
+                    templet: '#state',
+					width: '8%'
+				}, {
+                    title: '领取时间',
+                    unresize: 'false',
+                    templet: '#fetch_time',
+                    width: '13%'
+                }, {
+                    title: '使用时间',
+                    unresize: 'false',
+                    templet: '#use_time',
+                    width: '13%'
+                }]
+			],
+		});
+		
+	});
+</script>
+{/block}

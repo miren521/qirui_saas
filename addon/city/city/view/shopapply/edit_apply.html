@@ -1,0 +1,85 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	.ns-form {margin-top: 0;}
+	.layui-input-block {height: auto; word-break: break-all;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label">店铺名称：</label>
+		<div class="layui-input-block ns-len-mid ns-input-text">
+			{$apply_info.shop_name}
+		</div>
+	</div>
+
+	<div class="layui-form-item ns-shop-time">
+		<label class="layui-form-label">入驻时长：</label>
+		<div class="layui-input-block ns-len-mid ns-input-text">
+			{$apply_info.apply_year} 年
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">主营行业：</label>
+		<div class="layui-input-block ns-len-mid ns-input-text">
+			{$apply_info.category_name}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">开店套餐：</label>
+		<div class="layui-input-block ns-len-mid ns-input-text">
+			{$apply_info.group_name}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label img-upload-lable">付款凭证：</label>
+		<div class="layui-input-inline img-upload">
+			<input disabled="" type="hidden" class="layui-input" name="paying_money_certificate">
+			<div class="upload-img-block icon">
+				<div class="upload-img-box">
+					<img layer-src src="{:img($apply_info.paying_money_certificate)}" />
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">付款凭证说明：</label>
+		<div class="layui-input-block ns-input-text ns-len-long">
+			{$apply_info.paying_money_certificate_explain}
+		</div>
+	</div>
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">付款金额：</label>
+		<div class="layui-input-inline">
+			{$apply_info.paying_amount}
+		</div>
+		<span class="layui-form-mid">元</span>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>审核意见：</label>
+		<div class="layui-input-block ns-input-text">
+			{$apply_info.apply_message}
+		</div>
+	</div>
+
+	<div class="ns-form-row">
+		<button type="reset" class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+
+</div>
+
+{/block}
+{block name="script"}
+<script>
+
+	function back(){
+		location.href = ns.url('city://city/shopapply/apply');
+	}
+</script>
+{/block}

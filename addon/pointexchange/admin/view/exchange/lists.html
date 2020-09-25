@@ -1,0 +1,216 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>展示了积分可兑换的礼品、优惠券、红包等信息</li>
+			<li>可搜索积分兑换活动状态、关键字查询出具体兑换信息</li>
+			<li>可进行兑换信息添加、删除、编辑等操作，可查看该积分兑换活动下已兑换的订单</li>
+		</ul>
+	</div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+    <button class="layui-btn ns-bg-color" onclick="add()">添加积分兑换</button>
+
+    <div class="layui-form">
+		<div class="layui-input-inline">
+			<select name="state" lay-filter="state">
+				<option value="">上/下架</option>
+				<option value="1">上架</option>
+				<option value="0">下架</option>
+			</select>
+		</div>
+		
+        <div class="layui-input-inline">
+            <input type="text" name="search_text" placeholder="请输入兑换名称/关键字" class="layui-input ns-len-mid">
+            <button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+                <i class="layui-icon">&#xe615;</i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="type_name">
+	<ul class="layui-tab-title">
+		<li class="layui-this" lay-id="">全部</li>
+		<li lay-id="1">礼品</li>
+		<li lay-id="2">优惠券</li>
+		<li lay-id="3">红包</li>
+	</ul>
+	
+	<div class="layui-tab-content">
+		<!-- 列表 -->
+		<table id="exchange_list" lay-filter="exchange_list"></table>
+	</div>
+</div>
+
+<!-- 礼品信息 -->
+<script type="text/html" id="exchange_info">
+    <div class='ns-table-tuwen-box'>
+        <div class='ns-img-box'>
+			{{#  if(d.image){  }}
+            <img layer-src src="{{ns.img(d.image.split(',')[0])}}">
+			{{#  }else{  }}
+			<img layer-src src="__STATIC__/img/shape.png">
+			{{#  }  }}
+        </div>
+        <div class='ns-font-box'>
+            <p class="ns-multi-line-hiding">{{d.name}}</p>
+        </div>
+    </div>
+</script>
+
+<!-- 状态 -->
+<script type="text/html" id="state">
+    {{d.state == 1?'上架':'下架'}}
+</script>
+
+<!-- 编辑删除操作 -->
+<script type="text/html" id="action">
+    <div class="ns-table-btn">
+        <a class="layui-btn" lay-event="order">兑换订单</a>
+        <a class="layui-btn" lay-event="edit">编辑</a>
+        <a class="layui-btn" lay-event="delete">删除</a>
+    </div>
+</script>
+{/block}
+{block name="script"}
+<script>
+    layui.use(['form', 'element'], function() {
+        var table,
+            form = layui.form,
+			element = layui.element,
+            repeat_flag = false; //防重复标识
+        form.render();
+
+        //监听Tab切换
+		element.on('tab(type_name)', function(data) {
+			var type = $(this).attr("lay-id");
+			table.reload( {
+				page: {
+					curr: 1
+				},
+				where: {
+					'type': type
+				}
+			});
+		});
+
+        table = new Table({
+            elem: '#exchange_list',
+            url: ns.url("pointexchange://admin/exchange/lists"),
+            cols: [
+                [{
+                    field: 'name',
+                    title: '兑换商品',
+                    unresize: 'false',
+                    width: '10%',
+                    templet: '#exchange_info'
+                }, {
+                    field: 'type_name',
+                    title: '兑换商品类型',
+                    unresize: 'false',
+                    width: '10%',
+                }, {
+                    field: 'market_price',
+                    title: '<span style="padding-right: 50px;">市场价</span>',
+                    unresize: 'false',
+                    width: '10%',
+					align: 'right',
+					templet: function(data) {
+						return '<span style="padding-right: 50px;">￥'+ data.market_price +'</span>';
+					}
+                }, {
+                    field: 'point',
+                    title: '兑换积分',
+                    unresize: 'false',
+                    width: '15%'
+                }, {
+					field: 'price',
+					title: '兑换金额',
+					unresize: 'false',
+					width: '15%',
+				}, {
+                    field: 'state',
+                    title: '状态',
+                    unresize: 'false',
+                    width: '15%',
+                    templet: '#state',
+                }, {
+                    title: '操作',
+                    toolbar: '#action',
+                    unresize: 'false',
+                    width: '20%'
+                }]
+            ]
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function(obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'order': //管理
+                    location.href = ns.url("pointexchange://admin/pointexchange/lists?exchange_id=" + data.id);
+                    break;
+                case 'edit': //管理
+                    location.href = ns.url("pointexchange://admin/exchange/edit?id=" + data.id);
+                    break;
+                case 'delete': //删除
+                    deleteGift(data.id);
+                    break;
+            }
+        });
+
+        /**
+         * 删除
+         */
+        function deleteGift(id) {
+            if (repeat_flag) return false;
+            repeat_flag = true;
+
+            layer.confirm('确定要删除该礼品吗?', function() {
+                $.ajax({
+                    url: ns.url("pointexchange://admin/exchange/delete"),
+                    data: {id},
+                    dataType: 'JSON',
+                    type: 'POST',
+                    success: function(res) {
+                        layer.msg(res.message);
+                        repeat_flag = false;
+
+                        if (res.code == 0) {
+                            table.reload();
+                        }
+                    }
+                });
+            }, function () {
+                layer.close();
+                repeat_flag = false;
+            });
+        }
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function(data) {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+        });
+    });
+
+    function add() {
+        location.href = ns.url("pointexchange://admin/exchange/add");
+    }
+</script>
+{/block}

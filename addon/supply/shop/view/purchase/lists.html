@@ -1,0 +1,95 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/order.css">
+{/block}
+{block name="body"}
+<!-- 顶部html文件-->
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-order">
+			<div class="order-menu">
+				<ul class="layui-nav layui-nav-tree" lay-filter="test">
+					<li class="layui-nav-item layui-nav-itemed">
+						<a href="javascript:;">交易中心</a>
+						<dl class="layui-nav-child">
+							<dd><a href="{:addon_url('supply://shop/order/lists')}">我的订单</a></dd>
+                            <dd><a href="{:addon_url('supply://shop/orderrefund/lists')}">退款/售后</a></dd>
+                            <dd class="layui-this"><a href="{:addon_url('supply://shop/purchase/purchase')}">我的求购单</a></dd>
+						</dl>
+					</li>
+				</ul>
+			</div>
+			<div class="order-list">
+				<div class="order-list-title">我的求购单</div>
+
+                <div class="purchase-list-wrap">
+					<!-- 列表 -->
+					<div id="purchase_list"></div>
+				</div>
+
+				<div id="purchase_page"></div>
+			</div>
+		</div>
+	</div>
+</div>
+{/block}
+
+{block name="script"}
+<script src="SHOP_SUPPLY_LOCAL_JS/purchase_list.js"></script>
+<script>
+	var form, laypage, element, count = 0, curr = 1;
+	
+	layui.use(['form', 'laypage', 'element'], function () {
+		form = layui.form;
+		laypage = layui.laypage;
+		element = layui.element;
+
+		curr = location.hash.replace('#!page=', '') ? location.hash.replace('#!page=', '') : curr;
+		getOrderList(curr);
+		getOrderPage(count);
+	})
+
+	var order = new Order();
+	function getOrderList(curr, order_status) {
+		$.ajax({
+			type: 'GET',
+			dataType: 'JSON',
+			async: false,
+			data: {
+				"page": curr
+			},
+			url: ns.url("supply://shop/purchase/purchase"),
+			success: function (res) {
+				if (res.code == 0) {
+					order.setData(res.data);
+					$("#purchase_list").html(order.fetch());
+
+					count = res.data.count;
+				} else {
+					layer.msg(res.message);
+				}
+			}
+		});
+	}
+
+	function getOrderPage(count) {
+		if (!count) {
+			$("#purchase_page").css("display", "none");
+		} else {
+			$("#purchase_page").css("display", "block");
+		}
+
+		page = new Page({
+			elem: 'purchase_page',
+			count: count,
+			curr: 1,
+			callback: function (obj) {
+				console.log(obj);
+				getOrderList(obj.curr);
+			}
+		});
+	}
+</script>
+{/block}

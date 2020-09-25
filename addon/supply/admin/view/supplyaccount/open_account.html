@@ -1,0 +1,218 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+    .ns-card-brief:nth-child(1) {
+        margin-top: 0
+    }
+
+    .layui-card-body {
+        display: flex;
+        flex-wrap: wrap;
+        padding-bottom: 0 !important;
+        padding-left: 50px !important;
+        padding-right: 50px !important
+    }
+
+    .layui-card-body .content {
+        width: 33.3%;
+        margin-bottom: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: column;
+        justify-content: center
+    }
+
+    .layui-card-body .money {
+        font-size: 20px;
+        color: #000;
+        font-weight: 700;
+        margin-top: 10px;
+        max-width: 250px
+    }
+
+    .layui-card-body .subhead {
+        font-size: 12px;
+        margin-left: 3px;
+        cursor: pointer
+    }
+</style>
+{/block}
+{block name="main"}
+
+
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <div>
+            <span class="ns-card-title">供应商概况</span>
+        </div>
+    </div>
+    <div class="layui-card-body">
+
+        <div class="content">
+            <p class="title">供应商入驻总费用（元）</p>
+            <p class="money">{$account_data.open_fee}</p>
+        </div>
+    </div>
+</div>
+
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+    <div class="layui-form">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <label class="layui-form-label">供应商名称：</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" placeholder="供应商名称" name="site_name" autocomplete="off">
+                </div>
+
+            </div>
+        </div>
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <label class="layui-form-label">时间：</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" placeholder="开始时间" name="start_time" id="start_time"
+                           autocomplete="off" readonly>
+                    <i class="ns-calendar"></i>
+                </div>
+                <div class="layui-input-inline end-item">
+                    <input type="text" class="layui-input" placeholder="结束时间" name="end_time" id="end_time"
+                           autocomplete="off" readonly>
+                    <i class="ns-calendar"></i>
+                </div>
+            </div>
+        </div>
+        <div class="layui-input-inline">
+            <button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+                <i class="layui-icon">&#xe615;</i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 列表 -->
+<table id="open_account_list" lay-filter="open_account_list"></table>
+
+<!--账期开始时间-->
+<script type="text/html" id="start_times">
+    <div class="layui-elip">
+        {{# if(d.period_start_time == 0){ }}
+        --
+        {{# } else { }}
+        {{ns.time_to_date(d.period_start_time)}}
+        {{# } }}
+    </div>
+</script>
+
+{/block}
+
+{block name="script"}
+<script>
+    layui.use(['form', 'laydate'], function () {
+        var table,
+            form = layui.form,
+            laydate = layui.laydate,
+            currentDate = new Date(),
+            minDate = "";
+        form.render();
+
+        currentDate.setDate(currentDate.getDate() - 7);
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time',
+            type: 'datetime'
+        });
+
+        //结束时间
+        laydate.render({
+            elem: '#end_time',
+            type: 'datetime'
+        });
+
+        /**
+         * 重新渲染结束时间
+         */
+        function reRender() {
+            $("#end_time").remove();
+            $(".end-time").html('<input type="text" class="layui-input" placeholder="申请结束时间" name="end_date" id="end_time" >');
+            laydate.render({
+                elem: '#end_time',
+                type: 'datetime',
+                min: minDate
+            });
+        }
+
+        /**
+         * 表格加载
+         */
+        table = new Table({
+            elem: '#open_account_list',
+            url: ns.url("supply://admin/supplyaccount/openaccount"),
+            cols: [
+                [{
+                    field: 'account_no',
+                    title: '账单编号',
+                    unresize: 'false',
+                }, {
+                    field: 'site_name',
+                    title: '供应商名称',
+                    unresize: 'false',
+                }, {
+                    field: 'money',
+                    title: '<span style="padding-right: 50px;">缴费金额（元）</span>',
+                    unresize: 'false',
+                    align: 'right',
+                    templet: function (data) {
+                        return '<span style="padding-right: 50px;">￥' + data.money + '</span>';
+                    }
+                }, {
+                    field: 'type_name',
+                    title: '费用类型',
+                    unresize: 'false',
+                }, {
+                    field: 'create_time',
+                    title: '创建时间',
+                    unresize: 'false',
+
+                    templet: function (data) {
+                        if (data.create_time == 0) {
+                            return '--';
+                        } else {
+                            return ns.time_to_date(data.create_time)
+                        }
+                    }
+                }]
+            ]
+        });
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function (data) {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+            return false;
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function (obj) {
+            var data = obj.data,
+                event = obj.event;
+
+            switch (obj.event) {
+                case 'basic': //查看
+                    location.href = ns.url("supply://admin/supplysettlement/detail?period_id=" + data.period_id)
+                    break;
+            }
+        })
+    });
+</script>
+{/block}

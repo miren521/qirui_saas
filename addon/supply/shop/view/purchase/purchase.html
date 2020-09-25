@@ -1,0 +1,177 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" href="SHOP_SUPPLY_LOCAL_CSS/release.css">
+{/block}
+{block name="body"}
+<!-- 顶部html文件-->
+<div class="ns-supply-wrap">
+	<div class="ns-supply-wrap-con">
+		{include file="addon/supply/shop/view/market_head.html"/}
+
+		<div class="ns-supply-order">
+			<div class="order-menu">
+				<ul class="layui-nav layui-nav-tree" lay-filter="test">
+					<li class="layui-nav-item layui-nav-itemed">
+						<a href="javascript:;">交易中心</a>
+						<dl class="layui-nav-child">
+							<dd><a href="{:addon_url('supply://shop/order/lists')}">我的订单</a></dd>
+                            <dd><a href="{:addon_url('supply://shop/orderrefund/lists')}">退款/售后</a></dd>
+                            <dd class="layui-this"><a href="{:addon_url('supply://shop/purchase/purchase')}">我的求购单</a></dd>
+						</dl>
+					</li>
+				</ul>
+			</div>
+			<div class="purchase-wrap">
+				<div class="order-list-title">求购单</div>
+
+				<div class="purchase-list">
+					<!-- 列表 -->
+					<div id="purchase_list" lay-filter="purchase_list"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/html" id="goods">
+	<div class="ns-table-title">
+		<div class="ns-title-pic">
+			<img layer-src src="{{ns.img(d.goods_image)}}" onerror="this.src='SHOP_SUPPLY_LOCAL_IMG/default_goods.png'" />
+		</div>
+		<div class="ns-title-content">
+			<a href="javascript:;" class="ns-multi-line-hiding ns-text-color" title="{{ d.goods_name }}">{{ d.goods_name }}</a>
+		</div>
+	</div>
+</script>
+
+<script type="text/html" id="operation">
+	<div class="ns-table-btn">
+		{{#  if (d.status == 1) {  }}
+		<a class="layui-btn" lay-event="stop">截止</a>
+		{{#  }  }}
+		<a class="layui-btn" lay-event="delete">删除</a>
+		<a class="layui-btn" lay-event="detail">详情</a>
+	</div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+	var table, form, repeat_flag = false;
+	
+	layui.use(['form'], function () {
+		form = layui.form;
+
+		table = new Table({
+			elem: '#purchase_list',
+			url: ns.url("supply://shop/purchase/purchase"),
+			async : false,
+			cols: [
+				[{
+					title: '求购商品',
+					unresize: 'false',
+					width: '45%',
+					templet: '#goods'
+				}, {
+					title: '求购时间',
+					unresize: 'false',
+					width: '25%',
+					templet: function(data) {
+						return ns.time_to_date(data.end_time);
+					}
+				}, {
+					title: '状态',
+					unresize: 'false',
+					width: '15%',
+					templet: function(data) {
+						if (data.status == 1) {
+							return '求购中';
+						} else {
+							return '已截止';
+						}
+					}
+				}, {
+					title: '操作',
+					toolbar: '#operation',
+					unresize: 'false',
+					width: '15%'
+				}]
+			],
+		})
+		console.log(table);
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'delete': //删除
+					delPurchase(data.purchase_id);
+					break;
+				case 'stop': //截止
+					stopPurchase(data.purchase_id);
+					break;
+				case 'detail': //详情
+					location.href = ns.url("supply://shop/purchase/purchaseinfo", {"purchase_id": data.purchase_id});
+					break;
+			}
+		});
+		
+		/**
+		 * 删除
+		 */
+		function delPurchase(id) {
+			if (repeat_flag) return false;
+			repeat_flag = true;
+			
+			layer.confirm('确定要删除该求购信息吗?', function() {
+				$.ajax({
+					url: ns.url("supply://shop/purchase/delete"),
+					data: {"purchase_id": id},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						repeat_flag = false;
+						if(checkLogin(res)) {
+							layer.msg(res.message);
+							if (res.code == 0) {
+								table.reload();
+							}
+						}
+					}
+				});
+			}, function() {
+				repeat_flag = false;
+			});
+		}
+		
+		/**
+		 * 截止
+		 */
+		function stopPurchase(id) {
+			if (repeat_flag) return false;
+			repeat_flag = true;
+			
+			layer.confirm('确定要截止该求购信息吗?', function() {
+				$.ajax({
+					url: ns.url("supply://shop/purchase/close"),
+					data: {"purchase_id": id},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						repeat_flag = false;
+						if(checkLogin(res)) {
+							layer.msg(res.message);
+							if (res.code == 0) {
+								table.reload();
+							}
+						}
+					}
+				});
+			}, function() {
+				repeat_flag = false;
+			});
+		}
+	})
+</script>
+{/block}

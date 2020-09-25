@@ -1,0 +1,111 @@
+{extend name="base"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+	<div class="layui-form-item">
+		<label class="layui-form-label">SMTP服务器：</label>
+		<div class="layui-input-block">
+			<input type="text" name="host"  value="{$config_info.host ?? ''}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">SMTP端口：</label>
+		<div class="layui-input-block">
+			<input type="text" name="port"  value="{$config_info.port ?? ''}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">发信人邮件地址：</label>
+		<div class="layui-input-block">
+			<input type="text" name="from"  value="{$config_info.from ?? ''}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">身份验证用户名：</label>
+		<div class="layui-input-block">
+			<input type="text" name="username"  value="{$config_info.username ?? ''}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+		<div class="ns-word-aux">SMTP身份验证用户名</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">身份验证码：</label>
+		<div class="layui-input-block">
+			<input type="text" name="password"  value="{$config_info.password ?? ''}" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+		<div class="ns-word-aux">SMTP身份验证码</div>
+	</div>
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">是否开启：</label>
+		<div class="layui-input-block">
+			<input type="checkbox" name="is_use" lay-filter="isOpen" value="1" lay-skin="switch" {if condition="$is_use == 1"} checked {/if} />
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">邮件地址：</label>
+		<div class="layui-input-inline">
+			<input type="text" name="test_address"  value="" autocomplete="off" class="layui-input ns-len-long">
+		</div>
+		<button class="layui-btn layui-btn-primary" lay-submit lay-filter="testsend">发送测试邮件</button>
+	</div>
+	<div class="ns-form-row">
+		<button type="button" class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+	</div>
+</div>
+{/block}
+{block name="script"}
+<script>
+	layui.use('form', function() {
+		var form = layui.form,
+			repeat_flag = false; //防重复
+		form.render();
+
+		//保存配置
+		form.on('submit(save)', function(data) {
+			if(repeat_flag) return;
+			repeat_flag = true;
+
+			$.ajax({
+				url: ns.url("admin/message/email"),
+				data: data.field,
+				dataType: 'JSON',
+				type: 'POST',
+				success: function(res) {
+					layer.msg(res.message);
+					repeat_flag = false;
+					if (res.code == 0) {
+						location.reload();
+					}
+				}
+			});
+		});
+		//发送测试邮件
+        form.on('submit(testsend)', function(data) {
+            if(repeat_flag) return;
+            repeat_flag = true;
+
+            $.ajax({
+                url: ns.url("admin/message/testSendEmail"),
+                data: data.field,
+                dataType: 'JSON',
+                type: 'POST',
+                success: function(res) {
+                    repeat_flag = false;
+					
+					if (res.code == 0) {
+						layer.msg("发送成功");
+					} else {
+						layer.msg(res.message);
+					}
+                }
+            });
+        });
+	});
+	
+</script>
+{/block}

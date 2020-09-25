@@ -1,0 +1,181 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>展示了礼品相关信息列表</li>
+			<li>可搜索礼品名称、关键字搜索出具体礼品卡信息</li>
+			<li>可进行礼品添加、删除、编辑等操作</li>
+		</ul>
+	</div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<button class="layui-btn ns-bg-color" onclick="add()">添加礼品</button>
+
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<select name="gift_state" lay-filter="gift_state">
+				<option value="">上/下架</option>
+				<option value="1">上架</option>
+				<option value="0">下架</option>
+			</select>
+		</div>
+		
+		<div class="layui-input-inline">
+			<input type="text" name="search_text" placeholder="请输入礼品名称/关键字" class="layui-input ns-len-mid">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+				<i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- 列表 -->
+<table id="gift_list" lay-filter="gift_list"></table>
+
+<!-- 礼品信息 -->
+<script type="text/html" id="gift_info">
+	<div class='ns-table-tuwen-box'>
+		<div class='ns-img-box'>
+			{{#  if(d.gift_image){  }}
+			<img layer-src src="{{ns.img(d.gift_image.split(',')[0])}}">
+			{{#  }else{  }}
+			<img layer-src src="ADMIN_IMG/default_gift.png">
+			{{#  }  }}
+		</div>
+		<div class='ns-font-box'>
+			<p class="ns-multi-line-hiding">{{d.gift_name}}</p>
+		</div>
+	</div>
+</script>
+
+<!-- 状态 -->
+<script type="text/html" id="gift_status">
+	{{d.gift_state == 1?'上架':'下架'}}
+</script>
+
+<!-- 编辑删除操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="order">领取记录</a>
+		<a class="layui-btn" lay-event="edit">编辑</a>
+		<a class="layui-btn" lay-event="delete">删除</a>
+	</div>
+</script>
+{/block}
+{block name="script"}
+<script>
+	layui.use('form', function() {
+		var table,
+			form = layui.form,
+			repeat_flag = false; //防重复标识
+		form.render();
+
+		table = new Table({
+			elem: '#gift_list',
+			url: ns.url("gift://admin/gift/lists"),
+			cols: [
+				[{
+					field: 'gift_name',
+					title: '礼品名称',
+					unresize: 'false',
+					width: '30%',
+					templet: '#gift_info'
+				}, {
+					field: 'gift_price',
+					title: '<span style="padding-right: 50px;">礼品价格</span>',
+					unresize: 'false',
+					width: '20%',
+					align: 'right',
+					templet: function(data) {
+						return '<span style="padding-right: 50px;">￥'+ data.gift_price +'</span>';
+					}
+				}, {
+					field: 'gift_stock',
+					title: '库存',
+					unresize: 'false',
+					width: '15%'
+				}, {
+					field: 'gift_state',
+					title: '上下架',
+					unresize: 'false',
+					width: '15%',
+					templet: '#gift_status',
+				}, {
+					title: '操作',
+					toolbar: '#action',
+					unresize: 'false',
+					width: '20%'
+				}]
+			]
+		});
+
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+                case 'order': //订单管理
+                    location.href = ns.url("gift://admin/giftorder/lists?gift_id=" + data.gift_id);
+                    break;
+				case 'edit': //管理
+					location.href = ns.url("gift://admin/gift/edit?gift_id=" + data.gift_id);
+					break;
+				case 'delete': //删除
+					deleteGift(data.gift_id);
+					break;
+			}
+		});
+
+		/**
+		 * 删除
+		 */
+		function deleteGift(gift_id) {
+			if (repeat_flag) return false;
+			repeat_flag = true;
+
+			layer.confirm('确定要删除该礼品吗?', function() {
+				$.ajax({
+					url: ns.url("gift://admin/gift/delete"),
+					data: {gift_id},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						layer.msg(res.message);
+						repeat_flag = false;
+
+						if (res.code == 0) {
+							table.reload();
+						}
+					}
+				});
+			}, function () {
+				layer.close();
+				repeat_flag = false;
+			});
+		}
+
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+	});
+
+	function add() {
+		location.href = ns.url("gift://admin/gift/add");
+	}
+</script>
+{/block}

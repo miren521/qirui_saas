@@ -1,0 +1,87 @@
+{extend name="app/shop/view/base.html"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label"><span class="required">*</span>分组名：</label>
+		<div class="layui-input-block">
+			<input name="group_name" type="text" lay-verify="required" class="layui-input ns-len-long" placeholder="请输入分组名" value="{$group_info.group_name}" autocomplete="off">
+		</div>
+	</div>
+	
+	
+	<div class="layui-form-item">
+		<label class="layui-form-label">描述：</label>
+		<div class="layui-input-block">
+			<textarea name ="desc" class="layui-textarea ns-len-long" placeholder="请输入分组的相关描述">{$group_info.desc}</textarea>
+		</div>
+	</div>
+	
+	<!-- 操作 -->
+	<div class="ns-form-row">
+		<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+		<button class="layui-btn layui-btn-primary" onclick="back()">返回</button>
+	</div>
+	
+	<!-- 隐藏域 -->
+	<input name="group_id" type="text"  class="layui-input layui-hide" value="{$group_id}">
+</div>
+{/block}
+{block name="script"}
+
+<script>
+	var form,
+		repeat_flag = false;//防重复标识
+	
+    layui.use('form', function() {
+        form = layui.form;
+		form.render();
+        
+        form.on('submit(save)', function (data) {
+
+      
+			if (repeat_flag) return;
+            repeat_flag = true;
+            
+			$.ajax({
+				type: "POST",
+				dataType: "JSON",
+                url: ns.url("servicer://shop/group/edit"),
+                data: data.field,
+                success: function (res) {
+					repeat_flag = false;
+					
+					if (res.code == 0) {
+						layer.confirm('编辑成功', {
+							title:'操作提示',
+							btn: ['返回列表', '继续操作'],
+							yes: function(){
+								location.href = ns.url("servicer://shop/group/index")
+							},
+							btn2: function() {
+								location.reload();
+							}
+						})
+					}else{
+						layer.msg(res.message);
+					}
+                }
+            });
+        });
+
+        form.verify({
+            title: function (value) {
+                if (value.length == 0) {
+                    return '请输入用户组名称';
+                }
+            }
+        });
+    });
+	
+	function back() {
+		location.href = ns.url("servicer://shop/group/index");
+	}
+</script>
+{/block}

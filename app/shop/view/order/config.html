@@ -1,0 +1,150 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+	.invoice-content-block .layui-form-select{margin-bottom:10px}
+	.invoice-content-block .layui-form-select:last-child{margin-bottom:0}
+	.invoice-content-block .item{position:relative;margin-bottom:10px}
+	.invoice-content-block .item .layui-icon-close{font-size:12px;position:absolute;top:-8px;right:-8px;width:16px;height:16px;line-height:16px;text-align:center;color:#fff;-webkit-border-radius:10px;-moz-border-radius:10px;border-radius:10px;background:rgba(0,0,0,.3);cursor:pointer}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form">
+	<div class="layui-card ns-card-common ns-card-brief">
+		<div class="layui-card-header">
+			<span class="ns-card-title">发票设置</span>
+		</div>
+		<div class="layui-card-body">
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>发票开关：</label>
+				<div class="layui-input-inline">
+					<input type="radio" name="invoice_status" value="0" title="关闭" autocomplete="off" class="layui-input ns-len-long" {if empty($config.invoice_status) || $config.invoice_status == 0} checked {/if}>
+					<input type="radio" name="invoice_status" value="1" title="开启" autocomplete="off" class="layui-input ns-len-long" {if !empty($config.invoice_status) && $config.invoice_status == 1} checked {/if}>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>发票税率：</label>
+				<div class="layui-input-block">
+					<div class="layui-input-inline ns-len-short">
+						<input type="number" name="invoice_rate" min="0" lay-verify="required" value="{$config.invoice_rate ?? 0}" placeholder="请输入税率"  autocomplete="off" class="layui-input ns-len-short">
+					</div>
+					<div class="layui-form-mid">%</div>
+				</div>
+
+			</div>
+
+			<div class="layui-form-item invoice-content-block">
+				<label class="layui-form-label">发票内容：</label>
+				<div class="layui-input-inline invoice-content-box">
+					{if !empty($config.invoice_content)}
+					{foreach $config.invoice_content as $k => $v}
+						<div class="item">
+							<input type="text" name="invoice_content[]" lay-verify="required" value="{$v}" placeholder="请输入发票内容"  autocomplete="off" class="layui-input ns-len-short" >
+							<i class="layui-icon layui-icon-close"></i>
+						</div>
+					{/foreach}
+					{else/}
+					<div class="item">
+						<input type="text" name="invoice_content[]" lay-verify="required" value="" placeholder="请输入发票内容"  autocomplete="off" class="layui-input ns-len-short" >
+						<i class="layui-icon layui-icon-close"></i>
+					</div>
+					{/if}
+				</div>
+				<a class="layui-btn layui-btn-primary add-invoice-content-button">添加</a>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>邮寄费用：</label>
+				<div class="layui-input-block">
+					<div class="layui-input-inline ns-len-short">
+						<input type="number" name="invoice_money" min="0" lay-verify="required" value="{$config.invoice_money ?? 0}" placeholder="请输入费用" autocomplete="off" class="layui-input ns-len-short">
+					</div>
+					<div class="layui-form-mid">元</div>
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label"><span class="required">*</span>支持发票类型：</label>
+				<div class="layui-input-block">
+					<div class="layui-input-inline">
+						<input type="checkbox" name="type[]" value="1" title="普通发票" lay-skin="primary" {if !empty($config.type) && in_array(1, $config['type'])}checked{/if}>
+						<input type="checkbox" name="type[]" value="2" title="电子发票" lay-skin="primary"{if !empty($config.type) && in_array(2, $config['type'])}checked{/if}>
+					</div>
+				</div>
+			</div>
+
+
+			<div class="ns-form-row">
+				<button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+{/block}
+{block name="script"}
+
+<script>
+
+	var laytpl,form;
+	layui.use(['laytpl', 'form'], function() {
+		var repeat_flag = false; //防重复标识
+		form = layui.form,laytpl = layui.laytpl;
+		form.render();
+
+		form.on('submit(save)', function(data) {
+			if (repeat_flag) return;
+			repeat_flag = true;
+			
+			$.ajax({
+				type: 'POST',
+				url: ns.url("shop/order/config"),
+				data: data.field,
+				dataType: 'JSON',
+				success: function(res) {
+					repeat_flag = false;
+					if (res.code == 0 && !res.message) {
+						location.reload();
+						return;
+					}
+					layer.msg(res.message);
+				}
+			});
+		});
+
+		// 验证正整数
+		form.verify({
+			positivEinteger: function(value) {
+				if (!new RegExp("^(\\d|[1-9]\\d|99)$").test(value)) {
+					return '请输入0-99之间的正整数';
+				}
+			}
+		});
+		
+		// 验证正数
+		form.verify({
+			positiv: function(value) {
+				if (!new RegExp("^[0-9]+$").test(value)) {
+					return '时间不能小于0，且必须是整数！';
+				}
+			}
+		});
+
+		//添加发票内容
+		$(".add-invoice-content-button").click(function () {
+			var html = '';
+			html += '<div class="item">';
+			html += '<input type="text" name="invoice_content[]" lay-verify="required" value="" placeholder="请输入发票内容"  autocomplete="off" class="layui-input ns-len-short" >';
+			html += '<i class="layui-icon layui-icon-close" ></i>';
+			html += '</div>';
+			$(".invoice-content-box").append(html);
+		});
+
+		//删除发票内容
+		$('.invoice-content-block ').on('click', ".layui-icon-close",function () {
+			$(this).parent().remove();
+		});
+	});
+
+
+
+
+</script>
+{/block}

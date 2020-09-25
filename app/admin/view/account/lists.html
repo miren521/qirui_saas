@@ -1,0 +1,159 @@
+{extend name="base"/}
+{block name="resources"}
+<style>
+    .ns-shop-account-block {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .ns-shop-account {
+        width: 30%;
+        text-align: center;
+        padding: 20px 0;
+    }
+
+    .ns-shop-account-num {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .ns-shop-account-name {
+        font-size: 18px;
+    }
+
+    .layui-tab-content {
+        padding: 10px 0;
+    }
+
+    .ns-function-search .layui-form .ns-order-calc .layui-btn {
+        position: initial;
+        border-right: 1px solid #e5e5e5;
+    }
+
+</style>
+{/block}
+{block name="main"}
+<div class="ns-tab layui-tab layui-tab-brief" lay-filter="edit_user_tab">
+    <div class="layui-tab-content">
+        <div class="layui-tab-item layui-show">
+            <div class="ns-screen layui-collapse" lay-filter="selection_panel">
+                <div class="layui-colla-item">
+                    <h2 class="layui-colla-title">筛选</h2>
+                    <form class="layui-colla-content layui-form layui-show">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">店铺名称：</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="site_name" placeholder="店铺名称" autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">创建时间：</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" class="layui-input" name="start_time"  id="start_time" autocomplete="off" placeholder="开始时间" readonly>
+                                    <i class="ns-calendar"></i>
+                                </div>
+                                <div class="layui-form-mid">-</div>
+                                <div class="layui-input-inline">
+                                    <input type="text" class="layui-input" name="end_time" id="end_time" autocomplete="off" placeholder="结束时间" readonly>
+                                    <i class="ns-calendar"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ns-form-row">
+                            <button class="layui-btn ns-bg-color" lay-submit lay-filter="search">筛选</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <table id="account_list"></table>
+        </div>
+    </div>
+</div>
+<!-- 操作 -->
+<script type="text/html" id="action">
+    <div class="ns-table-btn">
+        <a class="layui-btn" lay-event="show">查看</a>
+    </div>
+</script>
+{/block}
+{block name="script"}
+<script>
+    layui.use(['form', 'laydate'], function() {
+        var tableAccountList= layui.table,
+            laydate = layui.laydate,
+            form = layui.form;
+        form.render();
+
+        //渲染时间
+        laydate.render({
+            elem: '#start_time',
+            type: 'datetime'
+        });
+
+        laydate.render({
+            elem: '#end_time',
+            type: 'datetime'
+        });
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function(data) {
+            tableAccountList.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+            return false;
+        });
+
+        //账户流水
+        tableAccountList = new Table({
+            elem: '#account_list',
+            url: ns.url("admin/account/lists"),
+            cols: [
+                [{
+                    field: 'order_no',
+                    title: '订单编号',
+                    width: '15%',
+                    unresize: 'false'
+                },{
+                    field: 'site_name',
+                    title: '店铺',
+                    width: '15%',
+                    unresize: 'false'
+                }, {
+                    field: 'order_money',
+                    title: '订单金额',
+                    width: '10%',
+                    unresize: 'false'
+                }, {
+                    field: 'account_data',
+                    title: '平台佣金',
+                    width: '10%',
+                    unresize: 'false'
+                }, {
+                    field: 'remark',
+                    title: '备注',
+                    width: '30%',
+                    unresize: 'false'
+                }, {
+                    field: 'create_time',
+                    title: '创建时间',
+                    width: '20%',
+                    unresize: 'false',
+                    templet: function(data) {
+                        return ns.time_to_date(data.create_time); //创建时间转换方法
+                    }
+                }]
+            ]
+        });
+    })
+</script>
+{/block}

@@ -1,0 +1,504 @@
+.index-wrap {
+    width: 100%;
+}
+
+.index {
+    width: $width;
+    margin: 0 auto;
+    padding-left: 210px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    .border-right {
+        border-right: 1px solid #f5f5f5;
+    }
+
+    .border-bottom {
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .banner {
+        height: 430px;
+        width: 100%;
+
+        .el-image {
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    .news {
+        width: 310px;
+        background: #ffffff;
+
+        .login-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 25px;
+            border-bottom: 1px solid #f1f1ff;
+
+            .avtar {
+                width: 48px;
+                height: 48px;
+                margin: 20px 0 10px 0;
+                border: 1px solid #e9e9e9;
+                border-radius: 50%;
+                overflow: hidden;
+                display: block;
+                line-height: 45px;
+                cursor: pointer;
+
+                img {
+                    display: inline-block;
+                }
+            }
+
+            .btn {
+                padding-bottom: 10px;
+                .login {
+                    padding-right: 5px;
+                    border-right: 1px solid #838383;
+                }
+
+                .register {
+                    margin-left: 5px;
+                }
+            }
+
+            .memeber-name {
+                padding-bottom: 10px;
+            }
+        }
+
+        .notice-wrap {
+            padding: 10px;
+
+            .notice {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 5px;
+                align-items: center;
+                .notice-name {
+                    font-weight: 600;
+                }
+                .notice-more {
+                    color: #838383;
+                    display: flex;
+                    align-items: center;
+                    &:hover {
+                        color: $base-color;
+                    }
+                }
+            }
+
+            .item {
+                width: 214px;
+
+                .notice-title {
+                    color: #838383;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+
+                    &:hover {
+                        color: $base-color;
+                    }
+                }
+            }
+        }
+
+        .xian {
+            margin: 0 20px;
+            background: #f1f1f1;
+            height: 1px;
+        }
+
+        .server-wrap {
+            padding: 10px;
+            .server-title {
+                font-weight: 600;
+                margin-bottom: 5px;
+            }
+
+            .item-wrap {
+                display: flex;
+
+                .item {
+                    flex: 1;
+                    text-align: center;
+
+                    a {
+                        display: flex;
+                        flex-direction: column;
+
+                        i {
+                            color: $base-color;
+                            font-size: 28px;
+                        }
+
+                        span {
+                            color: #838383;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.content {
+    width: 100%;
+
+    // 优惠券
+    .coupon {
+        width: $width;
+        margin: 20px auto;
+        display: flex;
+
+        .coupon-title {
+            width: 150px;
+            height: 112px;
+            background: $base-color;
+            -webkit-mask-box-image: url(../../assets/images/coupon_bg.png);
+            padding-left: 25px;
+            padding-top: 20px;
+            color: #f8f8f8;
+            flex-shrink: 0;
+            box-sizing: border-box;
+
+            .coupon-font {
+                font-size: 22px;
+                line-height: 22px;
+            }
+
+            .coupon-en {
+                font-size: 16px;
+                line-height: 16px;
+                text-transform: uppercase;
+                color: #fac4cd;
+                margin-top: 8px;
+            }
+
+            .coupon-more {
+                display: inline-block;
+                font-size: 16px;
+                line-height: 16px;
+                margin-top: 16px;
+                cursor: pointer;
+
+                span {
+                    margin-right: 5px;
+                }
+            }
+        }
+
+        .coupon-list {
+            flex: 1;
+            height: 112px;
+
+            li {
+                display: inline-block;
+                width: 20%;
+                height: 100%;
+                box-sizing: border-box;
+                background-color: #fff4f6;
+                border-right: 1px dashed $base-color;
+                text-align: center;
+                padding-top: 16px;
+
+                &:last-child {
+                    border: none;
+                }
+
+                .coupon-price {
+                    font-size: 16px;
+                    height: 36px;
+                    line-height: 36px;
+                    span {
+                        font-size: 36px;
+                    }
+                }
+
+                .coupon-term {
+                    color: #838383;
+                    line-height: 14px;
+                    margin-top: 10px;
+                }
+
+                .coupon-receive {
+                    line-height: 14px;
+                    margin-top: 10px;
+                    display: inline-block;
+                    cursor: pointer;
+                    i {
+                        font-size: 14px;
+                        margin-left: 5px;
+                    }
+                }
+            }
+        }
+    }
+
+    // 广告
+    .ad-wrap {
+        width: $width;
+        margin: 20px auto;
+        display: flex;
+        justify-content: space-between;
+
+        > div {
+            width: calc((100% - 15px) / 2);
+            height: 372px;
+        }
+
+        .ad-big {
+            display: flex;
+            justify-content: space-between;
+
+            .ad-big-img {
+                width: calc((100% - 15px) / 2);
+                cursor: pointer;
+            }
+        }
+
+        .ad-small {
+            display: flex;
+            justify-content: space-between;
+            align-content: space-between;
+            flex-wrap: wrap;
+
+            .ad-small-img {
+                width: calc((100% - 15px) / 2);
+                height: calc((100% - 15px) / 2);
+                cursor: pointer;
+            }
+        }
+    }
+
+    // 限时秒杀
+    .seckill-wrap {
+        height: 376px;
+        width: $width;
+		background-color: #FFFFFF;
+        margin: 20px auto;
+        border: 1px solid #e9e9e9;
+    }
+
+    .seckill-time {
+        width: 100%;
+        height: 45px;
+        line-height: 44px;
+        border-bottom: 1px solid #e9e9e9;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 20px;
+        box-sizing: border-box;
+
+        .seckill-time-left {
+            color: #383838;
+
+            i,
+            .seckill-time-title {
+                font-size: 18px;
+                font-weight: 600;
+                margin-right: 5px;
+            }
+
+            .seckill-time-title {
+                margin-right: 15px;
+            }
+        }
+
+        .count-down {
+            display: inline-block;
+            margin-left: 7px;
+        }
+
+        .seckill-time-right {
+            color: #838383;
+            cursor: pointer;
+        }
+    }
+
+    .seckill-content {
+        padding: 20px 20px 0;
+    }
+
+    .seamless-warp2 {
+        overflow: hidden;
+
+        ul.item {
+            li {
+                float: left;
+                width: 250px;
+                padding: 0 25px;
+                box-sizing: border-box;
+                border-right: 1px solid #f1f1f1;
+
+                .seckill-goods {
+                    cursor: pointer;
+
+                    .seckill-goods-img {
+                        width: 100%;
+                        height: 200px;
+                    }
+                    img {
+                        object-fit: cover;
+                    }
+
+                    > p {
+                        line-height: 24px;
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                        -webkit-line-clamp: 2;
+                        overflow: hidden;
+                        height: 50px;
+                    }
+
+                    .seckill-price-wrap {
+                        display: flex;
+                        align-items: flex-end;
+                        height: 24px;
+                        line-height: 24px;
+                        margin-top: 10px;
+
+                        p span {
+                            font-size: 24px;
+                        }
+
+                        .primary-price {
+                            text-decoration: line-through;
+                            color: #838383;
+                            margin-left: 10px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.floor {
+    width: $width;
+    margin: 20px auto;
+
+    .floor_item {
+        margin-top: 10px;
+    }
+}
+
+.floatLayer-wrap {
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    left: 0;
+    top: 0;
+    background: rgba($color: #000000, $alpha: 0.5);
+    z-index: 999;
+
+    .floatLayer {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 999;
+        cursor: pointer;
+
+        i {
+            color: #ffffff;
+            font-size: 30px;
+            position: absolute;
+            top: -30px;
+            right: -30px;
+        }
+    }
+}
+
+// 悬浮搜索
+.fixed-box {
+	width: 100%;
+	background-color: #FFFFFF;
+	position: fixed;
+	top: 0;
+	z-index: 999;
+	border-bottom: 2px solid $base-color;
+}
+
+.header-search {
+	width: $width;
+	height: 68px;
+	margin: 0 auto;
+	.logo-wrap {
+		width: 240px;
+		height: 68px;
+		line-height: 68px;
+		display: block;
+		img {
+			max-width: 100%;
+			max-height: 100%;
+		}
+	}
+	.in-sousuo {
+		width: 550px;
+		padding: 16px 0;
+		.sousuo-box {
+			width: 100%;
+			height: 36px;
+			border: 2px solid $base-color;
+			box-sizing: border-box;
+			.el-dropdown {
+				padding: 0 10px;
+				cursor: pointer;
+				&::after {
+					content: '';
+					border-left: 1px solid #cfcfcf;
+					margin-left: 5px;
+				}
+			}
+			input {
+				width: 380px;
+				height: 22px;
+				background: none;
+				outline: none;
+				border: none;
+				margin: 4px;
+			}
+			button {
+				border-radius: 0;
+				float: right;
+			}
+		}
+		
+	}
+	.cart-wrap {
+		position: relative;
+		float: right;
+
+		.cart {
+			margin-top: 15px;
+			width: 95px;
+			height: 36px;
+			padding: 0 28px 0 19px;
+			border: 1px solid #dfdfdf;
+			color: $base-color;
+			font-size: $ns-font-size-sm;
+			display: block;
+			position: absolute;
+			right: 0;
+			z-index: 101;
+			span {
+				cursor: pointer;
+				line-height: 38px;
+				margin-right: 10px;
+			}
+		}
+		&:hover {
+			.cart {
+				border-bottom: 1px solid #ffffff;
+			}
+		}
+	}
+}

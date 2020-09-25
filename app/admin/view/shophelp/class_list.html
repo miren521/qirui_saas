@@ -1,0 +1,122 @@
+{extend name="base"/}
+{block name="resources"}
+{/block}
+{block name="main"}
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+	<button class="layui-btn ns-bg-color" onclick="add()">添加帮助分类</button>
+
+	<div class="layui-form">
+		<div class="layui-input-inline">
+			<input type="text" name="search_text" placeholder="请输入类型名称" autocomplete="off" class="layui-input">
+			<button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+				<i class="layui-icon">&#xe615;</i>
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- 列表 -->
+<table id="type_list" lay-filter="type_list"></table>
+
+<!-- 操作 -->
+<script type="text/html" id="action">
+	<div class="ns-table-btn">
+		<a class="layui-btn" lay-event="edit">编辑</a>
+		<a class="layui-btn" lay-event="delete">删除</a>
+	</div>
+</script>
+{/block}
+{block name="script"}
+<script>
+	layui.use(['form'], function() {
+		var table,
+			form = layui.form,
+			repeat_flag = false;//防重复标识
+		
+		table = new Table({
+			elem: '#type_list',
+			url: ns.url("admin/shophelp/classList"),
+			cols: [
+				[{
+					field: 'class_name',
+					title: '分类名称',
+					width: '50%',
+					unresize: 'false'
+				}, {
+					field: 'sort',
+					title: '排序',
+					width: '35%',
+					unresize: 'false'
+				}, {
+					title: '操作',
+					width: '15%',
+					toolbar: '#action',
+					unresize: 'false'
+				}]
+			],
+		});
+		
+		/**
+		 * 搜索功能
+		 */
+		form.on('submit(search)', function(data) {
+			table.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+		
+		/**
+		 * 监听工具栏操作
+		 */
+		table.tool(function(obj) {
+			var data = obj.data;
+			switch (obj.event) {
+				case 'edit': //编辑
+					location.href = ns.url("admin/shophelp/editClass?class_id=" + data.class_id);
+					break;
+				case 'delete': //删除
+					deleteUser(data.class_id);
+					break;
+			}
+		});
+		
+		/**
+		 * 删除
+		 */
+		function deleteUser(class_id) {
+			if (repeat_flag) return false;
+			repeat_flag = true;
+		
+			layer.confirm('确定要删除该帮助类型吗?', function() {
+				$.ajax({
+					url: ns.url("admin/shophelp/deleteClass"),
+					data: {
+						class_id: class_id
+					},
+					dataType: 'JSON',
+					type: 'POST',
+					success: function(res) {
+						layer.msg(res.message);
+						repeat_flag = false;
+		
+						if (res.code == 0) {
+							table.reload();
+						}
+					}
+				});
+			}, function () {
+				layer.close();
+				repeat_flag = false;
+			});
+		}
+	});
+	
+	function add() {
+		location.href = ns.url("admin/shophelp/addClass");
+	}
+</script>
+{/block}

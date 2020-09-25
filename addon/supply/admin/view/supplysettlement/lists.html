@@ -1,0 +1,243 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+    .ns-card-brief:nth-child(1){margin-top:0}
+    .layui-card-body{display:flex;flex-wrap:wrap;padding-bottom:0!important;padding-left:50px!important;padding-right:50px!important}
+    .layui-card-body .content{width:33.3%;margin-bottom:30px;display:flex;flex-wrap:wrap;flex-direction:column;justify-content:center}
+    .layui-card-body .money{font-size:20px;color:#000;font-weight:700;margin-top:10px;max-width:250px}
+    .layui-card-body .subhead{font-size:12px;margin-left:3px;cursor:pointer}
+</style>
+{/block}
+{block name="main"}
+
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <div>
+            <span class="ns-card-title">供应商结算</span>
+        </div>
+    </div>
+    <div class="layui-card-body">
+        <div class="content">
+            <div class="title ns-prompt-block">
+                供应商结算金额（元）
+                <div class="ns-prompt">
+                    <i class="iconfont iconwenhao1"></i>
+                    <div class="ns-prompt-box">
+                        <div class="ns-prompt-con">
+                            供应商结算金额是平台按周期结算供应商订单金额后，扣除抽成后的供应商收入部分
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="money">{$supply_settlement}</p>
+        </div>
+        <div class="content">
+            <p class="title">平台总抽成（元）</p>
+            <p class="money">{$platform_money}</p>
+        </div>
+
+
+    </div>
+</div>
+
+<!-- 搜索框 -->
+<div class="ns-single-filter-box">
+    <div class="layui-form">
+        <div class="layui-inline">
+            <div class="layui-input-inline">
+                <label class="layui-form-label">账期截止时间：</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" placeholder="开始时间" name="start_date" id="start_time"
+                           autocomplete="off" readonly>
+                </div>
+                <div class="layui-input-inline end-item">
+                    <input type="text" class="layui-input" placeholder="结束时间" name="end_date" id="end_time"
+                           autocomplete="off" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="layui-input-inline">
+            <button type="button" class="layui-btn layui-btn-primary" lay-filter="search" lay-submit>
+                <i class="layui-icon">&#xe615;</i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 列表 -->
+<table id="period_account_list" lay-filter="period_account_list"></table>
+
+<!--账期开始时间-->
+<script type="text/html" id="start_times">
+    <div class="layui-elip">
+        {{# if(d.period_start_time == 0){ }}
+        --
+        {{# } else { }}
+        {{ns.time_to_date(d.period_start_time)}}
+        {{# } }}
+    </div>
+</script>
+
+<!--账期结束时间-->
+<script type="text/html" id="end_times">
+    <div class="layui-elip">{{ns.time_to_date(d.period_end_time)}}</div>
+</script>
+
+<!--创建时间-->
+<script type="text/html" id="times">
+    <div class="layui-elip">{{ns.time_to_date(d.create_time)}}</div>
+</script>
+
+<!--供应商金额-->
+<script type="text/html" id="supply_money">
+    <div class="layui-elip" style="color: green">￥{{d.real_supply_money}}</div>
+</script>
+
+<!--平台抽成-->
+<script type="text/html" id="platform_money">
+    <div class="layui-elip" style="color: red">￥{{d.real_money}}</div>
+</script>
+<!--分站抽成-->
+<script type="text/html" id="website_money">
+    <div class="layui-elip" style="color: red">￥{{d.website_commission}}</div>
+</script>
+<!--操作-->
+<script type="text/html" id="operation">
+    <div class="ns-table-btn">
+        <a class="layui-btn" lay-event="basic">查看</a>
+    </div>
+</script>
+{/block}
+
+{block name="script"}
+<script>
+    layui.use(['form', 'laydate'], function () {
+        var table,
+            form = layui.form,
+            laydate = layui.laydate,
+            currentDate = new Date(),
+            minDate = "";
+        form.render();
+
+        currentDate.setDate(currentDate.getDate() - 7);
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time',
+            type: 'datetime'
+        });
+
+        //结束时间
+        laydate.render({
+            elem: '#end_time',
+            type: 'datetime'
+        });
+
+        /**
+         * 重新渲染结束时间
+         */
+        function reRender() {
+            $("#end_time").remove();
+            $(".end-time").html('<input type="text" class="layui-input" placeholder="申请结束时间" name="end_date" id="end_time" >');
+            laydate.render({
+                elem: '#end_time',
+                type: 'datetime',
+                min: minDate
+            });
+        }
+
+        /**
+         * 表格加载
+         */
+        table = new Table({
+            elem: '#period_account_list',
+            url: ns.url("supply://admin/supplysettlement/lists"),
+            cols: [
+                [{
+                    field: 'period_no',
+                    title: '账单编号',
+                    unresize: 'false',
+                    width: '10%',
+                    templet: function (data) {
+                        return '<span title="' + data.period_no + '">' + data.period_no + '</span>';
+                    }
+                }, {
+                    field: 'supply_num',
+                    title: '供应商数',
+                    unresize: 'false',
+                    width: '6%',
+                    align: 'right',
+                }, {
+                    field: 'order_money',
+                    title: '订单总额',
+                    unresize: 'false',
+                    width: '10%',
+                    align: 'right',
+                    templet: function (data) {
+                        return '￥' + data.order_money;
+                    }
+                }, {
+                    title: '供应商结算金额',
+                    unresize: 'false',
+                    templet: '#supply_money',
+                    width: '8%',
+                    align: 'right'
+                }, {
+                    title: '平台总抽成',
+                    unresize: 'false',
+                    templet: '#platform_money',
+                    width: '8%',
+                    align: 'right',
+                }, {
+                    title: '账期开始时间',
+                    unresize: 'false',
+                    templet: '#start_times',
+                    width: '14%',
+                }, {
+                    title: '账期截止时间',
+                    unresize: 'false',
+                    templet: '#end_times',
+                    width: '14%',
+                }, {
+                    title: '结算时间',
+                    unresize: 'false',
+                    templet: '#times',
+                    width: '15%',
+                }, {
+                    title: '操作',
+                    toolbar: '#operation',
+                    unresize: 'false',
+                    width: '7%',
+                }]
+            ]
+        });
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(search)', function (data) {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+            return false;
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        table.tool(function (obj) {
+            var data = obj.data,
+                event = obj.event;
+
+            switch (obj.event) {
+                case 'basic': //查看
+                    location.href = ns.url("supply://admin/supplysettlement/detail?period_id=" + data.period_id)
+                    break;
+            }
+        })
+    });
+</script>
+{/block}

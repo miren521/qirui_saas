@@ -1,0 +1,225 @@
+html, body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	min-width: 1000px;
+}
+
+.layui-layout-admin {
+	height: 100%;
+}
+
+/* 顶部 */
+.layui-layout-admin .layui-header {
+	height: 80px;
+	line-height: 80px;
+}
+
+.layui-layout-admin .layui-logo {
+	width: 500px;
+	padding-left: 46px;
+	text-align: left;
+	line-height: 80px;
+	display: flex;
+	align-items: center;
+}
+
+.ns-login-font {
+	color: #5D5D5D;
+	margin-left: 6px;
+}
+
+.ns-login-split {
+	width: 1px;
+	height: 15px;
+	line-height: 12px;
+	color: #5D5D5D;
+	margin-left: 12px;
+	margin-right: 12px;
+}
+
+.ns-login-desc {
+	font-size: 14px;
+}
+
+.layui-header .layui-layout-right {
+	height: 80px;
+}
+
+.layui-header .layui-layout-right li {
+	height: 80px;
+	line-height: 80px;
+}
+
+.layui-header .layui-nav .layui-nav-item a {
+	color: #5D5D5D;
+}
+
+/* 底部 */
+.ns-login-bottom {
+	width: 100%;
+	height: 80px;
+	line-height: 80px;
+	text-align: center;
+	color: #999999;
+	position: absolute;
+	bottom: 0;
+}
+
+/* 中间 */
+.ns-login-middel {
+	width: 100%;
+	height: calc(100% - 161px);
+	position: relative;
+}
+
+.ns-login-box {
+	width: 100%;
+	height: 462px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.ns-login-banner {
+	width: 350px;
+	text-align: center;
+}
+
+.ns-login-banner img {
+	height: 300px;
+}
+
+.ns-login-banner p {
+	font-size: 14px;
+	color: #3E3E3E;
+	margin-top: 24px;
+	line-height: 30px;
+}
+
+.layui-carousel {
+	background-color: #FFFFFF;
+	height: 420px!important;
+}
+
+.layui-carousel>[carousel-item]>* {
+	background-color: #FFFFFF;
+}
+
+.layui-carousel-ind {
+	top: -20px;
+}
+
+.layui-carousel-ind ul, .layui-carousel-ind ul:hover {
+	background-color: transparent;
+}
+
+.layui-carousel-ind li {
+	background-color: rgba(234, 239, 244, 1);
+}
+
+.layui-carousel-ind li.layui-this {
+	background-color: rgba(39, 171, 255, 1);;
+}
+
+/* 分割线 */
+.ns-login-mid {
+	width: 1px;
+	height: 100%;
+	background-color: #F3F3F3;
+	margin-left: 96px;
+	margin-right: 96px;
+}
+
+/* 表单 */
+.login-form {
+	display: inline-block;
+	width: 350px;
+	box-sizing: border-box;
+	background-color: rgba(255, 255, 255, .15);
+	position: relative;
+	
+}
+
+.login-form h1 {
+	font-size: 30px;
+	text-align: center;
+	color: #555555;
+	margin-bottom: 44px;
+}
+
+.layui-form-item {
+	margin: 0 auto;
+	width: 100%;
+	height: 48px;
+	margin-bottom: 32px;
+	position: relative;
+}
+
+.ns-login-btn {
+	margin-top: 35px;
+	margin-bottom: 0;
+}
+
+.layui-form-item>input {
+	width: 100%;
+	height: 48px;
+	border-radius: 5px;
+	padding-left: 50px;
+	box-sizing: border-box;
+	border-color: #CCCCCC;
+}
+
+input:-webkit-autofill {
+	transition: background-color 9999s ease-in-out 0s;
+	-webkit-transition-delay: 9999s;
+}
+
+.ns-input-icon {
+	position: absolute;
+	top: 10px;
+	left: 11px;
+}
+
+.layui-form-forget {
+	display: block;
+	margin: 0 auto;
+	width: 80%;
+	text-align: right;
+	font-size: 13px;
+	color: #C2C2C2;
+	margin-top: 10px;
+}
+
+.layui-btn {
+	height: 50px;
+	border-radius: 3px;
+	font-size: 16px;
+	box-shadow: 0 0 10px 3px rgba(255, 255, 255, .15);
+}
+
+/* 验证码 */
+.verify-code-box input {
+	padding-left: 20px;
+}
+
+.verify-code-img {
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 120px;
+	height: 48px;
+	line-height: 46px;
+	overflow: hidden;
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+}
+
+.verify-code-box .verify-code-img {
+	text-align: right;
+	padding-right: 2px;
+}

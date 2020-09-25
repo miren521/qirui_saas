@@ -1,0 +1,226 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+    .ns-form-row{margin-top: 0;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-form ns-form">
+    <!-- 基础上传 -->
+    <div class="layui-card ns-card-common ns-card-brief">
+        <div class="layui-card-header">
+            <span class="ns-card-title">分销设置</span>
+        </div>
+        <div class="layui-card-body">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">是否开启分销：</label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline">
+                        <input type="radio" name="level_config" value="0" lay-filter="open_distribution" title="关闭" {if $basics_info.level == 0} checked {/if}/>
+                        <input type="radio" name="level_config" value="1" lay-filter="open_distribution" title="开启" {if $basics_info.level > 0} checked {/if}/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item distribution-index {if $basics_info.level == 0}layui-hide{/if}">
+                <label class="layui-form-label">分销层级：</label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline">
+                        <input type="radio" name="level" value="1" title="一级分销" {if $basics_info.level == 1 || $basics_info.level == 0} checked {/if}/>
+                        <input type="radio" name="level" value="2" title="二级分销" {if $basics_info.level == 2} checked {/if}/>
+                        <input type="radio" name="level" value="3" title="三级分销" {if $basics_info.level == 3} checked {/if}/>
+                    </div>
+                </div>
+                <div class="ns-word-aux ">默认佣金比例请到分销商等级进行设置</div>
+            </div>
+            <div class="layui-form-item distribution-index {if $basics_info.level == 0}layui-hide{/if}">
+                <label class="layui-form-label">是否需要审核：</label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline">
+                        <input type="radio" name="is_examine" value="1" lay-filter="level" title="开启" {if $basics_info.is_examine == 1} checked {/if}/>
+                        <input type="radio" name="is_examine" value="0" lay-filter="level" title="关闭" {if $basics_info.is_examine != 1} checked {/if}/>
+                    </div>
+                </div>
+                <div class="ns-word-aux ">开启后，分销商申请需要后台审核</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="layui-card ns-card-common ns-card-brief distribution-index {if $basics_info.level == 0}layui-hide{/if}">
+        <div class="layui-card-header">
+            <span class="ns-card-title">分销商资格</span>
+        </div>
+        <div class="layui-card-body">
+
+            <div class="layui-form-item distributor">
+                <label class="layui-form-label">成为分销商条件：</label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline">
+                        <input type="radio" name="fenxiao_condition" value="0" lay-filter="fenxiao_condition" title="无条件" {if $fenxiao_info.fenxiao_condition == 0} checked {/if}/>
+                        <input type="radio" name="fenxiao_condition" value="1" lay-filter="fenxiao_condition" title="申请" {if $fenxiao_info.fenxiao_condition == 1} checked {/if}/>
+                        <input type="radio" name="fenxiao_condition" value="2" lay-filter="fenxiao_condition" title="消费次数" {if $fenxiao_info.fenxiao_condition == 2} checked {/if}/>
+                        <input type="radio" name="fenxiao_condition" value="3" lay-filter="fenxiao_condition" title="消费金额" {if $fenxiao_info.fenxiao_condition == 3} checked {/if}/>
+                    </div>
+                </div>
+                <div class="ns-word-aux"></div>
+            </div>
+
+            <div class="layui-form-item layui-hide consume_count">
+                <label class="layui-form-label">累计消费次数：</label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline">
+                        <input type="number" name="consume_count" value="{$fenxiao_info.consume_count}" autocomplete="off" class="layui-input ns-len-small">
+                    </div>
+                    <div class="layui-form-mid">次</div>
+                </div>
+            </div>
+
+            <div class="layui-form-item layui-hide consume_money">
+                <label class="layui-form-label">累计消费金额：</label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline">
+                        <input type="number" name="consume_money" value="{$fenxiao_info.consume_money}" autocomplete="off" class="layui-input ns-len-small">
+                    </div>
+                    <div class="layui-form-mid">元</div>
+                </div>
+            </div>
+
+            <div class="layui-form-item  layui-hide consume_condition">
+                <label class="layui-form-label">消费条件：</label>
+                <div class="layui-input-block">
+                    <div class="layui-input-inline">
+                        <input type="radio" name="consume_condition" value="1" lay-filter="level" title="付款后" checked/>
+                        <input type="radio" name="consume_condition" value="2" lay-filter="level" title="订单完成" {if $fenxiao_info.consume_condition == 2} checked {/if}/>
+                    </div>
+                </div>
+                <div class="ns-word-aux">默认佣金比例请到分销商等级进行设置</div>
+            </div>
+
+            <!--<div class="layui-form-item">-->
+                <!--<label class="layui-form-label">完善资料：</label>-->
+                <!--<div class="layui-input-block">-->
+                    <!--<div class="layui-input-inline">-->
+                        <!--<input type="radio" name="perfect_info" value="1" lay-filter="level" title="需要" {if $fenxiao_info.perfect_info == 1} checked {/if}/>-->
+                        <!--<input type="radio" name="perfect_info" value="0" lay-filter="level" title="不需要" {if $fenxiao_info.perfect_info != 1} checked {/if}/>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+			
+        </div>
+    </div>
+    
+    <div class="layui-card ns-card-common ns-card-brief" style="margin-top: 0;">
+        <div class="layui-card-body" style="padding-top: 0;">
+            <div class="ns-form-row">
+                <button class="layui-btn ns-bg-color" lay-submit lay-filter="save">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!--<div class="layui-card ns-card-common ns-card-brief">-->
+        <!--<div class="layui-card-header">-->
+            <!--<span class="ns-card-title">上下线关系</span>-->
+        <!--</div>-->
+        <!--<div class="layui-card-body">-->
+
+            <!--<div class="layui-form-item">-->
+                <!--<label class="layui-form-label">成为下线条件：</label>-->
+                <!--<div class="layui-input-block">-->
+                    <!--<div class="layui-input-inline">-->
+                        <!--<input type="radio" name="child_condition" value="1" lay-filter="child_condition" title="首次点击分享链接" checked />-->
+                        <!--<input type="radio" name="child_condition" value="2" lay-filter="child_condition" title="首次下单" {if $relation_info.child_condition == 2} checked {/if}/>-->
+                        <!--<input type="radio" name="child_condition" value="3" lay-filter="child_condition" title="首次付款" {if $relation_info.child_condition == 3} checked {/if}/>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+
+        <!--</div>-->
+    <!--</div>-->
+
+    
+</div>
+{/block}
+{block name="script"}
+<script>
+    layui.use(['form'], function() {
+        var form = layui.form,
+            openDistribution = "{$basics_info.level}",
+            repeat_flag = false; //防重复标识
+        form.render();
+
+        form.on('submit(save)', function(data) {
+            if (repeat_flag) return;
+            repeat_flag = true;
+            if(!parseInt(openDistribution)){
+                data.field.level = data.field.level_config;
+            }
+
+            $.ajax({
+                type: 'POST',
+                dataType: 'JSON',
+                url: ns.url("fenxiao://admin/config/basics"),
+                data: data.field,
+                success: function(res) {
+                    layer.msg(res.message);
+					repeat_flag = false;
+                    if (res.code == 0) {
+                        location.reload();
+                    }
+                }
+            });
+        });
+
+        form.on('radio(open_distribution)', function(data){
+            openDistribution = data.value;
+            if (!parseInt(openDistribution)){
+                $(".distribution-index").addClass('layui-hide');
+                return false;
+            }
+            $(".distribution-index").removeClass('layui-hide');
+        });
+
+        //监听成为分销商条件选择
+        form.on('radio(fenxiao_condition)', function(data){
+            var value = data.value;
+            distributionConditions(value);
+        });
+        
+        distributionConditions("{$fenxiao_info.fenxiao_condition}");
+        function distributionConditions (value){
+            value = parseInt(value);
+
+            $('.consume_count').addClass("layui-hide");
+            $('.consume_money').addClass("layui-hide");
+            $('.consume_condition').addClass("layui-hide");
+            $('.apply').addClass("layui-hide");
+
+            //无条件
+            if(value == 0){
+                $(".distributor .ns-word-aux").text("默认成为分销商");
+            }
+            //申请
+            if(value == 1){
+                $('.apply').removeClass("layui-hide");
+                $(".distributor .ns-word-aux").text("需申请通过，才可以成为分销商");
+            }
+            //消费次数
+            if(value == 2){
+                $('.consume_count').removeClass("layui-hide");
+                $('.consume_condition').removeClass("layui-hide");
+
+                $(".distributor .ns-word-aux").text("当消费次数达到一定数量并申请通过才可以成为分销商");
+            }
+            //消费金额
+            if(value == 3){
+                $('.consume_money').removeClass("layui-hide");
+                $('.consume_condition').removeClass("layui-hide");
+
+                $(".distributor .ns-word-aux").text("当消费金额达到一定数量并申请通过才可以成为分销商");
+            }
+        }
+        
+    });
+</script>
+{/block}

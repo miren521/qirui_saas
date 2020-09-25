@@ -1,0 +1,155 @@
+{extend name="base"/}
+{block name="resources"}
+<link rel="stylesheet" type="text/css" href="SHOP_CSS/express_company.css" />
+<style>
+	.ns-border-color-gray {border-color: #DDDDDD !important;}
+</style>
+{/block}
+{block name="main"}
+<div class="layui-collapse ns-tips">
+	<div class="layui-colla-item">
+		<h2 class="layui-colla-title">操作提示</h2>
+		<ul class="layui-colla-content layui-show">
+			<li>物流公司列表：<br />1、已添加的物流公司：为商家选择的物流公司，商家发货时可供选择<br />2、可添加的物流公司：为平台端提供的物流公司列表中尚未被该商家所选择的物流公司</li>
+			<li>鼠标悬浮于可添加的物流公司之上时，会出现添加操作，点击添加可跳转到添加对应的打印模板界面，添加成功后可在已添加的物流公司列表中展示出来</li>
+			<li>已添加的物流公司可进行编辑打印模板和取消操作，取消后客户不可选择该物流公司</li>
+		</ul>
+	</div>
+</div>
+
+<fieldset class="layui-elem-field layui-field-title">
+	<legend>已添加的物流公司</legend>
+	<div class="layui-field-box shop-express-list">
+		{foreach $company_shop_list as $company_shop_list_k => $company_shop_list_v}
+		<div class="express-company-block ns-border-color-gray">
+			<div class="express-company-top">
+				<img src="{:img($company_shop_list_v.logo)}" />
+			</div>
+			<div class="express-company-bottom">
+				<div class="express-company-name" title="{$company_shop_list_v.company_name}">{$company_shop_list_v.company_name}</div>
+				<div class="express-company-operation">
+					<input type="hidden" value="{$company_shop_list_v.company_id}" class="company-id" />
+					<input type="hidden" value="{$company_shop_list_v.id}" class="id" />
+					<a class="layui-btn ns-text-color" lay-event="edit">编辑</a>
+					<a class="layui-btn ns-text-color" lay-event="del">删除</a>
+				</div>
+			</div>
+		</div>
+		{/foreach}
+	</div>
+</fieldset>
+
+<fieldset class="layui-elem-field layui-field-title">
+	<legend>可添加的物流公司</legend>
+	<div class="layui-field-box">
+		{foreach $company_list as $company_list_k => $company_list_v}
+		<div class="express-company-block ns-border-color-gray">
+			<div class="express-company-top">
+				<img src="{:img($company_list_v.logo)}" />
+			</div>
+			<div class="express-company-box">
+				<div class="express-company-name" title="{$company_list_v.company_name}">{$company_list_v.company_name}</div>
+			</div>
+			
+			<div class="express-company-shade">
+				<input type="hidden" value="{$company_list_v.company_id}" id="company_id" />
+				<div class="express-company-img"><i class="iconfont iconincrease" onclick="addCompany(this)"></i></div>
+				<div class="express-company-name-box">
+					<div class="express-company-name" title="{$company_list_v.company_name}">{$company_list_v.company_name}</div>
+				</div>
+			</div>
+		</div>
+		{/foreach}
+	</div>
+</fieldset>
+{/block}
+{block name="script"}
+<script>
+	var repeat_flag = false; //防重复标识
+	
+	$(function () {
+		$(".express-company-block").hover(function () {
+			$(this).find(".express-company-shade").show();
+			$(this).find(".express-company-box .express-company-name").hide();
+		}, function () {
+			$(this).find(".express-company-shade").hide();
+			$(this).find(".express-company-box .express-company-name").show();
+		});
+		
+	});
+	
+	function addCompany(e) {
+		if (repeat_flag) return false;
+		repeat_flag = true;
+		var _this = e;
+		var company_id = $(_this).parents(".express-company-shade").find("#company_id").val();
+
+		// layer.confirm('确定要添加该物流公司吗?', function() {
+			$.ajax({
+				url: ns.url("shop/express/addExpressCompanyShop"),
+				data: {
+					'company_id': company_id,
+				},
+				dataType: 'JSON',
+				type: 'POST',
+				success: function(res) {
+					layer.msg(res.message);
+					repeat_flag = false;
+
+					if (res.code == 0) {
+						location.reload();
+					}
+				}
+			});
+		// }, function() {
+		// 	layer.close();
+		// 	repeat_flag = false;
+		// });
+	}
+	
+	$(".layui-btn").click(function () {
+		var lay_event = $(this).attr("lay-event");
+		var company_id = $(this).siblings(".company-id").val();
+		var id = $(this).siblings(".id").val();
+		console.log(id);
+		
+		switch (lay_event){
+			case 'edit':
+				location.href = ns.url("shop/express/editPrintTemplate", {"company_id": company_id, "id": id});
+				break;
+			case 'del':
+				delTemplet(id, company_id);
+				break;
+		}
+	});
+	
+	function delTemplet(id, company_id) {
+		if (repeat_flag) return false;
+		repeat_flag = true;
+		
+		layer.confirm('确定要删除吗?', function() {
+			$.ajax({
+				url: ns.url("shop/express/closeCompany"),
+				data: {
+					'company_id': company_id,
+					'id': id
+				},
+				dataType: 'JSON',
+				type: 'POST',
+				success: function(res) {
+					layer.msg(res.message);
+					repeat_flag = false;
+					
+					if (res.code == 0) {
+						location.reload();
+					}
+				}
+			});
+		}, function() {
+			layer.close();
+			repeat_flag = false;
+		});
+	}
+	
+</script>
+{/block}

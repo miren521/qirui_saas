@@ -1,0 +1,421 @@
+{extend name="app/admin/view/base.html"/}
+{block name="resources"}
+<style>
+    .ns-card-brief:nth-child(1){
+        margin-top: 0;
+    }
+    .layui-card-body{
+        display: flex;
+        flex-wrap: wrap;
+        padding-bottom: 0;
+    }
+    .layui-card-body .content{
+        width: 25%;
+        margin-bottom: 20px;
+    }
+    .layui-card-body .money{
+        font-size: 20px;
+        color: #000;
+        font-weight: bold;
+        margin-top: 10px;
+        max-width: 250px;
+    }
+    .layui-card-body .subhead{
+        font-size: 12px;
+        margin-left: 3px;
+        cursor: pointer;
+    }
+</style>
+{/block}
+{block name="main"}
+<div class="layui-card ns-card-common ns-card-brief">
+    <div class="layui-card-header">
+        <div>
+            <span class="ns-card-title">资产概况</span>
+        </div>
+    </div>
+    <div class="layui-card-body">
+        <div class="content">
+            <p class="title">可用余额（元）</p>
+            <p class="money">{$account}</p>
+        </div>
+        <div class="content">
+            <p class="title">已提现（元）/ 提现中（元）</p>
+            <p class="money">{$account_info.account_withdraw} / {$account_info.account_withdraw_apply}</p>
+        </div>
+        <div class="content">
+            <p class="title">入驻费用（元）</p>
+            <p class="money">{$account_info.open_fee}</p>
+        </div>
+        <div class="content">
+            <p class="title">保证金（元）</p>
+            <p class="money">{$account_info.bond}</p>
+        </div>
+    </div>
+</div>
+
+<div class="layui-tab ns-table-tab" lay-filter="edit_user_tab">
+	<ul class="layui-tab-title">
+		<li class="layui-this" lay-id="account">账户收支</li>
+		<li lay-id="account_withdraw">提现记录</li>
+	</ul>
+	<div class="layui-tab-content">
+
+        <!--账户支出-->
+		<div class="layui-tab-item layui-show" lay-filter="account_list_tab">
+
+			<table id="account_list"></table>
+		</div>
+
+        <!--提现记录-->
+        <div class="layui-tab-item " lay-filter="withdraw_list_tab">
+
+            <table id="supply_withdraw_list"></table>
+        </div>
+
+        <!--待结算订单-->
+        <div class="layui-tab-item" lay-filter="order_list_tab">
+            <table id="order_list"></table>
+        </div>
+
+	</div>
+</div>
+<input id="site_id" type="hidden" value="{$account_info.supplier_site_id}" />
+
+<!--商家信息-->
+<script type="text/html" id="supply_info">
+    <div class="layui-elip">供应商名称：{{d.site_name}}</div>
+    <div class="layui-elip">联系人：{{d.name}}</div>
+    <div class="layui-elip">联系电话：{{d.mobile}}</div>
+</script>
+
+<!--账户信息-->
+<script type="text/html" id="account">
+    {{# if(d.bank_type == 1){ }}
+    <div class="layui-elip">账户类型：银行卡</div>
+    <div class="layui-elip">账户名称：{{d.settlement_bank_name}}</div>
+    <div class="layui-elip">提现账号：{{d.settlement_bank_account_number}}</div>
+    <div class="layui-elip">开户名：{{d.settlement_bank_account_name}}</div>
+    {{# }else{ }}
+    <div class="layui-elip">账户类型：支付宝</div>
+    <div class="layui-elip">支付宝用户名：{{d.settlement_bank_account_name}}</div>
+    <div class="layui-elip">支付宝账号：{{d.settlement_bank_account_number}}</div>
+    {{# } }}
+
+</script>
+
+<!--时间-->
+<script type="text/html" id="times">
+    <div class="layui-elip">申请时间：{{ns.time_to_date(d.apply_time)}}</div>
+    <div class="layui-elip">转账时间：{{ns.time_to_date(d.payment_time)}}</div>
+</script>
+
+<!--状态-->
+<script type="text/html" id="status">
+    {{# if(d.status == 0){ }}
+    <div class="layui-elip">待审核</div>
+    {{# }else if(d.status == 1){ }}
+    <div class="layui-elip">待转账</div>
+    {{# }else if(d.status == 2){ }}
+    <div class="layui-elip">已转账</div>
+    {{# }else if(d.status == -1){ }}
+    <div class="layui-elip">已拒绝</div>
+    {{# } }}
+</script>
+
+{/block}
+{block name="script"}
+<script>
+	layui.use(['element','form','laydate'], function() {
+		var tableAccount,
+			tableOrderCalc,
+			tableAccountWithdraw,
+            element = layui.element,
+            laydate = layui.laydate,
+			form = layui.form;
+        form.render();
+
+
+        //开始时间
+        laydate.render({
+            elem: '#start_time' //指定元素
+            ,done: function(value, date, endDate){
+                start_time = ns.date_to_time(value);
+
+            }
+        });
+        //结束时间
+        laydate.render({
+            elem: '#end_time' //指定元素
+            ,done: function(value, date, endDate){
+                end_time = ns.date_to_time(value);
+            }
+        });
+        //开始时间
+        laydate.render({
+            elem: '#start_time1' //指定元素
+            ,done: function(value, date, endDate){
+                start_time = ns.date_to_time(value);
+
+            }
+        });
+        //结束时间
+        laydate.render({
+            elem: '#end_time1' //指定元素
+            ,done: function(value, date, endDate){
+                end_time = ns.date_to_time(value);
+            }
+        });
+        //开始时间
+        laydate.render({
+            elem: '#start_time2' //指定元素
+            ,done: function(value, date, endDate){
+                start_time = ns.date_to_time(value);
+
+            }
+        });
+        //结束时间
+        laydate.render({
+            elem: '#end_time2' //指定元素
+            ,done: function(value, date, endDate){
+                end_time = ns.date_to_time(value);
+            }
+        });
+        /****************************************** 账户收支开始 **************************************/
+
+        //监听Tab切换，以改变地址hash值
+        element.on('tab(account_list_tab)', function () {
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: {
+                    'type': this.getAttribute('data-status')
+                }
+            });
+        });
+
+        /**
+         * 搜索功能
+         */
+        form.on('submit(account_search)', function (data) {
+            data.field.start_time = start_time;
+            data.field.end_time = end_time;
+            table.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+            return false;
+        });
+
+		tableAccount = new Table({
+			elem: '#account_list',
+			url: ns.url("supply://admin/supplyaccount/getsupplyaccount"),
+			where: {
+				"site_id": $("#site_id").val()
+			},
+			cols: [
+                [{
+                    field: 'account_no',
+                    title: '账单编号',
+                    unresize: 'false',
+                },{
+                    field: 'type_name',
+                    title: '收支来源',
+                    unresize: 'false',
+
+                },{
+                    field: 'account_data',
+                    title: '金额（元）',
+                    unresize: 'false',
+
+                }, {
+                    title: '收支类型',
+                    unresize: 'false',
+
+                    templet: function (res){
+                        return res.account_data >= 0 ? "收入" : "支出";
+                    }
+                }, {
+                    field: 'create_time',
+                    title: '时间',
+                    unresize: 'false',
+
+                    templet: function (res){
+                        if(res.create_time == 0){
+                            return '--';
+                        }else{
+                            return ns.time_to_date(res.create_time)
+                        }
+                    }
+                }, {
+                    field: 'remark',
+                    title: '说明',
+                    unresize: 'false'
+                }]
+			]
+		});
+		/***********************************************账户收支结束*******************************/
+
+        /***********************************************待结算订单开始*******************************/
+		tableOrderCalc = new Table({
+			elem: '#order_list',
+			url: ns.url("supply://admin/supplier/getordercalc"),
+			where: {
+				"site_id": $("#site_id").val()
+			},
+			cols: [
+                [{
+                    field: 'order_no',
+                    title: '订单编号',
+                    unresize: 'false',
+
+                }, {
+                    field:'order_money',
+                    title: '订单金额（元）',
+                    unresize: 'false',
+
+                }, {
+                    field:'refund_money',
+                    title: '退款金额（元）',
+                    unresize: 'false',
+
+                }, {
+                    field:'supply_money',
+                    title: '供应商金额（元）',
+                    unresize: 'false',
+
+                }, {
+                    field:'platform_money',
+                    title: '平台抽成（元）',
+                    unresize: 'false',
+
+                }, {
+                    title: '状态',
+                    unresize: 'false',
+                    templet: function (res){
+                        var str = '';
+                        if(res.order_status != 0 && res.order_status != -1 && res.order_status != 10){
+                            str = '进行中';
+                        }else if(res.order_status == 10 && res.settlement_id == 0){
+                            str = '待结算';
+                        }else if(res.order_status == 10 && res.settlement_id != 0){
+                            str = '已结算';
+                        }
+                        return str;
+                    }
+                }, {
+                    field: 'finish_time',
+                    title: '完成时间',
+                    unresize: 'false',
+                    templet: function (res){
+                        if(res.finish_time == 0){
+                            return '--';
+                        }else{
+                            return ns.time_to_date(res.finish_time)
+                        }
+
+                    }
+                }]
+			]
+		});
+
+        /***********************************************待结算订单结束*******************************/
+
+
+        /***********************************************提现记录开始*******************************/
+		tableAccountWithdraw = new Table({
+            elem: '#supply_withdraw_list',
+            url: ns.url("supply://admin/supplyaccount/withdraw"),
+            where: {
+                "site_id": $("#site_id").val()
+            },
+            cols: [
+                [{
+                    title: '商家信息',
+                    width: '15%',
+                    unresize: 'false',
+                    templet: '#supply_info',
+                }, {
+                    field: 'withdraw_no',
+                    title: '提现流水编号',
+                    width: '10%',
+                    unresize: 'false'
+                }, {
+                    title: '提现账户',
+                    width: '15%',
+                    unresize: 'false',
+                    templet: '#account',
+                }, {
+                    field: 'money',
+                    title: '提现金额',
+                    width: '8%',
+                    unresize: 'false'
+                },{
+                    field: 'status',
+                    title: '状态',
+                    width: '8%',
+                    unresize: 'false',
+                    templet: '#status'
+                },{
+                    title: '时间',
+                    width: '17%',
+                    unresize: 'false',
+                    templet: '#times'
+                }]
+			]
+		});
+
+        /***********************************************提现记录结束*******************************/
+		/**
+		 * 搜索功能
+		 */
+		// 待结算
+		form.on('submit(check)', function(data){
+			tableOrderCalc.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+		
+		// 提现
+		form.on('submit(search)', function(data){
+			tableAccountWithdraw.reload({
+				page: {
+					curr: 1
+				},
+				where: data.field
+			});
+		});
+
+        // 保证金
+        form.on('submit(search_deposit)', function(data){
+            tableDeposit.reload({
+                page: {
+                    curr: 1
+                },
+                where: data.field
+            });
+        });
+
+        /**
+         * 监听工具栏操作
+         */
+        tableOrderCalc.tool(function(obj) {
+            var data = obj.data,
+                event = obj.event;
+            switch (obj.event) {
+                case 'basic': //查看
+                    location.href = ns.url("supply://admin/order/detail?order_id=" + data.order_id);
+                    break;
+            }
+        });
+
+
+	})
+</script>
+{/block}

@@ -1,0 +1,90 @@
+/* 公共*/
+.float-btn .float-btn-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.float-btn .float-btn-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: 10px;
+    width: 50px;
+    height: 50px;
+    box-shadow: 0 0 3px rgba(0, 0, 0, .2);
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.float-btn .float-btn-item .img-box {
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 25px;
+    height: 25px;
+}
+
+.float-btn .float-btn-item .img-box img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.float-btn .float-btn-item span {
+    margin-top: 5px;
+    color: #333;
+    font-size: 12px;
+}
+
+.float-btn .float-btn-list li, .float-btn .float-btn-list .add-item {
+    display: flex;
+    align-items: end;
+    border: 1px dashed #e5e5e5;
+    padding: 10px;
+}
+
+.float-btn .float-btn-list li + li {
+    margin: 10px 0;
+}
+
+.float-btn .float-btn-list li .content-block {
+    width: 71%;
+    display: flex;
+    flex-direction: column;
+}
+
+.float-btn .float-btn-list li .content-block .layui-form-item {
+    margin: 0;
+}
+
+.float-btn .float-btn-list .add-item {
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+    cursor: pointer;
+}
+
+.float-btn .float-btn-list .add-item i {
+    font-weight: bold;
+    display: inline-block;
+    height: 24px;
+    line-height: 24px;
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+.float-btn .float-btn-list .add-item span {
+    display: inline-block;
+    height: 24px;
+    line-height: 24px;
+}
+
+.float-btn .float-btn-list li {
+    position: relative;
+}
+
+.float-btn .float-btn-list li:hover .del {
+    display: block;
+}
