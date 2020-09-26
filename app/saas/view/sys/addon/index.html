@@ -1,0 +1,86 @@
+{include file="common/header"/}
+<div class="lemo-container">
+    <div class="lemo-main">
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>{:lang('addons')}{:lang('list')}</legend>
+        </fieldset>
+
+        <table class="layui-table layui-hide" id="list" lay-filter="list"></table>
+
+    </div>
+</div>
+
+<!--登陆页面-->
+<div style="display: none;padding: 20px" id="login">
+    <blockquote class="layui-elem-quote layui-text">
+        登录提示：账号为 <a  target="_blank" href="https://bbs.lemocms.com">lemocms</a> 官方账号
+    </blockquote>
+    <br>
+    <br>
+    <form class="layui-form layui-form-pane" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">账号<i class="fa fa-user"></i></label>
+            <div class="layui-input-block">
+                <input type="text" class="layui-input" id="inputUsername" value=""
+                       placeholder="{:lang('username or email')}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码<i class="fa fa-lock"></i></label>
+            <div class="layui-input-block">
+                <input type="password" class="layui-input" id="inputPassword" value=""
+                       placeholder="{:lang('Your password')}">
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/html" id="action">
+    {{# if(d.install==1){ }}
+    <a href="javascript:;" class="layui-btn  layui-btn-xs" lay-event="config">{:lang('config')}</a>
+        {{#  if(d.status == 1){ }}
+        <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event='status'>启用</a>
+        {{#  } else { }}
+        <a class="layui-btn layui-btn-xs layui-btn-warm" lay-event='status'>禁用</a>
+        {{#  } }}
+    <a href="javascript:;" class="layui-btn layui-btn-danger layui-btn-xs" lay-event="uninstall">{:lang('uninstall')}</a>
+
+    {{# }else{ }}
+        <a href="javascript:;" class="layui-btn layui-btn-danger layui-btn-xs" lay-event="install">{:lang('install')}</a>
+
+    {{# } }}
+
+    {{# if(d.install==1){ }}
+        {{# if(d.website !=''){ }}
+        <a  href="{{d.website}}"  target="_blank" class="layui-btn  layui-btn-xs">{:lang('demo')}</a>
+        {{# } }}
+    {{# } }}
+</script>
+
+
+<script type="text/html" id="name">
+    {{d.name}}<img src="/static/admin/images/image.gif" onmouseover="layer.tips('<img src={{d.image}}>',this,{tips: [1, '#fff']});" onmouseout="layer.closeAll();">
+</script>
+<script type="text/html" id="create_time">
+    {{layui.util.toDateString(d.create_time*1000, 'yyyy-MM-dd HH:mm:ss')}}
+</script>
+<script type="text/html" id="update_time">
+    {{layui.util.toDateString(d.update_time*1000, 'yyyy-MM-dd HH:mm:ss')}}
+</script>
+
+{include file="common/footer"/}
+<script src="/static/plugins/md5/md5.min.js"></script>
+<script>
+    var data = {};
+    layui.config({
+        base: "/static/admin/js/",
+        version: true
+    }).extend({
+        Addon: "Addon"
+    }).use(['element', 'layer', 'Addon'], function () {
+
+        Addon.init(data);
+
+    });
+
+</script>

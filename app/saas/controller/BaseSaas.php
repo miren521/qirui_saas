@@ -43,22 +43,22 @@ class BaseSaas extends Controller
         $this->checkLogin();
 
         //检测用户组
-        $this->getGroupInfo();
+//        $this->getGroupInfo();
 
-        if (!$this->checkAuth()) {
-            if (!request()->isAjax()) {
-                $this->error('权限不足');
-            } else {
-                echo json_encode(error('', '权限不足'));
-                exit;
-            }
-        }
+//        if (!$this->checkAuth()) {
+//            if (!request()->isAjax()) {
+//                $this->error('权限不足');
+//            } else {
+//                echo json_encode(error('', '权限不足'));
+//                exit;
+//            }
+//        }
 
-        if (!request()->isAjax()) {
-            //获取菜单
-            $this->menus = $this->getMenuList();
-            $this->initBaseInfo();
-        }
+//        if (!request()->isAjax()) {
+//            //获取菜单
+//            $this->menus = $this->getMenuList();
+//            $this->initBaseInfo();
+//        }
     }
 
     /**
@@ -291,5 +291,15 @@ class BaseSaas extends Controller
     {
         $user = new User();
         $user->addUserLog($this->uid, $this->user_info['username'], $this->site_id, $action_name, $data);
+    }
+
+    /**
+     * 退出登录
+     */
+    public function logout()
+    {
+        session('admin',null);
+//        Session::clear();
+        $this->success(lang('logout success'), '@admin/login');
     }
 }

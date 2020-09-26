@@ -1,4 +1,4 @@
-<?php /*a:2:{s:63:"E:\mi\company\SaaS\code\back-end\app\saas\view\login\index.html";i:1601026377;s:56:"E:\mi\company\SaaS\code\back-end\app\saas\view\base.html";i:1601029239;}*/ ?>
+<?php /*a:2:{s:63:"E:\mi\company\SaaS\code\back-end\app\saas\view\login\index.html";i:1601084592;s:56:"E:\mi\company\SaaS\code\back-end\app\saas\view\base.html";i:1601029239;}*/ ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -26,7 +26,7 @@
 		.ns-calendar{background: url("http://saas.com/public/static/img/ns_calendar.png") no-repeat center / 16px 16px;}
 	</style>
 	
-<link rel="stylesheet" type="text/css" href="http://saas.com/app/admin/view/public/css/login.css" />
+<link rel="stylesheet" type="text/css" href="http://saas.com/app/admin/view/public/css/login.css"/>
 
 	<script type="text/javascript">
 	</script>
@@ -36,24 +36,27 @@
 <div class="layui-container">
     <div class="layui-form login-form">
         <div class="ns-login-logo">
-            <img src="http://saas.com/app/admin/view/public/img/login/login_logo.png" />
+            <img src="http://saas.com/app/admin/view/public/img/login/login_logo.png"/>
         </div>
         <div class="layui-form-title">
             <h1>Saas后台登录系统</h1>
         </div>
 
         <div class="layui-form-item">
-            <img class="ns-input-icon" src="http://saas.com/app/admin/view/public/img/login/username.png" />
-            <input type="text" name="username" lay-verify="userName" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+            <img class="ns-input-icon" src="http://saas.com/app/admin/view/public/img/login/username.png"/>
+            <input type="text" name="username" lay-verify="userName" placeholder="请输入用户名" autocomplete="off"
+                   class="layui-input">
         </div>
         <div class="layui-form-item">
-            <img class="ns-input-icon" src="http://saas.com/app/admin/view/public/img/login/password.png" />
-            <input type="password" name="password" lay-verify="password" placeholder="请输入密码" autocomplete="off" class="layui-input">
+            <img class="ns-input-icon" src="http://saas.com/app/admin/view/public/img/login/password.png"/>
+            <input type="password" name="password" lay-verify="password" placeholder="请输入密码" autocomplete="off"
+                   class="layui-input">
         </div>
 
         <?php if($admin_login == 1): ?>
         <div class="layui-form-item verify-code-box">
-            <input type="text" name="captcha" lay-verify="verificationCode" placeholder="请输入验证码" class="layui-input" value="">
+            <input type="text" name="captcha" lay-verify="verificationCode" placeholder="请输入验证码" class="layui-input"
+                   value="">
             <div class="verify-code-img">
                 <img id='verify_img' src="<?php echo htmlentities($captcha['img']); ?>" alt='captcha' onclick="verificationCode()"/>
             </div>
@@ -67,20 +70,21 @@
     </div>
 
     <div class="ns-login-bottom">
-        <?php if(!empty($copyright['copyright_desc'])): ?> <?php echo htmlentities($copyright['copyright_desc']); else: ?>版权所有 © 2019-2020 山西牛酷信息科技有限公司，并保留所有权利<?php endif; ?>
+        <?php if(!empty($copyright['copyright_desc'])): ?> <?php echo htmlentities($copyright['copyright_desc']); else: ?>版权所有 © 2019-2020
+        山西牛酷信息科技有限公司，并保留所有权利<?php endif; ?>
     </div>
 </div>
 
 
 <script>
-    layui.use('form', function() {
+    layui.use('form', function () {
         var form = layui.form,
             repeat_flag = false; //防重复标识
 
         /**
          * 登录
          */
-        form.on('submit(login)', function(data) {
+        form.on('submit(login)', function (data) {
 
             if (repeat_flag) return false;
             repeat_flag = true;
@@ -90,9 +94,9 @@
                 url: "<?php echo url('saas/login/login'); ?>",
                 data: data.field,
                 dataType: "JSON",
-                success: function(res) {
+                success: function (res) {
                     if (res.code == 0) {
-                        layer.msg('登录成功',{anim: 5,time: 500},function () {
+                        layer.msg('登录成功', {anim: 5, time: 500}, function () {
                             window.location = "<?php echo url('saas/index/index'); ?>";
                         })
                     } else {
@@ -104,7 +108,7 @@
             });
         });
 
-        $(document).keydown(function(event) {
+        $(document).keydown(function (event) {
             if (event.keyCode == 13) {
                 $(".ns-login-btn button").trigger("click");
             }
@@ -114,17 +118,17 @@
          * 表单验证
          */
         form.verify({
-            userName: function(value) {
+            userName: function (value) {
                 if (!value) {
                     return "用户名不能为空";
                 }
             },
-            password: function(value) {
+            password: function (value) {
                 if (!value) {
                     return "密码不能为空";
                 }
             },
-            verificationCode: function(value) {
+            verificationCode: function (value) {
                 if (!value) {
                     return "验证码不能为空";
                 }
@@ -136,7 +140,7 @@
     /**
      * 验证码
      */
-    function verificationCode(){
+    function verificationCode() {
         $.ajax({
             type: "get",
             url: "<?php echo url('admin/login/captcha'); ?>",
@@ -144,7 +148,7 @@
             async: false,
             success: function (res) {
                 var data = res.data;
-                $("#verify_img").attr("src",data.img);
+                $("#verify_img").attr("src", data.img);
                 $("input[name='captcha_id']").val(data.id);
             }
         });

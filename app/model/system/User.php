@@ -14,6 +14,7 @@ namespace app\model\system;
 
 use think\facade\Session;
 use app\model\BaseModel;
+use app\model\saas\AuthGroup;
 
 /**
  * 管理员模型
@@ -347,6 +348,12 @@ class User extends BaseModel
             'login_ip' => request()->ip(),
         ];
         model('user')->update($data, [['uid', "=", $user_info[ 'uid' ]]]);
+
+        // 查询权限列表
+        $rules = AuthGroup::where('id', $user_info['group_id'])
+            ->value('rules');
+        $auth['rules'] = $rules;
+
         //填写日志
         Session::set($app_module . "." . "uid", $user_info[ 'uid' ]);
         Session::set($app_module . "." . "user_info", $auth);

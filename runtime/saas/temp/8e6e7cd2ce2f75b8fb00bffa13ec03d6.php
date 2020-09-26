@@ -1,331 +1,170 @@
-<?php /*a:2:{s:63:"E:\mi\company\SaaS\code\back-end\app\saas\view\index\index.html";i:1601029250;s:56:"E:\mi\company\SaaS\code\back-end\app\saas\view\base.html";i:1601029239;}*/ ?>
+<?php /*a:3:{s:63:"E:\mi\company\SaaS\code\back-end\app\saas\view\index\index.html";i:1601091483;s:65:"E:\mi\company\SaaS\code\back-end\app\saas\view\common\header.html";i:1601084077;s:65:"E:\mi\company\SaaS\code\back-end\app\saas\view\common\footer.html";i:1601084092;}*/ ?>
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="renderer" content="webkit" />
-	<meta http-equiv="X-UA-COMPATIBLE" content="IE=edge,chrome=1" />
-	<title><?php echo htmlentities((isset($menu_info['title']) && ($menu_info['title'] !== '')?$menu_info['title']:"")); ?> - <?php echo htmlentities((isset($website['title']) && ($website['title'] !== '')?$website['title']:"Niushop开源商城")); ?></title>
-	<meta name="keywords" content="<?php echo htmlentities((isset($website['keywords']) && ($website['keywords'] !== '')?$website['keywords']:'Niushop开源商城')); ?>">
-	<meta name="description" content="<?php echo htmlentities((isset($website['desc']) && ($website['desc'] !== '')?$website['desc']:'描述')); ?>}">
-	<link rel="icon" type="image/x-icon" href="http://saas.com/public/static/img/bitbug_favicon.ico" />
-	<link rel="stylesheet" type="text/css" href="http://saas.com/public/static/css/iconfont.css" />
-	<link rel="stylesheet" type="text/css" href="http://saas.com/public/static/ext/layui/css/layui.css" />
-	<link rel="stylesheet" type="text/css" href="http://saas.com/public/static/loading/msgbox.css"/>
-	<link rel="stylesheet" type="text/css" href="http://saas.com/app/admin/view/public/css/common.css" />
-	<script src="http://saas.com/public/static/js/jquery-3.1.1.js"></script>
-	<script src="http://saas.com/public/static/ext/layui/layui.js"></script>
-	<script>
-		layui.use(['layer', 'upload', 'element'], function() {});
-		window.ns_url = {
-			baseUrl: "http://saas.com/",
-			route: ['<?php echo request()->module(); ?>', '<?php echo request()->controller(); ?>', '<?php echo request()->action(); ?>'],
-		};
-	</script>
-	<script src="http://saas.com/public/static/js/common.js"></script>
-	<style>
-		.ns-calendar{background: url("http://saas.com/public/static/img/ns_calendar.png") no-repeat center / 16px 16px;}
-	</style>
-	-->
-
-<!--
-	<script type="text/javascript">
-	</script>
+    <meta charset="utf-8">
+    <title><?php echo config('admin.sys_name'); ?>后台管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="http://saas.com/public/static/plugins/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="http://saas.com/public/static/admin/css/main.css?v=<?php echo time(); ?>" media="all">
+    <link rel="stylesheet" href="http://saas.com/public/static/plugins/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style id="lemo-bg-color">
+    </style>
 </head>
-<body>
-
-<!-- logo -->
-<div class="ns-logo">
-	<div class="logo-box">
-		<img src="http://saas.com/app/admin/view/public/img/logo.png">
-	</div>
-	<span>B2B2C多商户平台端</span>
-	<span>
-		服务电话：400-886-7993
-	</span>
-</div>
-
+<link rel="stylesheet" href="http://saas.com/public/static/admin/css/common.css" media="all">
+<body class="layui-layout-body lemo-all">
 <div class="layui-layout layui-layout-admin">
-	
-	<div class="layui-header">
-		<!-- 一级菜单 -->
-		<ul class="layui-nav layui-layout-left">
-			<?php $second_menu = []; foreach($menu as $menu_k => $menu_v): ?>
-			<li class="layui-nav-item <?php if($menu_v['selected']): ?> layui-this<?php endif; ?>">
-				<a href="<?php echo htmlentities($menu_v['url']); ?>"><?php echo htmlentities($menu_v['title']); ?></a>
-			</li>
-			<?php if($menu_v['selected']): 
-				$second_menu = $menu_v['child_list'];
-				 ?>
-			<?php endif; ?>
-			<?php endforeach; ?>
-		</ul>
-		<ul class="layui-nav layui-layout-right">
-			<li class="layui-nav-item">
-				<a href="javascript:;">
-					<div class="ns-img-box">
-						<img src="http://saas.com/app/admin/view/public/img/default_headimg.png" alt="">
-					</div>
-					<?php echo htmlentities($user_info['username']); ?>
-				</a>
-				<dl class="layui-nav-child">
-					<dd class="ns-reset-pass" onclick="resetPassword();">
-						<a href="javascript:;">修改密码</a>
-					</dd>
-					<dd>
-						<a onclick="clearCache()" href="javascript:;">清除缓存</a>
-					</dd>
-					<dd>
-						<a href="<?php echo addon_url('admin/login/logout'); ?>" class="login-out">退出登录</a>
-					</dd>
-				</dl>
-			</li>
-		</ul>
-	</div>
-	
 
-	<?php if(!(empty($second_menu) || (($second_menu instanceof \think\Collection || $second_menu instanceof \think\Paginator ) && $second_menu->isEmpty()))): ?>
-	<div class="layui-side">
-		<div class="layui-side-scroll">
-			<span class="ns-side-title"><?php echo htmlentities($crumbs[0]['title']); ?></span>
-			<!-- 二三级菜单-->
-			<ul class="layui-nav layui-nav-tree"  lay-filter="test">
-				<?php foreach($second_menu as $menu_second_k => $menu_second_v): ?>
-				<li class="layui-nav-item <?php if($menu_second_v['selected']): ?> layui-nav-itemed <?php endif; if(!$menu_second_v['child_list'] && $menu_second_v['selected']): ?> layui-this<?php endif; ?>">
-					<a class="layui-menu-tips" href="<?php if(!$menu_second_v['child_list']): ?> <?php echo htmlentities($menu_second_v['url']); else: ?>javascript:;<?php endif; ?>"><?php echo htmlentities($menu_second_v['title']); ?></a>
-					<?php if(!(empty($menu_second_v['child_list']) || (($menu_second_v['child_list'] instanceof \think\Collection || $menu_second_v['child_list'] instanceof \think\Paginator ) && $menu_second_v['child_list']->isEmpty()))): ?>
-					<dl class="layui-nav-child">
-						<?php foreach($menu_second_v["child_list"] as $menu_third_k => $menu_third_v): ?>
-						<dd class="<?php if($menu_third_v['selected']): ?> layui-this<?php endif; ?>">
-							<a href="<?php echo htmlentities($menu_third_v['url']); ?>"><?php echo htmlentities($menu_third_v['title']); ?></a>
-						</dd>
-						<?php endforeach; ?>
-					</dl>
-					<?php endif; ?>
-				</li>
-				<?php endforeach; ?>
-			</ul>
-		</div>
-	</div>
-	<?php endif; ?>
+    <div class="layui-header header">
+        <div class="layui-logo lemo-logo"></div>
 
-	<div class="layui-body<?php if(empty($second_menu) || (($second_menu instanceof \think\Collection || $second_menu instanceof \think\Paginator ) && $second_menu->isEmpty())): ?> child_no_exit<?php endif; ?>">
-		<!-- 面包屑 -->
-		
-		<?php if(count($second_menu) > 0): ?>
-		<div class="ns-crumbs<?php if(empty($second_menu) || (($second_menu instanceof \think\Collection || $second_menu instanceof \think\Paginator ) && $second_menu->isEmpty())): ?> child_no_exit<?php endif; ?>">
-		<span class="layui-breadcrumb" lay-separator="-">
-			<?php foreach($crumbs as $crumbs_k => $crumbs_v): if(count($crumbs) == ($crumbs_k + 1)): ?>
-			<a href="<?php echo htmlentities($crumbs_v['url']); ?>"><cite><?php echo htmlentities($crumbs_v['title']); ?></cite></a>
-			<?php else: ?>
-			<a href="<?php echo htmlentities($crumbs_v['url']); ?>"><?php echo htmlentities($crumbs_v['title']); ?></a>
-			<?php endif; ?>
-			<?php endforeach; ?>
-		</span>
-		</div>
-		<?php endif; ?>
-		
-		<div class="ns-body-content <?php if(count($second_menu) < 1): ?> crumbs_no_exit<?php endif; ?>">
-			<div class="ns-body">
-				<!-- 四级导航 -->
-				<?php if(isset($forth_menu) && !empty($forth_menu)): ?>
-				<div class="fourstage-nav layui-tab layui-tab-brief" lay-filter="edit_user_tab">
-					<ul class="layui-tab-title">
-						<?php if(is_array($forth_menu) || $forth_menu instanceof \think\Collection || $forth_menu instanceof \think\Paginator): $i = 0; $__LIST__ = $forth_menu;if( count($__LIST__)==0 ) : echo "" ;else: foreach($__LIST__ as $key=>$menu): $mod = ($i % 2 );++$i;?>
-						<li class="<?php echo $menu['selected']==1 ? 'layui-this'  :  ''; ?>" lay-id="basic_info"><a href="<?php echo htmlentities($menu['parse_url']); ?>"><?php echo htmlentities($menu['title']); ?></a></li>
-						<?php endforeach; endif; else: echo "" ;endif; ?>
-					</ul>
-				</div>
-				<?php endif; ?>
-				
-				-->
-<!--欢迎登录SaaS后台！-->
-<!--
-			</div>
-			
-			<!-- 版权信息 -->
-			<div class="ns-footer">
-				<div class="ns-footer-img">
-					<a href="#"><img style="-webkit-filter: grayscale(100%);-moz-filter: grayscale(100%);-ms-filter: grayscale(100%);-o-filter: grayscale(100%);filter: grayscale(100%);filter: gray;" src="<?php if(!empty($copyright['logo'])): ?> <?php echo img($copyright['logo']); else: ?>http://saas.com/public/static/img/copyright_logo.png<?php endif; ?>" /></a>
-				</div>
-			</div>
-		</div>
-	</div>
+        <div class="lemo-header-content">
+            <a>
+                <div class="lemo-tool"><i title="展开" class="fa fa-outdent" data-side-fold="1"></i></div>
+            </a>
+            <!--电脑端头部菜单-->
+            <ul class="layui-nav layui-layout-left lemo-header-menu mobile layui-hide-xs lemo-menu-header-pc">
+            </ul>
+
+            <!--手机端头部菜单-->
+            <ul class="layui-nav layui-layout-left lemo-header-menu mobile layui-hide-sm">
+                <li class="layui-nav-item">
+                    <a href="javascript:;"><i class="fa fa-list-ul"></i> 选择模块</a>
+                    <dl class="layui-nav-child lemo-menu-header-mobile">
+                    </dl>
+                </li>
+            </ul>
+
+            <ul class="layui-nav layui-layout-right">
+
+                <li class="layui-nav-item" lay-unselect>
+                    <a href="javascript:;" data-refresh="刷新" data-href="<?php echo url('clearData'); ?>"><i
+                            class="fa fa-refresh"></i></a>
+                </li>
+                <li class="layui-nav-item" lay-unselect>
+                    <a href="javascript:;" data-clear="清理" data-href="<?php echo url('clearData'); ?>" class="lemo-clear"><i
+                            class="fa fa-trash-o"></i></a>
+                </li>
+                <li class="layui-nav-item mobile layui-hide-xs" lay-unselect>
+                    <a href="javascript:;" data-check-screen="full"><i class="fa fa-arrows-alt"></i></a>
+                </li>
+                <li class="layui-nav-item lemo-setting">
+                    <a href="javascript:;"><?php echo session('saas.user_info.username'); ?></a>
+                    <dl class="layui-nav-child">
+                        <dd>
+                            <a href="javascript:;" lemo-content-href="<?php echo url('sys.auth/adminEdit'); ?>" data-title="基本资料"
+                               data-icon="fa fa-gears">基本资料</a>
+                        </dd>
+                        <dd>
+                            <a href="javascript:;" lemo-content-href="<?php echo url('password'); ?>" data-title="修改密码"
+                               data-icon="fa fa-gears">修改密码</a>
+                        </dd>
+                        <dd>
+                            <a href="javascript:;" lemo-content-href="<?php echo url('saas/index/logout'); ?>">退出登录</a>
+                        </dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item lemo-setting">
+                    <a href="javascript:;"><?php echo lang('lang'); ?></a>
+                    <dl class="layui-nav-child">
+                        <dd>
+                            <a href="javascript:;" class="lang zh" data-icon="fa fa-gears">中文</a>
+                        </dd>
+                        <dd>
+                            <a href="javascript:;" class="lang en" data-icon="fa fa-gears">English</a>
+                        </dd>
+
+                    </dl>
+                </li>
+                <li class="layui-nav-item lemo-select-bgcolor mobile layui-hide-xs" lay-unselect>
+                    <a href="javascript:;" data-bgcolor="配色方案"><i class="fa fa-ellipsis-v"></i></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!--无限极左侧菜单-->
+    <div class="layui-side layui-bg-black lemo-menu-left">
+    </div>
+
+    <!--遮罩层-->
+    <div class="lemo-make"></div>
+
+    <!-- 移动导航 -->
+    <div class="lemo-site-mobile"><i class="layui-icon"></i></div>
+
+    <div class="layui-body">
+
+        <div class="lemo-tab layui-tab-rollTool layui-tab" lay-filter="lemoTab" lay-allowclose="true">
+            <ul class="layui-tab-title">
+                <li class="layui-this" id="lemoHomeTabId" lay-id=""></li>
+            </ul>
+            <div class="layui-tab-control">
+                <li class="lemo-tab-roll-left layui-icon layui-icon-left"></li>
+                <li class="lemo-tab-roll-right layui-icon layui-icon-right"></li>
+                <li class="layui-tab-tool layui-icon layui-icon-down">
+                    <ul class="layui-nav close-box">
+                        <li class="layui-nav-item">
+                            <a href="javascript:;"><span class="layui-nav-more"></span></a>
+                            <dl class="layui-nav-child">
+                                <dd><a href="javascript:;" lemo-tab-close="current">关 闭 当 前</a></dd>
+                                <dd><a href="javascript:;" lemo-tab-close="other">关 闭 其 他</a></dd>
+                                <dd><a href="javascript:;" lemo-tab-close="all">关 闭 全 部</a></dd>
+                            </dl>
+                        </li>
+                    </ul>
+                </li>
+            </div>
+            <div class="layui-tab-content">
+                <div id="lemoHomeTabIframe" class="layui-tab-item layui-show"></div>
+            </div>
+        </div>
+
+    </div>
+
 </div>
 
-<!-- 重置密码弹框html -->
-<div class="layui-form" id="reset_pass" style="display: none;">
-    <div class="layui-form-item">
-        <label class="layui-form-label"><span class="required">*</span>原密码</label>
-        <div class="layui-input-block">
-            <input type="password" id="old_pass" name="old_pass" required class="layui-input ns-len-mid" maxlength="18" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" onblur="this.setAttribute('readonly',true);">
-            <span class="required"></span>
-        </div>
-    </div>
 
-    <div class="layui-form-item">
-        <label class="layui-form-label"><span class="required">*</span>新密码</label>
-        <div class="layui-input-block">
-            <input type="password" id="new_pass" name="new_pass" required class="layui-input ns-len-mid" maxlength="18" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" onblur="this.setAttribute('readonly',true);">
-            <span class="required"></span>
-        </div>
-    </div>
-
-    <div class="layui-form-item">
-        <label class="layui-form-label"><span class="required">*</span>确认新密码</label>
-        <div class="layui-input-block">
-            <input type="password" id="repeat_pass" name="repeat_pass" required class="layui-input ns-len-mid" maxlength="18" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" onblur="this.setAttribute('readonly',true);">
-            <span class="required"></span>
-        </div>
-    </div>
-
-    <div class="ns-form-row">
-        <button class="layui-btn ns-bg-color" onclick="repass()">确定</button>
-        <button class="layui-btn layui-btn-primary" onclick="closePass()">返回</button>
-    </div>
-</div>
-<script type="text/javascript">
-	layui.use('element',function () {
-		var element = layui.element;
-		element.render('breadcrumb');
-	});
-	function clearCache () {
-		$.ajax({
-			type: 'post',
-			url: ns.url("admin/Login/clearCache"),
-			dataType: 'JSON',
-			success: function(res) {
-				layer.msg(res.message);
-				location.reload();
-			}
-		})
-	}
-
-    /**
-     * 重置密码
-     */
-	var index;
-    function resetPassword() {
-        index = layer.open({
-            type:1,
-            content:$('#reset_pass'),
-            offset: 'auto',
-            area: ['650px']
-        });
-
-		setTimeout(function() {
-			$(".ns-reset-pass").removeClass('layui-this');
-		}, 1000);
-    }
-
-	// $(".ns-reset-pass").on('click', function() {
-	// 	$(this).removeClass('layui-this');
-	// })
-
-    var repeat_flag = false;
-    function repass(){
-        var old_pass = $("#old_pass").val();
-        var new_pass = $("#new_pass").val();
-        var repeat_pass = $("#repeat_pass").val();
-
-        if (old_pass == '') {
-            $("#old_pass").focus();
-            layer.msg("原密码不能为空");
-            return;
-        }
-
-        if (new_pass == '') {
-            $("#new_pass").focus();
-            layer.msg("密码不能为空");
-            return;
-        } else if ($("#new_pass").val().length < 6) {
-            $("#new_pass").focus();
-            layer.msg("密码不能少于6位数");
-            return;
-        }
-        if (repeat_pass == '') {
-            $("#repeat_pass").focus();
-            layer.msg("密码不能为空");
-            return;
-        } else if ($("#repeat_pass").val().length < 6) {
-            $("#repeat_pass").focus();
-            layer.msg("密码不能少于6位数");
-            return;
-        }
-        if (new_pass != repeat_pass) {
-            $("#repeat_pass").focus();
-            layer.msg("两次密码输入不一样，请重新输入");
-            return;
-        }
-
-        if(repeat_flag)return;
-        repeat_flag = true;
-
-        $.ajax({
-            type: "POST",
-            dataType: 'JSON',
-            url: ns.url("admin/login/modifypassword"),
-            data: {"old_pass": old_pass,"new_pass": new_pass},
-            success: function(res) {
-                layer.msg(res.message);
-                repeat_flag = false;
-
-                if (res.code == 0) {
-                    layer.close(index);
-                    location.reload();
-                }
-            }
-        });
-    }
-
-    function closePass() {
-        layer.close(index);
-	}
-	
-	/**
-	 * 打开相册
-	 */
-	function openAlbum(callback, imgNum) {
-		layui.use(['layer'], function () {
-			//iframe层-父子操作
-			layer.open({
-				type: 2,
-				title: '图片管理',
-				area: ['825px', '675px'],
-				fixed: false, //不固定
-				btn: ['保存', '返回'],
-				content: ns.url("admin/album/album?imgNum=" + imgNum),
-				yes: function (index, layero) {
-					var iframeWin = window[layero.find('iframe')[0]['name']];//得到iframe页的窗口对象，执行iframe页的方法：
-					
-					iframeWin.getCheckItem(function (obj) {
-						if (typeof callback == "string") {
-							try {
-								eval(callback + '(obj)');
-								layer.close(index);
-							} catch (e) {
-								console.error('回调函数' + callback + '未定义');
-							}
-						} else if (typeof callback == "function") {
-							callback(obj);
-							layer.close(index);
-						}
-						
-					});
-				}
-			});
-		});
-	}
-	
-	layui.use('element', function() {
-		var element = layui.element;
-		element.init();
-	});
-</script>
-
--->
+<script src="http://saas.com/public/static/plugins/layui/layui.js" charset="utf-8"></script>
 <!--<script>-->
-
+<!--    layui.config({-->
+<!--        base: "/static/admin/js/",-->
+<!--        version: true-->
+<!--    }).extend({-->
+<!--        Admin: 'Admin'-->
+<!--    }).use(['Admin'], function () {-->
+<!--        Admin = layui.Admin;-->
+<!--    });-->
 <!--</script>-->
-<!--
+
+<script src="http://saas.com/public/static/plugins/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+
+    layui.use(['jquery', 'layer', 'lemoAdmin'], function () {
+        var $ = layui.jquery,
+            layer = layui.layer,
+            lemoAdmin = layui.lemoAdmin;
+
+        var options = {
+            iniUrl: "<?php echo url('saas/index/menus'); ?>",    // 初始化接口
+            clearUrl: "<?php echo url('clearData'); ?>", // 缓存清理接口
+            urlHashLocation: true,      // 是否打开hash定位
+            bgColorDefault: 0,          // 主题默认配置
+            multiModule: true,          // 是否开启多模块
+            menuChildOpen: false,       // 是否默认展开菜单
+        };
+        lemoAdmin.render(options);
+
+    });
+</script>
 </body>
-</html>
+
