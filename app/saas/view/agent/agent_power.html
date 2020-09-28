@@ -1,0 +1,178 @@
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta name="renderer" content="webkit" />
+
+    <meta http-equiv="X-UA-COMPATIBLE" content="IE=edge,chrome=1" />
+
+    <title>{$menu_info['title']|default=""} - {$website['title']|default="Niushop开源商城"}</title>
+
+    <meta name="keywords" content="{$website['keywords']|default='Niushop开源商城'}">
+
+    <meta name="description" content="{$website['desc']|default='描述'}}">
+
+    <link rel="icon" type="image/x-icon" href="__STATIC__/img/bitbug_favicon.ico" />
+
+    <link rel="stylesheet" type="text/css" href="STATIC_CSS/iconfont.css" />
+
+    <link rel="stylesheet" type="text/css" href="__STATIC__/ext/layui/css/layui.css" />
+
+    <link rel="stylesheet" type="text/css" href="__STATIC__/loading/msgbox.css"/>
+
+    <link rel="stylesheet" type="text/css" href="ADMIN_CSS/common.css" />
+
+    <script src="__STATIC__/js/jquery-3.1.1.js"></script>
+
+    <script src="__STATIC__/ext/layui/layui.js"></script>
+
+    <script>
+
+        layui.use(['layer', 'upload', 'element'], function() {});
+
+        window.ns_url = {
+
+            baseUrl: "ROOT_URL/",
+
+            route: ['{:request()->module()}', '{:request()->controller()}', '{:request()->action()}'],
+
+        };
+
+    </script>
+
+    <script src="__STATIC__/js/common.js"></script>
+
+    <style>
+
+        .ns-calendar{background: url("__STATIC__/img/ns_calendar.png") no-repeat center / 16px 16px;}
+
+    </style>
+
+
+    <script type="text/javascript">
+
+    </script>
+
+</head>
+<body>
+<div class="x-body">
+    <form action="" method="post" class="layui-form layui-form-pane" style='width:700px;'>
+        <div class="layui-form-item">
+            <label for="name" class="layui-form-label">
+                <span class="x-red">*</span>权限组名
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="name" name="name" required="" autocomplete="off" class="layui-input" lay-verify="required">
+                <input type="hidden" name='op' value='add'>
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">
+                拥有权限
+            </label>
+            <table  class="layui-table layui-input-block">
+                <tbody>
+                <tr>
+                <td>
+                    <input name="auth[]" checked type="checkbox" value="1" title="父节点1" lay-filter='group' id='group'>
+                </td>
+
+                <td>
+                    <div class="layui-input-block">
+                        <input name="auth[]" type="checkbox" value="1-1" title="子节点1" class='group' lay-filter='group_child' check_child='group'>
+                        <input name="auth[]" type="checkbox" value="1-2" title="子节点11" class='group' lay-filter='group_child' check_child='group'>
+                        <input name="auth[]" type="checkbox" value="1-3" title="子节点111" class='group' lay-filter='group_child' check_child='group'>
+                        <input name="auth[]" type="checkbox" value="1-4" title="子节点1111" class='group' lay-filter='group_child' check_child='group'>
+                    </div>
+                    <div class="layui-input-block">
+                        <input name="auth[]" type="checkbox" value="" title="子节点2" class='group' lay-filter='group_child' check_child='group'>
+                        <input name="auth[]" type="checkbox" value="" title="子节点22" class='group' lay-filter='group_child' check_child='group'>
+                        <input name="auth[]" type="checkbox" value="" title="子节点222" class='group' lay-filter='group_child' check_child='group'>
+                    </div>
+                </td>
+
+                </tr>
+
+
+
+                </tbody>
+            </table>
+        </div>
+        <div class="layui-form-item">
+            <button  class="layui-btn" lay-filter="add" lay-submit="" id='btn'>立即提交</button>
+        </div>
+    </form>
+</div>
+<script src="${ctxStatic}/assets/layui/layui.js" type="text/javascript" ></script>
+<%--<script src="//res.layui.com/layui/dist/layui.js?t=1535898708529"></script>--%>
+<script>
+    layui.use(['form','layer'], function(){
+        $ = layui.jquery;
+        var form = layui.form
+            ,layer = layui.layer;
+
+        //父节点全选/全不选
+        form.on('checkbox(group)', function(data){
+            var check = "."+data.elem.id+"";//获取父节点的id
+            $(check).prop('checked',$(this).prop("checked"));//将和父节点id相同class的子节点选中
+            form.render();//更新全部
+        });
+
+        //子节点
+        form.on('checkbox(group_child)',function(data){
+            var check = '.'+data.elem.attributes['check_child'].value;//当前子节点下的check_child的值
+            var idcheck = '#'+data.elem.attributes['check_child'].value;
+            var test = 1;//定义一个初始值
+            for (var i = $(check).length - 1; i >= 0; i--) {
+                if($(check).eq(i).prop("checked")){
+                    test = 2;//当有复选框被选中时，初始值更改为2
+                }
+            }
+
+            if(test == 1){
+                $(idcheck).prop('checked',false);//如果初始值依旧为一，说明没有子节点的复选框被选中,则将和子节点相同class的
+            }else{
+                $(idcheck).prop('checked',true);//否则将父节点全选框选中
+            }
+            form.render();//更新全部
+
+        });
+
+        //监听提交
+        form.on('submit(add)', function(data){
+            $("#btn").attr("disabled","false");//关闭提交
+            $("#btn").addClass("layui-btn-disabled");//更改class
+            console.log("提交:" + JSON.stringify(data.field));
+            $.ajax({
+                // url: "{:url('')}",
+                type: 'post',
+                data: data.field,
+                success: function(res){
+                    if (res.status == 1) {
+                        layer.msg('操作成功', {icon:6});
+                        setTimeout(function(){window.parent.location.reload();}, 2000);//两秒后关闭并刷新页面
+                    } else {
+                        layer.msg(res.msg, {icon:5});
+                    }
+
+
+                    return false;
+                }
+            });
+
+            setTimeout(function(){
+                $("#btn").removeAttr("disabled");
+                $("#btn").removeClass("layui-btn-disabled");
+            }, 3000);//3秒后开启提交
+            return false;
+        });
+
+
+    });
+</script>
+
+</body>
+</html>

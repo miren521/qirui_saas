@@ -1,4 +1,4 @@
-<?php /*a:3:{s:63:"E:\mi\company\SaaS\code\back-end\app\saas\view\index\index.html";i:1601091483;s:65:"E:\mi\company\SaaS\code\back-end\app\saas\view\common\header.html";i:1601084077;s:65:"E:\mi\company\SaaS\code\back-end\app\saas\view\common\footer.html";i:1601084092;}*/ ?>
+<?php /*a:3:{s:63:"E:\mi\company\SaaS\code\back-end\app\saas\view\index\index.html";i:1601084737;s:65:"E:\mi\company\SaaS\code\back-end\app\saas\view\common\header.html";i:1601084077;s:65:"E:\mi\company\SaaS\code\back-end\app\saas\view\common\footer.html";i:1601084092;}*/ ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -69,7 +69,7 @@
                                data-icon="fa fa-gears">修改密码</a>
                         </dd>
                         <dd>
-                            <a href="javascript:;" lemo-content-href="<?php echo url('saas/index/logout'); ?>">退出登录</a>
+                            <a href="javascript:;" class="login-out">退出登录</a>
                         </dd>
                     </dl>
                 </li>

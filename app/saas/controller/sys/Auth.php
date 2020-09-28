@@ -12,7 +12,6 @@
  */
 namespace app\saas\controller\sys;
 
-use app\admin\model\AuthGroup;
 use app\model\saas\AuthRule;
 use app\admin\model\Admin;
 use app\common\controller\Backend;
@@ -25,6 +24,7 @@ use think\facade\Db;
 use think\facade\Request;
 use think\facade\Session;
 use think\facade\View;
+use app\model\saas\AuthGroup;
 
 class Auth extends BaseSaas
 {
@@ -91,7 +91,7 @@ class Auth extends BaseSaas
             $model = new Admin();
             $result = $model->add($data);
             if ($result) {
-                $this->success(lang('add success'), url('sys.Auth/adminList'));
+                $this->success('操作成功', url('sys.Auth/adminList'));
             } else {
                 $this->error(lang('add fail'));
             }
@@ -249,7 +249,7 @@ class Auth extends BaseSaas
             $info = $this->modelClass->find($id);
             $info->sort = $sort;
             $info->save();
-            $this->success(lang('edit success'));
+            $this->success('操作成功');
         }
     }
 
@@ -261,12 +261,11 @@ class Auth extends BaseSaas
         $child =$model::where('pid','in',$ids)->find();
         if ($ids && !$child) {
             $model->del($ids);
-            $this->success(lang('delete success'));
+            return retMsg(200,'操作成功');
         }elseif($child){
-            $this->error(lang('delete child first'));
-
+            return retMsg(0,'有下级');
         }else{
-            $this->error('id'.lang('not exist'));
+            return retMsg(0,'操作失败');
         }
     }
 
@@ -275,7 +274,7 @@ class Auth extends BaseSaas
     public function ruleAdd()
     {
         if (Request::isPost()) {
-            $data = $this->request->post();
+            $data = \request()->post();
             if (empty($data['title'])) {
                 $this->error(lang('rule name cannot null'));
             }
@@ -287,7 +286,7 @@ class Auth extends BaseSaas
                 $data['href'] = 'admin/'.trim($data['href'],'/');
             }
             if ($this->modelClass->create($data)) {
-                $this->success(lang('add success'),url('sys.Auth/adminRule'));
+                return retMsg(200,'操作成功');
             } else {
                 $this->error(lang('add fail'));
             }
@@ -318,11 +317,11 @@ class Auth extends BaseSaas
             $data = Request::param();
             $data['icon'] = $data['icon']?$data['icon']:'fa fa-adjust';
             if(strpos(trim($data['href'],'/'),'admin/')===false){
-                $data['href'] = 'admin/'.trim($data['href'],'/');
+                $data['href'] = trim($data['href'],'/');
             }
             $model = new AuthRule();
             $model->edit($data);
-            $this->success(lang('edit success'), url('sys.Auth/adminRule'));
+            return retMsg(200,'操作成功');
         } else {
             $list = Db::name('auth_rule')
                 ->order('sort asc')
@@ -376,11 +375,11 @@ class Auth extends BaseSaas
     // 用户组删除
     public function groupDel()
     {
-        $ids = $this->request->post('ids');
+        $ids = \request()->post('ids');
         if ($ids > 1) {
-            $model  = new AuthGroup();
-            $model->del($ids);
-            $this->success(lang('delete success'));
+            $res = AuthGroup::find($ids);
+            if (!$res->delete()) return retMsg(500, '操作失败');
+            return retMsg(200,'操作成功');
         } else {
             $this->error(lang('supper man cannot delete'));
         }
@@ -391,15 +390,15 @@ class Auth extends BaseSaas
     public function groupAdd()
     {
         if (Request::isPost()) {
-            $data = $this->request->post();
-            try {
-                $this->validate($data, 'AuthGroup');
-            } catch (\Exception $e) {
-                $this->error($e->getMessage());
-            }
+            $data = \request()->post();
+//            try {
+//                $this->validate($data, 'AuthGroup');
+//            } catch (\Exception $e) {
+//                $this->error($e->getMessage());
+//            }
             $result = AuthGroup::create($data);
             if ($result) {
-                $this->success(lang('add success'), url('sys.Auth/group'));
+                return retMsg(200, '操作成功');
             } else {
                 $this->error(lang('add fail'));
             }
@@ -417,20 +416,19 @@ class Auth extends BaseSaas
     public function groupEdit()
     {
         if (Request::isPost()) {
-            $data = $this->request->post();
+            $data = \request()->post();
             if($data['id']==1){
-                $this->error(lang('supper man cannot edit'));
+                return retMsg(200, '超级管理员不可修改');
             }
-            try{
-                $this->validate($data, 'AuthGroup');
-            }catch (\Exception $e){
-                $this->error($e->getMessage());
-            }
+//            try{
+//                $this->validate($data, 'AuthGroup');
+//            }catch (\Exception $e){
+//                $this->error($e->getMessage());
+//            }
             $where['id'] = $data['id'];
             $res = AuthGroup::update($data, $where);
             if($res){
-
-                $this->success(lang('edit success'), url('sys.Auth/group'));
+                return retMsg(200, '操作成功');
             }else{
                 $this->error(lang('edit fail'));
 
@@ -441,7 +439,7 @@ class Auth extends BaseSaas
             $info = AuthGroup::find(['id' => $id]);
             $view = [
                 'info' => $info,
-                'title' => lang('edit')
+                'title' => '编辑'
             ];
             View::assign($view);
             return view();
@@ -459,7 +457,7 @@ class Auth extends BaseSaas
 //                $this->error(lang('test data cannot edit'));
 //            }
             $info->save();
-            $this->success(lang('edit success'));
+            return retMsg(200, '操作成功');
 
         }
     }
@@ -491,11 +489,11 @@ class Auth extends BaseSaas
     // 用户组保存权限
     public function groupSetaccess()
     {
-        $rules = $this->request->post('rules');
+        $rules = \request()->post('rules');
         if (empty($rules)) {
             $this->error(lang('please choose rule'));
         }
-        $data = $this->request->post();
+        $data = \request()->post();
         $rules = $this->modelClass->authNormal($rules);
         $rls = '';
         foreach ($rules as $k=>$v){
@@ -507,7 +505,7 @@ class Auth extends BaseSaas
             $admin = Session::get('admin');
             $admin['rules'] = $rls;
             Session::set('admin', $admin);
-            $this->success(lang('rule assign success'),url('sys.Auth/group'));
+            return retMsg(200, '操作成功');
         } else {
             $this->error(lang('rule assign fail'));
         }

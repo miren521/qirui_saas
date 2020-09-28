@@ -1,4 +1,4 @@
-<?php /*a:3:{s:71:"E:\mi\company\SaaS\code\back-end\app\saas\view\sys\auth\admin_rule.html";i:1601100162;s:65:"E:\mi\company\SaaS\code\back-end\app\saas\view\common\header.html";i:1601084077;s:65:"E:\mi\company\SaaS\code\back-end\app\saas\view\common\footer.html";i:1601084092;}*/ ?>
+<?php /*a:3:{s:71:"E:\mi\company\SaaS\code\back-end\app\saas\view\sys\auth\admin_rule.html";i:1601197272;s:65:"E:\mi\company\SaaS\code\back-end\app\saas\view\common\header.html";i:1601084077;s:65:"E:\mi\company\SaaS\code\back-end\app\saas\view\common\footer.html";i:1601084092;}*/ ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,10 +24,10 @@
     <div class="lemo-main">
         <div class="admin-main layui-anim layui-anim-upbit">
             <fieldset class="layui-elem-field layui-field-title">
-                <legend>权限<?php echo lang('list'); ?></legend>
+                <legend>权限列表</legend>
             </fieldset>
             <blockquote class="layui-elem-quote">
-                <a data-href="<?php echo url('ruleAdd'); ?>" class="layui-btn layui-btn-sm add"><?php echo lang('add'); ?>路由</a>
+                <a data-href="<?php echo url('saas/sys.Auth/ruleAdd'); ?>" class="layui-btn layui-btn-sm add">添加路由</a>
                 <a class="layui-btn layui-btn-normal layui-btn-sm" onclick="openAll();">展开或折叠全部</a>
             </blockquote>
             <table class="layui-table" id="list" lay-filter="list"></table>
@@ -48,12 +48,12 @@
     <span class="icon {{d.icon}}"></span>
 </script>
 <script type="text/html" id="action">
-    <a class="layui-btn layui-btn-xs" data-href="<?php echo url('ruleEdit'); ?>?rule_id={{d.id}}&id={{d.id}}" lay-event="edit"><?php echo lang('edit'); ?></a>
-    <a class="layui-btn layui-btn-xs layui-btn-warm"  data-href="<?php echo url('ruleAdd'); ?>?rule_id={{d.id}}" lay-event="add"><?php echo lang('add'); ?><?php echo lang('child'); ?></a>
-    <a class="layui-btn layui-btn-danger layui-btn-xs"  data-href="<?php echo url('ruleDel'); ?>" lay-event="del"><?php echo lang('del'); ?></a>
+    <a class="layui-btn layui-btn-xs" data-href="<?php echo url('saas/sys.Auth/ruleEdit'); ?>?rule_id={{d.id}}&id={{d.id}}" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-xs layui-btn-warm"  data-href="<?php echo url('saas/sys.Auth/ruleAdd'); ?>?rule_id={{d.id}}" lay-event="add">添加下级</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs"  data-href="<?php echo url('saas/sys.Auth/ruleDel'); ?>" lay-event="del">删除</a>
 </script>
 <script type="text/html" id="topBtn">
-    <a data-href="<?php echo url('ruleAdd'); ?>" class="layui-btn layui-btn-sm" lay-event="add"><?php echo lang('add'); ?>权限</a>
+    <a data-href="<?php echo url('saas/sys.Auth/ruleAdd'); ?>" class="layui-btn layui-btn-sm" lay-event="add">添加权限</a>
 </script>
 <script src="http://saas.com/public/static/plugins/layui/layui.js" charset="utf-8"></script>
 <!--<script>-->
@@ -83,7 +83,7 @@
             id:tableId
             ,elem: '#'+tableId
             ,idField:'id'
-            ,url:'<?php echo url("adminRule"); ?>'
+            ,url:'<?php echo url("saas/sys.Auth/adminRule"); ?>'
             ,cellMinWidth: 100
             ,treeId:'id'//树形id字段名称
             ,treeUpId:'pid'//树形父id字段名称
@@ -98,8 +98,8 @@
                 {field: 'title', title: '权限名称', width: 200},
                 {field: 'href', title: '控制器/方法', minwidth: 200},
                 {field: 'auth_open',align: 'center', title: '是否验证权限', width: 150,toolbar: '#auth'},
-                {field: 'menu_status',align: 'center',title: '菜单<?php echo lang("status"); ?>', width: 150,toolbar: '#status'},
-                {field: 'sort',align: 'center', title: '<?php echo lang("order"); ?>', width: 80, templet: '#order'},
+                {field: 'menu_status',align: 'center',title: '菜单状态', width: 150,toolbar: '#status'},
+                {field: 'sort',align: 'center', title: '排序', width: 80, templet: '#order'},
                 {title:'操作',width:200, toolbar: '#action',align:"center"},
             ]]
             ,page:false

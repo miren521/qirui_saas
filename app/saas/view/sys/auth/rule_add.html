@@ -72,25 +72,25 @@
 {include file="common/footer"/}
 <script>
     layui.config({
-        base: '/static/plugins/layui/extend/'
+        base: '/public/static/plugins/layui/extend/'
     }).extend({
         iconPickerFa: 'iconPicker/iconPickerFa'
     }).use(['form', 'layer','iconPickerFa'], function () {
         var form = layui.form,layer = layui.layer,$= layui.jquery;
         var iconPickerFa = layui.iconPickerFa;
         var info  = {:json_encode($info)};
-        var url = "{:url('ruleAdd')}";
+        var url = "{:url('saas/sys.Auth/ruleAdd')}";
         var icon = '';
         if(info){
             form.val('form',info);
-            url = "{:url('ruleEdit')}";
+            url = "{:url('saas/sys.Auth/ruleEdit')}";
             icon= info.icon;
         }
         iconPickerFa.render({
             // 选择器，推荐使用input
             elem: '#iconPicker',
             // fa 图标接口
-            url: "/static/plugins/font-awesome-4.7.0/less/variables.less",
+            url: "/public/static/plugins/font-awesome-4.7.0/less/variables.less",
             // 是否开启搜索：true/false，默认true
             search: true,
             // 是否开启分页：true/false，默认true
@@ -121,7 +121,11 @@
             $.post(url,data.field,function(res){
                 if(res.code > 0){
                     layer.msg(res.msg,{time:1000,icon:1},function(){
-                        location.href = res.url;
+                        window.parent.location.reload();
+                        // window.opener.location.href = window.opener.location.href;
+                        // window.close();
+                        // window.opener.location.href = window.opener.location.href;
+                        // location.href = res.url;
                     });
                 }else{
                     layer.msg(res.msg,{time:1000,icon:2});

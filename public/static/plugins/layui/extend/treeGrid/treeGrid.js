@@ -4,9 +4,9 @@
  @Author：lrd
  */
 layui.config({
-    base: '/static/plugins/layui/extend/treeGrid/'
+    base: '/public/static/plugins/layui/extend/treeGrid/'
 }).extend({
-    dltable:'/dltable'
+    dltable:'dltable'
 }).define(['laytpl', 'laypage','dltable', 'layer', 'form'], function(exports){
     "use strict";
     var $ = layui.jquery;

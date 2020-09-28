@@ -82,15 +82,4 @@ class Index extends BaseSaas
         return view();
     }
 
-    /**
-     * 退出登录
-     */
-    public function logout()
-    {
-//        halt(1);
-//        session('admin',null);
-//        Session::clear();
-        $this->success(lang('logout success'), 'saas/login/login');
-    }
-
 }

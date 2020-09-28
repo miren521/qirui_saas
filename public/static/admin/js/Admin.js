@@ -29,7 +29,7 @@ layui.define(['form','layer', 'table','upload'], function (exports) {
             var data = obj.data;
             var url = $(this).attr('data-href');
             if(obj.event === 'del'){
-                layer.confirm('Are you sure you want to delete it', function(index){
+                layer.confirm('确定删除？', function(index){
                     loading =layer.load(1, {shade: [0.1,'#fff']});
                     $.post(url?url:'delete',{ids:[data.id]},function(res){
                         layer.close(loading);
@@ -93,14 +93,16 @@ layui.define(['form','layer', 'table','upload'], function (exports) {
                     layer.msg(res.msg, {time: 1800, icon: 1}, function () {
                         iframe = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
                         if(iframe){
+                            window.parent.location.reload();
                             iframe = parent.layer.getFrameIndex(iframe);
                             parent.layer.close(iframe)
                             layer.closeAll();
-                            window.parent.location.href = res.url;
+                            // window.parent.location.href = res.url;
                         }else{
                             iframe = parent.layer.getFrameIndex(iframe);
                             layer.close(iframe)
-                            window.location.href = res.url;
+                            window.location.reload();
+                            // window.location.href = res.url;
 
                         }
 
@@ -139,7 +141,7 @@ layui.define(['form','layer', 'table','upload'], function (exports) {
         $(document).on('click','#delAll',function(){
             var url = $(this).attr('data-href');
             url = url?url:'delete';
-            layer.confirm("Are you sure you want to delete it", {icon: 3}, function(index) {
+            layer.confirm("确定删除？", {icon: 3}, function(index) {
                 layer.close(iframe);
                 var checkStatus = table.checkStatus(tablelist); //list即为参数id设定的值
                 var ids = [];
@@ -184,9 +186,11 @@ layui.define(['form','layer', 'table','upload'], function (exports) {
         });
         //返回页面
         $('body').on('click','.back',function() {
-            var url = $(this).attr('data-href');
-            layer.closeAll();
-            window.parent.location.href=url;
+            window.parent.location.reload();
+            // var url = $(this).attr('data-href');
+            // layer.closeAll();
+            // window.close()
+            // window.parent.location.href=url;
 
         });
         $('body').on('click','#selectAttach',function(data) {

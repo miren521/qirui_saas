@@ -44,20 +44,20 @@ function list_to_tree($list, $pk = 'id', $pid = 'pid', $child = '_child', $root 
     // 创建基于主键的数组引用
     $refer = [];
     foreach ($list as $key => $data) {
-        $refer[ $data[ $pk ] ] = &$list[ $key ];
-        $refer[ $data[ $pk ] ][ $child ] = [];
-        $refer[ $data[ $pk ] ][ 'child_num' ] = 0;
+        $refer[$data[$pk]] = &$list[$key];
+        $refer[$data[$pk]][$child] = [];
+        $refer[$data[$pk]]['child_num'] = 0;
     }
     foreach ($refer as $key => $data) {
         // 判断是否存在parent
-        $parentId = $data[ $pid ];
+        $parentId = $data[$pid];
         if ($root == $parentId) {
-            $tree[ $key ] = &$refer[ $key ];
-        } elseif (isset($refer[ $parentId ])) {
-            is_object($refer[ $parentId ]) && $refer[ $parentId ] = $refer[ $parentId ]->toArray();
-            $parent = &$refer[ $parentId ];
-            $parent[ $child ][ $key ] = &$refer[ $key ];
-            $parent[ 'child_num' ]++;
+            $tree[$key] = &$refer[$key];
+        } elseif (isset($refer[$parentId])) {
+            is_object($refer[$parentId]) && $refer[$parentId] = $refer[$parentId]->toArray();
+            $parent = &$refer[$parentId];
+            $parent[$child][$key] = &$refer[$key];
+            $parent['child_num']++;
         }
     }
     return $tree;
@@ -76,9 +76,9 @@ function tree_to_list($tree, $child = '_child', $order = 'id', &$list = array())
     if (is_array($tree)) {
         foreach ($tree as $key => $value) {
             $reffer = $value;
-            if (isset($reffer[ $child ])) {
-                unset($reffer[ $child ]);
-                tree_to_list($value[ $child ], $child, $order, $list);
+            if (isset($reffer[$child])) {
+                unset($reffer[$child]);
+                tree_to_list($value[$child], $child, $order, $list);
             }
             $list[] = $reffer;
         }
@@ -100,7 +100,7 @@ function list_sort_by($list, $field, $sortby = 'asc')
     if (is_array($list)) {
         $refer = $resultSet = array();
         foreach ($list as $i => $data) {
-            $refer[ $i ] = &$data[ $field ];
+            $refer[$i] = &$data[$field];
         }
         switch ($sortby) {
             case 'asc': // 正向排序
@@ -114,7 +114,7 @@ function list_sort_by($list, $field, $sortby = 'asc')
                 break;
         }
         foreach ($refer as $key => $val) {
-            $resultSet[] = &$list[ $key ];
+            $resultSet[] = &$list[$key];
         }
         return $resultSet;
     }
@@ -133,7 +133,7 @@ function object_to_array($obj)
     }
     if (is_array($obj)) {
         foreach ($obj as $key => $value) {
-            $obj[ $key ] = object_to_array($value);
+            $obj[$key] = object_to_array($value);
         }
     }
     return $obj;
@@ -342,7 +342,7 @@ function http($url, $timeout = 30, $header = array())
     if ($data && is_array(explode("\r\n\r\n", $data))) {
         list ($header, $data) = explode("\r\n\r\n", $data);
     } else {
-        $header = explode("\r\n\r\n", $data)[ 0 ];
+        $header = explode("\r\n\r\n", $data)[0];
         $data = [];
     }
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -372,9 +372,9 @@ function replace_array_element($array, $replace)
 {
     foreach ($replace as $k => $v) {
         if ($v == "unset" || $v == "") {
-            unset($array[ $k ]);
+            unset($array[$k]);
         } else {
-            $array[ $k ] = $v;
+            $array[$k] = $v;
         }
     }
     return $array;
@@ -390,7 +390,7 @@ function ihtmlspecialchars($string)
 {
     if (is_array($string)) {
         foreach ($string as $key => $val) {
-            $string[ $key ] = ihtmlspecialchars($val);
+            $string[$key] = ihtmlspecialchars($val);
         }
     } else {
         $string = preg_replace(
@@ -415,12 +415,12 @@ function addon_url($url, $param = array())
         return $url;
     }
     $parse_url = parse_url($url);
-    $addon = isset($parse_url[ 'scheme' ]) ? $parse_url[ 'scheme' ] : '';
-    $controller = isset($parse_url[ 'host' ]) ? $parse_url[ 'host' ] : '';
-    $action = trim($parse_url[ 'path' ], '/');
+    $addon = isset($parse_url['scheme']) ? $parse_url['scheme'] : '';
+    $controller = isset($parse_url['host']) ? $parse_url['host'] : '';
+    $action = trim($parse_url['path'], '/');
     /* 解析URL带的参数 */
-    if (isset($parse_url[ 'query' ])) {
-        parse_str($parse_url[ 'query' ], $query);
+    if (isset($parse_url['query'])) {
+        parse_str($parse_url['query'], $query);
         $param = array_merge($query, $param);
     }
     $url = $addon . '/' . $controller . '/' . $action;
@@ -474,19 +474,19 @@ function url_action($url)
         $url_array = explode('/', $url);
         return [
             'addon' => '',
-            'model' => $url_array[ 0 ],
-            'controller' => $url_array[ 1 ],
-            'action' => $url_array[ 2 ]
+            'model' => $url_array[0],
+            'controller' => $url_array[1],
+            'action' => $url_array[2]
         ];
     } else {
         $url_addon_array = explode('://', $url);
-        $addon = $url_addon_array[ 0 ];
-        $url_array = explode('/', $url_addon_array[ 1 ]);
+        $addon = $url_addon_array[0];
+        $url_array = explode('/', $url_addon_array[1]);
         return [
             'addon' => $addon,
-            'model' => $url_array[ 0 ],
-            'controller' => $url_array[ 1 ],
-            'action' => $url_array[ 2 ]
+            'model' => $url_array[0],
+            'controller' => $url_array[1],
+            'action' => $url_array[2]
         ];
     }
 }
@@ -500,21 +500,21 @@ function addon_is_exit($name, $site_id = 0)
 {
     $addon_model = new Addon();
     $addon_data = $addon_model->getAddonList([], 'name');
-    $addons = array_column($addon_data[ 'data' ], 'name');
+    $addons = array_column($addon_data['data'], 'name');
     if (in_array($name, $addons)) {
         $shop_model = new \app\model\shop\Shop();
         $shop_info_result = $shop_model->getShopInfo([['site_id', '=', $site_id]], 'group_id');
-        $shop_info = $shop_info_result[ 'data' ];
+        $shop_info = $shop_info_result['data'];
         $group_model = new \app\model\shop\ShopGroup();
         if ($site_id == 0) {
             return 1;
         } else {
-            $group_result = $group_model->getGroupInfo([['group_id', '=', $shop_info[ 'group_id' ]]], 'addon_array');
-            $group = $group_result[ 'data' ];
+            $group_result = $group_model->getGroupInfo([['group_id', '=', $shop_info['group_id']]], 'addon_array');
+            $group = $group_result['data'];
             if (empty($group)) {
                 return 0;
             } else {
-                $addons = explode(',', $group[ 'addon_array' ]);
+                $addons = explode(',', $group['addon_array']);
                 return in_array($name, $addons) ? 1 : 0;
             }
         }
@@ -540,7 +540,7 @@ function event($event, $args = [], $once = false)
     }
     //只返回一个结果集
     if ($once) {
-        return isset($res[ 0 ]) ? $res[ 0 ] : '';
+        return isset($res[0]) ? $res[0] : '';
     }
     return $res;
 }
@@ -612,7 +612,7 @@ function img($path, $type = '')
     $first = explode("/", $path);
     $path = substr_replace($path, $type, $start, 0);
     if (stristr($path, "http://") === false && stristr($path, "https://") === false) {
-        if (is_numeric($first[ 0 ])) {
+        if (is_numeric($first[0])) {
             $true_path = __ROOT__ . '/upload/' . $path;
         } else {
             $true_path = __ROOT__ . '/' . $path;
@@ -667,21 +667,21 @@ function api($method, $params = [])
 function get_api_data($method, $params)
 {
     $method_array = explode('.', $method);
-    if ($method_array[ 0 ] == 'System') {
-        $class_name = 'app\\api\\controller\\' . $method_array[ 1 ];
+    if ($method_array[0] == 'System') {
+        $class_name = 'app\\api\\controller\\' . $method_array[1];
         if (!class_exists($class_name)) {
             return error();
         }
         $api_model = new $class_name($params);
     } else {
-        $class_name = "addon\\{$method_array[0]}\\api\\controller\\" . $method_array[ 1 ];
+        $class_name = "addon\\{$method_array[0]}\\api\\controller\\" . $method_array[1];
 
         if (!class_exists($class_name)) {
             return error();
         }
         $api_model = new $class_name($params);
     }
-    $function = $method_array[ 2 ];
+    $function = $method_array[2];
     $data = $api_model->$function($params);
     return $data;
 }
@@ -695,7 +695,7 @@ function get_zodiac($year)
 {
     $animals = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
     $key = ($year - 1900) % 12;
-    return $animals[ $key ];
+    return $animals[$key];
 }
 
 /**
@@ -709,12 +709,12 @@ function get_constellation($month, $day)
     $constellations = ['水瓶座', '双鱼座', '白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座', '天秤座', '天蝎座', '射手座', '摩羯座'];
     if ($day <= 22) {
         if (1 != $month) {
-            $constellation = $constellations[ $month - 2 ];
+            $constellation = $constellations[$month - 2];
         } else {
-            $constellation = $constellations[ 11 ];
+            $constellation = $constellations[11];
         }
     } else {
-        $constellation = $constellations[ $month - 1 ];
+        $constellation = $constellations[$month - 1];
     }
     return $constellation;
 }
@@ -729,8 +729,8 @@ function arr_key_to_int($data, $clild_name)
 {
     $temp_data = array_values($data);
     foreach ($temp_data as $k => $v) {
-        if (!empty($v[ $clild_name ])) {
-            $temp_data[ $k ][ $clild_name ] = arr_key_to_int($v[ $clild_name ], $clild_name);
+        if (!empty($v[$clild_name])) {
+            $temp_data[$k][$clild_name] = arr_key_to_int($v[$clild_name], $clild_name);
         }
     }
     return $temp_data;
@@ -763,7 +763,7 @@ function arr_del_arr($arr, $del_arr)
 {
     foreach ($arr as $k => $v) {
         if (in_array($v, $del_arr)) {
-            unset($arr[ $k ]);
+            unset($arr[$k]);
         }
     }
     sort($arr);
@@ -789,12 +789,12 @@ function check_auth($url = '')
     $member_info = cache("member_info_" . request()->siteid() . $access_token);
     if (empty($member_info)) {
         $member_info = api("System.Member.memberInfo", ['access_token' => $access_token]);
-        if ($member_info[ 'code' ] == 0) {
-            $member_info = $member_info[ 'data' ];
+        if ($member_info['code'] == 0) {
+            $member_info = $member_info['data'];
             cache("member_info_" . request()->siteid() . $access_token, $member_info);
         }
     }
-    $member_info[ 'access_token' ] = $access_token;
+    $member_info['access_token'] = $access_token;
     return success($member_info);
 }
 
@@ -942,7 +942,7 @@ function sp_dir_create($path, $mode = 0777)
     $cur_dir = '';
     $max = count($temp) - 1;
     for ($i = 0; $i < $max; $i++) {
-        $cur_dir .= $temp[ $i ] . '/';
+        $cur_dir .= $temp[$i] . '/';
         if (@is_dir($cur_dir)) {
             continue;
         }
@@ -1125,11 +1125,11 @@ function charset2utf8($mixed)
     if (is_array($mixed)) {
         foreach ($mixed as $k => $v) {
             if (is_array($v)) {
-                $mixed[ $k ] = charsetToUTF8($v);
+                $mixed[$k] = charsetToUTF8($v);
             } else {
                 $encode = mb_detect_encoding($v, array('ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5'));
                 if ($encode == 'EUC-CN') {
-                    $mixed[ $k ] = iconv('GBK', 'UTF-8', $v);
+                    $mixed[$k] = iconv('GBK', 'UTF-8', $v);
                 }
             }
         }
@@ -1150,10 +1150,10 @@ function charset2utf8($mixed)
 function check_bom($filename)
 {
     $contents = file_get_contents($filename);
-    $charset[ 1 ] = substr($contents, 0, 1);
-    $charset[ 2 ] = substr($contents, 1, 1);
-    $charset[ 3 ] = substr($contents, 2, 1);
-    if (ord($charset[ 1 ]) == 239 && ord($charset[ 2 ]) == 187 && ord($charset[ 3 ]) == 191) {
+    $charset[1] = substr($contents, 0, 1);
+    $charset[2] = substr($contents, 1, 1);
+    $charset[3] = substr($contents, 2, 1);
+    if (ord($charset[1]) == 239 && ord($charset[2]) == 187 && ord($charset[3]) == 191) {
         $rest = substr($contents, 3);
         return $rest;
     } else {
@@ -1230,8 +1230,8 @@ function getDistance(float $lng1, float $lat1, float $lng2, float $lat2)
 
 function get_http_type()
 {
-    $http_type = ((isset($_SERVER[ 'HTTPS' ]) && $_SERVER[ 'HTTPS' ] == 'on') || (isset($_SERVER[ 'HTTP_X_FORWARDED_PROTO' ])
-            && $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] == 'https')) ? 'https' : 'http';
+    $http_type = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
+            && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')) ? 'https' : 'http';
     return $http_type;
 }
 
@@ -1255,56 +1255,56 @@ function is_point_in_polygon($point, $pts)
     $p2 = 0;
     $p = $point; //测试点
 
-    $p1 = $pts[ 0 ];//left vertex
+    $p1 = $pts[0];//left vertex
     for ($i = 1; $i <= $N; ++$i) {//check all rays
         // dump($p1);
-        if ($p[ 'longitude' ] == $p1[ 'longitude' ] && $p[ 'latitude' ] == $p1[ 'latitude' ]) {
+        if ($p['longitude'] == $p1['longitude'] && $p['latitude'] == $p1['latitude']) {
             return $boundOrVertex;//p is an vertex
         }
 
-        $p2 = $pts[ $i % $N ];//right vertex
-        if ($p[ 'latitude' ] < min($p1[ 'latitude' ], $p2[ 'latitude' ]) || $p[ 'latitude' ]
-            > max($p1[ 'latitude' ], $p2[ 'latitude' ])) {
+        $p2 = $pts[$i % $N];//right vertex
+        if ($p['latitude'] < min($p1['latitude'], $p2['latitude']) || $p['latitude']
+            > max($p1['latitude'], $p2['latitude'])) {
             //ray is outside of our interests
             $p1 = $p2;
             continue;//next ray left point
         }
 
-        if ($p[ 'latitude' ] > min($p1[ 'latitude' ], $p2[ 'latitude' ]) && $p[ 'latitude' ]
-            < max($p1[ 'latitude' ], $p2[ 'latitude' ])) {
+        if ($p['latitude'] > min($p1['latitude'], $p2['latitude']) && $p['latitude']
+            < max($p1['latitude'], $p2['latitude'])) {
             //ray is crossing over by the algorithm (common part of)
-            if ($p[ 'longitude' ] <= max($p1[ 'longitude' ], $p2[ 'longitude' ])) {
+            if ($p['longitude'] <= max($p1['longitude'], $p2['longitude'])) {
                 //x is before of ray
-                if ($p1[ 'latitude' ] == $p2[ 'latitude' ] && $p[ 'longitude' ]
-                    >= min($p1[ 'longitude' ], $p2[ 'longitude' ])) {
+                if ($p1['latitude'] == $p2['latitude'] && $p['longitude']
+                    >= min($p1['longitude'], $p2['longitude'])) {
                     //overlies on a horizontal ray
                     return $boundOrVertex;
                 }
 
-                if ($p1[ 'longitude' ] == $p2[ 'longitude' ]) {//ray is vertical
-                    if ($p1[ 'longitude' ] == $p[ 'longitude' ]) {//overlies on a vertical ray
+                if ($p1['longitude'] == $p2['longitude']) {//ray is vertical
+                    if ($p1['longitude'] == $p['longitude']) {//overlies on a vertical ray
                         return $boundOrVertex;
                     } else {//before ray
                         ++$intersectCount;
                     }
                 } else {//cross point on the left side
-                    $xinters = ($p[ 'latitude' ] - $p1[ 'latitude' ]) * ($p2[ 'longitude' ] - $p1[ 'longitude' ])
-                        / ($p2[ 'latitude' ] - $p1[ 'latitude' ]) + $p1[ 'longitude' ];
+                    $xinters = ($p['latitude'] - $p1['latitude']) * ($p2['longitude'] - $p1['longitude'])
+                        / ($p2['latitude'] - $p1['latitude']) + $p1['longitude'];
                     //cross point of lng
-                    if (abs($p[ 'longitude' ] - $xinters) < $precision) {
+                    if (abs($p['longitude'] - $xinters) < $precision) {
                         //overlies on a ray
                         return $boundOrVertex;
                     }
 
-                    if ($p[ 'longitude' ] < $xinters) {//before ray
+                    if ($p['longitude'] < $xinters) {//before ray
                         ++$intersectCount;
                     }
                 }
             }
         } else {//special case when ray is crossing through the vertex
-            if ($p[ 'latitude' ] == $p2[ 'latitude' ] && $p[ 'longitude' ] <= $p2[ 'longitude' ]) {//p crossing over p2
-                $p3 = $pts[ ($i + 1) % $N ]; //next vertex
-                if ($p[ 'latitude' ] >= min($p1[ 'latitude' ], $p3[ 'latitude' ]) && $p[ 'latitude' ] <= max($p1[ 'latitude' ], $p3[ 'latitude' ])) { //p.latitude lies between p1.latitude & p3.latitude
+            if ($p['latitude'] == $p2['latitude'] && $p['longitude'] <= $p2['longitude']) {//p crossing over p2
+                $p3 = $pts[($i + 1) % $N]; //next vertex
+                if ($p['latitude'] >= min($p1['latitude'], $p3['latitude']) && $p['latitude'] <= max($p1['latitude'], $p3['latitude'])) { //p.latitude lies between p1.latitude & p3.latitude
                     ++$intersectCount;
                 } else {
                     $intersectCount += 2;
@@ -1336,10 +1336,10 @@ function getFileMap($path, $arr = [])
             if ($file_path != '.' && $file_path != '..') {
                 $temp_path = $path . '/' . $file_path;
                 if (is_dir($temp_path)) {
-                    $arr[ $temp_path ] = $file_path;
+                    $arr[$temp_path] = $file_path;
                     $arr = getFileMap($temp_path, $arr);
                 } else {
-                    $arr[ $temp_path ] = $file_path;
+                    $arr[$temp_path] = $file_path;
                 }
             }
         }
@@ -1417,7 +1417,7 @@ function downloadCsv($tableHead, $tempLine, $filePath, $list)
             $values = str_replace(',', '\\', $value);
             $newvalue = str_replace("{\$$key}", $values, $newvalue);
         }
-        $html .= $newvalue ;
+        $html .= $newvalue;
     }
 //    $newName = date('Ymd') . ".csv";//文件名
 //
@@ -1455,18 +1455,19 @@ function exportCsv($tableHead, $tempLine, $list)
             $values = str_replace(',', '\\', $value);
             $newvalue = str_replace("{\$$key}", $values, $newvalue);
         }
-        $html .= $newvalue ;
+        $html .= $newvalue;
     }
 
-    $filename = date('Ymd his').'.csv'; //设置文件名
+    $filename = date('Ymd his') . '.csv'; //设置文件名
     header("Content-type:text/csv");
-    header("Content-Disposition:attachment;filename=".$filename);
+    header("Content-Disposition:attachment;filename=" . $filename);
     header('Cache-Control:must-revalidate,post-check=0,pre-check=0');
     header('Expires:0');
     header('Pragma:public');
     exit(mb_convert_encoding($html, "GBK", "UTF-8"));
 
 }
+
 /**
  * 读取csv的内容到数组
  * @param string $uploadfile
@@ -1481,7 +1482,7 @@ function readCsv($uploadfile)
     $data = eval('return ' . iconv('gbk', 'utf-8', var_export($data, true)) . ';');
     foreach ($data as $key => $value) {
         if (!$value) {
-            unset($data[ $key ]);
+            unset($data[$key]);
         }
     }
     fclose($file);
@@ -1494,9 +1495,9 @@ function readCsv($uploadfile)
  * @param $end_time
  * @return array
  */
-function timediff( $begin_time, $end_time )
+function timediff($begin_time, $end_time)
 {
-    if ( $begin_time < $end_time ) {
+    if ($begin_time < $end_time) {
         $starttime = $begin_time;
         $endtime = $end_time;
     } else {
@@ -1504,25 +1505,25 @@ function timediff( $begin_time, $end_time )
         $endtime = $begin_time;
     }
     $timediff = $endtime - $starttime;
-    $days = intval( $timediff / 86400 );
+    $days = intval($timediff / 86400);
     $remain = $timediff % 86400;
-    $hours = intval( $remain / 3600 );
+    $hours = intval($remain / 3600);
     $remain = $remain % 3600;
-    $mins = intval( $remain / 60 );
+    $mins = intval($remain / 60);
     $secs = $remain % 60;
 
     $diff_str = '';
-    if($days > 0){
-        $diff_str .= $days.'天';
+    if ($days > 0) {
+        $diff_str .= $days . '天';
     }
-    if($hours > 0){
-        $diff_str .= $hours.'时';
+    if ($hours > 0) {
+        $diff_str .= $hours . '时';
     }
-    if($mins > 0){
-        $diff_str .= $mins.'分';
+    if ($mins > 0) {
+        $diff_str .= $mins . '分';
     }
-    if($secs > 0){
-        $diff_str .= $secs.'秒';
+    if ($secs > 0) {
+        $diff_str .= $secs . '秒';
     }
     return $diff_str;
 }
@@ -1538,4 +1539,41 @@ if (!function_exists('site_name')) {
         return Db::name('config')->where('code', 'site_name')
             ->value('value');
     }
+}
+
+/**
+ * 返回JSON数据
+ *
+ * @param int $code 状态码 (0=成功)
+ * @param string $msg 消息
+ * @param array $data 返回数据
+ * @param integer $count 数量 (页数 / 记录数量)
+ * @return void
+ */
+//function retMsg($data = [], $code = 200, $msg = '', $count = 0)
+//{
+//    header("Access-Control-Allow-Origin:*");
+//    header('Access-Control-Allow-Methods:POST,GET');
+//    header('Content-Type:application/json');
+//
+//    $list['code'] = $code;
+//    $list['msg'] = $msg;
+//    $list['count'] = $count;
+//    $list['data'] = $data;
+//    echo json_encode($list);
+//    die;
+//}
+
+function retMsg($code = 200, $msg = '', $data = [], $count = 0)
+{
+    header("Access-Control-Allow-Origin:*");
+    header('Access-Control-Allow-Methods:POST,GET');
+    header('Content-Type:application/json');
+
+    $list['code'] = $code;
+    $list['msg'] = $msg;
+    $list['count'] = $count;
+    $list['data'] = $data;
+    echo json_encode($list);
+    die;
 }

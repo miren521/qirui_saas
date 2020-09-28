@@ -3,14 +3,14 @@
     <div class="lemo-main">
         <div class="admin-main layui-anim layui-anim-upbit">
             <fieldset class="layui-elem-field layui-field-title">
-                <legend>权限组{:lang('list')}</legend>
+                <legend>权限组列表</legend>
                 <blockquote class="layui-elem-quote">
                     <div class="lemo-table">
-                        <form class="layui-form layui-form-pane" action="{:url('groupAdd')}" lay-filter="form" method="post" >
+                        <form class="layui-form layui-form-pane" action="{:url('saas/sys.Auth/groupAdd')}" lay-filter="form" method="post" >
                             <div class="layui-inline">
-                                <input type="text" name="title" lay-verify="required" placeholder="{:lang('pleaseEnter')}添加" autocomplete="off" class="layui-input">
+                                <input type="text" name="title" lay-verify="required" placeholder="请输入添加" autocomplete="off" class="layui-input">
                             </div>
-                            <button class="layui-btn data-add-btn layui-btn-sm" lay-submit="" lay-filter="submit">{:lang('add')}</button>
+                            <button class="layui-btn data-add-btn layui-btn-sm" lay-submit="" lay-filter="submit">添加</button>
                         </form>
                     </div>
                   </blockquote>
@@ -26,19 +26,19 @@
 
 
 <script type="text/html" id="action">
-    <a data-href="{:url('groupAccess')}?id={{d.id}}" class="layui-btn layui-btn-xs layui-btn-normal" lay-event="edit">配置规则</a>
-    <a data-href="{:url('groupEdit')}?id={{d.id}}" class="layui-btn layui-btn-warm layui-btn-xs" lay-event="edit">{:lang('edit')}</a>
+    <a data-href="{:url('saas/sys.Auth/groupAccess')}?id={{d.id}}" class="layui-btn layui-btn-xs layui-btn-normal" lay-event="edit">配置规则</a>
+    <a data-href="{:url('saas/sys.Auth/groupEdit')}?id={{d.id}}" class="layui-btn layui-btn-warm layui-btn-xs" lay-event="edit">编辑</a>
     {{# if(d.id==1){ }}
-    <a class="layui-btn layui-btn-danger layui-btn-xs layui-btn-disabled">{:lang('del')}</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs layui-btn-disabled">删除</a>
     {{# }else{  }}
-    <a class="layui-btn layui-btn-danger layui-btn-xs"  data-href="{:url('groupDel')}" lay-event="del">{:lang('del')}</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs"  data-href="{:url('saas/sys.Auth/groupDel')}" lay-event="del">删除</a>
     {{# } }}
 </script>
 <script type="text/html" id="status">
     {{# if(d.id==1){ }}
-    <input type="checkbox" disabled name="status" value="{{d.id}}" lay-skin="switch" lay-text="开启|关闭" data-href="{:url('groupState')}" lay-filter="status" checked>
+    <input type="checkbox" disabled name="status" value="{{d.id}}" lay-skin="switch" lay-text="开启|关闭" data-href="{:url('saas/sys.Auth/groupState')}" lay-filter="status" checked>
     {{# }else{  }}
-    <input type="checkbox" name="status"  value="{{d.id}}" lay-skin="switch" lay-text="开启|关闭" data-href="{:url('groupState')}" lay-filter="status" {{ d.status == 1 ? 'checked' : '' }}>
+    <input type="checkbox" name="status"  value="{{d.id}}" lay-skin="switch" lay-text="开启|关闭" data-href="{:url('saas/sys.Auth/groupState')}" lay-filter="status" {{ d.status == 1 ? 'checked' : '' }}>
     {{# } }}
 </script>
 <script type="text/html" id="create_time">
@@ -51,7 +51,7 @@
 <script>
     var tableIn;
     layui.config({
-        base: "/static/admin/js/",
+        base: "/public/static/admin/js/",
         version: true
     }).extend({
         Admin: 'Admin'
@@ -61,7 +61,7 @@
             table = layui.table;
         tableIn = table.render({
             elem: '#list',
-            url: '{:url("group")}',
+            url: '{:url("saas/sys.Auth/group")}',
             method: 'post',
             cols: [[
                 {checkbox: true, fixed: true},
