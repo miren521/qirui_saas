@@ -15,10 +15,10 @@
 </div>
 
 <script type="text/html" id="auth">
-    <input type="checkbox" name="auth_open" data-href="{:url('ruleState')}" value="{{d.id}}" lay-skin="switch" lay-text="是|否" lay-filter="status" {{ d.auth_open == 0 ? 'checked' : '' }}>
+    <input type="checkbox" name="auth_open" data-href="{:url('saas/sys.Auth/ruleState')}" value="{{d.id}}" lay-skin="switch" lay-text="是|否" lay-filter="status" {{ d.auth_open == 0 ? 'checked' : '' }}>
 </script>
 <script type="text/html" id="status">
-    <input type="checkbox" name="menu_status" data-href="{:url('ruleState')}" value="{{d.id}}" lay-skin="switch" lay-text="显示|隐藏" lay-filter="status" {{ d.menu_status == 1 ? 'checked' : '' }}>
+    <input type="checkbox" name="menu_status" data-href="{:url('saas/sys.Auth/ruleState')}" value="{{d.id}}" lay-skin="switch" lay-text="显示|隐藏" lay-filter="status" {{ d.menu_status == 1 ? 'checked' : '' }}>
 </script>
 <!--<script type="text/html" id="order">-->
 <!--    <input name="{{d.id}}" data-id="{{d.id}}" class="list_order layui-input" value=" {{d.sort}}" size="10"/>-->
@@ -76,7 +76,7 @@
             var data = obj.data;
             var url = $(this).attr('data-href');
             if(obj.event === 'del'){
-                layer.confirm('Are you sure you want to delete it', function(index){
+                layer.confirm('确认删除？', function(index){
                     loading =layer.load(1, {shade: [0.1,'#fff']});
                     $.post(url?url:'delete',{ids:[data.id]},function(res){
                         layer.close(loading);

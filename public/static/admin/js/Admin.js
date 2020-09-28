@@ -186,11 +186,11 @@ layui.define(['form','layer', 'table','upload'], function (exports) {
         });
         //返回页面
         $('body').on('click','.back',function() {
-            window.parent.location.reload();
-            // var url = $(this).attr('data-href');
-            // layer.closeAll();
+            // window.parent.location.reload();
+            var url = $(this).attr('data-href');
+            layer.closeAll();
             // window.close()
-            // window.parent.location.href=url;
+            window.parent.location.href=url;
 
         });
         $('body').on('click','#selectAttach',function(data) {

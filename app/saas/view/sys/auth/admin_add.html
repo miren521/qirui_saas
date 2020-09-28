@@ -9,7 +9,8 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">所属用户组</label>
                     <div class="layui-input-inline">
-                        <select name="group_id" lay-verify="required" {if !empty($info) && $info.group_id !=1 }disabled{/if}>
+<!--                        <select name="group_id" lay-verify="required" {if !empty($info) && $info.group_id !=1 }disabled{/if}>-->
+                        <select name="group_id" lay-verify="required">
                             <option value="">请选择用户组</option>
                             {volist name="authGroup" id="vo"}
                             <option value="{$vo.id}" {if !empty($info) && $info.group_id==$vo.id} selected {/if} >{$vo.title}</option>
@@ -19,18 +20,19 @@
                 </div>
 
                 <div class="layui-form-item">
-                    <label class="layui-form-label">{:lang('username')}</label>
+                    <label class="layui-form-label">用户名</label>
                     <div class="layui-input-inline">
-                        <input type="text" name="username" lay-verify="required" placeholder="{:lang('pleaseEnter')}登录用户名" class="layui-input {if $info && $info.id!==1}layui-disabled{/if}"  {if  $info && $info.id!==1}readonly="readonly"{/if}>
+<!--                        <input type="text" name="username" lay-verify="required" placeholder="请输入登录用户名" class="layui-input {if $info && $info.uid!==1}layui-disabled{/if}"  {if  $info && $info.uid!==1}readonly="readonly"{/if}>-->
+                        <input type="text" name="username" lay-verify="required" placeholder="请输入登录用户名" class="layui-input">
                     </div>
                     <div class="layui-form-mid layui-word-aux">
                         用户名在4到25个字符之间。
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">{:lang('password')}</label>
+                    <label class="layui-form-label">密码</label>
                     <div class="layui-input-inline">
-                        <input type="password" name="password" placeholder="{:lang('pleaseEnter')}登录密码" autocomplete="true" {if !empty($info)} lay-verify="required"{/if} class="layui-input">
+                        <input type="password" name="password" placeholder="请输入登录密码" autocomplete="true" {if !empty($info)} lay-verify="required"{/if} class="layui-input">
                     </div>
                     <div class="layui-form-mid layui-word-aux">
                         密码必须大于6位，小于15位。
@@ -49,26 +51,26 @@
                         </div>
                     </div>
                 </div>
+<!--                <div class="layui-form-item">-->
+<!--                    <label class="layui-form-label">{:lang('email')}</label>-->
+<!--                    <div class="layui-input-inline">-->
+<!--                        <input type="text" name="email" lay-verify="email" placeholder="请输入用户邮箱" class="layui-input">-->
+<!--                    </div>-->
+<!--                    <div class="layui-form-mid layui-word-aux">-->
+<!--                        用于密码找回，请认真填写。-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="layui-form-item">-->
+<!--                    <label class="layui-form-label">{:lang('mobile')}</label>-->
+<!--                    <div class="layui-input-inline">-->
+<!--                        <input type="text" name="mobile" lay-verify="phone" value="" placeholder="请输入手机号" class="layui-input">-->
+<!--                    </div>-->
+<!--                </div>-->
                 <div class="layui-form-item">
-                    <label class="layui-form-label">{:lang('email')}</label>
                     <div class="layui-input-inline">
-                        <input type="text" name="email" lay-verify="email" placeholder="{:lang('pleaseEnter')}用户邮箱" class="layui-input">
-                    </div>
-                    <div class="layui-form-mid layui-word-aux">
-                        用于密码找回，请认真填写。
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label">{:lang('mobile')}</label>
-                    <div class="layui-input-inline">
-                        <input type="text" name="mobile" lay-verify="phone" value="" placeholder="{:lang('pleaseEnter')}手机号" class="layui-input">
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <div class="layui-input-inline">
-                        <input type="hidden" name="id"  >
-                        <button type="button" class="layui-btn" lay-submit="" lay-filter="submit">{:lang('submit')}</button>
-                        <a data-href="{:url('adminList')}" class="layui-btn layui-btn-primary back">{:lang('back')}</a>
+                        <input type="hidden" name="uid"  >
+                        <button type="button" class="layui-btn" lay-submit="" lay-filter="submit">提交</button>
+                        <a data-href="{:url('saas/sys.Auth/adminList')}" class="layui-btn layui-btn-primary back">返回</a>
                     </div>
                 </div>
             </form>
@@ -80,7 +82,7 @@
 {include file="common/footer"/}
 <script>
     layui.config({
-        base: '/static/admin/js/',
+        base: '/public/static/admin/js/',
         version: true
     }).extend({
         Admin: 'Admin',

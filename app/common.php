@@ -21,6 +21,7 @@ use extend\QRcode as QRcode;
 use think\facade\Session;
 use think\facade\Event;
 use app\model\system\Addon;
+use think\facade\Db;
 
 /*****************************************************基础函数*********************************************************/
 /**
@@ -1576,4 +1577,11 @@ function retMsg($code = 200, $msg = '', $data = [], $count = 0)
     $list['data'] = $data;
     echo json_encode($list);
     die;
+}
+
+function getConfigByCode($code)
+{
+    return Db::name('other_config')->where('code', $code)
+        ->value('value');
+
 }

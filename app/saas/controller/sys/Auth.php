@@ -10,11 +10,10 @@
  * Author: yuege
  * Date: 2019/8/2
  */
+
 namespace app\saas\controller\sys;
 
 use app\model\saas\AuthRule;
-use app\admin\model\Admin;
-use app\common\controller\Backend;
 use app\common\traits\Curd;
 use app\saas\controller\BaseSaas;
 use lemo\helper\SignHelper;
@@ -25,11 +24,14 @@ use think\facade\Request;
 use think\facade\Session;
 use think\facade\View;
 use app\model\saas\AuthGroup;
+use app\model\saas\User as Admin;
 
 class Auth extends BaseSaas
 {
     use Curd;
+
     public $uid = '';
+
     public function initialize()
     {
         $this->uid = Session::get('admin.id');
@@ -40,12 +42,12 @@ class Auth extends BaseSaas
     // 管理员列表
     public function adminList()
     {
-        if(Request::isPost()){
-            $where=$this->request->post();
-            $map=[];
-            $map1=[];
-            $map2=[];
-            if(isset($where['keys'])) {
+        if (Request::isPost()) {
+            $where = \request()->post();
+            $map = [];
+            $map1 = [];
+            $map2 = [];
+            if (isset($where['keys'])) {
                 $map = [
                     ['a.username', 'like', "%" . $where['keys'] . "%"],
 
@@ -54,18 +56,19 @@ class Auth extends BaseSaas
                     ['a.email', 'like', "%" . $where['keys'] . "%"],
 
                 ];
-                $map2= [
+                $map2 = [
                     ['a.mobile', 'like', "%" . $where['keys'] . "%"],
                 ];
 
             }
-            $list=Db::name('admin')->alias('a')
-                ->join('auth_group ag','a.group_id = ag.id','left')
+            $list = Db::name('user')->alias('a')
+                ->where('app_module', 'saas')
+                ->join('auth_group ag', 'a.group_id = ag.id', 'left')
                 ->field('a.*,ag.title')
-                ->whereOr($map,$map1,$map2)
+                ->whereOr($map, $map1, $map2)
                 ->select();
 
-            return $result = ['code'=>0,'msg'=>lang('get info success'),'data'=>$list];
+            return $result = ['code' => 0, 'msg' => lang('get info success'), 'data' => $list];
         }
 
         return view();
@@ -75,23 +78,24 @@ class Auth extends BaseSaas
     public function adminAdd()
     {
         if (Request::isPost()) {
-            $data = $this->request->post();
-            try{
-                $this->validate($data, 'Admin');
-            }catch (\Exception $e){
-                $this->error($e->getMessage());
-            }
+            $data = \request()->post();
+//            try {
+//                $this->validate($data, 'Admin');
+//            } catch (\Exception $e) {
+//                $this->error($e->getMessage());
+//            }
 
-                $data['password'] = StringHelper::filterWords($data['password']);
-                if(!$data['password']){
-                    $data['password']='123456';
-                }
-                $data['password'] = password_hash($data['password'],PASSWORD_BCRYPT, SignHelper::passwordSalt());
+            $data['password'] = StringHelper::filterWords($data['password']);
+            if (!$data['password']) {
+                $data['password'] = '123456';
+            }
+            $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT, SignHelper::passwordSalt());
             //添加
             $model = new Admin();
+            $data['app_module'] = 'saas';
             $result = $model->add($data);
             if ($result) {
-                $this->success('操作成功', url('sys.Auth/adminList'));
+                return retMsg(200, '操作成功');
             } else {
                 $this->error(lang('add fail'));
             }
@@ -100,9 +104,9 @@ class Auth extends BaseSaas
         $auth_group = AuthGroup::where('status', 1)
             ->select();
         $view = [
-            'info'  =>$info,
+            'info' => $info,
             'authGroup' => $auth_group,
-            'title' => lang('add'),
+            'title' => '添加',
         ];
         View::assign($view);
         return view();
@@ -112,11 +116,11 @@ class Auth extends BaseSaas
     // 管理员删除
     public function adminDel()
     {
-        $ids = $this->request->post('ids');
+        $ids = \request()->post('ids');
         if (!empty($ids)) {
             $model = new Admin();
-            foreach ($ids as $k=>$id) {
-                if($id==1){
+            foreach ($ids as $k => $id) {
+                if ($id == 1) {
                     unset($ids[$k]);
                 }
             }
@@ -129,15 +133,14 @@ class Auth extends BaseSaas
     }
 
 
-
     // 管理员状态修改
     public function adminState()
     {
         if (Request::isPost()) {
-            $data = $this->request->post();
-            $id = $this->request->post('id');
+            $data = \request()->post();
+            $id = \request()->post('id');
             if (empty($id)) {
-                $this->error('id'.lang('not exist'));
+                $this->error('id' . lang('not exist'));
             }
             if ($id == 1) {
                 $this->error(lang('supper man cannot edit state'));
@@ -154,34 +157,37 @@ class Auth extends BaseSaas
     public function adminEdit()
     {
         if (Request::isPost()) {
-            $data = $this->request->post();
-            if(!$data['username']) $this->error(lang('username').lang('cannot null'));
-            if(!$data['password']) $this->error(lang('password').lang('cannot null'));
-            if(!$data['group_id']) $this->error(lang('adminGroup').lang('cannot null'));
-            $admin = Admin::find($data['id']);
-            if(password_verify($data['password'],$admin['password'])){
+            $data = \request()->post();
+            if (!$data['username']) $this->error(lang('username') . lang('cannot null'));
+            if (!$data['password']) $this->error(lang('password') . lang('cannot null'));
+            if (!$data['group_id']) $this->error(lang('adminGroup') . lang('cannot null'));
+            $admin = Admin::where(['uid' => $data['uid']])->find();
+            if (password_verify($data['password'], $admin['password'])) {
+                halt(2);
                 unset($data['password']);
-            }else{
-                $data['password'] = $this->request->post('password', '123456', 'lemo\helper\StringHelper::filterWords');
-                $data['password'] = password_hash($data['password'],PASSWORD_BCRYPT, SignHelper::passwordSalt());
+            } else {
+                $data['password'] = \request()->post('password', '123456');
+                $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT, SignHelper::passwordSalt());
             }
             $model = new Admin();
-            $model->edit($data);
-            if($this->uid==$data['id']){
-                session('admin',null);
+            $res = Admin::where(['uid' => $data['uid']])->update($data);
+            if (!$res) return retMsg(0, '操作失败');
+//            $model->edit($data);
+            if ($this->uid == $data['uid']) {
+                session('admin', null);
             }
-            $this->success(lang('edit success'), url('sys.Auth/adminList'));
+            return retMsg(200, '操作成功');
 
         } else {
-            $id = Request::param('id')?Request::param('id'):$this->uid;
+            $id = Request::param('id') ? Request::param('id') : $this->uid;
             if ($id) {
                 $auth_group = AuthGroup::select();
-                $admin = Admin::find($id)->toArray();
+                $admin = Admin::where(['uid' => $id])->find()->toArray();
                 unset($admin['password']);
                 $view = [
                     'info' => $admin,
                     'authGroup' => $auth_group,
-                    'title' => lang('edit'),
+                    'title' => '编辑',
                 ];
                 View::assign($view);
                 return view('admin_add');
@@ -193,18 +199,18 @@ class Auth extends BaseSaas
     // 权限列表
     public function adminRule()
     {
-        if(Request::isPost()){
+        if (Request::isPost()) {
             $uid = $this->uid;
 
             $arr = Db::name('auth_rule')
                 ->order('pid asc,sort asc')
                 ->select()->toArray();
-            foreach($arr as $k=>$v){
-                $arr[$k]['lay_is_open']=false;
+            foreach ($arr as $k => $v) {
+                $arr[$k]['lay_is_open'] = false;
             }
-            cache('authRuleList_'.$uid, $arr, 3600);
+            cache('authRuleList_' . $uid, $arr, 3600);
 
-            return $result = ['code'=>0,'msg'=>lang('get info success'),'data'=>$arr,'is'=>true,'tip'=>'操作成功'];
+            return $result = ['code' => 0, 'msg' => lang('get info success'), 'data' => $arr, 'is' => true, 'tip' => '操作成功'];
         }
         return view('admin_rule');
     }
@@ -212,30 +218,29 @@ class Auth extends BaseSaas
     // 权限菜单显示或者隐藏
     public function ruleState()
     {
-        if ($this->request->isPost()) {
-            $data = $this->request->post();
-            $id = $this->request->post('id');
+        if (Request::isPost()) {
+            $data = \request()->post();
+            $id = \request()->post('id');
 
             if (empty($id)) {
-                $this->error('id'.lang('not exist'));
+                $this->error('id' . lang('not exist'));
             }
-            $model  = new AuthRule();
+            $model = new AuthRule();
             $field = $data['field'];
             $auth = $this->modelClass->find($id);
             $ids = $this->modelClass->getAuthChildIds($id);
-            if($auth->$field==1){
-                $auth->$field=0;
-                $model->where('id','in',$ids)->save([$field=>0]);
-            }else{
-                $auth->$field=1;
-                $model->where('id','in',$ids)->save([$field=>1]);
+            if ($auth->$field == 1) {
+                $auth->$field = 0;
+                $model->where('id', 'in', $ids)->save([$field => 0]);
+            } else {
+                $auth->$field = 1;
+                $model->where('id', 'in', $ids)->save([$field => 1]);
 
             }
             $auth->save();
 
 
-
-            $this->success(lang('edit success'));
+            return retMsg(200, '操作成功');
         }
     }
 
@@ -258,14 +263,14 @@ class Auth extends BaseSaas
     {
         $ids = Request::param('ids');
         $model = new AuthRule();
-        $child =$model::where('pid','in',$ids)->find();
+        $child = $model::where('pid', 'in', $ids)->find();
         if ($ids && !$child) {
             $model->del($ids);
-            return retMsg(200,'操作成功');
-        }elseif($child){
-            return retMsg(0,'有下级');
-        }else{
-            return retMsg(0,'操作失败');
+            return retMsg(200, '操作成功');
+        } elseif ($child) {
+            return retMsg(0, '有下级');
+        } else {
+            return retMsg(0, '操作失败');
         }
     }
 
@@ -279,14 +284,14 @@ class Auth extends BaseSaas
                 $this->error(lang('rule name cannot null'));
             }
             if (empty($data['sort'])) {
-                $this->error(lang('sort').lang(' cannot null'));
+                $this->error(lang('sort') . lang(' cannot null'));
             }
-            $data['icon'] = $data['icon']?$data['icon']:'fa fa-adjust';
-            if(strpos(trim($data['href'],'/'),'admin/')===false){
-                $data['href'] = 'admin/'.trim($data['href'],'/');
+            $data['icon'] = $data['icon'] ? $data['icon'] : 'fa fa-adjust';
+            if (strpos(trim($data['href'], '/'), 'admin/') === false) {
+                $data['href'] = 'admin/' . trim($data['href'], '/');
             }
             if ($this->modelClass->create($data)) {
-                return retMsg(200,'操作成功');
+                return retMsg(200, '操作成功');
             } else {
                 $this->error(lang('add fail'));
             }
@@ -296,14 +301,14 @@ class Auth extends BaseSaas
                 ->select();
             $list = $this->modelClass->cateTree($list);
             $rule = '';
-            if(Request::get('rule_id')){
+            if (Request::get('rule_id')) {
                 $rule = Db::name('auth_rule')
                     ->find(Request::get('rule_id'));
             }
             $view = [
                 'info' => null,
                 'ruleList' => $list,
-                'rule' =>$rule,
+                'rule' => $rule,
             ];
             View::assign($view);
             return view('rule_add');
@@ -315,13 +320,13 @@ class Auth extends BaseSaas
     {
         if (request()->isPost()) {
             $data = Request::param();
-            $data['icon'] = $data['icon']?$data['icon']:'fa fa-adjust';
-            if(strpos(trim($data['href'],'/'),'admin/')===false){
-                $data['href'] = trim($data['href'],'/');
+            $data['icon'] = $data['icon'] ? $data['icon'] : 'fa fa-adjust';
+            if (strpos(trim($data['href'], '/'), 'admin/') === false) {
+                $data['href'] = trim($data['href'], '/');
             }
             $model = new AuthRule();
             $model->edit($data);
-            return retMsg(200,'操作成功');
+            return retMsg(200, '操作成功');
         } else {
             $list = Db::name('auth_rule')
                 ->order('sort asc')
@@ -330,7 +335,7 @@ class Auth extends BaseSaas
             $id = Request::param('id');
             $info = $this->modelClass->find($id)->toArray();
             $rule = '';
-            if(Request::get('rule_id')){
+            if (Request::get('rule_id')) {
                 $rule = Db::name('auth_rule')
                     ->find(Request::get('rule_id'));
             }
@@ -350,7 +355,7 @@ class Auth extends BaseSaas
     // 用户组管理
     public function group()
     {
-        if(Request::isPost()){
+        if (Request::isPost()) {
             //条件筛选
             $title = Request::param('title');
             //全局查询条件
@@ -367,7 +372,7 @@ class Auth extends BaseSaas
                     $this->pageSize, false,
                     ['query' => Request::param()]
                 )->toArray();
-            return $result = ['code'=>0,'msg'=>lang('get info success'),'data'=>$list['data']];
+            return $result = ['code' => 0, 'msg' => lang('get info success'), 'data' => $list['data']];
         }
         return view();
     }
@@ -379,7 +384,7 @@ class Auth extends BaseSaas
         if ($ids > 1) {
             $res = AuthGroup::find($ids);
             if (!$res->delete()) return retMsg(500, '操作失败');
-            return retMsg(200,'操作成功');
+            return retMsg(200, '操作成功');
         } else {
             $this->error(lang('supper man cannot delete'));
         }
@@ -417,7 +422,7 @@ class Auth extends BaseSaas
     {
         if (Request::isPost()) {
             $data = \request()->post();
-            if($data['id']==1){
+            if ($data['id'] == 1) {
                 return retMsg(200, '超级管理员不可修改');
             }
 //            try{
@@ -427,11 +432,10 @@ class Auth extends BaseSaas
 //            }
             $where['id'] = $data['id'];
             $res = AuthGroup::update($data, $where);
-            if($res){
+            if ($res) {
                 return retMsg(200, '操作成功');
-            }else{
+            } else {
                 $this->error(lang('edit fail'));
-
             }
 
         } else {
@@ -467,11 +471,11 @@ class Auth extends BaseSaas
     public function groupAccess()
     {
         $admin_rule = $this->modelClass->field('id, pid, title')
-            ->where('status',1)
+            ->where('status', 1)
             ->order('sort asc')->cache(3600)
             ->select()->toArray();
         $rules = AuthGroup::where('id', Request::param('id'))
-            ->where('status',1)
+            ->where('status', 1)
             ->value('rules');
         $list = $this->modelClass->authChecked($admin_rule, $pid = 0, $rules);
         $group_id = Request::param('id');
@@ -496,8 +500,8 @@ class Auth extends BaseSaas
         $data = \request()->post();
         $rules = $this->modelClass->authNormal($rules);
         $rls = '';
-        foreach ($rules as $k=>$v){
-            $rls.=$v['id'].',';
+        foreach ($rules as $k => $v) {
+            $rls .= $v['id'] . ',';
         }
         $where['id'] = $data['group_id'];
         $where['rules'] = $rls;

@@ -61,7 +61,7 @@
                 <div class="layui-form-item">
                     <div class="layui-input-inline">
                         <button type="button" class="layui-btn" lay-submit="" lay-filter="submit">立即提交</button>
-                        <a data-href="{:url('adminRule')}" class="layui-btn layui-btn-primary back">返回</a>
+                        <a data-href="{:url('saas/sys.Auth/adminRule')}" class="layui-btn layui-btn-primary back">返回</a>
                     </div>
                 </div>
             </form>
@@ -111,7 +111,6 @@
             var url = $(this).attr('data-href');
             layer.closeAll();
             window.parent.location.href=url;
-
         });
         form.on('submit(submit)', function (data) {
             // 提交到方法 默认为本身

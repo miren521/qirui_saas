@@ -10,14 +10,15 @@
  * Author: yuege
  * Date: 2019/8/2
  */
-namespace app\admin\controller\sys;
+namespace app\saas\controller\sys;
 use app\common\controller\Backend;
 use app\common\model\Attach as AttachModel;
 use app\common\traits\Curd;
+use app\saas\controller\BaseSaas;
 use lemo\helper\FileHelper;
 use lemo\helper\DataHelper;
 
-class Uploads extends Backend{
+class Uploads extends BaseSaas {
     use Curd;
     //上传验证规则
     protected $uploadValidate = [
@@ -97,13 +98,15 @@ class Uploads extends Backend{
                 $width = isset($imgInfo[0]) ? $imgInfo[0] : $width;
                 $height = isset($imgInfo[1]) ? $imgInfo[1] : $height;
             }
+
+            // TODO 这里有session，需要重做，所以等完善好在做
             if (!empty($path)) {
                 $data = [
                     'admin_id'=>session('admin.id'),
                     'name'=>$file_name,
                     'path'=>$path,
                     'thumb'=>$path,
-                    'url'=>$this->request->domain().$path,
+                    'url'=> request()->domain().$path,
                     'ext'=>$file_ext,
                     'size'=>$file_size/1024,
                     'width'=>$width,
@@ -112,7 +115,6 @@ class Uploads extends Backend{
                     'sha1'=>$sha1,
                     'mime'=>$file_mime,
                     'driver'=>'local',
-
                 ];
                 $attach = AttachModel::create($data);
                 $result['code'] = 1;

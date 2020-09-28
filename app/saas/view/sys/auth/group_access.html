@@ -50,6 +50,13 @@
 
         });
 
+        //返回页面
+        $('body').on('click','.back',function() {
+            var url = $(this).attr('data-href');
+            layer.closeAll();
+            window.parent.location.href=url;
+        });
+
         // 按钮事件
         util.event('lay-demo', {
             getChecked: function (othis) {

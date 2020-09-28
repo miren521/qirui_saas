@@ -13,10 +13,29 @@
                     </div>
                 </div>
                 <div class="layui-form-item">
+                    <label class="layui-form-label">折扣比例</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="ratio"  lay-verify="required" placeholder="请输入折扣比例" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">允许用户量</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="user_number"  lay-verify="required" placeholder="请输入允许用户量" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">排序</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="sort" value="50" placeholder="请输入排序编号"
+                               class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
                     <div class="layui-input-block">
                         <input type="hidden" name="id">
                         <button type="button" class="layui-btn" lay-submit="" lay-filter="submit">提交</button>
-                        <a data-href="{:url('group')}" class="layui-btn layui-btn-primary back">返回</a>
+                        <a data-href="{:url('saas/sys.Auth/group')}" class="layui-btn layui-btn-primary back">返回</a>
                     </div>
                 </div>
             </form>
