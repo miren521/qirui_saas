@@ -1,0 +1,370 @@
+{include file="common/header"/}
+<style type="text/css">
+    /*重置默认的外边距和内边距*/
+    *{
+        margin:0;
+        padding:0;
+    }
+    /*常用标签的样式重置*/
+    i{
+        font-style: normal;
+    }
+    a{
+        text-decoration: none;
+    }
+    input{
+        outline: none;
+        border:none;
+        BACKGROUND-COLOR: transparent;
+    }
+    /*设定html和body的宽度为100%*/
+    html,body{
+        width:100%;
+        font-size: 14px;
+    }
+    /*版心*/
+    .container{
+        width:1210px;
+        margin:0 auto;
+
+    }
+    /*-----------------------------------京东注册模块---------------------------*/
+    .register{
+        width: 400px;
+        margin: 0 auto;
+        padding-top:40px;
+        position: relative;
+    }
+    /*包裹表单项和对应的提示信息的容器的样式设置*/
+    .register-box{
+        width:100%;
+        height: 52px;
+        padding-bottom: 30px;
+    }
+    /*表单项样式设置*/
+    .register-box .box{
+        width:100%;
+        height:100%;
+        line-height: 52px;
+        padding-left: 10px;
+        border: 1px solid #ccc;
+        position: relative;
+    }
+    .register-box .box.error{
+        border:1px solid red;
+    }
+    .register-box .box input{
+        width:200px;
+        font-size:16px;
+        padding-left: 20px;
+    }
+    /*验证通过*/
+    .register-box .box.right i{
+        width:20px;
+        height: 20px;
+        background: url(../images/right.png) no-repeat center center;
+        position: absolute;
+        top:50%;
+        margin-top: -10px;
+        right: 10px;
+
+    }
+    /*提示信息样式设置*/
+    .register-box .tip {
+        width:100%;
+        line-height: 30px;
+        font-size: 12px;
+    }
+    .register-box .tip i{
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .register-box .tip span{
+        color: #CCCCCC;
+    }
+    /*提示信息隐藏样式*/
+    .register-box .tip.hide{
+        display: none;
+    }
+    /*提示信息默认样式*/
+    .register-box .tip.default i {
+        background: url(../images/default.png) no-repeat center center;
+    }
+    .register-box .tip.default span{
+        color: #ccc;
+    }
+    /*提示信息错误样式*/
+    .register-box .tip.error i {
+        background: url(../images/error.png) no-repeat center center;
+    }
+    .register-box .tip.error span{
+        color: red;
+    }
+    /*提示信息密码弱*/
+    .register-box .tip.ruo i {
+        background: url(../images/ruo.png) no-repeat center center;
+    }
+    /*提示信息密码中*/
+    .register-box .tip.zhong i {
+        background: url(../images/zhong.png) no-repeat center center;
+    }
+    /*提示信息密码中*/
+    .register-box .tip.qiang i {
+        background: url(../images/qiang.png) no-repeat center center;
+    }
+    /*京东用户注册协议*/
+    .register-box.xieyi{
+        width:100%;
+        height: 20px;
+        padding-bottom: 30px;
+        /*	background-color: #ccc;*/
+    }
+    .register-box.xieyi .box{
+        line-height: normal;
+        padding: 0;
+        border: none;
+    }
+    .register-box.xieyi .box.error{
+        line-height: normal;
+        padding: 0;
+        border: 1px solid red;
+    }
+    .register-box.xieyi .box input{
+        width: auto;
+    }
+    /*注册*/
+    .register button{
+        width: 100%;
+        height: 40px;
+        font:bold 18px/40px "宋体";
+        color: white;
+        background-color: darkred;
+        outline-color: white;
+    }
+    .register button:hover{
+        background-color: red;
+    }
+</style>
+<div style="margin:40px auto;">
+    <!--版心-->
+    <div class="container">
+        <!--京东注册模块-->
+        <div class="register">
+            <!--用户名-->
+            <div class="register-box">
+                <!--表单项-->
+                <div class="box default">
+                    <label >账&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;号&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <input type="text" id="account" placeholder="账户名和登录名" />
+                    <i></i>
+                </div>
+                <!--提示信息-->
+                <div class="tip">
+                    <i></i>
+                    <span></span>
+                </div>
+            </div>
+
+            <div class="register-box">
+                <!--表单项-->
+                <div class="box default">
+                    <label >密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <input type="password" id="passwd"  placeholder="所在区域" />
+                </div>
+                <!--提示信息-->
+                <div class="tip">
+                    <i></i>
+                    <span></span>
+                </div>
+            </div>
+
+            <!--设置密码-->
+            <div class="register-box">
+                <!--表单项-->
+                <div class="box default">
+                    <label >所&nbsp;在&nbsp;区&nbsp;域&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <input type="text" id="area"  placeholder="所在区域" />
+                </div>
+                <!--提示信息-->
+                <div class="tip">
+                    <i></i>
+                    <span></span>
+                </div>
+            </div>
+            <!--确认密码-->
+            <div class="register-box">
+                <!--表单项-->
+                <div class="box default">
+                    <label >详&nbsp;细&nbsp;地&nbsp;址&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <input type="text" id="address" placeholder="请输入详细地址" />
+                    <i></i>
+                </div>
+                <!--提示信息-->
+                <div class="tip">
+                    <i></i>
+                    <span></span>
+                </div>
+            </div>
+            <!--设置密码-->
+            <div class="register-box">
+                <!--表单项-->
+                <div class="box default">
+                    <label >客&nbsp;户&nbsp;经&nbsp;理&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <input type="text" id="customer_manager" placeholder="请输入客户经理" />
+                    <i></i>
+                </div>
+                <!--提示信息-->
+                <div class="tip">
+                    <i></i>
+                    <span></span>
+                </div>
+            </div>
+            <!--手机验证-->
+            <div class="register-box">
+                <!--表单项-->
+                <div class="box default">
+                    <label >联&nbsp;&nbsp;&nbsp;系&nbsp;&nbsp;&nbsp;&nbsp;人&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <input type="text" id="contact" placeholder="请输入联系人" />
+                    <i></i>
+                </div>
+                <!--提示信息-->
+                <div class="tip">
+                    <i></i>
+                    <span></span>
+                </div>
+            </div>
+            <div class="register-box">
+                <!--表单项-->
+                <div class="box default">
+                    <label >电&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;话&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <input type="text" id="contact_phone"  placeholder="请输入联系人电话" />
+                    <i></i>
+                </div>
+                <!--提示信息-->
+                <div class="tip">
+                    <i></i>
+                    <span></span>
+                </div>
+            </div>
+            <div class="register-box">
+                <!--表单项-->
+                <div class="box default">
+                    <label >手&nbsp;&nbsp;&nbsp;机&nbsp;&nbsp;&nbsp;&nbsp;号&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <input type="text" id="mobile"  placeholder="请输入本人手机号" />
+                    <i></i>
+                </div>
+                <!--提示信息-->
+                <div class="tip">
+                    <i></i>
+                    <span></span>
+                </div>
+            </div>
+            <div class="register-box">
+                <!--表单项-->
+                <div class="box default">
+                    <label >邮&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;箱&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <input type="text" id="email"  placeholder="请输入邮箱" />
+                    <i></i>
+                </div>
+                <!--提示信息-->
+                <div class="tip">
+                    <i></i>
+                    <span></span>
+                </div>
+            </div>
+            <div class="register-box">
+                <!--表单项-->
+                <div class="box default">
+                    <label >Q&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Q&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <input type="text" id="qq"  placeholder="请输入本人QQ" />
+                    <i></i>
+                </div>
+                <!--提示信息-->
+                <div class="tip">
+                    <i></i>
+                    <span></span>
+                </div>
+            </div>
+            <div class="register-box">
+                <!--表单项-->
+                <div class="box default">
+                    <label >微&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;信&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <input type="text" id="wechat"  placeholder="请输入微信" />
+                    <i></i>
+                </div>
+                <!--提示信息-->
+                <div class="tip">
+                    <i></i>
+                    <span></span>
+                </div>
+            </div>
+            <!--注册协议-->
+            <div class="register-box xieyi">
+                <!--表单项-->
+                <div class="box default">
+                    <input type="checkbox" id="ck" />
+                    <span>我已阅读并同意<a href="##">《saas用户注册协议》</a></span>
+                </div>
+                <!--提示信息-->
+                <div class="tip">
+                    <i></i>
+                    <span></span>
+                </div>
+            </div>
+            <!--注册-->
+            <button id="btn">新&nbsp;&nbsp;增</button>
+        </div>
+
+    </div>
+
+</div>
+
+{include file="common/footer"/}
+
+<script src="https:/cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    // window.onload = function() {
+    //     var userName = $("userName");
+    //     var pwd = $("pwd");
+    //     var pwd2 = $("pwd2");
+    //     var email = $("email");
+    //     var mobile = $("mobile");
+    //     var ck = $("ck");
+    //     var btn = $("btn");
+    // }
+    $(
+        $('#btn').on('click',function () {
+            //提交数据
+            $.post('/saas/customer/addition',{
+                account         :$.trim($('#account').val()),
+                passwd          :$.trim($('#passwd').val()),
+                // province        :$.trim($('#area').val()),
+                // city            :$.trim($('#city').val()),
+                // district        :$.trim($('#district').val()),
+                province        :'贵州省',
+                city            :'贵阳市',
+                district        :'南明区',
+                address         :$.trim($('#address').val()),
+                customer_manager:$.trim($('#customer_manager').val()),
+                contact         :$.trim($('#contact').val()),
+                contact_phone   :$.trim($('#contact_phone').val()),
+                mobile          :$.trim($('#mobile').val()),
+                email           :$.trim($('#email').val()),
+                qq              :$.trim($('#qq').val()),
+                wechat          :$.trim($('#wechat').val()),
+            },function (res) {
+                if(res.code == 0){
+                    alert(res.message);
+                    setTimeout(function () {
+                        //window.location.href="/Index/index?role_id="+ res.data.role_id;
+                    },0);
+                }else{
+                    alert(res.message);
+                }
+            },'json');
+        })
+    )
+
+</script>

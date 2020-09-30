@@ -10,6 +10,7 @@ use app\model\system\User;
 use app\model\system\User as UserModel;
 use app\model\web\Config as ConfigModel;
 use app\model\web\WebSite;
+use think\facade\Lang;
 use think\Request;
 
 class BaseSaas extends Controller
@@ -58,6 +59,7 @@ class BaseSaas extends Controller
 //            $this->menus = $this->getMenuList();
 //            $this->initBaseInfo();
 //        }
+
     }
 
     /**
@@ -301,4 +303,5 @@ class BaseSaas extends Controller
 //        Session::clear();
         $this->success(lang('logout success'), '@admin/login');
     }
+
 }

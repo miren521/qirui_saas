@@ -10,16 +10,17 @@
  * Author: yuege
  * Date: 2019/8/2
  */
-namespace app\admin\controller\sys;
+namespace app\saas\controller\sys;
 use app\common\controller\Backend;
 use app\common\model\Config as ConfigModel;
 use app\common\model\ConfigGroup as ConfigGroupModel;
 use app\common\model\FieldType;
 use app\common\traits\Curd;
+use app\saas\controller\BaseSaas;
 use think\facade\Request;
 use think\facade\Db;
 use think\facade\View;
-class System extends Backend {
+class System extends BaseSaas {
     use Curd;
     public $rules = [
         ['name'=>'email','title'=>'邮件'],
@@ -40,15 +41,15 @@ class System extends Backend {
     public function index(){
         $group =  ['site','email','upload','sms'];
 
-        $list = Db::name('config')
+        $list = Db::name('saas_config')
             ->where('type','in',$group)
             ->field('code,value')
             ->column('value','code');
 
         View::assign('config',json_encode($list));
         return view();
-
     }
+
     //配置设置
     public function site()
     {

@@ -1,0 +1,72 @@
+{include file="common/header"/}
+<div class="lemo-container">
+    <div class="lemo-main">
+        <div class="admin-main layui-anim layui-anim-upbit">
+            <fieldset class="layui-elem-field layui-field-title">
+                <legend>用户权限列表</legend>
+<!--                <blockquote class="layui-elem-quote">-->
+<!--                    <div class="lemo-table">-->
+<!--                        <form class="layui-form layui-form-pane" action="{:url('saas/sys.Auth/groupAdd')}" lay-filter="form" method="post" >-->
+<!--                            <div class="layui-inline">-->
+<!--                                <input type="text" name="title" lay-verify="required" placeholder="请输入添加" autocomplete="off" class="layui-input">-->
+<!--                            </div>-->
+<!--                            <button class="layui-btn data-add-btn layui-btn-sm" lay-submit="" lay-filter="submit">添加</button>-->
+<!--                        </form>-->
+<!--                    </div>-->
+<!--                </blockquote>-->
+
+            </fieldset>
+
+
+
+            <table class="layui-table" id="list" lay-filter="list"></table>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/html" id="action">
+    <a data-href="{:url('saas/combo/groupAccess')}?id={{d.id}}" class="layui-btn layui-btn-xs layui-btn-normal" lay-event="edit">配置规则</a>
+<!--    <a data-href="{:url('saas/sys.Auth/groupEdit')}?id={{d.id}}" class="layui-btn layui-btn-warm layui-btn-xs" lay-event="edit">编辑</a>-->
+<!--    <a class="layui-btn layui-btn-danger layui-btn-xs"  data-href="{:url('saas/combo/groupDel')}" lay-event="del">删除</a>-->
+</script>
+<script type="text/html" id="status">
+    <input type="checkbox" name="status"  value="{{d.id}}" lay-skin="switch" lay-text="开启|关闭" data-href="{:url('saas/combo/groupState')}" lay-filter="status" {{ d.status == 1 ? 'checked' : '' }}>
+</script>
+<script type="text/html" id="create_time">
+    {{layui.util.toDateString(d.create_time*1000, 'yyyy-MM-dd HH:mm:ss')}}
+</script>
+<script type="text/html" id="update_time">
+    {{layui.util.toDateString(d.update_time*1000, 'yyyy-MM-dd HH:mm:ss')}}
+</script>
+{include file="common/footer"/}
+<script>
+    var tableIn;
+    layui.config({
+        base: "/public/static/admin/js/",
+        version: true
+    }).extend({
+        Admin: 'Admin'
+    }).use(['element','form', 'layer', 'Admin','table'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table;
+        tableIn = table.render({
+            elem: '#list',
+            url: '{:url("saas/combo/group")}',
+            method: 'post',
+            cols: [[
+                {checkbox: true, fixed: true},
+                {field: 'id', title: 'ID', width: 80, fixed: true, sort: true},
+                {field: 'type', title: '会员类型', width: 150,},
+                {field: 'status', title: '状态', width: 180, templet:'#status'},
+                {field: 'create_time', title: '添加时间', width: 180,templet:'#create_time'},
+                {field: 'update_time', title: '修改时间', width: 180,templet:'#update_time'},
+                {title:'操作',width:250, toolbar: '#action',align:"center"},
+
+            ]],
+
+        });
+    });
+
+</script>

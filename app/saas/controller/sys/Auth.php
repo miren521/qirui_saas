@@ -321,7 +321,7 @@ class Auth extends BaseSaas
         if (request()->isPost()) {
             $data = Request::param();
             $data['icon'] = $data['icon'] ? $data['icon'] : 'fa fa-adjust';
-            if (strpos(trim($data['href'], '/'), 'admin/') === false) {
+            if (strpos(trim($data['href'], '/'), ' ') === false) {
                 $data['href'] = trim($data['href'], '/');
             }
             $model = new AuthRule();
@@ -474,9 +474,11 @@ class Auth extends BaseSaas
             ->where('status', 1)
             ->order('sort asc')->cache(3600)
             ->select()->toArray();
+
         $rules = AuthGroup::where('id', Request::param('id'))
             ->where('status', 1)
             ->value('rules');
+
         $list = $this->modelClass->authChecked($admin_rule, $pid = 0, $rules);
         $group_id = Request::param('id');
         $idList = $this->modelClass->column('id');

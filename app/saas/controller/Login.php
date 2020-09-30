@@ -6,6 +6,8 @@ use app\model\system\User as UserModel;
 use app\model\web\Config as ConfigModel;
 use think\captcha\facade\Captcha as ThinkCaptcha;
 use think\facade\Cache;
+use app\model\agent\Agent;
+use think\facade\Session;
 
 class Login extends Controller
 {
@@ -32,8 +34,8 @@ class Login extends Controller
                 }
             }
 
-            $user_model = new UserModel();
-            $res = $user_model->login($username, $password, $this->app_module);
+            $agent = new Agent();
+            $res = $agent->login($username, $password, $this->app_module);
             return $res;
         } else {
             $this->assign("menu_info", [ 'title' => "登录" ]);
@@ -78,5 +80,13 @@ class Login extends Controller
         if ($captcha != $captcha_data) return error(-1, '验证码错误');
 
         return success();
+    }
+    /**
+     * 退出登录
+     */
+    public function logOut(){
+        Session::delete($this->app_module . "." . "user_info");
+        Session::delete($this->app_module . "." . "uid");
+        redirect('/saas/login/login.html')->send();
     }
 }

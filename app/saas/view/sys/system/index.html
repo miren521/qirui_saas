@@ -2,15 +2,15 @@
 <div class="lemo-container">
     <div class="lemo-main">
         <fieldset class="layui-elem-field layui-field-title">
-            <legend>{:lang('config')}{:lang('list')}</legend>
+            <legend>配置列表</legend>
         </fieldset>
 
         <div class="layui-tab">
             <ul class="layui-tab-title">
-                <li class="layui-this">{:lang('site setting')}</li>
-                <li class="">{:lang('email setting')}</li>
-                <li class="">{:lang('sms setting')}</li>
-                <li class="">{:lang('upload setting')}</li>
+                <li class="layui-this">网站设置</li>
+                <li class="">邮箱设置</li>
+                <li class="">短信设置</li>
+                <li class="">上传设置</li>
             </ul>
             <div class="layui-tab-content">
 <!--网站配置-->
@@ -18,17 +18,17 @@
                         <form class="layui-form layui-form-pane" action="{:url('site')}" lay-filter="form-config">
 
                             <div class="layui-form-item">
-                                <label class="layui-form-label required">{:lang('site name')}</label>
+                                <label class="layui-form-label required">网站名字</label>
                                 <div class="layui-input-block">
-                                    <input type="text" name="site_name" lay-verify="required" lay-reqtext="{:lang('site name can not empty')}"
-                                           placeholder="{:lang('site name')}" value="" class="layui-input">
+                                    <input type="text" name="site_name" lay-verify="required" lay-reqtext="网站名不能为空"
+                                           placeholder="网站名" value="" class="layui-input">
                                     <!--                                    <tip>填写自己部署网站的名称。</tip>-->
                                 </div>
                             </div>
                             <div class="layui-form-item">
-                                <label class="layui-form-label required">{:lang('site domain')}</label>
+                                <label class="layui-form-label required">网站域名</label>
                                 <div class="layui-input-block">
-                                    <input type="text" name="site_domain" lay-verify="url" lay-reqtext="{:lang('site domain can not empty')}"
+                                    <input type="text" name="site_domain" lay-verify="url" lay-reqtext="网站名不能为空"
                                            placeholder="{:lang('site domain')}" value="" class="layui-input">
                                 </div>
                             </div>
@@ -245,7 +245,7 @@
 <script>
     var tableIn;
     layui.config({
-        base: "/static/admin/js/",
+        base: "/public/static/admin/js/",
         version: true
     }).extend({
         Admin: 'Admin'

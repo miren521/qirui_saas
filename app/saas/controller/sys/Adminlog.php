@@ -10,12 +10,14 @@
  * Author: yuege
  * Date: 2019/8/2
  */
-namespace app\admin\controller\sys;
+namespace app\saas\controller\sys;
 use app\common\controller\Backend;
 use app\common\traits\Curd;
+use app\saas\controller\BaseSaas;
 use think\facade\Request;
-use app\admin\model\AdminLog as LogModel;
-class Adminlog extends Backend {
+use app\model\saas\AdminLog as LogModel;
+
+class Adminlog extends BaseSaas {
 
     use Curd;
     public function initialize()
@@ -29,6 +31,7 @@ class Adminlog extends Backend {
      * @throws \think\db\exception\DbException
      */
     public function index(){
+
         if($this->request->isPost()){
             $keys=$this->request->post('keys','','trim');
 //            $page = $this->request->post('page')?$this->request->post('page'):1;
