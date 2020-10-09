@@ -25,9 +25,7 @@ class CustomerLevel extends BaseModel
      */
     public static function authChecked($pid = '', $rules)
     {
-
         $cate = Cache::get('admin_rule');
-
         $list = [];
         $rulesArr = explode(',', $rules);
         foreach ($cate as $v) {

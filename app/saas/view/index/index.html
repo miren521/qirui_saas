@@ -26,11 +26,11 @@
             <ul class="layui-nav layui-layout-right">
 
                 <li class="layui-nav-item" lay-unselect>
-                    <a href="javascript:;" data-refresh="刷新" data-href="{:url('clearData')}"><i
+                    <a href="javascript:;" data-refresh="刷新" data-href="{:url('saas/index/clearData')}"><i
                             class="fa fa-refresh"></i></a>
                 </li>
                 <li class="layui-nav-item" lay-unselect>
-                    <a href="javascript:;" data-clear="清理" data-href="{:url('clearData')}" class="lemo-clear"><i
+                    <a href="javascript:;" data-clear="清理" data-href="{:url('saas/index/clearData')}" class="lemo-clear"><i
                             class="fa fa-trash-o"></i></a>
                 </li>
                 <li class="layui-nav-item mobile layui-hide-xs" lay-unselect>
@@ -40,15 +40,15 @@
                     <a href="javascript:;">{:session('saas.user_info.username')}</a>
                     <dl class="layui-nav-child">
                         <dd>
-                            <a href="javascript:;" lemo-content-href="{:url('sys.auth/adminEdit')}" data-title="基本资料"
+                            <a href="javascript:;" lemo-content-href="{:url('saas/sys.auth/adminEdit')}" data-title="基本资料"
                                data-icon="fa fa-gears">基本资料</a>
                         </dd>
                         <dd>
-                            <a href="javascript:;" lemo-content-href="{:url('password')}" data-title="修改密码"
+                            <a href="javascript:;" lemo-content-href="{:url('saas/index/password')}" data-title="修改密码"
                                data-icon="fa fa-gears">修改密码</a>
                         </dd>
                         <dd>
-                            <a href="javascript:;" class="login-out">退出登录</a>
+                            <a href="{:url('saas/login/logout')}">退出登录</a>
                         </dd>
                     </dl>
                 </li>

@@ -83,6 +83,7 @@ layui.define(['form','layer', 'table','upload'], function (exports) {
                 }
             });
         });
+
         //表单提交
         form.on('submit(submit)', function (data) {
             loading =layer.load(1, {shade: [0.1,'#fff']});

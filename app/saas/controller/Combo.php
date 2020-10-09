@@ -118,8 +118,6 @@ class Combo extends BaseSaas
      */
     public function groupAccess()
     {
-
-
         if (Cache::get('admin_rule') == null){
             $admin_rule = Menu::where(['app_module' => 'admin'])
                 ->field('id,parent,title,name')
@@ -152,8 +150,9 @@ class Combo extends BaseSaas
     public function groupSetaccess()
     {
         $rules = \request()->post('rules');
+        $rules = \Qiniu\json_decode($rules, true);
         if (empty($rules)) {
-            $this->error(lang('please choose rule'));
+            return retMsg(0, '提交权限为空');
         }
 
         $data = \request()->post();

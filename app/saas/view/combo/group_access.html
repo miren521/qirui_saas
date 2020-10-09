@@ -74,6 +74,7 @@
         form.on('submit(submit)', function (obj) {
             loading =layer.load(1, {shade: [0.1,'#fff']});
             var data  = tree.getChecked('treebox');
+            data = JSON.stringify(data)
             $.post("groupSetaccess", {rules:data,group_id:'{$group_id}'}, function (res) {
                 layer.close(loading);
                 if (res.code > 0) {

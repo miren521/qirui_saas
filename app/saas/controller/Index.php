@@ -14,10 +14,14 @@ use app\common\lib\Menu;
 use app\model\saas\AuthRule;
 use app\model\system\User as UserModel;
 use app\model\web\Config as ConfigModel;
+use lemo\helper\SignHelper;
 use think\captcha\facade\Captcha as ThinkCaptcha;
 use think\facade\Cache;
+use think\facade\Request;
 use think\facade\Session;
 use think\facade\View;
+use app\model\agent\Agent;
+
 
 /**
  * 首页 控制器
@@ -81,5 +85,55 @@ class Index extends BaseSaas
 
         return view();
     }
+
+    /*
+     * 清除缓存 出去session缓存
+     */
+    public function clearData(){
+//        $dir = config('admin.clear_cache_dir') ? app()->getRootPath().'runtime/admin' : app()->getRootPath().'runtime';
+        Cache::clear();
+//        if(FileHelper::delDir($dir) ){
+        return retMsg(200, '清理成功');
+//        }
+    }
+    /*
+     * 修改密码
+     */
+    public function password(){
+        if (!Request::isPost()){
+
+            return View::fetch('login/password');
+
+        }else{
+            if( Request::isPost() and Session::get('admin.id')===3){
+                $this->error(lang('test data cannot edit'));
+            }
+
+            $data =  Request::post();
+            $oldpassword = Request::post('oldpassword', '123456', 'lemo\helper\StringHelper::filterWords');
+            $admin = \app\model\agent\Agent::find($data['id']);
+            if(!password_verify($oldpassword, $admin['password'])){
+                $this->error(lang('origin password error'));
+            }
+            $password = Request::post('password', '123456','lemo\helper\StringHelper::filterWords');
+            try {
+                $data['password'] = password_hash($password,PASSWORD_BCRYPT, SignHelper::passwordSalt());
+
+                if(Session::get('admin.id')==1){
+                    Agent::update($data);
+                }elseif(Session::get('admin.id')==$data['id']){
+                    Agent::update($data);
+                }else{
+                    $this->error(lang('permission denied'));
+                }
+
+            } catch (\Exception $e) {
+                $this->error($e->getMessage());
+            }
+            return retMsg(200, '成功');
+
+        }
+    }
+
 
 }
