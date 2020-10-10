@@ -6,7 +6,6 @@ namespace app\model\agent;
 
 use app\model\BaseModel;
 use app\model\saas\AuthGroup;
-use think\facade\Cache;
 use think\facade\Session;
 
 class Agent extends BaseModel
@@ -32,12 +31,12 @@ class Agent extends BaseModel
 
     public function addAgent($data, $agent_id)
     {
-        $where['agent_id'] = $agent_id;
+        $where['id'] = $agent_id;
 
         model('agent')->startTrans();
         $agent_info = model('agent')->getInfo($where, '*');
 
-        $data['pid'] = $agent_info['agent_id'];
+        $data['pid'] = $agent_info['id'];
         $data['gid'] = $agent_info['pid'];
         try {
 
@@ -64,7 +63,7 @@ class Agent extends BaseModel
     public function editAgent($agent_id)
 
     {
-        $where['agent_id'] = $agent_id;
+        $where['id'] = $agent_id;
 
         $res = model('agent')->getInfo($where, '*');
 
@@ -160,6 +159,7 @@ class Agent extends BaseModel
 
         // 记录登录SESSION
         $auth = array(
+            'is_admin' => $user_info['is_admin'],
             'id' => $user_info['id'],
             'username' => $user_info['number'],
             'power' => $user_info['power'],

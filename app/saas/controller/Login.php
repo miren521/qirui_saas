@@ -21,6 +21,7 @@ class Login extends Controller
         $config_model = new ConfigModel();
         $config_info = $config_model->getCaptchaConfig();
         $config = $config_info['data']['value'];
+
         $this->assign('admin_login', $config['admin_login']);
         if (request()->isAjax()) {
             $username = input('username', '');

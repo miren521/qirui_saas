@@ -32,8 +32,15 @@ class Menu extends Backend
     //获取左侧主菜单
     public static function authMenu($arr,$pid=0,$rules=[]){
         $user_info = Session::get("saas" . "." . "user_info");
-        $authrules = explode(',',$user_info['rules']);
+
         $authopen = AuthRule::where('auth_open',1)->column('id');
+
+        if ($user_info['is_admin'] == 1){
+            $authrules = AuthRule::column('id');
+        }else{
+            $authrules = explode(',',$user_info['rules']);
+        }
+
         if($authopen){
             $authrules = array_unique(array_merge($authrules,$authopen));
         }

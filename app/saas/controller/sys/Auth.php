@@ -479,7 +479,19 @@ class Auth extends BaseSaas
             ->where('status', 1)
             ->value('rules');
 
+
+
+        $user_info = Session::get($this->app_module . "." . "user_info");
+        if ($user_info['is_admin'] == 1){
+            $rules = implode(',', AuthRule::column('id'));
+        }else{
+            $rules = AuthGroup::where('id', Request::param('id'))
+                ->where('status', 1)
+                ->value('rules');
+        }
+
         $list = $this->modelClass->authChecked($admin_rule, $pid = 0, $rules);
+
         $group_id = Request::param('id');
         $idList = $this->modelClass->column('id');
         sort($idList);
